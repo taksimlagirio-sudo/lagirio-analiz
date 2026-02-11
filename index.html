@@ -2534,11 +2534,587 @@ const MonthlyReport = {
     }
 };
 
-const Forecast = { generate() { console.log('Forecast.generate - stub'); } };
-const Comparison = { load() { console.log('Comparison.load - stub'); } };
+// ============================================================
+// 15. FORECAST - Tahmin Modulu
+// ============================================================
+const Forecast = {
+    chart: null,
+
+    generate() {
+        if (!appData.loaded) return;
+        const container = document.getElementById('forecastContent');
+        const model = document.getElementById('forecastModel').value;
+
+        // Son yilin verilerini al
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort((a, b) => b - a);
+        const latestYear = years[0] || new Date().getFullYear();
+        const monthly = FinanceEngine.calculateMonthly(latestYear, null);
+
+        // Gecmis verileri olan aylari bul
+        const activeMonths = monthly.filter(m => m.totalProfit !== 0);
+
+        if (activeMonths.length < 2) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-state-icon">&#128202;</div>
+                <h3>Yetersiz Veri</h3>
+                <p>Tahmin icin en az 2 aylik veri gerekli</p>
+            </div>`;
+            return;
+        }
+
+        // Tahmin hesapla
+        const forecasts = this.calculateForecast(monthly, model);
+        const maxProfit = Math.max(...forecasts.map(f => f.value), ...activeMonths.map(m => m.totalProfit));
+
+        container.innerHTML = `
+            <!-- Tahmin Grafigi -->
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card full-width">
+                    <div class="chart-header">
+                        <span class="chart-title">Kazanc Tahmini - ${model === 'avg3' ? 'Son 3 Ay Ort.' : model === 'avg6' ? 'Son 6 Ay Ort.' : 'Trend Bazli'}</span>
+                    </div>
+                    <div class="chart-body" style="height:350px">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tahmin Kartlari -->
+            <div class="forecast-grid">
+                ${forecasts.map(f => `
+                    <div class="forecast-card">
+                        <div class="forecast-month">${f.monthName}</div>
+                        <div class="forecast-value" style="color:${f.value >= 0 ? 'var(--green-900)' : 'var(--error)'}">
+                            ${Utils.formatEUR(f.value)}
+                        </div>
+                        <div style="font-size:11px;color:var(--text-light);margin-top:4px">${f.label}</div>
+                        <div class="forecast-bar">
+                            <div class="forecast-bar-fill" style="width:${maxProfit > 0 ? Math.max(0, f.value / maxProfit * 100) : 0}%"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <!-- Ozet -->
+            <div class="chart-card" style="margin-top:20px">
+                <div class="chart-header">
+                    <span class="chart-title">Tahmin Ozeti</span>
+                </div>
+                <div class="metrics-grid" style="margin-top:16px">
+                    <div class="metric-card">
+                        <div class="metric-label">Tahmini 3 Ay</div>
+                        <div class="metric-value">${Utils.formatEUR(forecasts.slice(0, 3).reduce((s, f) => s + f.value, 0))}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Tahmini 6 Ay</div>
+                        <div class="metric-value">${Utils.formatEUR(forecasts.slice(0, 6).reduce((s, f) => s + f.value, 0))}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Aylik Ortalama</div>
+                        <div class="metric-value">${Utils.formatEUR(forecasts.reduce((s, f) => s + f.value, 0) / forecasts.length)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.renderChart(monthly, forecasts, latestYear);
+    },
+
+    calculateForecast(monthly, model) {
+        const actuals = monthly.filter(m => m.totalProfit !== 0).map(m => m.totalProfit);
+        const lastActiveIdx = monthly.reduce((last, m, i) => m.totalProfit !== 0 ? i : last, -1);
+        const forecasts = [];
+
+        for (let i = 0; i < 6; i++) {
+            const targetMonth = (lastActiveIdx + 1 + i) % 12;
+            let value = 0;
+            let label = '';
+
+            switch(model) {
+                case 'avg3': {
+                    const recent = actuals.slice(-3);
+                    value = recent.reduce((s, v) => s + v, 0) / recent.length;
+                    label = 'Son 3 ay ortalamasindan';
+                    break;
+                }
+                case 'avg6': {
+                    const recent = actuals.slice(-6);
+                    value = recent.reduce((s, v) => s + v, 0) / recent.length;
+                    label = 'Son 6 ay ortalamasindan';
+                    break;
+                }
+                case 'trend': {
+                    if (actuals.length >= 2) {
+                        const n = actuals.length;
+                        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                        for (let j = 0; j < n; j++) {
+                            sumX += j; sumY += actuals[j];
+                            sumXY += j * actuals[j]; sumX2 += j * j;
+                        }
+                        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                        const intercept = (sumY - slope * sumX) / n;
+                        value = intercept + slope * (n + i);
+                        label = `Trend: ${slope >= 0 ? '+' : ''}${Utils.formatEUR(slope)}/ay`;
+                    }
+                    break;
+                }
+            }
+
+            forecasts.push({
+                month: targetMonth,
+                monthName: Utils.getMonthName(targetMonth),
+                value: value,
+                label: label
+            });
+        }
+        return forecasts;
+    },
+
+    renderChart(monthly, forecasts, year) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('forecastChart');
+        if (!ctx) return;
+
+        const allLabels = monthly.map(m => m.monthName).concat(forecasts.map(f => f.monthName + '*'));
+        const actualData = monthly.map(m => m.totalProfit || null);
+        const forecastData = new Array(12).fill(null);
+
+        // Son gercek degerden baslat
+        const lastActive = monthly.reduce((last, m, i) => m.totalProfit !== 0 ? i : last, -1);
+        if (lastActive >= 0) forecastData[lastActive] = monthly[lastActive].totalProfit;
+        forecasts.forEach((f, i) => forecastData.push(f.value));
+
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: allLabels,
+                datasets: [
+                    {
+                        label: `${year} Gercek`,
+                        data: actualData.concat(new Array(forecasts.length).fill(null)),
+                        borderColor: '#1f7a5f',
+                        backgroundColor: 'rgba(31,122,95,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#1f7a5f'
+                    },
+                    {
+                        label: 'Tahmin',
+                        data: forecastData,
+                        borderColor: '#ff9c00',
+                        borderDash: [8, 4],
+                        backgroundColor: 'rgba(255,156,0,0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff9c00',
+                        pointStyle: 'triangle'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 10 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+};
+
+// ============================================================
+// 16. COMPARISON - Karsilastirma Modulu
+// ============================================================
+const Comparison = {
+    chart: null,
+
+    load() {
+        if (!appData.loaded) return;
+        const type = document.getElementById('compareType').value;
+        const container = document.getElementById('comparisonContent');
+
+        switch(type) {
+            case 'yoy': this.yearOverYear(container); break;
+            case 'apartments': this.apartmentComparison(container); break;
+            case 'systems': this.systemComparison(container); break;
+        }
+    },
+
+    // Yillik karsilastirma
+    yearOverYear(container) {
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort();
+        if (years.length < 2) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-state-icon">&#128197;</div>
+                <h3>Yetersiz Veri</h3>
+                <p>Yillik karsilastirma icin en az 2 yilin verisi gerekli</p>
+            </div>`;
+            return;
+        }
+
+        const yearlyData = years.map(y => {
+            const data = FinanceEngine.calculateAll(y, '', null);
+            return {
+                year: y,
+                profit: data.totalProfit,
+                income: data.results.reduce((s, r) => s + r.totalIncome, 0),
+                expenses: data.results.reduce((s, r) => s + r.totalExpenses, 0),
+                reservations: data.results.reduce((s, r) => s + r.reservationCount, 0),
+                nights: data.results.reduce((s, r) => s + r.totalNights, 0),
+                apartments: data.results.length
+            };
+        });
+
+        container.innerHTML = `
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card full-width">
+                    <div class="chart-header"><span class="chart-title">Yillik Karsilastirma</span></div>
+                    <div class="chart-body" style="height:350px"><canvas id="comparisonChart"></canvas></div>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <div class="table-header"><span class="table-title">Yillik Detay</span></div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Yil</th><th>Aktif Daire</th><th>Rez.</th><th>Gece</th><th>Gelir</th><th>Gider</th><th>Kazanc</th><th>Degisim</th></tr>
+                    </thead>
+                    <tbody>
+                        ${yearlyData.map((d, i) => {
+                            const prev = i > 0 ? yearlyData[i - 1] : null;
+                            const change = prev ? Utils.getChangeIndicator(d.profit, prev.profit) : { class: '', text: '-' };
+                            return `<tr>
+                                <td><strong>${d.year}</strong></td>
+                                <td>${d.apartments}</td>
+                                <td>${d.reservations}</td>
+                                <td>${d.nights}</td>
+                                <td>${Utils.formatEUR(d.income)}</td>
+                                <td>${Utils.formatEUR(d.expenses)}</td>
+                                <td class="${d.profit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(d.profit)}</td>
+                                <td class="${change.class}">${change.text}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        this.renderYoYChart(yearlyData);
+    },
+
+    renderYoYChart(yearlyData) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('comparisonChart');
+        if (!ctx) return;
+
+        this.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: yearlyData.map(d => d.year.toString()),
+                datasets: [
+                    { label: 'Gelir', data: yearlyData.map(d => d.income), backgroundColor: 'rgba(31,122,95,0.7)', borderRadius: 4 },
+                    { label: 'Gider', data: yearlyData.map(d => d.expenses), backgroundColor: 'rgba(239,68,68,0.5)', borderRadius: 4 },
+                    { label: 'Kazanc', data: yearlyData.map(d => d.profit), backgroundColor: 'rgba(255,156,0,0.8)', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` } }
+                },
+                scales: {
+                    y: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    },
+
+    // Daireler arasi karsilastirma
+    apartmentComparison(container) {
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort((a, b) => b - a);
+        const year = years[0] || new Date().getFullYear();
+        const data = FinanceEngine.calculateAll(year, '', null);
+
+        if (data.results.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">&#127968;</div><h3>Veri Yok</h3></div>`;
+            return;
+        }
+
+        const sorted = [...data.results].sort((a, b) => b.lagirioProfit - a.lagirioProfit);
+        const top5 = sorted.slice(0, 5);
+        const bottom5 = sorted.slice(-5).reverse();
+
+        container.innerHTML = `
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card">
+                    <div class="chart-header"><span class="chart-title">En Cok Kazandiran 5 Daire</span></div>
+                    <div class="chart-body"><canvas id="compTopChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><span class="chart-title">En Az Kazandiran 5 Daire</span></div>
+                    <div class="chart-body"><canvas id="compBottomChart"></canvas></div>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <div class="table-header"><span class="table-title">Tum Daireler - ${year} (Kazanca gore sirali)</span></div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Sira</th><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Gider</th><th>Kazanc</th><th>Ort. Gecelik</th></tr>
+                    </thead>
+                    <tbody>
+                        ${sorted.map((r, i) => {
+                            const sys = CONFIG.SYSTEMS[r.apartment.systemType];
+                            return `<tr${r.lagirioProfit < 0 ? ' style="background:#fff5f5"' : ''}>
+                                <td>${i + 1}</td>
+                                <td><strong>${r.apartment.code}</strong></td>
+                                <td><span class="system-badge s${r.apartment.systemType}">${sys ? sys.short : ''}</span></td>
+                                <td>${r.reservationCount}</td>
+                                <td>${Utils.formatEUR(r.totalIncome)}</td>
+                                <td>${Utils.formatEUR(r.totalExpenses)}</td>
+                                <td class="${r.lagirioProfit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(r.lagirioProfit)}</td>
+                                <td>${Utils.formatEUR(r.avgNightlyRate)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        this.renderCompBars(top5, bottom5);
+    },
+
+    renderCompBars(top5, bottom5) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+
+        const ctx1 = document.getElementById('compTopChart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: top5.map(r => r.apartment.code),
+                    datasets: [{ data: top5.map(r => r.lagirioProfit), backgroundColor: '#1f7a5f', borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => Utils.formatEUR(c.parsed.x) } } }, scales: { x: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v }, grid: { color: 'rgba(0,0,0,0.04)' } }, y: { ticks: { font: { family: 'Inter', size: 12, weight: 600 } } } } }
+            });
+        }
+
+        const ctx2 = document.getElementById('compBottomChart');
+        if (ctx2) {
+            this.chart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: bottom5.map(r => r.apartment.code),
+                    datasets: [{ data: bottom5.map(r => r.lagirioProfit), backgroundColor: bottom5.map(r => r.lagirioProfit < 0 ? '#ef4444' : '#f59e0b'), borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => Utils.formatEUR(c.parsed.x) } } }, scales: { x: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v }, grid: { color: 'rgba(0,0,0,0.04)' } }, y: { ticks: { font: { family: 'Inter', size: 12, weight: 600 } } } } }
+            });
+        }
+    },
+
+    // Sistem bazli karsilastirma
+    systemComparison(container) {
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort((a, b) => b - a);
+        const year = years[0] || new Date().getFullYear();
+        const data = FinanceEngine.calculateAll(year, '', null);
+
+        const systems = {};
+        data.results.forEach(r => {
+            const sys = r.apartment.systemType;
+            if (!systems[sys]) systems[sys] = { profit: 0, income: 0, expenses: 0, count: 0, reservations: 0 };
+            systems[sys].profit += r.lagirioProfit;
+            systems[sys].income += r.totalIncome;
+            systems[sys].expenses += r.totalExpenses;
+            systems[sys].count++;
+            systems[sys].reservations += r.reservationCount;
+        });
+
+        const sysKeys = Object.keys(systems).sort();
+
+        container.innerHTML = `
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card full-width">
+                    <div class="chart-header"><span class="chart-title">Sistem Bazli Kazanc Karsilastirmasi - ${year}</span></div>
+                    <div class="chart-body" style="height:350px"><canvas id="comparisonChart"></canvas></div>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <div class="table-header"><span class="table-title">Sistem Detay</span></div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Sistem</th><th>Daire Sayisi</th><th>Rez.</th><th>Toplam Gelir</th><th>Toplam Gider</th><th>Toplam Kazanc</th><th>Daire Basi Ort.</th></tr>
+                    </thead>
+                    <tbody>
+                        ${sysKeys.map(sys => {
+                            const s = systems[sys];
+                            const cfg = CONFIG.SYSTEMS[sys];
+                            const avg = s.count > 0 ? s.profit / s.count : 0;
+                            return `<tr>
+                                <td><span class="system-badge s${sys}">${cfg ? cfg.name : 'Sistem ' + sys}</span></td>
+                                <td>${s.count}</td>
+                                <td>${s.reservations}</td>
+                                <td>${Utils.formatEUR(s.income)}</td>
+                                <td>${Utils.formatEUR(s.expenses)}</td>
+                                <td class="${s.profit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(s.profit)}</td>
+                                <td>${Utils.formatEUR(avg)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('comparisonChart');
+        if (ctx) {
+            this.chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sysKeys.map(s => CONFIG.SYSTEMS[s] ? CONFIG.SYSTEMS[s].short : 'S' + s),
+                    datasets: [
+                        { label: 'Gelir', data: sysKeys.map(s => systems[s].income), backgroundColor: 'rgba(31,122,95,0.7)', borderRadius: 4 },
+                        { label: 'Kazanc', data: sysKeys.map(s => systems[s].profit), backgroundColor: sysKeys.map(s => CONFIG.SYSTEMS[s] ? CONFIG.SYSTEMS[s].color : '#999'), borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` } } },
+                    scales: { y: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } } }
+                }
+            });
+        }
+    }
+};
+
+// ============================================================
+// 17. EXPORT MANAGER - PDF / CSV Disa Aktarma
+// ============================================================
 const ExportManager = {
-    exportPDF() { Toast.info('PDF export - sonraki adimda eklenecek'); },
-    exportCSV() { Toast.info('CSV export - sonraki adimda eklenecek'); }
+    exportCSV() {
+        if (!appData.loaded) { Toast.error('Once veri yukleyin'); return; }
+
+        const year = parseInt(document.getElementById('filterYear').value);
+        const month = document.getElementById('filterMonth').value;
+        const data = FinanceEngine.calculateAll(year, month, null);
+
+        if (data.results.length === 0) { Toast.error('Disa aktarilacak veri yok'); return; }
+
+        // CSV baslik
+        let csv = 'Daire,Sistem,Rezervasyon,Toplam Gelir (EUR),Banka Gelir (EUR),Nakit Gelir (EUR),Platform Kom. (EUR),Giderler (EUR),KDV (EUR),Banka Kom. (EUR),Nakit Kom. (EUR),Lagirio Kazanc (EUR)\n';
+
+        data.results.forEach(r => {
+            const sys = CONFIG.SYSTEMS[r.apartment.systemType];
+            csv += `"${r.apartment.code}","${sys ? sys.name : 'Sistem ' + r.apartment.systemType}",${r.reservationCount},${r.totalIncome.toFixed(2)},${r.bankIncome.toFixed(2)},${r.cashIncome.toFixed(2)},${r.totalPlatformComm.toFixed(2)},${r.totalExpenses.toFixed(2)},${r.totalKDV.toFixed(2)},${r.bankLagirioComm.toFixed(2)},${r.cashLagirioComm.toFixed(2)},${r.lagirioProfit.toFixed(2)}\n`;
+        });
+
+        // Toplam satiri
+        const t = data.results.reduce((a, r) => ({
+            res: a.res + r.reservationCount, income: a.income + r.totalIncome,
+            bank: a.bank + r.bankIncome, cash: a.cash + r.cashIncome,
+            platform: a.platform + r.totalPlatformComm, exp: a.exp + r.totalExpenses,
+            kdv: a.kdv + r.totalKDV, bankC: a.bankC + r.bankLagirioComm,
+            cashC: a.cashC + r.cashLagirioComm, profit: a.profit + r.lagirioProfit
+        }), { res: 0, income: 0, bank: 0, cash: 0, platform: 0, exp: 0, kdv: 0, bankC: 0, cashC: 0, profit: 0 });
+
+        csv += `"TOPLAM","${data.results.length} daire",${t.res},${t.income.toFixed(2)},${t.bank.toFixed(2)},${t.cash.toFixed(2)},${t.platform.toFixed(2)},${t.exp.toFixed(2)},${t.kdv.toFixed(2)},${t.bankC.toFixed(2)},${t.cashC.toFixed(2)},${t.profit.toFixed(2)}\n`;
+
+        // BOM ekle (Excel Turkce karakter icin)
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const monthName = month !== '' ? '-' + Utils.getMonthName(parseInt(month)) : '';
+        a.download = `lagirio-analiz-${year}${monthName}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        Toast.success('CSV dosyasi indirildi');
+    },
+
+    exportPDF() {
+        if (!appData.loaded) { Toast.error('Once veri yukleyin'); return; }
+
+        // Basit HTML -> print PDF
+        const year = parseInt(document.getElementById('filterYear').value);
+        const month = document.getElementById('filterMonth').value;
+        const data = FinanceEngine.calculateAll(year, month, null);
+
+        if (data.results.length === 0) { Toast.error('Disa aktarilacak veri yok'); return; }
+
+        const monthName = month !== '' ? ' - ' + Utils.getMonthName(parseInt(month)) : '';
+        const t = data.results.reduce((a, r) => ({
+            res: a.res + r.reservationCount, income: a.income + r.totalIncome,
+            platform: a.platform + r.totalPlatformComm, exp: a.exp + r.totalExpenses,
+            kdv: a.kdv + r.totalKDV, profit: a.profit + r.lagirioProfit
+        }), { res: 0, income: 0, platform: 0, exp: 0, kdv: 0, profit: 0 });
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`<!DOCTYPE html><html><head><title>Lagirio Analiz - ${year}${monthName}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 30px; color: #1a1a1a; }
+                h1 { color: #0d3028; font-size: 22px; margin-bottom: 4px; }
+                h2 { color: #1f7a5f; font-size: 16px; margin: 20px 0 10px; }
+                .subtitle { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                th { background: #f4faf8; padding: 8px 10px; text-align: left; border-bottom: 2px solid #0d3028; font-size: 11px; }
+                td { padding: 7px 10px; border-bottom: 1px solid #eee; }
+                tr:last-child { font-weight: bold; background: #f4faf8; }
+                .pos { color: #10b981; } .neg { color: #ef4444; }
+                .summary { display: flex; gap: 30px; margin: 20px 0; }
+                .summary-item { text-align: center; }
+                .summary-label { font-size: 11px; color: #6b7280; }
+                .summary-value { font-size: 20px; font-weight: bold; color: #0d3028; }
+            </style></head><body>
+            <h1>Lagirio Analiz Raporu</h1>
+            <p class="subtitle">${year}${monthName} | ${data.results.length} daire | ${new Date().toLocaleDateString('tr-TR')}</p>
+            <div class="summary">
+                <div class="summary-item"><div class="summary-label">Toplam Kazanc</div><div class="summary-value">${Utils.formatEUR(t.profit)}</div></div>
+                <div class="summary-item"><div class="summary-label">Toplam Gelir</div><div class="summary-value">${Utils.formatEUR(t.income)}</div></div>
+                <div class="summary-item"><div class="summary-label">Toplam Gider</div><div class="summary-value">${Utils.formatEUR(t.exp)}</div></div>
+                <div class="summary-item"><div class="summary-label">Rezervasyon</div><div class="summary-value">${t.res}</div></div>
+            </div>
+            <h2>Daire Bazinda Detay</h2>
+            <table>
+                <thead><tr><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Platform Kom.</th><th>Gider</th><th>KDV</th><th>Kazanc</th></tr></thead>
+                <tbody>
+                    ${data.results.map(r => {
+                        const sys = CONFIG.SYSTEMS[r.apartment.systemType];
+                        return `<tr>
+                            <td>${r.apartment.code}</td>
+                            <td>${sys ? sys.short : ''}</td>
+                            <td>${r.reservationCount}</td>
+                            <td>${Utils.formatEUR(r.totalIncome)}</td>
+                            <td>${Utils.formatEUR(r.totalPlatformComm)}</td>
+                            <td>${Utils.formatEUR(r.totalExpenses)}</td>
+                            <td>${Utils.formatEUR(r.totalKDV)}</td>
+                            <td class="${r.lagirioProfit >= 0 ? 'pos' : 'neg'}">${Utils.formatEUR(r.lagirioProfit)}</td>
+                        </tr>`;
+                    }).join('')}
+                    <tr>
+                        <td>TOPLAM</td><td>${data.results.length} daire</td><td>${t.res}</td>
+                        <td>${Utils.formatEUR(t.income)}</td><td>${Utils.formatEUR(t.platform)}</td>
+                        <td>${Utils.formatEUR(t.exp)}</td><td>${Utils.formatEUR(t.kdv)}</td>
+                        <td class="${t.profit >= 0 ? 'pos' : 'neg'}">${Utils.formatEUR(t.profit)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <script>window.onload = () => { window.print(); }</script>
+        </body></html>`);
+        printWindow.document.close();
+        Toast.success('PDF yazdir penceresi acildi');
+    }
 };
 
 // ============================================================
