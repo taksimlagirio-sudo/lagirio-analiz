@@ -2093,8 +2093,447 @@ const FinanceEngine = {
     }
 };
 
-const ApartmentDetail = { load() { console.log('ApartmentDetail.load - stub'); } };
-const MonthlyReport = { load() { console.log('MonthlyReport.load - stub'); } };
+// ============================================================
+// 13. APARTMENT DETAIL - Daire Detay Sayfasi
+// ============================================================
+const ApartmentDetail = {
+    chart: null,
+
+    load() {
+        if (!appData.loaded) return;
+        const aptId = document.getElementById('aptDetailSelect').value;
+        const container = document.getElementById('aptDetailContent');
+
+        if (!aptId) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-state-icon">&#127968;</div>
+                <h3>Daire Secin</h3>
+                <p>Detayli analiz icin bir daire secin</p>
+            </div>`;
+            return;
+        }
+
+        const apt = appData.apartments.find(a => a.id === aptId);
+        if (!apt) return;
+
+        const year = parseInt(document.getElementById('aptDetailYear').value);
+        const monthly = FinanceEngine.calculateMonthly(year, aptId);
+        const yearData = FinanceEngine.calculateAll(year, '', aptId);
+        const result = yearData.results[0];
+
+        const sys = CONFIG.SYSTEMS[apt.systemType];
+
+        // Yillik ozet
+        const totalIncome = result ? result.totalIncome : 0;
+        const totalExpenses = result ? result.totalExpenses : 0;
+        const totalProfit = yearData.totalProfit;
+        const totalRes = result ? result.reservationCount : 0;
+        const totalNights = result ? result.totalNights : 0;
+        const avgNightly = result ? result.avgNightlyRate : 0;
+
+        container.innerHTML = `
+            <!-- Daire Bilgi Karti -->
+            <div class="chart-card" style="margin-bottom:20px">
+                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                    <div>
+                        <h2 style="font-size:22px;font-weight:800;color:var(--green-900)">${apt.code}</h2>
+                        <p style="font-size:13px;color:var(--text-secondary)">${apt.ownerName || ''} ${apt.location ? '- ' + apt.location : ''}</p>
+                    </div>
+                    <span class="system-badge s${apt.systemType}" style="font-size:13px;padding:6px 14px">
+                        Sistem ${apt.systemType} - ${sys ? sys.name : ''}
+                    </span>
+                    <div style="margin-left:auto;text-align:right">
+                        <div style="font-size:12px;color:var(--text-light)">Komisyon: ${apt.lagirioCommission || 0}%</div>
+                        <div style="font-size:12px;color:var(--text-light)">KDV: ${apt.taxRate || 0}%</div>
+                        ${apt.incomeTaxRate ? `<div style="font-size:12px;color:var(--text-light)">Gelir V.: ${apt.incomeTaxRate}%</div>` : ''}
+                        ${apt.stopajRate ? `<div style="font-size:12px;color:var(--text-light)">Stopaj: ${apt.stopajRate}%</div>` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrikler -->
+            <div class="metrics-grid">
+                <div class="metric-card highlight">
+                    <div class="metric-label">Lagirio Kazanci</div>
+                    <div class="metric-value">${Utils.formatEUR(totalProfit)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gelir</div>
+                    <div class="metric-value">${Utils.formatEUR(totalIncome)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gider</div>
+                    <div class="metric-value">${Utils.formatEUR(totalExpenses)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Rezervasyon</div>
+                    <div class="metric-value">${totalRes}</div>
+                    <div class="metric-sub">${totalNights} gece</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Ort. Gecelik</div>
+                    <div class="metric-value">${Utils.formatEUR(avgNightly)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Kar Marji</div>
+                    <div class="metric-value">${totalIncome > 0 ? Utils.formatPercent(totalProfit / totalIncome * 100) : '0%'}</div>
+                </div>
+            </div>
+
+            <!-- Aylik Grafik -->
+            <div class="charts-grid">
+                <div class="chart-card full-width">
+                    <div class="chart-header">
+                        <span class="chart-title">${apt.code} - ${year} Aylik Performans</span>
+                    </div>
+                    <div class="chart-body" style="height:350px">
+                        <canvas id="aptDetailChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aylik Tablo -->
+            <div class="data-table-container">
+                <div class="table-header">
+                    <span class="table-title">Aylik Detay - ${year}</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ay</th>
+                            <th>Rez.</th>
+                            <th>Gece</th>
+                            <th>Gelir</th>
+                            <th>Platform Kom.</th>
+                            <th>Gider</th>
+                            <th>KDV</th>
+                            <th>Lagirio Kazanc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${monthly.map(m => {
+                            const r = m.results[0];
+                            if (!r) return `<tr><td>${m.monthName}</td><td colspan="7" style="color:var(--text-light)">-</td></tr>`;
+                            const pClass = r.lagirioProfit >= 0 ? 'positive' : 'negative';
+                            return `<tr>
+                                <td><strong>${m.monthName}</strong></td>
+                                <td>${r.reservationCount}</td>
+                                <td>${r.totalNights}</td>
+                                <td>${Utils.formatEUR(r.totalIncome)}</td>
+                                <td>${Utils.formatEUR(r.totalPlatformComm)}</td>
+                                <td>${Utils.formatEUR(r.totalExpenses)}</td>
+                                <td>${Utils.formatEUR(r.totalKDV)}</td>
+                                <td class="${pClass}">${Utils.formatEUR(r.lagirioProfit)}</td>
+                            </tr>`;
+                        }).join('')}
+                        <tr style="background:var(--beige-50);font-weight:700">
+                            <td>TOPLAM</td>
+                            <td>${totalRes}</td>
+                            <td>${totalNights}</td>
+                            <td>${Utils.formatEUR(totalIncome)}</td>
+                            <td>${Utils.formatEUR(result ? result.totalPlatformComm : 0)}</td>
+                            <td>${Utils.formatEUR(totalExpenses)}</td>
+                            <td>${Utils.formatEUR(result ? result.totalKDV : 0)}</td>
+                            <td class="${totalProfit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(totalProfit)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rezervasyon Listesi -->
+            <div class="data-table-container">
+                <div class="table-header">
+                    <span class="table-title">Rezervasyonlar - ${year}</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Misafir</th>
+                            <th>Giris</th>
+                            <th>Cikis</th>
+                            <th>Gece</th>
+                            <th>Platform</th>
+                            <th>Tutar</th>
+                            <th>Platform Kom.</th>
+                            <th>Odeme</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${this.getReservationRows(aptId, year)}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        // Grafik ciz
+        this.renderChart(monthly);
+    },
+
+    getReservationRows(aptId, year) {
+        const reservations = FinanceEngine.filterByPeriod(
+            appData.reservations.filter(r => r.apartmentId === aptId),
+            'checkIn', year, ''
+        ).sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+
+        if (reservations.length === 0) return '<tr><td colspan="8" style="text-align:center;color:var(--text-light)">Rezervasyon yok</td></tr>';
+
+        return reservations.map(r => {
+            const nights = Utils.calculateNights(r.checkIn, r.checkOut);
+            return `<tr>
+                <td>${r.guestName || '-'}</td>
+                <td>${r.checkIn}</td>
+                <td>${r.checkOut}</td>
+                <td>${nights}</td>
+                <td>${r.platform || '-'}</td>
+                <td>${Utils.formatEUR(Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'))}</td>
+                <td>${Utils.formatEUR(r.platformCommission || 0)}</td>
+                <td>${r.paymentMethod || '-'}</td>
+            </tr>`;
+        }).join('');
+    },
+
+    renderChart(monthly) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('aptDetailChart');
+        if (!ctx) return;
+
+        this.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthly.map(m => m.monthName),
+                datasets: [
+                    {
+                        label: 'Gelir',
+                        data: monthly.map(m => m.totalIncome),
+                        backgroundColor: 'rgba(31,122,95,0.7)',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Gider',
+                        data: monthly.map(m => m.totalExpenses),
+                        backgroundColor: 'rgba(239,68,68,0.5)',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Lagirio Kazanc',
+                        data: monthly.map(m => m.totalProfit),
+                        type: 'line',
+                        borderColor: '#ff9c00',
+                        backgroundColor: 'rgba(255,156,0,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff9c00'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+};
+
+// ============================================================
+// 14. MONTHLY REPORT - Aylik Rapor
+// ============================================================
+const MonthlyReport = {
+    chart: null,
+
+    load() {
+        if (!appData.loaded) return;
+        const year = parseInt(document.getElementById('monthlyYear').value);
+        const container = document.getElementById('monthlyContent');
+        const monthly = FinanceEngine.calculateMonthly(year, null);
+
+        // Yillik toplamlar
+        const yearTotals = {
+            income: monthly.reduce((s, m) => s + m.totalIncome, 0),
+            expenses: monthly.reduce((s, m) => s + m.totalExpenses, 0),
+            profit: monthly.reduce((s, m) => s + m.totalProfit, 0),
+            reservations: monthly.reduce((s, m) => s + m.totalReservations, 0),
+            nights: monthly.reduce((s, m) => s + m.totalNights, 0)
+        };
+
+        // En iyi / en kotu ay
+        const activeMonths = monthly.filter(m => m.totalProfit !== 0);
+        const bestMonth = activeMonths.length > 0
+            ? activeMonths.reduce((best, m) => m.totalProfit > best.totalProfit ? m : best)
+            : null;
+        const worstMonth = activeMonths.length > 0
+            ? activeMonths.reduce((worst, m) => m.totalProfit < worst.totalProfit ? m : worst)
+            : null;
+
+        container.innerHTML = `
+            <!-- Yillik Ozet -->
+            <div class="metrics-grid">
+                <div class="metric-card highlight">
+                    <div class="metric-label">${year} Toplam Kazanc</div>
+                    <div class="metric-value">${Utils.formatEUR(yearTotals.profit)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gelir</div>
+                    <div class="metric-value">${Utils.formatEUR(yearTotals.income)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gider</div>
+                    <div class="metric-value">${Utils.formatEUR(yearTotals.expenses)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Rez.</div>
+                    <div class="metric-value">${yearTotals.reservations}</div>
+                    <div class="metric-sub">${yearTotals.nights} gece</div>
+                </div>
+                <div class="metric-card${bestMonth ? '' : ' '}">
+                    <div class="metric-label">En Iyi Ay</div>
+                    <div class="metric-value">${bestMonth ? bestMonth.monthName : '-'}</div>
+                    <div class="metric-sub up">${bestMonth ? Utils.formatEUR(bestMonth.totalProfit) : ''}</div>
+                </div>
+                <div class="metric-card${worstMonth && worstMonth.totalProfit < 0 ? ' danger' : ''}">
+                    <div class="metric-label">En Dusuk Ay</div>
+                    <div class="metric-value">${worstMonth ? worstMonth.monthName : '-'}</div>
+                    <div class="metric-sub down">${worstMonth ? Utils.formatEUR(worstMonth.totalProfit) : ''}</div>
+                </div>
+            </div>
+
+            <!-- Grafik -->
+            <div class="charts-grid">
+                <div class="chart-card full-width">
+                    <div class="chart-header">
+                        <span class="chart-title">${year} - Aylik Gelir / Gider / Kazanc</span>
+                    </div>
+                    <div class="chart-body" style="height:350px">
+                        <canvas id="monthlyReportChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aylik Tablo -->
+            <div class="data-table-container">
+                <div class="table-header">
+                    <span class="table-title">${year} - Ay Bazinda Detay</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ay</th>
+                            <th>Aktif Daire</th>
+                            <th>Rez.</th>
+                            <th>Gece</th>
+                            <th>Toplam Gelir</th>
+                            <th>Toplam Gider</th>
+                            <th>Lagirio Kazanc</th>
+                            <th>Kar Marji</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${monthly.map(m => {
+                            const margin = m.totalIncome > 0 ? (m.totalProfit / m.totalIncome * 100) : 0;
+                            const pClass = m.totalProfit >= 0 ? 'positive' : 'negative';
+                            return `<tr${m.totalProfit < 0 ? ' style="background:#fff5f5"' : ''}>
+                                <td><strong>${m.monthName}</strong></td>
+                                <td>${m.results.length}</td>
+                                <td>${m.totalReservations}</td>
+                                <td>${m.totalNights}</td>
+                                <td>${Utils.formatEUR(m.totalIncome)}</td>
+                                <td>${Utils.formatEUR(m.totalExpenses)}</td>
+                                <td class="${pClass}">${Utils.formatEUR(m.totalProfit)}</td>
+                                <td>${Utils.formatPercent(margin)}</td>
+                            </tr>`;
+                        }).join('')}
+                        <tr style="background:var(--beige-50);font-weight:700">
+                            <td>TOPLAM</td>
+                            <td>-</td>
+                            <td>${yearTotals.reservations}</td>
+                            <td>${yearTotals.nights}</td>
+                            <td>${Utils.formatEUR(yearTotals.income)}</td>
+                            <td>${Utils.formatEUR(yearTotals.expenses)}</td>
+                            <td class="${yearTotals.profit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(yearTotals.profit)}</td>
+                            <td>${yearTotals.income > 0 ? Utils.formatPercent(yearTotals.profit / yearTotals.income * 100) : '0%'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        this.renderChart(monthly);
+    },
+
+    renderChart(monthly) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('monthlyReportChart');
+        if (!ctx) return;
+
+        this.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthly.map(m => m.monthName),
+                datasets: [
+                    {
+                        label: 'Gelir',
+                        data: monthly.map(m => m.totalIncome),
+                        backgroundColor: 'rgba(31,122,95,0.7)',
+                        borderRadius: 4,
+                        order: 2
+                    },
+                    {
+                        label: 'Gider',
+                        data: monthly.map(m => m.totalExpenses),
+                        backgroundColor: 'rgba(239,68,68,0.5)',
+                        borderRadius: 4,
+                        order: 3
+                    },
+                    {
+                        label: 'Lagirio Kazanc',
+                        data: monthly.map(m => m.totalProfit),
+                        type: 'line',
+                        borderColor: '#ff9c00',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff9c00',
+                        fill: false,
+                        tension: 0.4,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+};
+
 const Forecast = { generate() { console.log('Forecast.generate - stub'); } };
 const Comparison = { load() { console.log('Comparison.load - stub'); } };
 const ExportManager = {
