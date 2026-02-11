@@ -1327,13 +1327,257 @@ document.getElementById('loginUser').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
 });
 
-// Placeholder stubs - will be implemented in next steps
+// ============================================================
+// 10. CHART MANAGER - Grafik Yonetimi
+// ============================================================
+const ChartManager = {
+    instances: {},
+
+    destroy(id) {
+        if (this.instances[id]) {
+            this.instances[id].destroy();
+            delete this.instances[id];
+        }
+    },
+
+    destroyAll() {
+        Object.keys(this.instances).forEach(id => this.destroy(id));
+    },
+
+    // Aylik trend cizgi grafigi
+    renderMonthlyTrend(canvasId, monthlyData) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const labels = monthlyData.map(m => m.monthName);
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Lagirio Kazanc (EUR)',
+                        data: monthlyData.map(m => m.totalProfit),
+                        borderColor: '#1f7a5f',
+                        backgroundColor: 'rgba(31,122,95,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#1f7a5f'
+                    },
+                    {
+                        label: 'Toplam Gelir (EUR)',
+                        data: monthlyData.map(m => m.totalIncome),
+                        borderColor: '#ff9c00',
+                        backgroundColor: 'rgba(255,156,0,0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#ff9c00'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${Utils.formatEUR(ctx.parsed.y)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0),
+                            font: { family: 'Inter', size: 11 }
+                        },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: {
+                        ticks: { font: { family: 'Inter', size: 11 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    },
+
+    // Sistem dagilimi pasta grafigi
+    renderSystemDist(canvasId, results) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const systemGroups = {};
+        results.forEach(r => {
+            const sys = r.apartment.systemType;
+            if (!systemGroups[sys]) systemGroups[sys] = 0;
+            systemGroups[sys] += r.lagirioProfit;
+        });
+
+        const labels = [], data = [], colors = [];
+        Object.keys(systemGroups).sort().forEach(sys => {
+            const cfg = CONFIG.SYSTEMS[sys];
+            labels.push(cfg ? cfg.short : 'S' + sys);
+            data.push(systemGroups[sys]);
+            colors.push(cfg ? cfg.color : '#999');
+        });
+
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 }, padding: 12 } },
+                    tooltip: {
+                        callbacks: { label: (ctx) => `${ctx.label}: ${Utils.formatEUR(ctx.parsed)}` }
+                    }
+                }
+            }
+        });
+    },
+
+    // Platform dagilimi bar grafigi
+    renderPlatformDist(canvasId, results) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const platforms = {};
+        results.forEach(r => {
+            r.reservations.forEach(res => {
+                const p = res.platform || 'Diger';
+                if (!platforms[p]) platforms[p] = { income: 0, count: 0 };
+                platforms[p].income += Utils.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                platforms[p].count++;
+            });
+        });
+
+        const labels = Object.keys(platforms).sort();
+        const pColors = { 'Airbnb': '#ff5a5f', 'Booking': '#003580', 'Direct': '#10b981', 'Diger': '#6b7280' };
+
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Gelir (EUR)',
+                    data: labels.map(l => platforms[l].income),
+                    backgroundColor: labels.map(l => pColors[l] || '#6b7280'),
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${Utils.formatEUR(ctx.parsed.y)} (${platforms[labels[ctx.dataIndex]].count} rez.)`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    },
+
+    // Banka vs Nakit pasta grafigi
+    renderPaymentDist(canvasId, results) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        let bankTotal = 0, cashTotal = 0;
+        results.forEach(r => { bankTotal += r.bankIncome; cashTotal += r.cashIncome; });
+
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Banka', 'Nakit'],
+                datasets: [{
+                    data: [bankTotal, cashTotal],
+                    backgroundColor: ['#1f7a5f', '#ff9c00'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 }, padding: 12 } },
+                    tooltip: {
+                        callbacks: { label: (ctx) => `${ctx.label}: ${Utils.formatEUR(ctx.parsed)}` }
+                    }
+                }
+            }
+        });
+    }
+};
+
+// ============================================================
+// 11. TABLE SORT - Tablo Siralama
+// ============================================================
+const TableSort = {
+    state: {},
+
+    sort(tableId, colIdx) {
+        const key = `${tableId}_${colIdx}`;
+        const dir = this.state[key] === 'asc' ? 'desc' : 'asc';
+        this.state[key] = dir;
+
+        const tbody = document.getElementById(tableId + 'TableBody');
+        if (!tbody) return;
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            const aText = a.cells[colIdx]?.textContent.trim() || '';
+            const bText = b.cells[colIdx]?.textContent.trim() || '';
+
+            const aNum = parseFloat(aText.replace(/[^0-9.-]/g, ''));
+            const bNum = parseFloat(bText.replace(/[^0-9.-]/g, ''));
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return dir === 'asc' ? aNum - bNum : bNum - aNum;
+            }
+            return dir === 'asc' ? aText.localeCompare(bText, 'tr') : bText.localeCompare(aText, 'tr');
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    }
+};
+
+// ============================================================
+// 12. DASHBOARD - Ana Panel
+// ============================================================
 const Dashboard = {
+    currentData: null,
+
     init() {
         this.populateFilters();
         this.populateYears();
         if (appData.loaded) this.refresh();
     },
+
     populateFilters() {
         const sel = document.getElementById('filterApartment');
         const aptSel = document.getElementById('aptDetailSelect');
@@ -1345,6 +1589,7 @@ const Dashboard = {
             aptSel.innerHTML += opt;
         });
     },
+
     populateYears() {
         const years = new Set();
         appData.reservations.forEach(r => {
@@ -1360,8 +1605,150 @@ const Dashboard = {
             });
         }
     },
-    refresh() { console.log('Dashboard.refresh - will be implemented'); },
-    filterTable(q) { console.log('Dashboard.filterTable - will be implemented'); }
+
+    refresh() {
+        if (!appData.loaded) return;
+
+        const year = parseInt(document.getElementById('filterYear').value);
+        const month = document.getElementById('filterMonth').value;
+        const aptFilter = document.getElementById('filterApartment').value;
+
+        // Hesapla
+        const data = FinanceEngine.calculateAll(year, month, aptFilter || null);
+        this.currentData = data;
+
+        // Onceki donem (karsilastirma icin)
+        let prevData = null;
+        if (month !== '') {
+            const prevMonth = parseInt(month) - 1;
+            if (prevMonth >= 0) {
+                prevData = FinanceEngine.calculateAll(year, prevMonth.toString(), aptFilter || null);
+            }
+        } else {
+            prevData = FinanceEngine.calculateAll(year - 1, '', aptFilter || null);
+        }
+
+        // Metrikler
+        this.renderMetrics(data, prevData);
+
+        // Tablo
+        this.renderTable(data.results);
+
+        // Grafikler
+        const monthlyData = FinanceEngine.calculateMonthly(year, aptFilter || null);
+        ChartManager.renderMonthlyTrend('chartMonthlyTrend', monthlyData);
+        ChartManager.renderSystemDist('chartSystemDist', data.results);
+        ChartManager.renderPlatformDist('chartPlatformDist', data.results);
+        ChartManager.renderPaymentDist('chartPaymentDist', data.results);
+    },
+
+    renderMetrics(data, prevData) {
+        const r = data.results;
+        const totalIncome = r.reduce((s, i) => s + i.totalIncome, 0);
+        const totalExpenses = r.reduce((s, i) => s + i.totalExpenses, 0);
+        const totalReservations = r.reduce((s, i) => s + i.reservationCount, 0);
+        const totalNights = r.reduce((s, i) => s + i.totalNights, 0);
+        const avgNightly = totalNights > 0 ? totalIncome / totalNights : 0;
+        const activeDaireler = r.length;
+
+        // Onceki donem
+        const prevProfit = prevData ? prevData.totalProfit : 0;
+        const prevIncome = prevData ? prevData.results.reduce((s, i) => s + i.totalIncome, 0) : 0;
+
+        const profitChange = Utils.getChangeIndicator(data.totalProfit, prevProfit);
+        const incomeChange = Utils.getChangeIndicator(totalIncome, prevIncome);
+
+        const container = document.getElementById('overviewMetrics');
+        container.innerHTML = `
+            <div class="metric-card highlight">
+                <div class="metric-label">Lagirio Kazanci</div>
+                <div class="metric-value">${Utils.formatEUR(data.totalProfit)}</div>
+                <div class="metric-sub ${profitChange.class}">${profitChange.text} onceki doneme gore</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Toplam Gelir</div>
+                <div class="metric-value">${Utils.formatEUR(totalIncome)}</div>
+                <div class="metric-sub ${incomeChange.class}">${incomeChange.text} onceki doneme gore</div>
+            </div>
+            <div class="metric-card${totalExpenses > totalIncome * 0.4 ? ' warning' : ''}">
+                <div class="metric-label">Toplam Gider</div>
+                <div class="metric-value">${Utils.formatEUR(totalExpenses)}</div>
+                <div class="metric-sub">Gelirin ${totalIncome > 0 ? Utils.formatPercent(totalExpenses / totalIncome * 100) : '0%'}'i</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Rezervasyonlar</div>
+                <div class="metric-value">${totalReservations}</div>
+                <div class="metric-sub">${totalNights} gece toplam</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Ort. Gecelik</div>
+                <div class="metric-value">${Utils.formatEUR(avgNightly)}</div>
+                <div class="metric-sub">gece basina ortalama</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Aktif Daire</div>
+                <div class="metric-value">${activeDaireler} / ${appData.apartments.length}</div>
+                <div class="metric-sub">rezervasyonu olan daireler</div>
+            </div>
+        `;
+    },
+
+    renderTable(results) {
+        const tbody = document.getElementById('overviewTableBody');
+        if (!tbody) return;
+
+        if (results.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-light)">Bu donem icin veri bulunamadi</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = results.map(item => {
+            const sys = CONFIG.SYSTEMS[item.apartment.systemType];
+            const profitClass = item.lagirioProfit >= 0 ? 'positive' : 'negative';
+            return `<tr>
+                <td><strong>${item.apartment.code}</strong></td>
+                <td><span class="system-badge s${item.apartment.systemType}">${sys ? sys.short : 'S' + item.apartment.systemType}</span></td>
+                <td>${item.reservationCount}</td>
+                <td>${Utils.formatEUR(item.totalIncome)}</td>
+                <td>${Utils.formatEUR(item.totalPlatformComm)}</td>
+                <td>${Utils.formatEUR(item.totalExpenses)}</td>
+                <td>${Utils.formatEUR(item.totalKDV)}</td>
+                <td class="${profitClass}">${Utils.formatEUR(item.lagirioProfit)}</td>
+            </tr>`;
+        }).join('');
+
+        // Toplam satiri
+        const totals = results.reduce((acc, i) => ({
+            res: acc.res + i.reservationCount,
+            income: acc.income + i.totalIncome,
+            platform: acc.platform + i.totalPlatformComm,
+            expenses: acc.expenses + i.totalExpenses,
+            kdv: acc.kdv + i.totalKDV,
+            profit: acc.profit + i.lagirioProfit
+        }), { res: 0, income: 0, platform: 0, expenses: 0, kdv: 0, profit: 0 });
+
+        const profitClass = totals.profit >= 0 ? 'positive' : 'negative';
+        tbody.innerHTML += `<tr style="background:var(--beige-50);font-weight:700">
+            <td>TOPLAM</td>
+            <td>${results.length} daire</td>
+            <td>${totals.res}</td>
+            <td>${Utils.formatEUR(totals.income)}</td>
+            <td>${Utils.formatEUR(totals.platform)}</td>
+            <td>${Utils.formatEUR(totals.expenses)}</td>
+            <td>${Utils.formatEUR(totals.kdv)}</td>
+            <td class="${profitClass}">${Utils.formatEUR(totals.profit)}</td>
+        </tr>`;
+    },
+
+    filterTable(query) {
+        const tbody = document.getElementById('overviewTableBody');
+        if (!tbody) return;
+        const q = query.toLowerCase();
+        Array.from(tbody.querySelectorAll('tr')).forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(q) || q === '' ? '' : 'none';
+        });
+    }
 };
 
 // ============================================================
@@ -1714,7 +2101,6 @@ const ExportManager = {
     exportPDF() { Toast.info('PDF export - sonraki adimda eklenecek'); },
     exportCSV() { Toast.info('CSV export - sonraki adimda eklenecek'); }
 };
-const TableSort = { sort(table, col) { console.log('TableSort - stub'); } };
 
 // ============================================================
 // APP INIT
