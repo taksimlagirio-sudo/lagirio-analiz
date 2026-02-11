@@ -1363,6 +1363,349 @@ const Dashboard = {
     refresh() { console.log('Dashboard.refresh - will be implemented'); },
     filterTable(q) { console.log('Dashboard.filterTable - will be implemented'); }
 };
+
+// ============================================================
+// 9. FINANCE ENGINE - 9 Sistem Hesaplama Motoru
+// ============================================================
+const FinanceEngine = {
+
+    // Rezervasyonlari banka/nakit olarak ayir
+    splitByPayment(reservations) {
+        return {
+            bank: reservations.filter(r => r.paymentMethod !== 'Nakit'),
+            cash: reservations.filter(r => r.paymentMethod === 'Nakit')
+        };
+    },
+
+    // Giderleri EUR'ya cevir ve topla
+    calcExpensesEUR(expenses) {
+        return expenses.reduce((sum, exp) => {
+            return sum + Utils.convertToEUR(exp.amount, exp.currency || 'EUR');
+        }, 0);
+    },
+
+    // Demirbas giderlerini EUR'ya cevir ve topla
+    calcCapitalExpensesEUR(capitalExpenses) {
+        return capitalExpenses.reduce((sum, exp) => {
+            return sum + Utils.convertToEUR(exp.amount, exp.currency || 'EUR');
+        }, 0);
+    },
+
+    // Belirli donem icin filtreleme
+    filterByPeriod(items, dateField, year, month) {
+        return items.filter(item => {
+            const d = new Date(item[dateField]);
+            return d.getFullYear() === year &&
+                   (month === '' || month === null || month === undefined || d.getMonth() === parseInt(month));
+        });
+    },
+
+    // Belirli daire + donem icin filtreleme
+    filterByAptAndPeriod(items, dateField, apartmentId, year, month) {
+        return this.filterByPeriod(items, dateField, year, month)
+                   .filter(item => item.apartmentId === apartmentId);
+    },
+
+    // ============================================================
+    // ANA HESAPLAMA: Tek bir daire icin tum hesaplamayi yap
+    // ============================================================
+    calculateApartment(apartment, reservations, expenses, capitalExpenses) {
+        if (reservations.length === 0) return null;
+
+        const { bank, cash } = this.splitByPayment(reservations);
+
+        // Gelirler
+        const bankIncome = bank.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+        const cashIncome = cash.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+        const totalIncome = bankIncome + cashIncome;
+
+        // Platform komisyonlari
+        const bankPlatformComm = bank.reduce((s, r) => s + (r.platformCommission || 0), 0);
+        const cashPlatformComm = cash.reduce((s, r) => s + (r.platformCommission || 0), 0);
+        const totalPlatformComm = bankPlatformComm + cashPlatformComm;
+
+        // Giderler
+        const totalExpenses = this.calcExpensesEUR(expenses);
+        const totalCapitalExp = capitalExpenses ? this.calcCapitalExpensesEUR(capitalExpenses) : 0;
+
+        // KDV hesapla
+        const totalKDV = this.calcKDV(apartment, reservations, bank);
+
+        // Lagirio komisyon/kar hesapla
+        const lagirioResult = this.calcLagirioProfit(apartment, reservations, bank, cash,
+            bankIncome, cashIncome, totalIncome, bankPlatformComm, cashPlatformComm,
+            totalExpenses, totalKDV);
+
+        // Gece ve ortalama hesaplari
+        const totalNights = reservations.reduce((s, r) => s + Utils.calculateNights(r.checkIn, r.checkOut), 0);
+        const avgNightlyRate = totalNights > 0 ? totalIncome / totalNights : 0;
+
+        return {
+            apartment,
+            bankIncome,
+            cashIncome,
+            totalIncome,
+            bankPlatformComm,
+            cashPlatformComm,
+            totalPlatformComm,
+            totalExpenses,
+            totalCapitalExp,
+            totalKDV,
+            bankLagirioComm: lagirioResult.bankComm,
+            cashLagirioComm: lagirioResult.cashComm,
+            lagirioProfit: lagirioResult.profit,
+            reservationCount: reservations.length,
+            totalNights,
+            avgNightlyRate,
+            occupancyDays: totalNights,
+            reservations,
+            expenses
+        };
+    },
+
+    // ============================================================
+    // KDV HESAPLAMA - Sistem bazli
+    // ============================================================
+    calcKDV(apartment, reservations, bankReservations) {
+        const taxRate = apartment.taxRate || 0;
+        if (taxRate === 0) return 0;
+
+        switch(apartment.systemType) {
+            case '1': // Sistem 1 - KDV var
+            case '3': // Sistem 3 - KDV var
+            case '4': // Sistem 4 - KDV var
+            case '5': // Sistem 5 - KDV var
+            case '9': // Sistem 9 - KDV var
+                return bankReservations.reduce((sum, res) => {
+                    const amt = Utils.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                    return sum + amt * (taxRate / 100) / (1 + taxRate / 100);
+                }, 0);
+
+            case '2': // Sistem 2 - KDV yok (geri aliniyor)
+            case '6': // Sistem 6 - KDV yok
+            case '8': // Sistem 8 - KDV yok
+                return 0;
+
+            case '7': // Sistem 7 - Sadece Booking/Direct'te KDV
+                const bookingDirect = reservations.filter(r => r.platform !== 'Airbnb');
+                const bookingBank = bookingDirect.filter(r => r.paymentMethod !== 'Nakit');
+                const bookingBankIncome = bookingBank.reduce((s, r) =>
+                    s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                return bookingBankIncome * (taxRate / 100) / (1 + taxRate / 100);
+
+            default: return 0;
+        }
+    },
+
+    // ============================================================
+    // LAGIRIO KAR HESAPLAMA - 9 Sistem
+    // ============================================================
+    calcLagirioProfit(apartment, reservations, bank, cash,
+                      bankIncome, cashIncome, totalIncome,
+                      bankPlatformComm, cashPlatformComm,
+                      totalExpenses, totalKDV) {
+
+        let profit = 0, bankComm = 0, cashComm = 0;
+        const commRate = apartment.lagirioCommission / 100;
+
+        switch(apartment.systemType) {
+
+            // Sistem 1 - Kira: Net kar Lagirio'nun
+            case '1': {
+                const netProfit = totalIncome - bankPlatformComm - cashPlatformComm - totalExpenses - totalKDV;
+                profit = netProfit;
+                bankComm = totalIncome > 0 ? bankIncome - bankPlatformComm - (totalExpenses * bankIncome / totalIncome) - totalKDV : 0;
+                cashComm = totalIncome > 0 ? cashIncome - cashPlatformComm - (totalExpenses * cashIncome / totalIncome) : 0;
+                break;
+            }
+
+            // Sistem 2 - Kisi Sirketi: Komisyon Lagirio'nun
+            case '2': {
+                bankComm = bankIncome > 0 ? bankIncome * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 3 - Komisyon Standart: Gider+KDV+Platform dusulur, kalanin komisyonu
+            case '3': {
+                const afterDeductions = bankIncome - totalExpenses - totalKDV - bankPlatformComm;
+                bankComm = afterDeductions > 0 ? afterDeductions * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 4 - Komisyon Ozel: Platform dusulur, kalanin komisyonu
+            case '4': {
+                const afterPlatform = bankIncome - bankPlatformComm;
+                bankComm = afterPlatform > 0 ? afterPlatform * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 5 - Stopajli: Platform dusulur, kalanin komisyonu
+            case '5': {
+                const afterPlatform = bankIncome - bankPlatformComm;
+                bankComm = afterPlatform > 0 ? afterPlatform * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 6 - Platform Ayrimli (Lagirio/Zirkon)
+            case '6': {
+                const lagirioRes = reservations.filter(r => r.paidTo === 'Lagirio');
+                const zirkonRes = reservations.filter(r => r.paidTo === 'Zirkon');
+
+                // Lagirio gelir/komisyon
+                const lagirioInc = lagirioRes.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const lagirioPComm = lagirioRes.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const lagirioNet = lagirioInc - lagirioPComm - (lagirioRes.length > 0 ? totalExpenses : 0);
+                const lagirioC = lagirioNet * commRate;
+
+                // Zirkon gelir/komisyon
+                const zirkonInc = zirkonRes.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const zirkonPComm = zirkonRes.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const zirkonNet = zirkonInc - zirkonPComm - (zirkonRes.length > 0 && lagirioRes.length === 0 ? totalExpenses : 0);
+                const zirkonC = zirkonNet * commRate;
+
+                profit = lagirioC + zirkonC;
+
+                // Banka/Nakit dagilimi
+                const lagirioBankInc = lagirioRes.filter(r => r.paymentMethod !== 'Nakit')
+                    .reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const zirkonBankInc = zirkonRes.filter(r => r.paymentMethod !== 'Nakit')
+                    .reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+
+                const lagirioBankRatio = lagirioInc > 0 ? lagirioBankInc / lagirioInc : 0;
+                const zirkonBankRatio = zirkonInc > 0 ? zirkonBankInc / zirkonInc : 0;
+
+                bankComm = (lagirioC * lagirioBankRatio) + (zirkonC * zirkonBankRatio);
+                cashComm = (lagirioC * (1 - lagirioBankRatio)) + (zirkonC * (1 - zirkonBankRatio));
+                break;
+            }
+
+            // Sistem 7 - Karma Platform (Airbnb/Booking ayrimli)
+            case '7': {
+                const airbnbRes = reservations.filter(r => r.platform === 'Airbnb');
+                const bookingRes = reservations.filter(r => r.platform !== 'Airbnb');
+
+                // Airbnb: platform dusulur, kalanin komisyonu
+                const airbnbInc = airbnbRes.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const airbnbPComm = airbnbRes.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const airbnbAfter = airbnbInc - airbnbPComm;
+                const airbnbLComm = airbnbAfter * commRate;
+
+                // Booking banka: platform dusulur, kalanin komisyonu
+                const bookingBank = bookingRes.filter(r => r.paymentMethod !== 'Nakit');
+                const bookingBankInc = bookingBank.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const bookingBankPComm = bookingBank.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const bookingBankAfter = bookingBankInc - bookingBankPComm;
+                const bookingLComm = bookingBankAfter * commRate;
+
+                // Booking nakit
+                const bookingCash = bookingRes.filter(r => r.paymentMethod === 'Nakit');
+                const bookingCashAfter = bookingCash.reduce((s, r) =>
+                    s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR') - (r.platformCommission || 0), 0);
+                const bookingCashLComm = bookingCashAfter * commRate;
+
+                profit = airbnbLComm + bookingLComm + bookingCashLComm;
+                bankComm = airbnbLComm + bookingLComm;
+                cashComm = bookingCashLComm;
+                break;
+            }
+
+            // Sistem 8 - Kisi Sirketi (Kar Bazli)
+            case '8': {
+                const bankProfit = bankIncome - totalExpenses - bankPlatformComm;
+                bankComm = bankProfit > 0 ? bankProfit * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 9 - Stopajli (KDV Dusulmus): Platform + KDV dusulur, kalanin komisyonu
+            case '9': {
+                const afterPlatform = bankIncome - bankPlatformComm;
+                const afterKDV = afterPlatform - totalKDV;
+                bankComm = afterKDV > 0 ? afterKDV * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+        }
+
+        return { profit, bankComm, cashComm };
+    },
+
+    // ============================================================
+    // TOPLU HESAPLAMA: Tum daireler icin
+    // ============================================================
+    calculateAll(year, month, apartmentFilter) {
+        const results = [];
+        let totalProfit = 0;
+
+        const apartments = apartmentFilter
+            ? appData.apartments.filter(a => a.id === apartmentFilter)
+            : appData.apartments;
+
+        apartments.forEach(apt => {
+            const reservations = this.filterByAptAndPeriod(appData.reservations, 'checkIn', apt.id, year, month);
+            const expenses = this.filterByAptAndPeriod(appData.expenses, 'date', apt.id, year, month);
+            const capitalExps = appData.capitalExpenses
+                ? this.filterByAptAndPeriod(appData.capitalExpenses, 'date', apt.id, year, month)
+                : [];
+
+            const result = this.calculateApartment(apt, reservations, expenses, capitalExps);
+            if (result) {
+                results.push(result);
+                totalProfit += result.lagirioProfit;
+            }
+        });
+
+        // Koda gore sirala
+        results.sort((a, b) => {
+            const extractNums = (code) => {
+                const nums = code.match(/\d+/g);
+                return nums ? nums.map(n => parseInt(n)) : [0];
+            };
+            const aN = extractNums(a.apartment.code);
+            const bN = extractNums(b.apartment.code);
+            if (aN[0] !== bN[0]) return aN[0] - bN[0];
+            if (aN[1] && bN[1] && aN[1] !== bN[1]) return aN[1] - bN[1];
+            return a.apartment.code.localeCompare(b.apartment.code, 'tr');
+        });
+
+        return { results, totalProfit };
+    },
+
+    // Aylik bazda hesaplama (12 ay)
+    calculateMonthly(year, apartmentFilter) {
+        const monthly = [];
+        for (let m = 0; m < 12; m++) {
+            const data = this.calculateAll(year, m.toString(), apartmentFilter);
+            monthly.push({
+                month: m,
+                monthName: Utils.getMonthName(m),
+                ...data,
+                totalIncome: data.results.reduce((s, r) => s + r.totalIncome, 0),
+                totalExpenses: data.results.reduce((s, r) => s + r.totalExpenses, 0),
+                totalReservations: data.results.reduce((s, r) => s + r.reservationCount, 0),
+                totalNights: data.results.reduce((s, r) => s + r.totalNights, 0)
+            });
+        }
+        return monthly;
+    }
+};
+
 const ApartmentDetail = { load() { console.log('ApartmentDetail.load - stub'); } };
 const MonthlyReport = { load() { console.log('MonthlyReport.load - stub'); } };
 const Forecast = { generate() { console.log('Forecast.generate - stub'); } };
