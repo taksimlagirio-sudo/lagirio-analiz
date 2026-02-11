@@ -1,0 +1,3139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lagirio Analiz Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        /* ========= Lagirio Analiz Dashboard - CSS ========= */
+        :root {
+            --beige-50: #faf8f4;
+            --beige-100: #f5e6d3;
+            --beige-200: #ead8c0;
+            --beige-300: #e0caad;
+
+            --green-900: #0d3028;
+            --green-800: #135a49;
+            --green-700: #1a5f4a;
+            --green-600: #1f7a5f;
+            --green-500: #2a9574;
+            --green-400: #34b088;
+            --green-100: #e8f5f1;
+            --green-50: #f4faf8;
+
+            --orange-600: #ff9c00;
+            --orange-500: #ffaa26;
+            --orange-400: #ffb84d;
+            --orange-100: #fff4e0;
+            --orange-50: #fffaf0;
+
+            --bg-app: #f5f5f7;
+            --surface: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-light: #9ca3af;
+            --border-light: rgba(0,0,0,0.06);
+            --border-medium: rgba(0,0,0,0.12);
+
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-full: 9999px;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.12);
+
+            --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-app);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========= LOGIN SCREEN ========= */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 50%, var(--green-600) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-screen::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 80%;
+            height: 200%;
+            background: radial-gradient(ellipse, rgba(255,156,0,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 48px 40px;
+            width: 420px;
+            max-width: 90vw;
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-logo {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--green-800), var(--green-600));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -1px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--green-900);
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .login-input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .login-input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-family: inherit;
+            transition: var(--transition);
+            background: var(--beige-50);
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--green-600);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26,95,74,0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--green-800), var(--green-600));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(13,48,40,0.3);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-error {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* ========= MAIN LAYOUT ========= */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: white;
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--green-800), var(--green-600));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--green-900);
+        }
+
+        .header-badge {
+            background: var(--orange-100);
+            color: var(--orange-600);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn:hover {
+            background: var(--beige-50);
+            border-color: var(--green-600);
+            color: var(--green-800);
+        }
+
+        .header-btn.primary {
+            background: var(--green-800);
+            color: white;
+            border-color: var(--green-800);
+        }
+
+        .header-btn.primary:hover {
+            background: var(--green-700);
+        }
+
+        .sync-status {
+            font-size: 12px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .sync-dot.offline { background: var(--text-light); }
+        .sync-dot.syncing { background: var(--warning); animation: pulse 1s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ========= TAB NAVIGATION ========= */
+        .tab-nav {
+            background: white;
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 32px;
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 14px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--green-700);
+        }
+
+        .tab-btn.active {
+            color: var(--green-800);
+            border-bottom-color: var(--green-600);
+        }
+
+        /* ========= CONTENT AREA ========= */
+        .content-area {
+            padding: 24px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* ========= FILTER BAR ========= */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 10px 14px;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: inherit;
+            background: white;
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--green-600);
+            box-shadow: 0 0 0 3px rgba(26,95,74,0.1);
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* ========= METRIC CARDS ========= */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        .metric-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .metric-card.highlight {
+            background: linear-gradient(135deg, var(--green-800), var(--green-600));
+            color: white;
+            border: none;
+        }
+
+        .metric-card.highlight .metric-label { color: rgba(255,255,255,0.8); }
+        .metric-card.highlight .metric-value { color: white; }
+
+        .metric-card.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .metric-card.danger {
+            border-left: 4px solid var(--error);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--green-900);
+            line-height: 1.1;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .metric-sub.up { color: var(--success); }
+        .metric-sub.down { color: var(--error); }
+
+        .metric-card.highlight .metric-sub { color: rgba(255,255,255,0.7); }
+        .metric-card.highlight .metric-sub.up { color: #86efac; }
+        .metric-card.highlight .metric-sub.down { color: #fca5a5; }
+
+        /* ========= CHART CONTAINERS ========= */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-actions button {
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .chart-actions button.active,
+        .chart-actions button:hover {
+            background: var(--green-100);
+            border-color: var(--green-600);
+            color: var(--green-800);
+        }
+
+        .chart-body {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-body canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ========= DATA TABLE ========= */
+        .data-table-container {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table-title {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .table-search {
+            padding: 8px 12px;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: inherit;
+            width: 220px;
+        }
+
+        .table-search:focus {
+            outline: none;
+            border-color: var(--green-600);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--beige-50);
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .data-table th:hover {
+            background: var(--beige-100);
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-light);
+            white-space: nowrap;
+        }
+
+        .data-table tr:hover {
+            background: var(--green-50);
+        }
+
+        .data-table .positive { color: var(--success); font-weight: 600; }
+        .data-table .negative { color: var(--error); font-weight: 600; }
+
+        .system-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .system-badge.s1 { background: #dbeafe; color: #1d4ed8; }
+        .system-badge.s2 { background: #fce7f3; color: #be185d; }
+        .system-badge.s3 { background: #d1fae5; color: #047857; }
+        .system-badge.s4 { background: #fef3c7; color: #b45309; }
+        .system-badge.s5 { background: #e0e7ff; color: #4338ca; }
+        .system-badge.s6 { background: #fae8ff; color: #7e22ce; }
+        .system-badge.s7 { background: #ccfbf1; color: #0f766e; }
+        .system-badge.s8 { background: #fee2e2; color: #b91c1c; }
+        .system-badge.s9 { background: #f3e8ff; color: #6b21a8; }
+
+        /* ========= FORECAST SECTION ========= */
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .forecast-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .forecast-month {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .forecast-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--green-900);
+        }
+
+        .forecast-bar {
+            height: 6px;
+            background: var(--border-light);
+            border-radius: var(--radius-full);
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .forecast-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-600), var(--green-400));
+            border-radius: var(--radius-full);
+            transition: width 0.8s ease;
+        }
+
+        /* ========= TOAST ========= */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            background: white;
+            box-shadow: var(--shadow-lg);
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastIn 0.3s ease;
+            max-width: 360px;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--error); }
+        .toast.info { border-left: 4px solid var(--info); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ========= LOADING ========= */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.hidden { display: none; }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-light);
+            border-top-color: var(--green-600);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ========= EMPTY STATE ========= */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ========= RESPONSIVE ========= */
+        @media (max-width: 1024px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .forecast-grid { grid-template-columns: repeat(2, 1fr); }
+            .content-area { padding: 16px; }
+        }
+
+        @media (max-width: 768px) {
+            .top-header { padding: 0 16px; }
+            .tab-nav { padding: 0 16px; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .forecast-grid { grid-template-columns: 1fr; }
+            .header-badge { display: none; }
+
+            .data-table-container { overflow-x: auto; }
+            .data-table { min-width: 800px; }
+        }
+
+        @media (max-width: 480px) {
+            .metrics-grid { grid-template-columns: 1fr; }
+            .login-card { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========= TOAST CONTAINER ========= -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ========= LOADING OVERLAY ========= -->
+<div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Veriler yukleniyor...</div>
+</div>
+
+<!-- ========= LOGIN SCREEN ========= -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo">L</div>
+        <h1 class="login-title">Lagirio Analiz</h1>
+        <p class="login-subtitle">Daire bazli kazanc analiz paneli</p>
+
+        <div class="login-input-group">
+            <label>Kullanici Adi</label>
+            <input type="text" class="login-input" id="loginUser" placeholder="Kullanici adiniz" autocomplete="username">
+        </div>
+        <div class="login-input-group">
+            <label>Sifre</label>
+            <input type="password" class="login-input" id="loginPass" placeholder="Sifreniz" autocomplete="current-password">
+        </div>
+
+        <button class="login-btn" id="loginBtn" onclick="Auth.login()">Giris Yap</button>
+        <p class="login-error" id="loginError"></p>
+    </div>
+</div>
+
+<!-- ========= MAIN APP ========= -->
+<div class="app-container" id="appContainer">
+
+    <!-- Header -->
+    <header class="top-header">
+        <div class="header-left">
+            <div class="header-logo">L</div>
+            <span class="header-title">Lagirio Analiz</span>
+            <span class="header-badge">BETA</span>
+        </div>
+        <div class="header-right">
+            <div class="sync-status">
+                <span class="sync-dot" id="syncDot"></span>
+                <span id="syncText">Bagli degil</span>
+            </div>
+            <button class="header-btn" onclick="DataSync.importFile()">Veri Yukle</button>
+            <button class="header-btn" onclick="ExportManager.exportPDF()">PDF</button>
+            <button class="header-btn" onclick="ExportManager.exportCSV()">CSV</button>
+            <button class="header-btn" onclick="Auth.logout()" style="color:var(--error)">Cikis</button>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="overview">Genel Bakis</button>
+        <button class="tab-btn" data-tab="apartments">Daire Analiz</button>
+        <button class="tab-btn" data-tab="monthly">Aylik Rapor</button>
+        <button class="tab-btn" data-tab="forecast">Tahmin</button>
+        <button class="tab-btn" data-tab="comparison">Karsilastirma</button>
+    </nav>
+
+    <!-- Content -->
+    <main class="content-area">
+
+        <!-- ====== OVERVIEW TAB ====== -->
+        <div class="tab-panel active" id="panel-overview">
+
+            <!-- Filters -->
+            <div class="filter-bar">
+                <span class="filter-label">Donem:</span>
+                <select class="filter-select" id="filterYear" onchange="Dashboard.refresh()">
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+                <select class="filter-select" id="filterMonth" onchange="Dashboard.refresh()">
+                    <option value="">Tum Yil</option>
+                    <option value="0">Ocak</option>
+                    <option value="1">Subat</option>
+                    <option value="2">Mart</option>
+                    <option value="3">Nisan</option>
+                    <option value="4">Mayis</option>
+                    <option value="5">Haziran</option>
+                    <option value="6">Temmuz</option>
+                    <option value="7">Agustos</option>
+                    <option value="8">Eylul</option>
+                    <option value="9">Ekim</option>
+                    <option value="10">Kasim</option>
+                    <option value="11">Aralik</option>
+                </select>
+                <select class="filter-select" id="filterApartment" onchange="Dashboard.refresh()">
+                    <option value="">Tum Daireler</option>
+                </select>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="metrics-grid" id="overviewMetrics">
+                <!-- Filled by JS -->
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Aylik Kazanc Trendi</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartMonthlyTrend"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Sistem Dagilimi</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartSystemDist"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Platform Dagilimi</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartPlatformDist"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Banka vs Nakit</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartPaymentDist"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Apartments Table -->
+            <div class="data-table-container">
+                <div class="table-header">
+                    <span class="table-title">Daire Performansi</span>
+                    <input type="text" class="table-search" placeholder="Daire ara..." oninput="Dashboard.filterTable(this.value)">
+                </div>
+                <table class="data-table" id="overviewTable">
+                    <thead>
+                        <tr>
+                            <th onclick="TableSort.sort('overview',0)">Daire</th>
+                            <th onclick="TableSort.sort('overview',1)">Sistem</th>
+                            <th onclick="TableSort.sort('overview',2)">Rez. Sayisi</th>
+                            <th onclick="TableSort.sort('overview',3)">Toplam Gelir</th>
+                            <th onclick="TableSort.sort('overview',4)">Platform Kom.</th>
+                            <th onclick="TableSort.sort('overview',5)">Giderler</th>
+                            <th onclick="TableSort.sort('overview',6)">KDV</th>
+                            <th onclick="TableSort.sort('overview',7)">Lagirio Kazanc</th>
+                        </tr>
+                    </thead>
+                    <tbody id="overviewTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ====== APARTMENT DETAIL TAB ====== -->
+        <div class="tab-panel" id="panel-apartments">
+            <div class="filter-bar">
+                <span class="filter-label">Daire Sec:</span>
+                <select class="filter-select" id="aptDetailSelect" onchange="ApartmentDetail.load()">
+                    <option value="">-- Daire Secin --</option>
+                </select>
+                <select class="filter-select" id="aptDetailYear" onchange="ApartmentDetail.load()">
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+            </div>
+            <div id="aptDetailContent">
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#127968;</div>
+                    <h3>Daire Secin</h3>
+                    <p>Detayli analiz icin bir daire secin</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== MONTHLY REPORT TAB ====== -->
+        <div class="tab-panel" id="panel-monthly">
+            <div class="filter-bar">
+                <span class="filter-label">Yil:</span>
+                <select class="filter-select" id="monthlyYear" onchange="MonthlyReport.load()">
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                </select>
+            </div>
+            <div id="monthlyContent"></div>
+        </div>
+
+        <!-- ====== FORECAST TAB ====== -->
+        <div class="tab-panel" id="panel-forecast">
+            <div class="filter-bar">
+                <span class="filter-label">Tahmin Modeli:</span>
+                <select class="filter-select" id="forecastModel" onchange="Forecast.generate()">
+                    <option value="avg3">Son 3 Ay Ortalamasi</option>
+                    <option value="avg6">Son 6 Ay Ortalamasi</option>
+                    <option value="trend">Trend Bazli</option>
+                </select>
+            </div>
+            <div id="forecastContent"></div>
+        </div>
+
+        <!-- ====== COMPARISON TAB ====== -->
+        <div class="tab-panel" id="panel-comparison">
+            <div class="filter-bar">
+                <span class="filter-label">Karsilastir:</span>
+                <select class="filter-select" id="compareType" onchange="Comparison.load()">
+                    <option value="yoy">Yillik Karsilastirma</option>
+                    <option value="apartments">Daireler Arasi</option>
+                    <option value="systems">Sistem Karsilastirma</option>
+                </select>
+            </div>
+            <div id="comparisonContent"></div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Hidden file input for import -->
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="DataSync.handleFile(event)">
+
+<script>
+// ============================================================
+// LAGIRIO ANALIZ DASHBOARD - JavaScript
+// ============================================================
+
+// ============================================================
+// 1. CONFIG - Sabitler ve Sistem Tanimlari
+// ============================================================
+const CONFIG = {
+    SYSTEMS: {
+        '1': { name: 'Kira', short: 'Kira', color: '#3b82f6' },
+        '2': { name: 'Kisi Sirketi', short: 'Kisi Sirk.', color: '#ec4899' },
+        '3': { name: 'Komisyon (Standart)', short: 'Komisyon', color: '#10b981' },
+        '4': { name: 'Komisyon (Ozel)', short: 'Kom. Ozel', color: '#f59e0b' },
+        '5': { name: 'Stopajli', short: 'Stopaj', color: '#6366f1' },
+        '6': { name: 'Platform Ayrimli', short: 'Plt. Ayr.', color: '#a855f7' },
+        '7': { name: 'Karma Platform', short: 'Karma', color: '#14b8a6' },
+        '8': { name: 'Kisi Sirketi (Kar)', short: 'Sirk. Kar', color: '#ef4444' },
+        '9': { name: 'Stopajli (KDV)', short: 'Stp. KDV', color: '#8b5cf6' }
+    },
+    MONTHS: ['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'],
+    CHART_COLORS: ['#0d3028','#1f7a5f','#2a9574','#34b088','#ff9c00','#ffaa26','#3b82f6','#6366f1','#ec4899','#ef4444','#14b8a6','#a855f7'],
+    EXCHANGE_RATES: { USD_EUR: 0.92, TL_EUR: 37.5 },
+    AUTH: {
+        users: [
+            { username: 'admin', password: 'lagirio2025', role: 'admin' },
+            { username: 'viewer', password: 'view2025', role: 'viewer' }
+        ]
+    }
+};
+
+// ============================================================
+// 2. TOAST - Bildirim Sistemi
+// ============================================================
+const Toast = {
+    show(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icons = { success: '\u2713', error: '\u2717', info: '\u24D8' };
+        toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(40px)';
+            toast.style.transition = '0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    },
+    success(msg) { this.show(msg, 'success'); },
+    error(msg) { this.show(msg, 'error'); },
+    info(msg) { this.show(msg, 'info'); }
+};
+
+// ============================================================
+// 3. AUTH - Giris / Cikis Yonetimi
+// ============================================================
+const Auth = {
+    currentUser: null,
+
+    login() {
+        const username = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value;
+        const errorEl = document.getElementById('loginError');
+
+        if (!username || !password) {
+            errorEl.textContent = 'Kullanici adi ve sifre gerekli';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        const user = CONFIG.AUTH.users.find(u => u.username === username && u.password === password);
+        if (!user) {
+            errorEl.textContent = 'Kullanici adi veya sifre hatali';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        this.currentUser = user;
+        localStorage.setItem('lagirioAnaliz_auth', JSON.stringify({ username: user.username, role: user.role }));
+
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').classList.add('active');
+        errorEl.style.display = 'none';
+
+        Toast.success(`Hosgeldiniz, ${user.username}!`);
+        Dashboard.init();
+    },
+
+    logout() {
+        this.currentUser = null;
+        localStorage.removeItem('lagirioAnaliz_auth');
+        document.getElementById('loginScreen').style.display = '';
+        document.getElementById('appContainer').classList.remove('active');
+        Toast.info('Cikis yapildi');
+    },
+
+    checkSession() {
+        const saved = localStorage.getItem('lagirioAnaliz_auth');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                const user = CONFIG.AUTH.users.find(u => u.username === parsed.username);
+                if (user) {
+                    this.currentUser = user;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appContainer').classList.add('active');
+                    return true;
+                }
+            } catch(e) {}
+        }
+        return false;
+    }
+};
+
+// ============================================================
+// 4. UTILS - Yardimci Fonksiyonlar
+// ============================================================
+const Utils = {
+    convertToEUR(amount, currency) {
+        if (!amount) return 0;
+        switch(currency) {
+            case 'USD': return amount * CONFIG.EXCHANGE_RATES.USD_EUR;
+            case 'TL':
+            case 'TRY': return amount / CONFIG.EXCHANGE_RATES.TL_EUR;
+            case 'EUR':
+            default: return amount;
+        }
+    },
+
+    formatEUR(val) {
+        if (val === null || val === undefined || isNaN(val)) return '0.00 EUR';
+        return val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' EUR';
+    },
+
+    formatNumber(val) {
+        if (val === null || val === undefined || isNaN(val)) return '0';
+        return val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+
+    formatPercent(val) {
+        if (!val || isNaN(val)) return '0%';
+        return val.toFixed(1) + '%';
+    },
+
+    getMonthName(idx) {
+        return CONFIG.MONTHS[idx] || '';
+    },
+
+    calculateNights(checkIn, checkOut) {
+        const d1 = new Date(checkIn);
+        const d2 = new Date(checkOut);
+        return Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
+    },
+
+    getChangeIndicator(current, previous) {
+        if (!previous || previous === 0) return { class: '', text: '' };
+        const pct = ((current - previous) / Math.abs(previous)) * 100;
+        if (pct > 0) return { class: 'up', text: `+${pct.toFixed(1)}%` };
+        if (pct < 0) return { class: 'down', text: `${pct.toFixed(1)}%` };
+        return { class: '', text: '0%' };
+    }
+};
+
+// ============================================================
+// 5. DATA STORE - Veri Deposu
+// ============================================================
+let appData = {
+    apartments: [],
+    reservations: [],
+    expenses: [],
+    categories: [],
+    capitalExpenses: [],
+    lagirioExpenses: [],
+    loaded: false,
+    lastSync: null
+};
+
+// ============================================================
+// 6. DATA SYNC - Veri Yukleme / Import
+// ============================================================
+const DataSync = {
+    importFile() {
+        document.getElementById('fileInput').click();
+    },
+
+    handleFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Loading.show('Veri dosyasi yukleniyor...');
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const parsed = JSON.parse(e.target.result);
+
+                // daire-uygulamasi formatini tani
+                if (parsed.apartments || parsed.reservations) {
+                    appData.apartments = parsed.apartments || [];
+                    appData.reservations = parsed.reservations || [];
+                    appData.expenses = parsed.expenses || [];
+                    appData.categories = parsed.categories || [];
+                    appData.capitalExpenses = parsed.capitalExpenses || [];
+                    appData.lagirioExpenses = parsed.lagirioExpenses || [];
+                    appData.loaded = true;
+                    appData.lastSync = new Date().toISOString();
+
+                    // localStorage'a kaydet
+                    localStorage.setItem('lagirioAnaliz_data', JSON.stringify(appData));
+
+                    this.updateSyncStatus(true);
+                    Toast.success(`Veri yuklendi: ${appData.apartments.length} daire, ${appData.reservations.length} rezervasyon`);
+
+                    // Filtreleri ve dashboard'u guncelle
+                    Dashboard.populateFilters();
+                    Dashboard.refresh();
+                } else {
+                    Toast.error('Gecersiz veri formati. daire-uygulamasi export dosyasi bekleniyor.');
+                }
+            } catch(err) {
+                console.error('Import error:', err);
+                Toast.error('Dosya okunamadi: ' + err.message);
+            }
+            Loading.hide();
+        };
+
+        reader.onerror = () => {
+            Toast.error('Dosya okuma hatasi');
+            Loading.hide();
+        };
+
+        reader.readAsText(file);
+        event.target.value = '';
+    },
+
+    loadFromStorage() {
+        try {
+            const saved = localStorage.getItem('lagirioAnaliz_data');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                Object.assign(appData, parsed);
+                appData.loaded = true;
+                this.updateSyncStatus(true);
+                return true;
+            }
+        } catch(e) {
+            console.error('Storage load error:', e);
+        }
+        return false;
+    },
+
+    updateSyncStatus(connected) {
+        const dot = document.getElementById('syncDot');
+        const text = document.getElementById('syncText');
+        if (connected && appData.loaded) {
+            dot.className = 'sync-dot';
+            const count = appData.apartments.length;
+            text.textContent = `${count} daire yuklendi`;
+        } else {
+            dot.className = 'sync-dot offline';
+            text.textContent = 'Veri yuklenmedi';
+        }
+    },
+
+    exportData() {
+        const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lagirio-analiz-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+};
+
+// ============================================================
+// 7. LOADING - Yukleme Ekrani
+// ============================================================
+const Loading = {
+    show(text) {
+        document.getElementById('loadingText').textContent = text || 'Yukleniyor...';
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+    },
+    hide() {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+};
+
+// ============================================================
+// 8. TAB NAVIGATION
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const panel = document.getElementById('panel-' + btn.dataset.tab);
+        if (panel) panel.classList.add('active');
+
+        // Tab'a gore veri yukle
+        const tab = btn.dataset.tab;
+        if (tab === 'overview') Dashboard.refresh();
+        else if (tab === 'apartments') ApartmentDetail.load();
+        else if (tab === 'monthly') MonthlyReport.load();
+        else if (tab === 'forecast') Forecast.generate();
+        else if (tab === 'comparison') Comparison.load();
+    });
+});
+
+// Enter ile login
+document.getElementById('loginPass').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') Auth.login();
+});
+document.getElementById('loginUser').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('loginPass').focus();
+});
+
+// ============================================================
+// 10. CHART MANAGER - Grafik Yonetimi
+// ============================================================
+const ChartManager = {
+    instances: {},
+
+    destroy(id) {
+        if (this.instances[id]) {
+            this.instances[id].destroy();
+            delete this.instances[id];
+        }
+    },
+
+    destroyAll() {
+        Object.keys(this.instances).forEach(id => this.destroy(id));
+    },
+
+    // Aylik trend cizgi grafigi
+    renderMonthlyTrend(canvasId, monthlyData) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const labels = monthlyData.map(m => m.monthName);
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Lagirio Kazanc (EUR)',
+                        data: monthlyData.map(m => m.totalProfit),
+                        borderColor: '#1f7a5f',
+                        backgroundColor: 'rgba(31,122,95,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#1f7a5f'
+                    },
+                    {
+                        label: 'Toplam Gelir (EUR)',
+                        data: monthlyData.map(m => m.totalIncome),
+                        borderColor: '#ff9c00',
+                        backgroundColor: 'rgba(255,156,0,0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#ff9c00'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${Utils.formatEUR(ctx.parsed.y)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0),
+                            font: { family: 'Inter', size: 11 }
+                        },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: {
+                        ticks: { font: { family: 'Inter', size: 11 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    },
+
+    // Sistem dagilimi pasta grafigi
+    renderSystemDist(canvasId, results) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const systemGroups = {};
+        results.forEach(r => {
+            const sys = r.apartment.systemType;
+            if (!systemGroups[sys]) systemGroups[sys] = 0;
+            systemGroups[sys] += r.lagirioProfit;
+        });
+
+        const labels = [], data = [], colors = [];
+        Object.keys(systemGroups).sort().forEach(sys => {
+            const cfg = CONFIG.SYSTEMS[sys];
+            labels.push(cfg ? cfg.short : 'S' + sys);
+            data.push(systemGroups[sys]);
+            colors.push(cfg ? cfg.color : '#999');
+        });
+
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 }, padding: 12 } },
+                    tooltip: {
+                        callbacks: { label: (ctx) => `${ctx.label}: ${Utils.formatEUR(ctx.parsed)}` }
+                    }
+                }
+            }
+        });
+    },
+
+    // Platform dagilimi bar grafigi
+    renderPlatformDist(canvasId, results) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const platforms = {};
+        results.forEach(r => {
+            r.reservations.forEach(res => {
+                const p = res.platform || 'Diger';
+                if (!platforms[p]) platforms[p] = { income: 0, count: 0 };
+                platforms[p].income += Utils.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                platforms[p].count++;
+            });
+        });
+
+        const labels = Object.keys(platforms).sort();
+        const pColors = { 'Airbnb': '#ff5a5f', 'Booking': '#003580', 'Direct': '#10b981', 'Diger': '#6b7280' };
+
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Gelir (EUR)',
+                    data: labels.map(l => platforms[l].income),
+                    backgroundColor: labels.map(l => pColors[l] || '#6b7280'),
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${Utils.formatEUR(ctx.parsed.y)} (${platforms[labels[ctx.dataIndex]].count} rez.)`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    },
+
+    // Banka vs Nakit pasta grafigi
+    renderPaymentDist(canvasId, results) {
+        this.destroy(canvasId);
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        let bankTotal = 0, cashTotal = 0;
+        results.forEach(r => { bankTotal += r.bankIncome; cashTotal += r.cashIncome; });
+
+        this.instances[canvasId] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Banka', 'Nakit'],
+                datasets: [{
+                    data: [bankTotal, cashTotal],
+                    backgroundColor: ['#1f7a5f', '#ff9c00'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 }, padding: 12 } },
+                    tooltip: {
+                        callbacks: { label: (ctx) => `${ctx.label}: ${Utils.formatEUR(ctx.parsed)}` }
+                    }
+                }
+            }
+        });
+    }
+};
+
+// ============================================================
+// 11. TABLE SORT - Tablo Siralama
+// ============================================================
+const TableSort = {
+    state: {},
+
+    sort(tableId, colIdx) {
+        const key = `${tableId}_${colIdx}`;
+        const dir = this.state[key] === 'asc' ? 'desc' : 'asc';
+        this.state[key] = dir;
+
+        const tbody = document.getElementById(tableId + 'TableBody');
+        if (!tbody) return;
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            const aText = a.cells[colIdx]?.textContent.trim() || '';
+            const bText = b.cells[colIdx]?.textContent.trim() || '';
+
+            const aNum = parseFloat(aText.replace(/[^0-9.-]/g, ''));
+            const bNum = parseFloat(bText.replace(/[^0-9.-]/g, ''));
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return dir === 'asc' ? aNum - bNum : bNum - aNum;
+            }
+            return dir === 'asc' ? aText.localeCompare(bText, 'tr') : bText.localeCompare(aText, 'tr');
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    }
+};
+
+// ============================================================
+// 12. DASHBOARD - Ana Panel
+// ============================================================
+const Dashboard = {
+    currentData: null,
+
+    init() {
+        this.populateFilters();
+        this.populateYears();
+        if (appData.loaded) this.refresh();
+    },
+
+    populateFilters() {
+        const sel = document.getElementById('filterApartment');
+        const aptSel = document.getElementById('aptDetailSelect');
+        sel.innerHTML = '<option value="">Tum Daireler</option>';
+        aptSel.innerHTML = '<option value="">-- Daire Secin --</option>';
+        [...appData.apartments].sort((a, b) => a.code.localeCompare(b.code, 'tr')).forEach(apt => {
+            const opt = `<option value="${apt.id}">${apt.code} - ${apt.ownerName || apt.location || ''}</option>`;
+            sel.innerHTML += opt;
+            aptSel.innerHTML += opt;
+        });
+    },
+
+    populateYears() {
+        const years = new Set();
+        appData.reservations.forEach(r => {
+            if (r.checkIn) years.add(new Date(r.checkIn).getFullYear());
+        });
+        if (years.size > 0) {
+            const sortedYears = [...years].sort((a, b) => b - a);
+            ['filterYear', 'aptDetailYear', 'monthlyYear'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+                }
+            });
+        }
+    },
+
+    refresh() {
+        if (!appData.loaded) return;
+
+        const year = parseInt(document.getElementById('filterYear').value);
+        const month = document.getElementById('filterMonth').value;
+        const aptFilter = document.getElementById('filterApartment').value;
+
+        // Hesapla
+        const data = FinanceEngine.calculateAll(year, month, aptFilter || null);
+        this.currentData = data;
+
+        // Onceki donem (karsilastirma icin)
+        let prevData = null;
+        if (month !== '') {
+            const prevMonth = parseInt(month) - 1;
+            if (prevMonth >= 0) {
+                prevData = FinanceEngine.calculateAll(year, prevMonth.toString(), aptFilter || null);
+            }
+        } else {
+            prevData = FinanceEngine.calculateAll(year - 1, '', aptFilter || null);
+        }
+
+        // Metrikler
+        this.renderMetrics(data, prevData);
+
+        // Tablo
+        this.renderTable(data.results);
+
+        // Grafikler
+        const monthlyData = FinanceEngine.calculateMonthly(year, aptFilter || null);
+        ChartManager.renderMonthlyTrend('chartMonthlyTrend', monthlyData);
+        ChartManager.renderSystemDist('chartSystemDist', data.results);
+        ChartManager.renderPlatformDist('chartPlatformDist', data.results);
+        ChartManager.renderPaymentDist('chartPaymentDist', data.results);
+    },
+
+    renderMetrics(data, prevData) {
+        const r = data.results;
+        const totalIncome = r.reduce((s, i) => s + i.totalIncome, 0);
+        const totalExpenses = r.reduce((s, i) => s + i.totalExpenses, 0);
+        const totalReservations = r.reduce((s, i) => s + i.reservationCount, 0);
+        const totalNights = r.reduce((s, i) => s + i.totalNights, 0);
+        const avgNightly = totalNights > 0 ? totalIncome / totalNights : 0;
+        const activeDaireler = r.length;
+
+        // Onceki donem
+        const prevProfit = prevData ? prevData.totalProfit : 0;
+        const prevIncome = prevData ? prevData.results.reduce((s, i) => s + i.totalIncome, 0) : 0;
+
+        const profitChange = Utils.getChangeIndicator(data.totalProfit, prevProfit);
+        const incomeChange = Utils.getChangeIndicator(totalIncome, prevIncome);
+
+        const container = document.getElementById('overviewMetrics');
+        container.innerHTML = `
+            <div class="metric-card highlight">
+                <div class="metric-label">Lagirio Kazanci</div>
+                <div class="metric-value">${Utils.formatEUR(data.totalProfit)}</div>
+                <div class="metric-sub ${profitChange.class}">${profitChange.text} onceki doneme gore</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Toplam Gelir</div>
+                <div class="metric-value">${Utils.formatEUR(totalIncome)}</div>
+                <div class="metric-sub ${incomeChange.class}">${incomeChange.text} onceki doneme gore</div>
+            </div>
+            <div class="metric-card${totalExpenses > totalIncome * 0.4 ? ' warning' : ''}">
+                <div class="metric-label">Toplam Gider</div>
+                <div class="metric-value">${Utils.formatEUR(totalExpenses)}</div>
+                <div class="metric-sub">Gelirin ${totalIncome > 0 ? Utils.formatPercent(totalExpenses / totalIncome * 100) : '0%'}'i</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Rezervasyonlar</div>
+                <div class="metric-value">${totalReservations}</div>
+                <div class="metric-sub">${totalNights} gece toplam</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Ort. Gecelik</div>
+                <div class="metric-value">${Utils.formatEUR(avgNightly)}</div>
+                <div class="metric-sub">gece basina ortalama</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Aktif Daire</div>
+                <div class="metric-value">${activeDaireler} / ${appData.apartments.length}</div>
+                <div class="metric-sub">rezervasyonu olan daireler</div>
+            </div>
+        `;
+    },
+
+    renderTable(results) {
+        const tbody = document.getElementById('overviewTableBody');
+        if (!tbody) return;
+
+        if (results.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-light)">Bu donem icin veri bulunamadi</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = results.map(item => {
+            const sys = CONFIG.SYSTEMS[item.apartment.systemType];
+            const profitClass = item.lagirioProfit >= 0 ? 'positive' : 'negative';
+            return `<tr>
+                <td><strong>${item.apartment.code}</strong></td>
+                <td><span class="system-badge s${item.apartment.systemType}">${sys ? sys.short : 'S' + item.apartment.systemType}</span></td>
+                <td>${item.reservationCount}</td>
+                <td>${Utils.formatEUR(item.totalIncome)}</td>
+                <td>${Utils.formatEUR(item.totalPlatformComm)}</td>
+                <td>${Utils.formatEUR(item.totalExpenses)}</td>
+                <td>${Utils.formatEUR(item.totalKDV)}</td>
+                <td class="${profitClass}">${Utils.formatEUR(item.lagirioProfit)}</td>
+            </tr>`;
+        }).join('');
+
+        // Toplam satiri
+        const totals = results.reduce((acc, i) => ({
+            res: acc.res + i.reservationCount,
+            income: acc.income + i.totalIncome,
+            platform: acc.platform + i.totalPlatformComm,
+            expenses: acc.expenses + i.totalExpenses,
+            kdv: acc.kdv + i.totalKDV,
+            profit: acc.profit + i.lagirioProfit
+        }), { res: 0, income: 0, platform: 0, expenses: 0, kdv: 0, profit: 0 });
+
+        const profitClass = totals.profit >= 0 ? 'positive' : 'negative';
+        tbody.innerHTML += `<tr style="background:var(--beige-50);font-weight:700">
+            <td>TOPLAM</td>
+            <td>${results.length} daire</td>
+            <td>${totals.res}</td>
+            <td>${Utils.formatEUR(totals.income)}</td>
+            <td>${Utils.formatEUR(totals.platform)}</td>
+            <td>${Utils.formatEUR(totals.expenses)}</td>
+            <td>${Utils.formatEUR(totals.kdv)}</td>
+            <td class="${profitClass}">${Utils.formatEUR(totals.profit)}</td>
+        </tr>`;
+    },
+
+    filterTable(query) {
+        const tbody = document.getElementById('overviewTableBody');
+        if (!tbody) return;
+        const q = query.toLowerCase();
+        Array.from(tbody.querySelectorAll('tr')).forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(q) || q === '' ? '' : 'none';
+        });
+    }
+};
+
+// ============================================================
+// 9. FINANCE ENGINE - 9 Sistem Hesaplama Motoru
+// ============================================================
+const FinanceEngine = {
+
+    // Rezervasyonlari banka/nakit olarak ayir
+    splitByPayment(reservations) {
+        return {
+            bank: reservations.filter(r => r.paymentMethod !== 'Nakit'),
+            cash: reservations.filter(r => r.paymentMethod === 'Nakit')
+        };
+    },
+
+    // Giderleri EUR'ya cevir ve topla
+    calcExpensesEUR(expenses) {
+        return expenses.reduce((sum, exp) => {
+            return sum + Utils.convertToEUR(exp.amount, exp.currency || 'EUR');
+        }, 0);
+    },
+
+    // Demirbas giderlerini EUR'ya cevir ve topla
+    calcCapitalExpensesEUR(capitalExpenses) {
+        return capitalExpenses.reduce((sum, exp) => {
+            return sum + Utils.convertToEUR(exp.amount, exp.currency || 'EUR');
+        }, 0);
+    },
+
+    // Belirli donem icin filtreleme
+    filterByPeriod(items, dateField, year, month) {
+        return items.filter(item => {
+            const d = new Date(item[dateField]);
+            return d.getFullYear() === year &&
+                   (month === '' || month === null || month === undefined || d.getMonth() === parseInt(month));
+        });
+    },
+
+    // Belirli daire + donem icin filtreleme
+    filterByAptAndPeriod(items, dateField, apartmentId, year, month) {
+        return this.filterByPeriod(items, dateField, year, month)
+                   .filter(item => item.apartmentId === apartmentId);
+    },
+
+    // ============================================================
+    // ANA HESAPLAMA: Tek bir daire icin tum hesaplamayi yap
+    // ============================================================
+    calculateApartment(apartment, reservations, expenses, capitalExpenses) {
+        if (reservations.length === 0) return null;
+
+        const { bank, cash } = this.splitByPayment(reservations);
+
+        // Gelirler
+        const bankIncome = bank.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+        const cashIncome = cash.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+        const totalIncome = bankIncome + cashIncome;
+
+        // Platform komisyonlari
+        const bankPlatformComm = bank.reduce((s, r) => s + (r.platformCommission || 0), 0);
+        const cashPlatformComm = cash.reduce((s, r) => s + (r.platformCommission || 0), 0);
+        const totalPlatformComm = bankPlatformComm + cashPlatformComm;
+
+        // Giderler
+        const totalExpenses = this.calcExpensesEUR(expenses);
+        const totalCapitalExp = capitalExpenses ? this.calcCapitalExpensesEUR(capitalExpenses) : 0;
+
+        // KDV hesapla
+        const totalKDV = this.calcKDV(apartment, reservations, bank);
+
+        // Lagirio komisyon/kar hesapla
+        const lagirioResult = this.calcLagirioProfit(apartment, reservations, bank, cash,
+            bankIncome, cashIncome, totalIncome, bankPlatformComm, cashPlatformComm,
+            totalExpenses, totalKDV);
+
+        // Gece ve ortalama hesaplari
+        const totalNights = reservations.reduce((s, r) => s + Utils.calculateNights(r.checkIn, r.checkOut), 0);
+        const avgNightlyRate = totalNights > 0 ? totalIncome / totalNights : 0;
+
+        return {
+            apartment,
+            bankIncome,
+            cashIncome,
+            totalIncome,
+            bankPlatformComm,
+            cashPlatformComm,
+            totalPlatformComm,
+            totalExpenses,
+            totalCapitalExp,
+            totalKDV,
+            bankLagirioComm: lagirioResult.bankComm,
+            cashLagirioComm: lagirioResult.cashComm,
+            lagirioProfit: lagirioResult.profit,
+            reservationCount: reservations.length,
+            totalNights,
+            avgNightlyRate,
+            occupancyDays: totalNights,
+            reservations,
+            expenses
+        };
+    },
+
+    // ============================================================
+    // KDV HESAPLAMA - Sistem bazli
+    // ============================================================
+    calcKDV(apartment, reservations, bankReservations) {
+        const taxRate = apartment.taxRate || 0;
+        if (taxRate === 0) return 0;
+
+        switch(apartment.systemType) {
+            case '1': // Sistem 1 - KDV var
+            case '3': // Sistem 3 - KDV var
+            case '4': // Sistem 4 - KDV var
+            case '5': // Sistem 5 - KDV var
+            case '9': // Sistem 9 - KDV var
+                return bankReservations.reduce((sum, res) => {
+                    const amt = Utils.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                    return sum + amt * (taxRate / 100) / (1 + taxRate / 100);
+                }, 0);
+
+            case '2': // Sistem 2 - KDV yok (geri aliniyor)
+            case '6': // Sistem 6 - KDV yok
+            case '8': // Sistem 8 - KDV yok
+                return 0;
+
+            case '7': // Sistem 7 - Sadece Booking/Direct'te KDV
+                const bookingDirect = reservations.filter(r => r.platform !== 'Airbnb');
+                const bookingBank = bookingDirect.filter(r => r.paymentMethod !== 'Nakit');
+                const bookingBankIncome = bookingBank.reduce((s, r) =>
+                    s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                return bookingBankIncome * (taxRate / 100) / (1 + taxRate / 100);
+
+            default: return 0;
+        }
+    },
+
+    // ============================================================
+    // LAGIRIO KAR HESAPLAMA - 9 Sistem
+    // ============================================================
+    calcLagirioProfit(apartment, reservations, bank, cash,
+                      bankIncome, cashIncome, totalIncome,
+                      bankPlatformComm, cashPlatformComm,
+                      totalExpenses, totalKDV) {
+
+        let profit = 0, bankComm = 0, cashComm = 0;
+        const commRate = apartment.lagirioCommission / 100;
+
+        switch(apartment.systemType) {
+
+            // Sistem 1 - Kira: Net kar Lagirio'nun
+            case '1': {
+                const netProfit = totalIncome - bankPlatformComm - cashPlatformComm - totalExpenses - totalKDV;
+                profit = netProfit;
+                bankComm = totalIncome > 0 ? bankIncome - bankPlatformComm - (totalExpenses * bankIncome / totalIncome) - totalKDV : 0;
+                cashComm = totalIncome > 0 ? cashIncome - cashPlatformComm - (totalExpenses * cashIncome / totalIncome) : 0;
+                break;
+            }
+
+            // Sistem 2 - Kisi Sirketi: Komisyon Lagirio'nun
+            case '2': {
+                bankComm = bankIncome > 0 ? bankIncome * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 3 - Komisyon Standart: Gider+KDV+Platform dusulur, kalanin komisyonu
+            case '3': {
+                const afterDeductions = bankIncome - totalExpenses - totalKDV - bankPlatformComm;
+                bankComm = afterDeductions > 0 ? afterDeductions * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 4 - Komisyon Ozel: Platform dusulur, kalanin komisyonu
+            case '4': {
+                const afterPlatform = bankIncome - bankPlatformComm;
+                bankComm = afterPlatform > 0 ? afterPlatform * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 5 - Stopajli: Platform dusulur, kalanin komisyonu
+            case '5': {
+                const afterPlatform = bankIncome - bankPlatformComm;
+                bankComm = afterPlatform > 0 ? afterPlatform * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 6 - Platform Ayrimli (Lagirio/Zirkon)
+            case '6': {
+                const lagirioRes = reservations.filter(r => r.paidTo === 'Lagirio');
+                const zirkonRes = reservations.filter(r => r.paidTo === 'Zirkon');
+
+                // Lagirio gelir/komisyon
+                const lagirioInc = lagirioRes.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const lagirioPComm = lagirioRes.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const lagirioNet = lagirioInc - lagirioPComm - (lagirioRes.length > 0 ? totalExpenses : 0);
+                const lagirioC = lagirioNet * commRate;
+
+                // Zirkon gelir/komisyon
+                const zirkonInc = zirkonRes.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const zirkonPComm = zirkonRes.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const zirkonNet = zirkonInc - zirkonPComm - (zirkonRes.length > 0 && lagirioRes.length === 0 ? totalExpenses : 0);
+                const zirkonC = zirkonNet * commRate;
+
+                profit = lagirioC + zirkonC;
+
+                // Banka/Nakit dagilimi
+                const lagirioBankInc = lagirioRes.filter(r => r.paymentMethod !== 'Nakit')
+                    .reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const zirkonBankInc = zirkonRes.filter(r => r.paymentMethod !== 'Nakit')
+                    .reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+
+                const lagirioBankRatio = lagirioInc > 0 ? lagirioBankInc / lagirioInc : 0;
+                const zirkonBankRatio = zirkonInc > 0 ? zirkonBankInc / zirkonInc : 0;
+
+                bankComm = (lagirioC * lagirioBankRatio) + (zirkonC * zirkonBankRatio);
+                cashComm = (lagirioC * (1 - lagirioBankRatio)) + (zirkonC * (1 - zirkonBankRatio));
+                break;
+            }
+
+            // Sistem 7 - Karma Platform (Airbnb/Booking ayrimli)
+            case '7': {
+                const airbnbRes = reservations.filter(r => r.platform === 'Airbnb');
+                const bookingRes = reservations.filter(r => r.platform !== 'Airbnb');
+
+                // Airbnb: platform dusulur, kalanin komisyonu
+                const airbnbInc = airbnbRes.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const airbnbPComm = airbnbRes.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const airbnbAfter = airbnbInc - airbnbPComm;
+                const airbnbLComm = airbnbAfter * commRate;
+
+                // Booking banka: platform dusulur, kalanin komisyonu
+                const bookingBank = bookingRes.filter(r => r.paymentMethod !== 'Nakit');
+                const bookingBankInc = bookingBank.reduce((s, r) => s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const bookingBankPComm = bookingBank.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const bookingBankAfter = bookingBankInc - bookingBankPComm;
+                const bookingLComm = bookingBankAfter * commRate;
+
+                // Booking nakit
+                const bookingCash = bookingRes.filter(r => r.paymentMethod === 'Nakit');
+                const bookingCashAfter = bookingCash.reduce((s, r) =>
+                    s + Utils.convertToEUR(r.totalAmount, r.currency || 'EUR') - (r.platformCommission || 0), 0);
+                const bookingCashLComm = bookingCashAfter * commRate;
+
+                profit = airbnbLComm + bookingLComm + bookingCashLComm;
+                bankComm = airbnbLComm + bookingLComm;
+                cashComm = bookingCashLComm;
+                break;
+            }
+
+            // Sistem 8 - Kisi Sirketi (Kar Bazli)
+            case '8': {
+                const bankProfit = bankIncome - totalExpenses - bankPlatformComm;
+                bankComm = bankProfit > 0 ? bankProfit * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+
+            // Sistem 9 - Stopajli (KDV Dusulmus): Platform + KDV dusulur, kalanin komisyonu
+            case '9': {
+                const afterPlatform = bankIncome - bankPlatformComm;
+                const afterKDV = afterPlatform - totalKDV;
+                bankComm = afterKDV > 0 ? afterKDV * commRate : 0;
+                const cashAfterPlatform = cashIncome - cashPlatformComm;
+                cashComm = cashAfterPlatform > 0 ? cashAfterPlatform * commRate : 0;
+                profit = bankComm + cashComm;
+                break;
+            }
+        }
+
+        return { profit, bankComm, cashComm };
+    },
+
+    // ============================================================
+    // TOPLU HESAPLAMA: Tum daireler icin
+    // ============================================================
+    calculateAll(year, month, apartmentFilter) {
+        const results = [];
+        let totalProfit = 0;
+
+        const apartments = apartmentFilter
+            ? appData.apartments.filter(a => a.id === apartmentFilter)
+            : appData.apartments;
+
+        apartments.forEach(apt => {
+            const reservations = this.filterByAptAndPeriod(appData.reservations, 'checkIn', apt.id, year, month);
+            const expenses = this.filterByAptAndPeriod(appData.expenses, 'date', apt.id, year, month);
+            const capitalExps = appData.capitalExpenses
+                ? this.filterByAptAndPeriod(appData.capitalExpenses, 'date', apt.id, year, month)
+                : [];
+
+            const result = this.calculateApartment(apt, reservations, expenses, capitalExps);
+            if (result) {
+                results.push(result);
+                totalProfit += result.lagirioProfit;
+            }
+        });
+
+        // Koda gore sirala
+        results.sort((a, b) => {
+            const extractNums = (code) => {
+                const nums = code.match(/\d+/g);
+                return nums ? nums.map(n => parseInt(n)) : [0];
+            };
+            const aN = extractNums(a.apartment.code);
+            const bN = extractNums(b.apartment.code);
+            if (aN[0] !== bN[0]) return aN[0] - bN[0];
+            if (aN[1] && bN[1] && aN[1] !== bN[1]) return aN[1] - bN[1];
+            return a.apartment.code.localeCompare(b.apartment.code, 'tr');
+        });
+
+        return { results, totalProfit };
+    },
+
+    // Aylik bazda hesaplama (12 ay)
+    calculateMonthly(year, apartmentFilter) {
+        const monthly = [];
+        for (let m = 0; m < 12; m++) {
+            const data = this.calculateAll(year, m.toString(), apartmentFilter);
+            monthly.push({
+                month: m,
+                monthName: Utils.getMonthName(m),
+                ...data,
+                totalIncome: data.results.reduce((s, r) => s + r.totalIncome, 0),
+                totalExpenses: data.results.reduce((s, r) => s + r.totalExpenses, 0),
+                totalReservations: data.results.reduce((s, r) => s + r.reservationCount, 0),
+                totalNights: data.results.reduce((s, r) => s + r.totalNights, 0)
+            });
+        }
+        return monthly;
+    }
+};
+
+// ============================================================
+// 13. APARTMENT DETAIL - Daire Detay Sayfasi
+// ============================================================
+const ApartmentDetail = {
+    chart: null,
+
+    load() {
+        if (!appData.loaded) return;
+        const aptId = document.getElementById('aptDetailSelect').value;
+        const container = document.getElementById('aptDetailContent');
+
+        if (!aptId) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-state-icon">&#127968;</div>
+                <h3>Daire Secin</h3>
+                <p>Detayli analiz icin bir daire secin</p>
+            </div>`;
+            return;
+        }
+
+        const apt = appData.apartments.find(a => a.id === aptId);
+        if (!apt) return;
+
+        const year = parseInt(document.getElementById('aptDetailYear').value);
+        const monthly = FinanceEngine.calculateMonthly(year, aptId);
+        const yearData = FinanceEngine.calculateAll(year, '', aptId);
+        const result = yearData.results[0];
+
+        const sys = CONFIG.SYSTEMS[apt.systemType];
+
+        // Yillik ozet
+        const totalIncome = result ? result.totalIncome : 0;
+        const totalExpenses = result ? result.totalExpenses : 0;
+        const totalProfit = yearData.totalProfit;
+        const totalRes = result ? result.reservationCount : 0;
+        const totalNights = result ? result.totalNights : 0;
+        const avgNightly = result ? result.avgNightlyRate : 0;
+
+        container.innerHTML = `
+            <!-- Daire Bilgi Karti -->
+            <div class="chart-card" style="margin-bottom:20px">
+                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                    <div>
+                        <h2 style="font-size:22px;font-weight:800;color:var(--green-900)">${apt.code}</h2>
+                        <p style="font-size:13px;color:var(--text-secondary)">${apt.ownerName || ''} ${apt.location ? '- ' + apt.location : ''}</p>
+                    </div>
+                    <span class="system-badge s${apt.systemType}" style="font-size:13px;padding:6px 14px">
+                        Sistem ${apt.systemType} - ${sys ? sys.name : ''}
+                    </span>
+                    <div style="margin-left:auto;text-align:right">
+                        <div style="font-size:12px;color:var(--text-light)">Komisyon: ${apt.lagirioCommission || 0}%</div>
+                        <div style="font-size:12px;color:var(--text-light)">KDV: ${apt.taxRate || 0}%</div>
+                        ${apt.incomeTaxRate ? `<div style="font-size:12px;color:var(--text-light)">Gelir V.: ${apt.incomeTaxRate}%</div>` : ''}
+                        ${apt.stopajRate ? `<div style="font-size:12px;color:var(--text-light)">Stopaj: ${apt.stopajRate}%</div>` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrikler -->
+            <div class="metrics-grid">
+                <div class="metric-card highlight">
+                    <div class="metric-label">Lagirio Kazanci</div>
+                    <div class="metric-value">${Utils.formatEUR(totalProfit)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gelir</div>
+                    <div class="metric-value">${Utils.formatEUR(totalIncome)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gider</div>
+                    <div class="metric-value">${Utils.formatEUR(totalExpenses)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Rezervasyon</div>
+                    <div class="metric-value">${totalRes}</div>
+                    <div class="metric-sub">${totalNights} gece</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Ort. Gecelik</div>
+                    <div class="metric-value">${Utils.formatEUR(avgNightly)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Kar Marji</div>
+                    <div class="metric-value">${totalIncome > 0 ? Utils.formatPercent(totalProfit / totalIncome * 100) : '0%'}</div>
+                </div>
+            </div>
+
+            <!-- Aylik Grafik -->
+            <div class="charts-grid">
+                <div class="chart-card full-width">
+                    <div class="chart-header">
+                        <span class="chart-title">${apt.code} - ${year} Aylik Performans</span>
+                    </div>
+                    <div class="chart-body" style="height:350px">
+                        <canvas id="aptDetailChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aylik Tablo -->
+            <div class="data-table-container">
+                <div class="table-header">
+                    <span class="table-title">Aylik Detay - ${year}</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ay</th>
+                            <th>Rez.</th>
+                            <th>Gece</th>
+                            <th>Gelir</th>
+                            <th>Platform Kom.</th>
+                            <th>Gider</th>
+                            <th>KDV</th>
+                            <th>Lagirio Kazanc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${monthly.map(m => {
+                            const r = m.results[0];
+                            if (!r) return `<tr><td>${m.monthName}</td><td colspan="7" style="color:var(--text-light)">-</td></tr>`;
+                            const pClass = r.lagirioProfit >= 0 ? 'positive' : 'negative';
+                            return `<tr>
+                                <td><strong>${m.monthName}</strong></td>
+                                <td>${r.reservationCount}</td>
+                                <td>${r.totalNights}</td>
+                                <td>${Utils.formatEUR(r.totalIncome)}</td>
+                                <td>${Utils.formatEUR(r.totalPlatformComm)}</td>
+                                <td>${Utils.formatEUR(r.totalExpenses)}</td>
+                                <td>${Utils.formatEUR(r.totalKDV)}</td>
+                                <td class="${pClass}">${Utils.formatEUR(r.lagirioProfit)}</td>
+                            </tr>`;
+                        }).join('')}
+                        <tr style="background:var(--beige-50);font-weight:700">
+                            <td>TOPLAM</td>
+                            <td>${totalRes}</td>
+                            <td>${totalNights}</td>
+                            <td>${Utils.formatEUR(totalIncome)}</td>
+                            <td>${Utils.formatEUR(result ? result.totalPlatformComm : 0)}</td>
+                            <td>${Utils.formatEUR(totalExpenses)}</td>
+                            <td>${Utils.formatEUR(result ? result.totalKDV : 0)}</td>
+                            <td class="${totalProfit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(totalProfit)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rezervasyon Listesi -->
+            <div class="data-table-container">
+                <div class="table-header">
+                    <span class="table-title">Rezervasyonlar - ${year}</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Misafir</th>
+                            <th>Giris</th>
+                            <th>Cikis</th>
+                            <th>Gece</th>
+                            <th>Platform</th>
+                            <th>Tutar</th>
+                            <th>Platform Kom.</th>
+                            <th>Odeme</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${this.getReservationRows(aptId, year)}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        // Grafik ciz
+        this.renderChart(monthly);
+    },
+
+    getReservationRows(aptId, year) {
+        const reservations = FinanceEngine.filterByPeriod(
+            appData.reservations.filter(r => r.apartmentId === aptId),
+            'checkIn', year, ''
+        ).sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+
+        if (reservations.length === 0) return '<tr><td colspan="8" style="text-align:center;color:var(--text-light)">Rezervasyon yok</td></tr>';
+
+        return reservations.map(r => {
+            const nights = Utils.calculateNights(r.checkIn, r.checkOut);
+            return `<tr>
+                <td>${r.guestName || '-'}</td>
+                <td>${r.checkIn}</td>
+                <td>${r.checkOut}</td>
+                <td>${nights}</td>
+                <td>${r.platform || '-'}</td>
+                <td>${Utils.formatEUR(Utils.convertToEUR(r.totalAmount, r.currency || 'EUR'))}</td>
+                <td>${Utils.formatEUR(r.platformCommission || 0)}</td>
+                <td>${r.paymentMethod || '-'}</td>
+            </tr>`;
+        }).join('');
+    },
+
+    renderChart(monthly) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('aptDetailChart');
+        if (!ctx) return;
+
+        this.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthly.map(m => m.monthName),
+                datasets: [
+                    {
+                        label: 'Gelir',
+                        data: monthly.map(m => m.totalIncome),
+                        backgroundColor: 'rgba(31,122,95,0.7)',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Gider',
+                        data: monthly.map(m => m.totalExpenses),
+                        backgroundColor: 'rgba(239,68,68,0.5)',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Lagirio Kazanc',
+                        data: monthly.map(m => m.totalProfit),
+                        type: 'line',
+                        borderColor: '#ff9c00',
+                        backgroundColor: 'rgba(255,156,0,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff9c00'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+};
+
+// ============================================================
+// 14. MONTHLY REPORT - Aylik Rapor
+// ============================================================
+const MonthlyReport = {
+    chart: null,
+
+    load() {
+        if (!appData.loaded) return;
+        const year = parseInt(document.getElementById('monthlyYear').value);
+        const container = document.getElementById('monthlyContent');
+        const monthly = FinanceEngine.calculateMonthly(year, null);
+
+        // Yillik toplamlar
+        const yearTotals = {
+            income: monthly.reduce((s, m) => s + m.totalIncome, 0),
+            expenses: monthly.reduce((s, m) => s + m.totalExpenses, 0),
+            profit: monthly.reduce((s, m) => s + m.totalProfit, 0),
+            reservations: monthly.reduce((s, m) => s + m.totalReservations, 0),
+            nights: monthly.reduce((s, m) => s + m.totalNights, 0)
+        };
+
+        // En iyi / en kotu ay
+        const activeMonths = monthly.filter(m => m.totalProfit !== 0);
+        const bestMonth = activeMonths.length > 0
+            ? activeMonths.reduce((best, m) => m.totalProfit > best.totalProfit ? m : best)
+            : null;
+        const worstMonth = activeMonths.length > 0
+            ? activeMonths.reduce((worst, m) => m.totalProfit < worst.totalProfit ? m : worst)
+            : null;
+
+        container.innerHTML = `
+            <!-- Yillik Ozet -->
+            <div class="metrics-grid">
+                <div class="metric-card highlight">
+                    <div class="metric-label">${year} Toplam Kazanc</div>
+                    <div class="metric-value">${Utils.formatEUR(yearTotals.profit)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gelir</div>
+                    <div class="metric-value">${Utils.formatEUR(yearTotals.income)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Gider</div>
+                    <div class="metric-value">${Utils.formatEUR(yearTotals.expenses)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Toplam Rez.</div>
+                    <div class="metric-value">${yearTotals.reservations}</div>
+                    <div class="metric-sub">${yearTotals.nights} gece</div>
+                </div>
+                <div class="metric-card${bestMonth ? '' : ' '}">
+                    <div class="metric-label">En Iyi Ay</div>
+                    <div class="metric-value">${bestMonth ? bestMonth.monthName : '-'}</div>
+                    <div class="metric-sub up">${bestMonth ? Utils.formatEUR(bestMonth.totalProfit) : ''}</div>
+                </div>
+                <div class="metric-card${worstMonth && worstMonth.totalProfit < 0 ? ' danger' : ''}">
+                    <div class="metric-label">En Dusuk Ay</div>
+                    <div class="metric-value">${worstMonth ? worstMonth.monthName : '-'}</div>
+                    <div class="metric-sub down">${worstMonth ? Utils.formatEUR(worstMonth.totalProfit) : ''}</div>
+                </div>
+            </div>
+
+            <!-- Grafik -->
+            <div class="charts-grid">
+                <div class="chart-card full-width">
+                    <div class="chart-header">
+                        <span class="chart-title">${year} - Aylik Gelir / Gider / Kazanc</span>
+                    </div>
+                    <div class="chart-body" style="height:350px">
+                        <canvas id="monthlyReportChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aylik Tablo -->
+            <div class="data-table-container">
+                <div class="table-header">
+                    <span class="table-title">${year} - Ay Bazinda Detay</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ay</th>
+                            <th>Aktif Daire</th>
+                            <th>Rez.</th>
+                            <th>Gece</th>
+                            <th>Toplam Gelir</th>
+                            <th>Toplam Gider</th>
+                            <th>Lagirio Kazanc</th>
+                            <th>Kar Marji</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${monthly.map(m => {
+                            const margin = m.totalIncome > 0 ? (m.totalProfit / m.totalIncome * 100) : 0;
+                            const pClass = m.totalProfit >= 0 ? 'positive' : 'negative';
+                            return `<tr${m.totalProfit < 0 ? ' style="background:#fff5f5"' : ''}>
+                                <td><strong>${m.monthName}</strong></td>
+                                <td>${m.results.length}</td>
+                                <td>${m.totalReservations}</td>
+                                <td>${m.totalNights}</td>
+                                <td>${Utils.formatEUR(m.totalIncome)}</td>
+                                <td>${Utils.formatEUR(m.totalExpenses)}</td>
+                                <td class="${pClass}">${Utils.formatEUR(m.totalProfit)}</td>
+                                <td>${Utils.formatPercent(margin)}</td>
+                            </tr>`;
+                        }).join('')}
+                        <tr style="background:var(--beige-50);font-weight:700">
+                            <td>TOPLAM</td>
+                            <td>-</td>
+                            <td>${yearTotals.reservations}</td>
+                            <td>${yearTotals.nights}</td>
+                            <td>${Utils.formatEUR(yearTotals.income)}</td>
+                            <td>${Utils.formatEUR(yearTotals.expenses)}</td>
+                            <td class="${yearTotals.profit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(yearTotals.profit)}</td>
+                            <td>${yearTotals.income > 0 ? Utils.formatPercent(yearTotals.profit / yearTotals.income * 100) : '0%'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        this.renderChart(monthly);
+    },
+
+    renderChart(monthly) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('monthlyReportChart');
+        if (!ctx) return;
+
+        this.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthly.map(m => m.monthName),
+                datasets: [
+                    {
+                        label: 'Gelir',
+                        data: monthly.map(m => m.totalIncome),
+                        backgroundColor: 'rgba(31,122,95,0.7)',
+                        borderRadius: 4,
+                        order: 2
+                    },
+                    {
+                        label: 'Gider',
+                        data: monthly.map(m => m.totalExpenses),
+                        backgroundColor: 'rgba(239,68,68,0.5)',
+                        borderRadius: 4,
+                        order: 3
+                    },
+                    {
+                        label: 'Lagirio Kazanc',
+                        data: monthly.map(m => m.totalProfit),
+                        type: 'line',
+                        borderColor: '#ff9c00',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff9c00',
+                        fill: false,
+                        tension: 0.4,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+};
+
+// ============================================================
+// 15. FORECAST - Tahmin Modulu
+// ============================================================
+const Forecast = {
+    chart: null,
+
+    generate() {
+        if (!appData.loaded) return;
+        const container = document.getElementById('forecastContent');
+        const model = document.getElementById('forecastModel').value;
+
+        // Son yilin verilerini al
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort((a, b) => b - a);
+        const latestYear = years[0] || new Date().getFullYear();
+        const monthly = FinanceEngine.calculateMonthly(latestYear, null);
+
+        // Gecmis verileri olan aylari bul
+        const activeMonths = monthly.filter(m => m.totalProfit !== 0);
+
+        if (activeMonths.length < 2) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-state-icon">&#128202;</div>
+                <h3>Yetersiz Veri</h3>
+                <p>Tahmin icin en az 2 aylik veri gerekli</p>
+            </div>`;
+            return;
+        }
+
+        // Tahmin hesapla
+        const forecasts = this.calculateForecast(monthly, model);
+        const maxProfit = Math.max(...forecasts.map(f => f.value), ...activeMonths.map(m => m.totalProfit));
+
+        container.innerHTML = `
+            <!-- Tahmin Grafigi -->
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card full-width">
+                    <div class="chart-header">
+                        <span class="chart-title">Kazanc Tahmini - ${model === 'avg3' ? 'Son 3 Ay Ort.' : model === 'avg6' ? 'Son 6 Ay Ort.' : 'Trend Bazli'}</span>
+                    </div>
+                    <div class="chart-body" style="height:350px">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tahmin Kartlari -->
+            <div class="forecast-grid">
+                ${forecasts.map(f => `
+                    <div class="forecast-card">
+                        <div class="forecast-month">${f.monthName}</div>
+                        <div class="forecast-value" style="color:${f.value >= 0 ? 'var(--green-900)' : 'var(--error)'}">
+                            ${Utils.formatEUR(f.value)}
+                        </div>
+                        <div style="font-size:11px;color:var(--text-light);margin-top:4px">${f.label}</div>
+                        <div class="forecast-bar">
+                            <div class="forecast-bar-fill" style="width:${maxProfit > 0 ? Math.max(0, f.value / maxProfit * 100) : 0}%"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <!-- Ozet -->
+            <div class="chart-card" style="margin-top:20px">
+                <div class="chart-header">
+                    <span class="chart-title">Tahmin Ozeti</span>
+                </div>
+                <div class="metrics-grid" style="margin-top:16px">
+                    <div class="metric-card">
+                        <div class="metric-label">Tahmini 3 Ay</div>
+                        <div class="metric-value">${Utils.formatEUR(forecasts.slice(0, 3).reduce((s, f) => s + f.value, 0))}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Tahmini 6 Ay</div>
+                        <div class="metric-value">${Utils.formatEUR(forecasts.slice(0, 6).reduce((s, f) => s + f.value, 0))}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Aylik Ortalama</div>
+                        <div class="metric-value">${Utils.formatEUR(forecasts.reduce((s, f) => s + f.value, 0) / forecasts.length)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.renderChart(monthly, forecasts, latestYear);
+    },
+
+    calculateForecast(monthly, model) {
+        const actuals = monthly.filter(m => m.totalProfit !== 0).map(m => m.totalProfit);
+        const lastActiveIdx = monthly.reduce((last, m, i) => m.totalProfit !== 0 ? i : last, -1);
+        const forecasts = [];
+
+        for (let i = 0; i < 6; i++) {
+            const targetMonth = (lastActiveIdx + 1 + i) % 12;
+            let value = 0;
+            let label = '';
+
+            switch(model) {
+                case 'avg3': {
+                    const recent = actuals.slice(-3);
+                    value = recent.reduce((s, v) => s + v, 0) / recent.length;
+                    label = 'Son 3 ay ortalamasindan';
+                    break;
+                }
+                case 'avg6': {
+                    const recent = actuals.slice(-6);
+                    value = recent.reduce((s, v) => s + v, 0) / recent.length;
+                    label = 'Son 6 ay ortalamasindan';
+                    break;
+                }
+                case 'trend': {
+                    if (actuals.length >= 2) {
+                        const n = actuals.length;
+                        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                        for (let j = 0; j < n; j++) {
+                            sumX += j; sumY += actuals[j];
+                            sumXY += j * actuals[j]; sumX2 += j * j;
+                        }
+                        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                        const intercept = (sumY - slope * sumX) / n;
+                        value = intercept + slope * (n + i);
+                        label = `Trend: ${slope >= 0 ? '+' : ''}${Utils.formatEUR(slope)}/ay`;
+                    }
+                    break;
+                }
+            }
+
+            forecasts.push({
+                month: targetMonth,
+                monthName: Utils.getMonthName(targetMonth),
+                value: value,
+                label: label
+            });
+        }
+        return forecasts;
+    },
+
+    renderChart(monthly, forecasts, year) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('forecastChart');
+        if (!ctx) return;
+
+        const allLabels = monthly.map(m => m.monthName).concat(forecasts.map(f => f.monthName + '*'));
+        const actualData = monthly.map(m => m.totalProfit || null);
+        const forecastData = new Array(12).fill(null);
+
+        // Son gercek degerden baslat
+        const lastActive = monthly.reduce((last, m, i) => m.totalProfit !== 0 ? i : last, -1);
+        if (lastActive >= 0) forecastData[lastActive] = monthly[lastActive].totalProfit;
+        forecasts.forEach((f, i) => forecastData.push(f.value));
+
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: allLabels,
+                datasets: [
+                    {
+                        label: `${year} Gercek`,
+                        data: actualData.concat(new Array(forecasts.length).fill(null)),
+                        borderColor: '#1f7a5f',
+                        backgroundColor: 'rgba(31,122,95,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#1f7a5f'
+                    },
+                    {
+                        label: 'Tahmin',
+                        data: forecastData,
+                        borderColor: '#ff9c00',
+                        borderDash: [8, 4],
+                        backgroundColor: 'rgba(255,156,0,0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff9c00',
+                        pointStyle: 'triangle'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: {
+                        callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } },
+                        grid: { color: 'rgba(0,0,0,0.04)' }
+                    },
+                    x: { ticks: { font: { family: 'Inter', size: 10 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+};
+
+// ============================================================
+// 16. COMPARISON - Karsilastirma Modulu
+// ============================================================
+const Comparison = {
+    chart: null,
+
+    load() {
+        if (!appData.loaded) return;
+        const type = document.getElementById('compareType').value;
+        const container = document.getElementById('comparisonContent');
+
+        switch(type) {
+            case 'yoy': this.yearOverYear(container); break;
+            case 'apartments': this.apartmentComparison(container); break;
+            case 'systems': this.systemComparison(container); break;
+        }
+    },
+
+    // Yillik karsilastirma
+    yearOverYear(container) {
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort();
+        if (years.length < 2) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-state-icon">&#128197;</div>
+                <h3>Yetersiz Veri</h3>
+                <p>Yillik karsilastirma icin en az 2 yilin verisi gerekli</p>
+            </div>`;
+            return;
+        }
+
+        const yearlyData = years.map(y => {
+            const data = FinanceEngine.calculateAll(y, '', null);
+            return {
+                year: y,
+                profit: data.totalProfit,
+                income: data.results.reduce((s, r) => s + r.totalIncome, 0),
+                expenses: data.results.reduce((s, r) => s + r.totalExpenses, 0),
+                reservations: data.results.reduce((s, r) => s + r.reservationCount, 0),
+                nights: data.results.reduce((s, r) => s + r.totalNights, 0),
+                apartments: data.results.length
+            };
+        });
+
+        container.innerHTML = `
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card full-width">
+                    <div class="chart-header"><span class="chart-title">Yillik Karsilastirma</span></div>
+                    <div class="chart-body" style="height:350px"><canvas id="comparisonChart"></canvas></div>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <div class="table-header"><span class="table-title">Yillik Detay</span></div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Yil</th><th>Aktif Daire</th><th>Rez.</th><th>Gece</th><th>Gelir</th><th>Gider</th><th>Kazanc</th><th>Degisim</th></tr>
+                    </thead>
+                    <tbody>
+                        ${yearlyData.map((d, i) => {
+                            const prev = i > 0 ? yearlyData[i - 1] : null;
+                            const change = prev ? Utils.getChangeIndicator(d.profit, prev.profit) : { class: '', text: '-' };
+                            return `<tr>
+                                <td><strong>${d.year}</strong></td>
+                                <td>${d.apartments}</td>
+                                <td>${d.reservations}</td>
+                                <td>${d.nights}</td>
+                                <td>${Utils.formatEUR(d.income)}</td>
+                                <td>${Utils.formatEUR(d.expenses)}</td>
+                                <td class="${d.profit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(d.profit)}</td>
+                                <td class="${change.class}">${change.text}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        this.renderYoYChart(yearlyData);
+    },
+
+    renderYoYChart(yearlyData) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('comparisonChart');
+        if (!ctx) return;
+
+        this.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: yearlyData.map(d => d.year.toString()),
+                datasets: [
+                    { label: 'Gelir', data: yearlyData.map(d => d.income), backgroundColor: 'rgba(31,122,95,0.7)', borderRadius: 4 },
+                    { label: 'Gider', data: yearlyData.map(d => d.expenses), backgroundColor: 'rgba(239,68,68,0.5)', borderRadius: 4 },
+                    { label: 'Kazanc', data: yearlyData.map(d => d.profit), backgroundColor: 'rgba(255,156,0,0.8)', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } },
+                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` } }
+                },
+                scales: {
+                    y: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                    x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } }
+                }
+            }
+        });
+    },
+
+    // Daireler arasi karsilastirma
+    apartmentComparison(container) {
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort((a, b) => b - a);
+        const year = years[0] || new Date().getFullYear();
+        const data = FinanceEngine.calculateAll(year, '', null);
+
+        if (data.results.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">&#127968;</div><h3>Veri Yok</h3></div>`;
+            return;
+        }
+
+        const sorted = [...data.results].sort((a, b) => b.lagirioProfit - a.lagirioProfit);
+        const top5 = sorted.slice(0, 5);
+        const bottom5 = sorted.slice(-5).reverse();
+
+        container.innerHTML = `
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card">
+                    <div class="chart-header"><span class="chart-title">En Cok Kazandiran 5 Daire</span></div>
+                    <div class="chart-body"><canvas id="compTopChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><span class="chart-title">En Az Kazandiran 5 Daire</span></div>
+                    <div class="chart-body"><canvas id="compBottomChart"></canvas></div>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <div class="table-header"><span class="table-title">Tum Daireler - ${year} (Kazanca gore sirali)</span></div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Sira</th><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Gider</th><th>Kazanc</th><th>Ort. Gecelik</th></tr>
+                    </thead>
+                    <tbody>
+                        ${sorted.map((r, i) => {
+                            const sys = CONFIG.SYSTEMS[r.apartment.systemType];
+                            return `<tr${r.lagirioProfit < 0 ? ' style="background:#fff5f5"' : ''}>
+                                <td>${i + 1}</td>
+                                <td><strong>${r.apartment.code}</strong></td>
+                                <td><span class="system-badge s${r.apartment.systemType}">${sys ? sys.short : ''}</span></td>
+                                <td>${r.reservationCount}</td>
+                                <td>${Utils.formatEUR(r.totalIncome)}</td>
+                                <td>${Utils.formatEUR(r.totalExpenses)}</td>
+                                <td class="${r.lagirioProfit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(r.lagirioProfit)}</td>
+                                <td>${Utils.formatEUR(r.avgNightlyRate)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        this.renderCompBars(top5, bottom5);
+    },
+
+    renderCompBars(top5, bottom5) {
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+
+        const ctx1 = document.getElementById('compTopChart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: top5.map(r => r.apartment.code),
+                    datasets: [{ data: top5.map(r => r.lagirioProfit), backgroundColor: '#1f7a5f', borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => Utils.formatEUR(c.parsed.x) } } }, scales: { x: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v }, grid: { color: 'rgba(0,0,0,0.04)' } }, y: { ticks: { font: { family: 'Inter', size: 12, weight: 600 } } } } }
+            });
+        }
+
+        const ctx2 = document.getElementById('compBottomChart');
+        if (ctx2) {
+            this.chart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: bottom5.map(r => r.apartment.code),
+                    datasets: [{ data: bottom5.map(r => r.lagirioProfit), backgroundColor: bottom5.map(r => r.lagirioProfit < 0 ? '#ef4444' : '#f59e0b'), borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => Utils.formatEUR(c.parsed.x) } } }, scales: { x: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v }, grid: { color: 'rgba(0,0,0,0.04)' } }, y: { ticks: { font: { family: 'Inter', size: 12, weight: 600 } } } } }
+            });
+        }
+    },
+
+    // Sistem bazli karsilastirma
+    systemComparison(container) {
+        const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort((a, b) => b - a);
+        const year = years[0] || new Date().getFullYear();
+        const data = FinanceEngine.calculateAll(year, '', null);
+
+        const systems = {};
+        data.results.forEach(r => {
+            const sys = r.apartment.systemType;
+            if (!systems[sys]) systems[sys] = { profit: 0, income: 0, expenses: 0, count: 0, reservations: 0 };
+            systems[sys].profit += r.lagirioProfit;
+            systems[sys].income += r.totalIncome;
+            systems[sys].expenses += r.totalExpenses;
+            systems[sys].count++;
+            systems[sys].reservations += r.reservationCount;
+        });
+
+        const sysKeys = Object.keys(systems).sort();
+
+        container.innerHTML = `
+            <div class="charts-grid" style="margin-bottom:24px">
+                <div class="chart-card full-width">
+                    <div class="chart-header"><span class="chart-title">Sistem Bazli Kazanc Karsilastirmasi - ${year}</span></div>
+                    <div class="chart-body" style="height:350px"><canvas id="comparisonChart"></canvas></div>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <div class="table-header"><span class="table-title">Sistem Detay</span></div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Sistem</th><th>Daire Sayisi</th><th>Rez.</th><th>Toplam Gelir</th><th>Toplam Gider</th><th>Toplam Kazanc</th><th>Daire Basi Ort.</th></tr>
+                    </thead>
+                    <tbody>
+                        ${sysKeys.map(sys => {
+                            const s = systems[sys];
+                            const cfg = CONFIG.SYSTEMS[sys];
+                            const avg = s.count > 0 ? s.profit / s.count : 0;
+                            return `<tr>
+                                <td><span class="system-badge s${sys}">${cfg ? cfg.name : 'Sistem ' + sys}</span></td>
+                                <td>${s.count}</td>
+                                <td>${s.reservations}</td>
+                                <td>${Utils.formatEUR(s.income)}</td>
+                                <td>${Utils.formatEUR(s.expenses)}</td>
+                                <td class="${s.profit >= 0 ? 'positive' : 'negative'}">${Utils.formatEUR(s.profit)}</td>
+                                <td>${Utils.formatEUR(avg)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        if (this.chart) { this.chart.destroy(); this.chart = null; }
+        const ctx = document.getElementById('comparisonChart');
+        if (ctx) {
+            this.chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sysKeys.map(s => CONFIG.SYSTEMS[s] ? CONFIG.SYSTEMS[s].short : 'S' + s),
+                    datasets: [
+                        { label: 'Gelir', data: sysKeys.map(s => systems[s].income), backgroundColor: 'rgba(31,122,95,0.7)', borderRadius: 4 },
+                        { label: 'Kazanc', data: sysKeys.map(s => systems[s].profit), backgroundColor: sysKeys.map(s => CONFIG.SYSTEMS[s] ? CONFIG.SYSTEMS[s].color : '#999'), borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 12 } } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${Utils.formatEUR(c.parsed.y)}` } } },
+                    scales: { y: { ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v.toFixed(0), font: { family: 'Inter', size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { ticks: { font: { family: 'Inter', size: 11 } }, grid: { display: false } } }
+                }
+            });
+        }
+    }
+};
+
+// ============================================================
+// 17. EXPORT MANAGER - PDF / CSV Disa Aktarma
+// ============================================================
+const ExportManager = {
+    exportCSV() {
+        if (!appData.loaded) { Toast.error('Once veri yukleyin'); return; }
+
+        const year = parseInt(document.getElementById('filterYear').value);
+        const month = document.getElementById('filterMonth').value;
+        const data = FinanceEngine.calculateAll(year, month, null);
+
+        if (data.results.length === 0) { Toast.error('Disa aktarilacak veri yok'); return; }
+
+        // CSV baslik
+        let csv = 'Daire,Sistem,Rezervasyon,Toplam Gelir (EUR),Banka Gelir (EUR),Nakit Gelir (EUR),Platform Kom. (EUR),Giderler (EUR),KDV (EUR),Banka Kom. (EUR),Nakit Kom. (EUR),Lagirio Kazanc (EUR)\n';
+
+        data.results.forEach(r => {
+            const sys = CONFIG.SYSTEMS[r.apartment.systemType];
+            csv += `"${r.apartment.code}","${sys ? sys.name : 'Sistem ' + r.apartment.systemType}",${r.reservationCount},${r.totalIncome.toFixed(2)},${r.bankIncome.toFixed(2)},${r.cashIncome.toFixed(2)},${r.totalPlatformComm.toFixed(2)},${r.totalExpenses.toFixed(2)},${r.totalKDV.toFixed(2)},${r.bankLagirioComm.toFixed(2)},${r.cashLagirioComm.toFixed(2)},${r.lagirioProfit.toFixed(2)}\n`;
+        });
+
+        // Toplam satiri
+        const t = data.results.reduce((a, r) => ({
+            res: a.res + r.reservationCount, income: a.income + r.totalIncome,
+            bank: a.bank + r.bankIncome, cash: a.cash + r.cashIncome,
+            platform: a.platform + r.totalPlatformComm, exp: a.exp + r.totalExpenses,
+            kdv: a.kdv + r.totalKDV, bankC: a.bankC + r.bankLagirioComm,
+            cashC: a.cashC + r.cashLagirioComm, profit: a.profit + r.lagirioProfit
+        }), { res: 0, income: 0, bank: 0, cash: 0, platform: 0, exp: 0, kdv: 0, bankC: 0, cashC: 0, profit: 0 });
+
+        csv += `"TOPLAM","${data.results.length} daire",${t.res},${t.income.toFixed(2)},${t.bank.toFixed(2)},${t.cash.toFixed(2)},${t.platform.toFixed(2)},${t.exp.toFixed(2)},${t.kdv.toFixed(2)},${t.bankC.toFixed(2)},${t.cashC.toFixed(2)},${t.profit.toFixed(2)}\n`;
+
+        // BOM ekle (Excel Turkce karakter icin)
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const monthName = month !== '' ? '-' + Utils.getMonthName(parseInt(month)) : '';
+        a.download = `lagirio-analiz-${year}${monthName}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        Toast.success('CSV dosyasi indirildi');
+    },
+
+    exportPDF() {
+        if (!appData.loaded) { Toast.error('Once veri yukleyin'); return; }
+
+        // Basit HTML -> print PDF
+        const year = parseInt(document.getElementById('filterYear').value);
+        const month = document.getElementById('filterMonth').value;
+        const data = FinanceEngine.calculateAll(year, month, null);
+
+        if (data.results.length === 0) { Toast.error('Disa aktarilacak veri yok'); return; }
+
+        const monthName = month !== '' ? ' - ' + Utils.getMonthName(parseInt(month)) : '';
+        const t = data.results.reduce((a, r) => ({
+            res: a.res + r.reservationCount, income: a.income + r.totalIncome,
+            platform: a.platform + r.totalPlatformComm, exp: a.exp + r.totalExpenses,
+            kdv: a.kdv + r.totalKDV, profit: a.profit + r.lagirioProfit
+        }), { res: 0, income: 0, platform: 0, exp: 0, kdv: 0, profit: 0 });
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`<!DOCTYPE html><html><head><title>Lagirio Analiz - ${year}${monthName}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 30px; color: #1a1a1a; }
+                h1 { color: #0d3028; font-size: 22px; margin-bottom: 4px; }
+                h2 { color: #1f7a5f; font-size: 16px; margin: 20px 0 10px; }
+                .subtitle { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                th { background: #f4faf8; padding: 8px 10px; text-align: left; border-bottom: 2px solid #0d3028; font-size: 11px; }
+                td { padding: 7px 10px; border-bottom: 1px solid #eee; }
+                tr:last-child { font-weight: bold; background: #f4faf8; }
+                .pos { color: #10b981; } .neg { color: #ef4444; }
+                .summary { display: flex; gap: 30px; margin: 20px 0; }
+                .summary-item { text-align: center; }
+                .summary-label { font-size: 11px; color: #6b7280; }
+                .summary-value { font-size: 20px; font-weight: bold; color: #0d3028; }
+            </style></head><body>
+            <h1>Lagirio Analiz Raporu</h1>
+            <p class="subtitle">${year}${monthName} | ${data.results.length} daire | ${new Date().toLocaleDateString('tr-TR')}</p>
+            <div class="summary">
+                <div class="summary-item"><div class="summary-label">Toplam Kazanc</div><div class="summary-value">${Utils.formatEUR(t.profit)}</div></div>
+                <div class="summary-item"><div class="summary-label">Toplam Gelir</div><div class="summary-value">${Utils.formatEUR(t.income)}</div></div>
+                <div class="summary-item"><div class="summary-label">Toplam Gider</div><div class="summary-value">${Utils.formatEUR(t.exp)}</div></div>
+                <div class="summary-item"><div class="summary-label">Rezervasyon</div><div class="summary-value">${t.res}</div></div>
+            </div>
+            <h2>Daire Bazinda Detay</h2>
+            <table>
+                <thead><tr><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Platform Kom.</th><th>Gider</th><th>KDV</th><th>Kazanc</th></tr></thead>
+                <tbody>
+                    ${data.results.map(r => {
+                        const sys = CONFIG.SYSTEMS[r.apartment.systemType];
+                        return `<tr>
+                            <td>${r.apartment.code}</td>
+                            <td>${sys ? sys.short : ''}</td>
+                            <td>${r.reservationCount}</td>
+                            <td>${Utils.formatEUR(r.totalIncome)}</td>
+                            <td>${Utils.formatEUR(r.totalPlatformComm)}</td>
+                            <td>${Utils.formatEUR(r.totalExpenses)}</td>
+                            <td>${Utils.formatEUR(r.totalKDV)}</td>
+                            <td class="${r.lagirioProfit >= 0 ? 'pos' : 'neg'}">${Utils.formatEUR(r.lagirioProfit)}</td>
+                        </tr>`;
+                    }).join('')}
+                    <tr>
+                        <td>TOPLAM</td><td>${data.results.length} daire</td><td>${t.res}</td>
+                        <td>${Utils.formatEUR(t.income)}</td><td>${Utils.formatEUR(t.platform)}</td>
+                        <td>${Utils.formatEUR(t.exp)}</td><td>${Utils.formatEUR(t.kdv)}</td>
+                        <td class="${t.profit >= 0 ? 'pos' : 'neg'}">${Utils.formatEUR(t.profit)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <script>window.onload = () => { window.print(); }</script>
+        </body></html>`);
+        printWindow.document.close();
+        Toast.success('PDF yazdir penceresi acildi');
+    }
+};
+
+// ============================================================
+// APP INIT
+// ============================================================
+(function init() {
+    // Onceki oturumu kontrol et
+    const hasSession = Auth.checkSession();
+    // Kayitli veriyi yukle
+    DataSync.loadFromStorage();
+
+    if (hasSession && appData.loaded) {
+        Dashboard.init();
+    } else if (hasSession) {
+        DataSync.updateSyncStatus(false);
+    }
+})();
+
+</script>
+
+</body>
+</html>
