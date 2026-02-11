@@ -1014,8 +1014,380 @@
 // LAGIRIO ANALIZ DASHBOARD - JavaScript
 // ============================================================
 
-// Placeholder - modules will be added step by step
-console.log('Lagirio Analiz Dashboard - HTML/CSS loaded');
+// ============================================================
+// 1. CONFIG - Sabitler ve Sistem Tanimlari
+// ============================================================
+const CONFIG = {
+    SYSTEMS: {
+        '1': { name: 'Kira', short: 'Kira', color: '#3b82f6' },
+        '2': { name: 'Kisi Sirketi', short: 'Kisi Sirk.', color: '#ec4899' },
+        '3': { name: 'Komisyon (Standart)', short: 'Komisyon', color: '#10b981' },
+        '4': { name: 'Komisyon (Ozel)', short: 'Kom. Ozel', color: '#f59e0b' },
+        '5': { name: 'Stopajli', short: 'Stopaj', color: '#6366f1' },
+        '6': { name: 'Platform Ayrimli', short: 'Plt. Ayr.', color: '#a855f7' },
+        '7': { name: 'Karma Platform', short: 'Karma', color: '#14b8a6' },
+        '8': { name: 'Kisi Sirketi (Kar)', short: 'Sirk. Kar', color: '#ef4444' },
+        '9': { name: 'Stopajli (KDV)', short: 'Stp. KDV', color: '#8b5cf6' }
+    },
+    MONTHS: ['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'],
+    CHART_COLORS: ['#0d3028','#1f7a5f','#2a9574','#34b088','#ff9c00','#ffaa26','#3b82f6','#6366f1','#ec4899','#ef4444','#14b8a6','#a855f7'],
+    EXCHANGE_RATES: { USD_EUR: 0.92, TL_EUR: 37.5 },
+    AUTH: {
+        users: [
+            { username: 'admin', password: 'lagirio2025', role: 'admin' },
+            { username: 'viewer', password: 'view2025', role: 'viewer' }
+        ]
+    }
+};
+
+// ============================================================
+// 2. TOAST - Bildirim Sistemi
+// ============================================================
+const Toast = {
+    show(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icons = { success: '\u2713', error: '\u2717', info: '\u24D8' };
+        toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(40px)';
+            toast.style.transition = '0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    },
+    success(msg) { this.show(msg, 'success'); },
+    error(msg) { this.show(msg, 'error'); },
+    info(msg) { this.show(msg, 'info'); }
+};
+
+// ============================================================
+// 3. AUTH - Giris / Cikis Yonetimi
+// ============================================================
+const Auth = {
+    currentUser: null,
+
+    login() {
+        const username = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value;
+        const errorEl = document.getElementById('loginError');
+
+        if (!username || !password) {
+            errorEl.textContent = 'Kullanici adi ve sifre gerekli';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        const user = CONFIG.AUTH.users.find(u => u.username === username && u.password === password);
+        if (!user) {
+            errorEl.textContent = 'Kullanici adi veya sifre hatali';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        this.currentUser = user;
+        localStorage.setItem('lagirioAnaliz_auth', JSON.stringify({ username: user.username, role: user.role }));
+
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').classList.add('active');
+        errorEl.style.display = 'none';
+
+        Toast.success(`Hosgeldiniz, ${user.username}!`);
+        Dashboard.init();
+    },
+
+    logout() {
+        this.currentUser = null;
+        localStorage.removeItem('lagirioAnaliz_auth');
+        document.getElementById('loginScreen').style.display = '';
+        document.getElementById('appContainer').classList.remove('active');
+        Toast.info('Cikis yapildi');
+    },
+
+    checkSession() {
+        const saved = localStorage.getItem('lagirioAnaliz_auth');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                const user = CONFIG.AUTH.users.find(u => u.username === parsed.username);
+                if (user) {
+                    this.currentUser = user;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appContainer').classList.add('active');
+                    return true;
+                }
+            } catch(e) {}
+        }
+        return false;
+    }
+};
+
+// ============================================================
+// 4. UTILS - Yardimci Fonksiyonlar
+// ============================================================
+const Utils = {
+    convertToEUR(amount, currency) {
+        if (!amount) return 0;
+        switch(currency) {
+            case 'USD': return amount * CONFIG.EXCHANGE_RATES.USD_EUR;
+            case 'TL':
+            case 'TRY': return amount / CONFIG.EXCHANGE_RATES.TL_EUR;
+            case 'EUR':
+            default: return amount;
+        }
+    },
+
+    formatEUR(val) {
+        if (val === null || val === undefined || isNaN(val)) return '0.00 EUR';
+        return val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' EUR';
+    },
+
+    formatNumber(val) {
+        if (val === null || val === undefined || isNaN(val)) return '0';
+        return val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+
+    formatPercent(val) {
+        if (!val || isNaN(val)) return '0%';
+        return val.toFixed(1) + '%';
+    },
+
+    getMonthName(idx) {
+        return CONFIG.MONTHS[idx] || '';
+    },
+
+    calculateNights(checkIn, checkOut) {
+        const d1 = new Date(checkIn);
+        const d2 = new Date(checkOut);
+        return Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
+    },
+
+    getChangeIndicator(current, previous) {
+        if (!previous || previous === 0) return { class: '', text: '' };
+        const pct = ((current - previous) / Math.abs(previous)) * 100;
+        if (pct > 0) return { class: 'up', text: `+${pct.toFixed(1)}%` };
+        if (pct < 0) return { class: 'down', text: `${pct.toFixed(1)}%` };
+        return { class: '', text: '0%' };
+    }
+};
+
+// ============================================================
+// 5. DATA STORE - Veri Deposu
+// ============================================================
+let appData = {
+    apartments: [],
+    reservations: [],
+    expenses: [],
+    categories: [],
+    capitalExpenses: [],
+    lagirioExpenses: [],
+    loaded: false,
+    lastSync: null
+};
+
+// ============================================================
+// 6. DATA SYNC - Veri Yukleme / Import
+// ============================================================
+const DataSync = {
+    importFile() {
+        document.getElementById('fileInput').click();
+    },
+
+    handleFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Loading.show('Veri dosyasi yukleniyor...');
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const parsed = JSON.parse(e.target.result);
+
+                // daire-uygulamasi formatini tani
+                if (parsed.apartments || parsed.reservations) {
+                    appData.apartments = parsed.apartments || [];
+                    appData.reservations = parsed.reservations || [];
+                    appData.expenses = parsed.expenses || [];
+                    appData.categories = parsed.categories || [];
+                    appData.capitalExpenses = parsed.capitalExpenses || [];
+                    appData.lagirioExpenses = parsed.lagirioExpenses || [];
+                    appData.loaded = true;
+                    appData.lastSync = new Date().toISOString();
+
+                    // localStorage'a kaydet
+                    localStorage.setItem('lagirioAnaliz_data', JSON.stringify(appData));
+
+                    this.updateSyncStatus(true);
+                    Toast.success(`Veri yuklendi: ${appData.apartments.length} daire, ${appData.reservations.length} rezervasyon`);
+
+                    // Filtreleri ve dashboard'u guncelle
+                    Dashboard.populateFilters();
+                    Dashboard.refresh();
+                } else {
+                    Toast.error('Gecersiz veri formati. daire-uygulamasi export dosyasi bekleniyor.');
+                }
+            } catch(err) {
+                console.error('Import error:', err);
+                Toast.error('Dosya okunamadi: ' + err.message);
+            }
+            Loading.hide();
+        };
+
+        reader.onerror = () => {
+            Toast.error('Dosya okuma hatasi');
+            Loading.hide();
+        };
+
+        reader.readAsText(file);
+        event.target.value = '';
+    },
+
+    loadFromStorage() {
+        try {
+            const saved = localStorage.getItem('lagirioAnaliz_data');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                Object.assign(appData, parsed);
+                appData.loaded = true;
+                this.updateSyncStatus(true);
+                return true;
+            }
+        } catch(e) {
+            console.error('Storage load error:', e);
+        }
+        return false;
+    },
+
+    updateSyncStatus(connected) {
+        const dot = document.getElementById('syncDot');
+        const text = document.getElementById('syncText');
+        if (connected && appData.loaded) {
+            dot.className = 'sync-dot';
+            const count = appData.apartments.length;
+            text.textContent = `${count} daire yuklendi`;
+        } else {
+            dot.className = 'sync-dot offline';
+            text.textContent = 'Veri yuklenmedi';
+        }
+    },
+
+    exportData() {
+        const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lagirio-analiz-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+};
+
+// ============================================================
+// 7. LOADING - Yukleme Ekrani
+// ============================================================
+const Loading = {
+    show(text) {
+        document.getElementById('loadingText').textContent = text || 'Yukleniyor...';
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+    },
+    hide() {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+};
+
+// ============================================================
+// 8. TAB NAVIGATION
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const panel = document.getElementById('panel-' + btn.dataset.tab);
+        if (panel) panel.classList.add('active');
+
+        // Tab'a gore veri yukle
+        const tab = btn.dataset.tab;
+        if (tab === 'overview') Dashboard.refresh();
+        else if (tab === 'apartments') ApartmentDetail.load();
+        else if (tab === 'monthly') MonthlyReport.load();
+        else if (tab === 'forecast') Forecast.generate();
+        else if (tab === 'comparison') Comparison.load();
+    });
+});
+
+// Enter ile login
+document.getElementById('loginPass').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') Auth.login();
+});
+document.getElementById('loginUser').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('loginPass').focus();
+});
+
+// Placeholder stubs - will be implemented in next steps
+const Dashboard = {
+    init() {
+        this.populateFilters();
+        this.populateYears();
+        if (appData.loaded) this.refresh();
+    },
+    populateFilters() {
+        const sel = document.getElementById('filterApartment');
+        const aptSel = document.getElementById('aptDetailSelect');
+        sel.innerHTML = '<option value="">Tum Daireler</option>';
+        aptSel.innerHTML = '<option value="">-- Daire Secin --</option>';
+        [...appData.apartments].sort((a, b) => a.code.localeCompare(b.code, 'tr')).forEach(apt => {
+            const opt = `<option value="${apt.id}">${apt.code} - ${apt.ownerName || apt.location || ''}</option>`;
+            sel.innerHTML += opt;
+            aptSel.innerHTML += opt;
+        });
+    },
+    populateYears() {
+        const years = new Set();
+        appData.reservations.forEach(r => {
+            if (r.checkIn) years.add(new Date(r.checkIn).getFullYear());
+        });
+        if (years.size > 0) {
+            const sortedYears = [...years].sort((a, b) => b - a);
+            ['filterYear', 'aptDetailYear', 'monthlyYear'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+                }
+            });
+        }
+    },
+    refresh() { console.log('Dashboard.refresh - will be implemented'); },
+    filterTable(q) { console.log('Dashboard.filterTable - will be implemented'); }
+};
+const ApartmentDetail = { load() { console.log('ApartmentDetail.load - stub'); } };
+const MonthlyReport = { load() { console.log('MonthlyReport.load - stub'); } };
+const Forecast = { generate() { console.log('Forecast.generate - stub'); } };
+const Comparison = { load() { console.log('Comparison.load - stub'); } };
+const ExportManager = {
+    exportPDF() { Toast.info('PDF export - sonraki adimda eklenecek'); },
+    exportCSV() { Toast.info('CSV export - sonraki adimda eklenecek'); }
+};
+const TableSort = { sort(table, col) { console.log('TableSort - stub'); } };
+
+// ============================================================
+// APP INIT
+// ============================================================
+(function init() {
+    // Onceki oturumu kontrol et
+    const hasSession = Auth.checkSession();
+    // Kayitli veriyi yukle
+    DataSync.loadFromStorage();
+
+    if (hasSession && appData.loaded) {
+        Dashboard.init();
+    } else if (hasSession) {
+        DataSync.updateSyncStatus(false);
+    }
+})();
 
 </script>
 
