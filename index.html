@@ -59,12 +59,44 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #16a34a, #22c55e); border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #15803d, #16a34a); }
+
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg-app);
+            background: linear-gradient(135deg, #faf6f0, #fdfcfa, #faf6f0);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .animate-slide-up { animation: slideUp 0.3s ease-out; }
+
+        /* Glass effects */
+        .glass {
+            background: rgba(255, 253, 251, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(250, 246, 240, 0.5);
+        }
+        .glass-dark {
+            background: rgba(0, 77, 64, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* ========= LOGIN SCREEN ========= */
@@ -202,21 +234,24 @@
 
         .app-container.active {
             display: block;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        /* Top Header */
+        /* Top Header - Glass Dark */
         .top-header {
-            background: white;
-            border-bottom: 1px solid var(--border-light);
+            background: rgba(0, 77, 64, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 0 32px;
-            height: 64px;
+            height: 68px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
         .header-left {
@@ -226,27 +261,28 @@
         }
 
         .header-logo {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--green-800), var(--green-600));
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--orange-600), var(--orange-500));
             border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 800;
             color: white;
+            box-shadow: 0 2px 8px rgba(255,156,0,0.3);
         }
 
         .header-title {
             font-size: 18px;
             font-weight: 700;
-            color: var(--green-900);
+            color: white;
         }
 
         .header-badge {
-            background: var(--orange-100);
-            color: var(--orange-600);
+            background: rgba(255,255,255,0.15);
+            color: #86efac;
             font-size: 11px;
             font-weight: 700;
             padding: 4px 10px;
@@ -261,39 +297,39 @@
 
         .header-btn {
             padding: 8px 16px;
-            border: 1px solid var(--border-medium);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: var(--radius-sm);
-            background: white;
+            background: rgba(255,255,255,0.1);
             font-size: 13px;
             font-weight: 500;
             font-family: inherit;
             cursor: pointer;
             transition: var(--transition);
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.85);
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
         .header-btn:hover {
-            background: var(--beige-50);
-            border-color: var(--green-600);
-            color: var(--green-800);
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
+            color: white;
         }
 
         .header-btn.primary {
-            background: var(--green-800);
+            background: rgba(255,255,255,0.2);
             color: white;
-            border-color: var(--green-800);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .header-btn.primary:hover {
-            background: var(--green-700);
+            background: rgba(255,255,255,0.3);
         }
 
         .sync-status {
             font-size: 12px;
-            color: var(--text-light);
+            color: rgba(255,255,255,0.6);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -303,10 +339,10 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--success);
+            background: #86efac;
         }
 
-        .sync-dot.offline { background: var(--text-light); }
+        .sync-dot.offline { background: rgba(255,255,255,0.3); }
         .sync-dot.syncing { background: var(--warning); animation: pulse 1s infinite; }
 
         @keyframes pulse {
@@ -316,35 +352,37 @@
 
         /* ========= TAB NAVIGATION ========= */
         .tab-nav {
-            background: white;
-            border-bottom: 1px solid var(--border-light);
-            padding: 0 32px;
+            background: linear-gradient(90deg, #16a34a, #15803d);
+            padding: 4px 32px;
             display: flex;
             gap: 4px;
             overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .tab-btn {
-            padding: 14px 20px;
+            padding: 12px 20px;
             font-size: 13px;
             font-weight: 600;
             font-family: inherit;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,0.7);
             background: none;
             border: none;
-            border-bottom: 2px solid transparent;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
             cursor: pointer;
             transition: var(--transition);
             white-space: nowrap;
         }
 
         .tab-btn:hover {
-            color: var(--green-700);
+            color: white;
+            background: rgba(255,255,255,0.1);
         }
 
         .tab-btn.active {
-            color: var(--green-800);
-            border-bottom-color: var(--green-600);
+            color: white;
+            background: rgba(255,255,255,0.2);
+            box-shadow: inset 0 -2px 0 white;
         }
 
         /* ========= CONTENT AREA ========= */
@@ -360,6 +398,7 @@
 
         .tab-panel.active {
             display: block;
+            animation: fadeIn 0.3s ease-out;
         }
 
         /* ========= FILTER BAR ========= */
@@ -369,6 +408,13 @@
             gap: 12px;
             margin-bottom: 24px;
             flex-wrap: wrap;
+            background: rgba(255, 253, 251, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(250, 246, 240, 0.5);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
         }
 
         .filter-select {
@@ -381,6 +427,7 @@
             color: var(--text-primary);
             cursor: pointer;
             min-width: 140px;
+            transition: var(--transition);
         }
 
         .filter-select:focus {
@@ -404,17 +451,33 @@
         }
 
         .metric-card {
-            background: white;
+            background: rgba(255, 253, 251, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--radius-md);
             padding: 20px;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-light);
-            transition: var(--transition);
+            border: 1px solid rgba(250, 246, 240, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 60%, rgba(34,197,94,0.05));
+            transition: all 0.3s ease;
         }
 
         .metric-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+
+        .metric-card:hover::before {
+            background: linear-gradient(135deg, transparent 40%, rgba(34,197,94,0.1));
         }
 
         .metric-card.highlight {
@@ -422,6 +485,8 @@
             color: white;
             border: none;
         }
+
+        .metric-card.highlight::before { display: none; }
 
         .metric-card.highlight .metric-label { color: rgba(255,255,255,0.8); }
         .metric-card.highlight .metric-value { color: white; }
@@ -475,11 +540,18 @@
         }
 
         .chart-card {
-            background: white;
+            background: rgba(255, 253, 251, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--radius-md);
             padding: 24px;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-light);
+            border: 1px solid rgba(250, 246, 240, 0.5);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-md);
         }
 
         .chart-card.full-width {
@@ -536,10 +608,12 @@
 
         /* ========= DATA TABLE ========= */
         .data-table-container {
-            background: white;
+            background: rgba(255, 253, 251, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-light);
+            border: 1px solid rgba(250, 246, 240, 0.5);
             overflow: hidden;
             margin-bottom: 24px;
         }
@@ -636,11 +710,19 @@
         }
 
         .forecast-card {
-            background: white;
+            background: rgba(255, 253, 251, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--radius-md);
             padding: 20px;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-light);
+            border: 1px solid rgba(250, 246, 240, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .forecast-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
 
         .forecast-month {
@@ -791,7 +873,7 @@
 <!-- ========= LOADING OVERLAY ========= -->
 <div class="loading-overlay hidden" id="loadingOverlay">
     <div class="spinner"></div>
-    <div class="loading-text" id="loadingText">Veriler yukleniyor...</div>
+    <div class="loading-text" id="loadingText">Veriler yükleniyor...</div>
 </div>
 
 <!-- ========= LOGIN SCREEN ========= -->
@@ -799,18 +881,18 @@
     <div class="login-card">
         <div class="login-logo">L</div>
         <h1 class="login-title">Lagirio Analiz</h1>
-        <p class="login-subtitle">Daire bazli kazanc analiz paneli</p>
+        <p class="login-subtitle">Daire bazlı kazanç analiz paneli</p>
 
         <div class="login-input-group">
-            <label>Kullanici Adi</label>
-            <input type="text" class="login-input" id="loginUser" placeholder="Kullanici adiniz" autocomplete="username">
+            <label>Kullanıcı Adı</label>
+            <input type="text" class="login-input" id="loginUser" placeholder="Kullanıcı adınız" autocomplete="username">
         </div>
         <div class="login-input-group">
-            <label>Sifre</label>
-            <input type="password" class="login-input" id="loginPass" placeholder="Sifreniz" autocomplete="current-password">
+            <label>Şifre</label>
+            <input type="password" class="login-input" id="loginPass" placeholder="Şifreniz" autocomplete="current-password">
         </div>
 
-        <button class="login-btn" id="loginBtn" onclick="Auth.login()">Giris Yap</button>
+        <button class="login-btn" id="loginBtn" onclick="Auth.login()">Giriş Yap</button>
         <p class="login-error" id="loginError"></p>
     </div>
 </div>
@@ -822,28 +904,30 @@
     <header class="top-header">
         <div class="header-left">
             <div class="header-logo">L</div>
-            <span class="header-title">Lagirio Analiz</span>
-            <span class="header-badge">BETA</span>
+            <div>
+                <span class="header-title">Lagirio Analiz</span>
+                <span class="header-badge">BETA</span>
+            </div>
         </div>
         <div class="header-right">
             <div class="sync-status">
                 <span class="sync-dot" id="syncDot"></span>
-                <span id="syncText">Bagli degil</span>
+                <span id="syncText">Bağlı değil</span>
             </div>
-            <button class="header-btn" onclick="DataSync.importFile()">Veri Yukle</button>
+            <button class="header-btn" onclick="DataSync.importFile()">Veri Yükle</button>
             <button class="header-btn" onclick="ExportManager.exportPDF()">PDF</button>
             <button class="header-btn" onclick="ExportManager.exportCSV()">CSV</button>
-            <button class="header-btn" onclick="Auth.logout()" style="color:var(--error)">Cikis</button>
+            <button class="header-btn" onclick="Auth.logout()" style="color:#fca5a5">Çıkış</button>
         </div>
     </header>
 
     <!-- Tabs -->
     <nav class="tab-nav">
-        <button class="tab-btn active" data-tab="overview">Genel Bakis</button>
+        <button class="tab-btn active" data-tab="overview">Genel Bakış</button>
         <button class="tab-btn" data-tab="apartments">Daire Analiz</button>
-        <button class="tab-btn" data-tab="monthly">Aylik Rapor</button>
+        <button class="tab-btn" data-tab="monthly">Aylık Rapor</button>
         <button class="tab-btn" data-tab="forecast">Tahmin</button>
-        <button class="tab-btn" data-tab="comparison">Karsilastirma</button>
+        <button class="tab-btn" data-tab="comparison">Karşılaştırma</button>
     </nav>
 
     <!-- Content -->
@@ -854,28 +938,28 @@
 
             <!-- Filters -->
             <div class="filter-bar">
-                <span class="filter-label">Donem:</span>
+                <span class="filter-label">Dönem:</span>
                 <select class="filter-select" id="filterYear" onchange="Dashboard.refresh()">
                     <option value="2025">2025</option>
                     <option value="2024">2024</option>
                 </select>
                 <select class="filter-select" id="filterMonth" onchange="Dashboard.refresh()">
-                    <option value="">Tum Yil</option>
+                    <option value="">Tüm Yıl</option>
                     <option value="0">Ocak</option>
-                    <option value="1">Subat</option>
+                    <option value="1">Şubat</option>
                     <option value="2">Mart</option>
                     <option value="3">Nisan</option>
-                    <option value="4">Mayis</option>
+                    <option value="4">Mayıs</option>
                     <option value="5">Haziran</option>
                     <option value="6">Temmuz</option>
-                    <option value="7">Agustos</option>
-                    <option value="8">Eylul</option>
+                    <option value="7">Ağustos</option>
+                    <option value="8">Eylül</option>
                     <option value="9">Ekim</option>
-                    <option value="10">Kasim</option>
-                    <option value="11">Aralik</option>
+                    <option value="10">Kasım</option>
+                    <option value="11">Aralık</option>
                 </select>
                 <select class="filter-select" id="filterApartment" onchange="Dashboard.refresh()">
-                    <option value="">Tum Daireler</option>
+                    <option value="">Tüm Daireler</option>
                 </select>
             </div>
 
@@ -888,7 +972,7 @@
             <div class="charts-grid">
                 <div class="chart-card">
                     <div class="chart-header">
-                        <span class="chart-title">Aylik Kazanc Trendi</span>
+                        <span class="chart-title">Aylık Kazanç Trendi</span>
                     </div>
                     <div class="chart-body">
                         <canvas id="chartMonthlyTrend"></canvas>
@@ -896,7 +980,7 @@
                 </div>
                 <div class="chart-card">
                     <div class="chart-header">
-                        <span class="chart-title">Sistem Dagilimi</span>
+                        <span class="chart-title">Sistem Dağılımı</span>
                     </div>
                     <div class="chart-body">
                         <canvas id="chartSystemDist"></canvas>
@@ -904,7 +988,7 @@
                 </div>
                 <div class="chart-card">
                     <div class="chart-header">
-                        <span class="chart-title">Platform Dagilimi</span>
+                        <span class="chart-title">Platform Dağılımı</span>
                     </div>
                     <div class="chart-body">
                         <canvas id="chartPlatformDist"></canvas>
@@ -923,7 +1007,7 @@
             <!-- Top Apartments Table -->
             <div class="data-table-container">
                 <div class="table-header">
-                    <span class="table-title">Daire Performansi</span>
+                    <span class="table-title">Daire Performansı</span>
                     <input type="text" class="table-search" placeholder="Daire ara..." oninput="Dashboard.filterTable(this.value)">
                 </div>
                 <table class="data-table" id="overviewTable">
@@ -948,9 +1032,9 @@
         <!-- ====== APARTMENT DETAIL TAB ====== -->
         <div class="tab-panel" id="panel-apartments">
             <div class="filter-bar">
-                <span class="filter-label">Daire Sec:</span>
+                <span class="filter-label">Daire Seç:</span>
                 <select class="filter-select" id="aptDetailSelect" onchange="ApartmentDetail.load()">
-                    <option value="">-- Daire Secin --</option>
+                    <option value="">-- Daire Seçin --</option>
                 </select>
                 <select class="filter-select" id="aptDetailYear" onchange="ApartmentDetail.load()">
                     <option value="2025">2025</option>
@@ -960,8 +1044,8 @@
             <div id="aptDetailContent">
                 <div class="empty-state">
                     <div class="empty-state-icon">&#127968;</div>
-                    <h3>Daire Secin</h3>
-                    <p>Detayli analiz icin bir daire secin</p>
+                    <h3>Daire Seçin</h3>
+                    <p>Detaylı analiz için bir daire seçin</p>
                 </div>
             </div>
         </div>
@@ -969,7 +1053,7 @@
         <!-- ====== MONTHLY REPORT TAB ====== -->
         <div class="tab-panel" id="panel-monthly">
             <div class="filter-bar">
-                <span class="filter-label">Yil:</span>
+                <span class="filter-label">Yıl:</span>
                 <select class="filter-select" id="monthlyYear" onchange="MonthlyReport.load()">
                     <option value="2025">2025</option>
                     <option value="2024">2024</option>
@@ -983,9 +1067,9 @@
             <div class="filter-bar">
                 <span class="filter-label">Tahmin Modeli:</span>
                 <select class="filter-select" id="forecastModel" onchange="Forecast.generate()">
-                    <option value="avg3">Son 3 Ay Ortalamasi</option>
-                    <option value="avg6">Son 6 Ay Ortalamasi</option>
-                    <option value="trend">Trend Bazli</option>
+                    <option value="avg3">Son 3 Ay Ortalaması</option>
+                    <option value="avg6">Son 6 Ay Ortalaması</option>
+                    <option value="trend">Trend Bazlı</option>
                 </select>
             </div>
             <div id="forecastContent"></div>
@@ -994,11 +1078,11 @@
         <!-- ====== COMPARISON TAB ====== -->
         <div class="tab-panel" id="panel-comparison">
             <div class="filter-bar">
-                <span class="filter-label">Karsilastir:</span>
+                <span class="filter-label">Karşılaştır:</span>
                 <select class="filter-select" id="compareType" onchange="Comparison.load()">
-                    <option value="yoy">Yillik Karsilastirma</option>
-                    <option value="apartments">Daireler Arasi</option>
-                    <option value="systems">Sistem Karsilastirma</option>
+                    <option value="yoy">Yıllık Karşılaştırma</option>
+                    <option value="apartments">Daireler Arası</option>
+                    <option value="systems">Sistem Karşılaştırma</option>
                 </select>
             </div>
             <div id="comparisonContent"></div>
@@ -1021,16 +1105,16 @@
 const CONFIG = {
     SYSTEMS: {
         '1': { name: 'Kira', short: 'Kira', color: '#3b82f6' },
-        '2': { name: 'Kisi Sirketi', short: 'Kisi Sirk.', color: '#ec4899' },
+        '2': { name: 'Kişi Şirketi', short: 'Kişi Şirk.', color: '#ec4899' },
         '3': { name: 'Komisyon (Standart)', short: 'Komisyon', color: '#10b981' },
-        '4': { name: 'Komisyon (Ozel)', short: 'Kom. Ozel', color: '#f59e0b' },
-        '5': { name: 'Stopajli', short: 'Stopaj', color: '#6366f1' },
-        '6': { name: 'Platform Ayrimli', short: 'Plt. Ayr.', color: '#a855f7' },
+        '4': { name: 'Komisyon (Özel)', short: 'Kom. Özel', color: '#f59e0b' },
+        '5': { name: 'Stopajlı', short: 'Stopaj', color: '#6366f1' },
+        '6': { name: 'Platform Ayrımlı', short: 'Plt. Ayr.', color: '#a855f7' },
         '7': { name: 'Karma Platform', short: 'Karma', color: '#14b8a6' },
-        '8': { name: 'Kisi Sirketi (Kar)', short: 'Sirk. Kar', color: '#ef4444' },
-        '9': { name: 'Stopajli (KDV)', short: 'Stp. KDV', color: '#8b5cf6' }
+        '8': { name: 'Kişi Şirketi (Kar)', short: 'Şirk. Kar', color: '#ef4444' },
+        '9': { name: 'Stopajlı (KDV)', short: 'Stp. KDV', color: '#8b5cf6' }
     },
-    MONTHS: ['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'],
+    MONTHS: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
     CHART_COLORS: ['#0d3028','#1f7a5f','#2a9574','#34b088','#ff9c00','#ffaa26','#3b82f6','#6366f1','#ec4899','#ef4444','#14b8a6','#a855f7'],
     EXCHANGE_RATES: { USD_EUR: 0.92, TL_EUR: 37.5 },
     AUTH: {
@@ -1065,7 +1149,7 @@ const Toast = {
 };
 
 // ============================================================
-// 3. AUTH - Giris / Cikis Yonetimi
+// 3. AUTH - Giriş / Çıkış Yönetimi
 // ============================================================
 const Auth = {
     currentUser: null,
@@ -1076,14 +1160,14 @@ const Auth = {
         const errorEl = document.getElementById('loginError');
 
         if (!username || !password) {
-            errorEl.textContent = 'Kullanici adi ve sifre gerekli';
+            errorEl.textContent = 'Kullanıcı adı ve şifre gerekli';
             errorEl.style.display = 'block';
             return;
         }
 
         const user = CONFIG.AUTH.users.find(u => u.username === username && u.password === password);
         if (!user) {
-            errorEl.textContent = 'Kullanici adi veya sifre hatali';
+            errorEl.textContent = 'Kullanıcı adı veya şifre hatalı';
             errorEl.style.display = 'block';
             return;
         }
@@ -1095,7 +1179,7 @@ const Auth = {
         document.getElementById('appContainer').classList.add('active');
         errorEl.style.display = 'none';
 
-        Toast.success(`Hosgeldiniz, ${user.username}!`);
+        Toast.success(`Hoşgeldiniz, ${user.username}!`);
         Dashboard.init();
     },
 
@@ -1104,7 +1188,7 @@ const Auth = {
         localStorage.removeItem('lagirioAnaliz_auth');
         document.getElementById('loginScreen').style.display = '';
         document.getElementById('appContainer').classList.remove('active');
-        Toast.info('Cikis yapildi');
+        Toast.info('Çıkış yapıldı');
     },
 
     checkSession() {
@@ -1126,7 +1210,7 @@ const Auth = {
 };
 
 // ============================================================
-// 4. UTILS - Yardimci Fonksiyonlar
+// 4. UTILS - Yardımcı Fonksiyonlar
 // ============================================================
 const Utils = {
     convertToEUR(amount, currency) {
@@ -1189,7 +1273,7 @@ let appData = {
 };
 
 // ============================================================
-// 6. DATA SYNC - Veri Yukleme / Import
+// 6. DATA SYNC - Veri Yükleme / Import
 // ============================================================
 const DataSync = {
     importFile() {
@@ -1200,14 +1284,14 @@ const DataSync = {
         const file = event.target.files[0];
         if (!file) return;
 
-        Loading.show('Veri dosyasi yukleniyor...');
+        Loading.show('Veri dosyası yükleniyor...');
 
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const parsed = JSON.parse(e.target.result);
 
-                // daire-uygulamasi formatini tani
+                // daire-uygulamasi formatını tanı
                 if (parsed.apartments || parsed.reservations) {
                     appData.apartments = parsed.apartments || [];
                     appData.reservations = parsed.reservations || [];
@@ -1228,7 +1312,7 @@ const DataSync = {
                     Dashboard.populateFilters();
                     Dashboard.refresh();
                 } else {
-                    Toast.error('Gecersiz veri formati. daire-uygulamasi export dosyasi bekleniyor.');
+                    Toast.error('Geçersiz veri formatı. daire-uygulamasi export dosyası bekleniyor.');
                 }
             } catch(err) {
                 console.error('Import error:', err);
@@ -1238,7 +1322,7 @@ const DataSync = {
         };
 
         reader.onerror = () => {
-            Toast.error('Dosya okuma hatasi');
+            Toast.error('Dosya okuma hatası');
             Loading.hide();
         };
 
@@ -1287,11 +1371,11 @@ const DataSync = {
 };
 
 // ============================================================
-// 7. LOADING - Yukleme Ekrani
+// 7. LOADING - Yükleme Ekranı
 // ============================================================
 const Loading = {
     show(text) {
-        document.getElementById('loadingText').textContent = text || 'Yukleniyor...';
+        document.getElementById('loadingText').textContent = text || 'Yükleniyor...';
         document.getElementById('loadingOverlay').classList.remove('hidden');
     },
     hide() {
@@ -1345,7 +1429,7 @@ const ChartManager = {
         Object.keys(this.instances).forEach(id => this.destroy(id));
     },
 
-    // Aylik trend cizgi grafigi
+    // Aylık trend çizgi grafiği
     renderMonthlyTrend(canvasId, monthlyData) {
         this.destroy(canvasId);
         const ctx = document.getElementById(canvasId);
@@ -1583,7 +1667,7 @@ const Dashboard = {
         const sel = document.getElementById('filterApartment');
         const aptSel = document.getElementById('aptDetailSelect');
         sel.innerHTML = '<option value="">Tum Daireler</option>';
-        aptSel.innerHTML = '<option value="">-- Daire Secin --</option>';
+        aptSel.innerHTML = '<option value="">-- Daire Seçin --</option>';
         [...appData.apartments].sort((a, b) => a.code.localeCompare(b.code, 'tr')).forEach(apt => {
             const opt = `<option value="${apt.id}">${apt.code} - ${apt.ownerName || apt.location || ''}</option>`;
             sel.innerHTML += opt;
@@ -1618,7 +1702,7 @@ const Dashboard = {
         const data = FinanceEngine.calculateAll(year, month, aptFilter || null);
         this.currentData = data;
 
-        // Onceki donem (karsilastirma icin)
+        // Önceki dönem (karşılaştırma için)
         let prevData = null;
         if (month !== '') {
             const prevMonth = parseInt(month) - 1;
@@ -1652,7 +1736,7 @@ const Dashboard = {
         const avgNightly = totalNights > 0 ? totalIncome / totalNights : 0;
         const activeDaireler = r.length;
 
-        // Onceki donem
+        // Önceki dönem
         const prevProfit = prevData ? prevData.totalProfit : 0;
         const prevIncome = prevData ? prevData.results.reduce((s, i) => s + i.totalIncome, 0) : 0;
 
@@ -1664,12 +1748,12 @@ const Dashboard = {
             <div class="metric-card highlight">
                 <div class="metric-label">Lagirio Kazanci</div>
                 <div class="metric-value">${Utils.formatEUR(data.totalProfit)}</div>
-                <div class="metric-sub ${profitChange.class}">${profitChange.text} onceki doneme gore</div>
+                <div class="metric-sub ${profitChange.class}">${profitChange.text} önceki döneme göre</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Toplam Gelir</div>
                 <div class="metric-value">${Utils.formatEUR(totalIncome)}</div>
-                <div class="metric-sub ${incomeChange.class}">${incomeChange.text} onceki doneme gore</div>
+                <div class="metric-sub ${incomeChange.class}">${incomeChange.text} önceki döneme göre</div>
             </div>
             <div class="metric-card${totalExpenses > totalIncome * 0.4 ? ' warning' : ''}">
                 <div class="metric-label">Toplam Gider</div>
@@ -1699,7 +1783,7 @@ const Dashboard = {
         if (!tbody) return;
 
         if (results.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-light)">Bu donem icin veri bulunamadi</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-light)">Bu dönem için veri bulunamadı</td></tr>';
             return;
         }
 
@@ -1779,7 +1863,7 @@ const FinanceEngine = {
         }, 0);
     },
 
-    // Belirli donem icin filtreleme
+    // Belirli dönem için filtreleme
     filterByPeriod(items, dateField, year, month) {
         return items.filter(item => {
             const d = new Date(item[dateField]);
@@ -1788,14 +1872,14 @@ const FinanceEngine = {
         });
     },
 
-    // Belirli daire + donem icin filtreleme
+    // Belirli daire + dönem için filtreleme
     filterByAptAndPeriod(items, dateField, apartmentId, year, month) {
         return this.filterByPeriod(items, dateField, year, month)
                    .filter(item => item.apartmentId === apartmentId);
     },
 
     // ============================================================
-    // ANA HESAPLAMA: Tek bir daire icin tum hesaplamayi yap
+    // ANA HESAPLAMA: Tek bir daire için tüm hesaplamayı yap
     // ============================================================
     calculateApartment(apartment, reservations, expenses, capitalExpenses) {
         if (reservations.length === 0) return null;
@@ -1852,7 +1936,7 @@ const FinanceEngine = {
     },
 
     // ============================================================
-    // KDV HESAPLAMA - Sistem bazli
+    // KDV HESAPLAMA - Sistem bazlı
     // ============================================================
     calcKDV(apartment, reservations, bankReservations) {
         const taxRate = apartment.taxRate || 0;
@@ -1907,7 +1991,7 @@ const FinanceEngine = {
                 break;
             }
 
-            // Sistem 2 - Kisi Sirketi: Komisyon Lagirio'nun
+            // Sistem 2 - Kişi Şirketi: Komisyon Lagirio'nun
             case '2': {
                 bankComm = bankIncome > 0 ? bankIncome * commRate : 0;
                 const cashAfterPlatform = cashIncome - cashPlatformComm;
@@ -1926,7 +2010,7 @@ const FinanceEngine = {
                 break;
             }
 
-            // Sistem 4 - Komisyon Ozel: Platform dusulur, kalanin komisyonu
+            // Sistem 4 - Komisyon Özel: Platform düşülür, kalanın komisyonu
             case '4': {
                 const afterPlatform = bankIncome - bankPlatformComm;
                 bankComm = afterPlatform > 0 ? afterPlatform * commRate : 0;
@@ -1936,7 +2020,7 @@ const FinanceEngine = {
                 break;
             }
 
-            // Sistem 5 - Stopajli: Platform dusulur, kalanin komisyonu
+            // Sistem 5 - Stopajlı: Platform düşülür, kalanın komisyonu
             case '5': {
                 const afterPlatform = bankIncome - bankPlatformComm;
                 bankComm = afterPlatform > 0 ? afterPlatform * commRate : 0;
@@ -1946,7 +2030,7 @@ const FinanceEngine = {
                 break;
             }
 
-            // Sistem 6 - Platform Ayrimli (Lagirio/Zirkon)
+            // Sistem 6 - Platform Ayrımlı (Lagirio/Zirkon)
             case '6': {
                 const lagirioRes = reservations.filter(r => r.paidTo === 'Lagirio');
                 const zirkonRes = reservations.filter(r => r.paidTo === 'Zirkon');
@@ -2009,7 +2093,7 @@ const FinanceEngine = {
                 break;
             }
 
-            // Sistem 8 - Kisi Sirketi (Kar Bazli)
+            // Sistem 8 - Kişi Şirketi (Kar Bazlı)
             case '8': {
                 const bankProfit = bankIncome - totalExpenses - bankPlatformComm;
                 bankComm = bankProfit > 0 ? bankProfit * commRate : 0;
@@ -2019,7 +2103,7 @@ const FinanceEngine = {
                 break;
             }
 
-            // Sistem 9 - Stopajli (KDV Dusulmus): Platform + KDV dusulur, kalanin komisyonu
+            // Sistem 9 - Stopajlı (KDV Düşülmüş): Platform + KDV düşülür, kalanın komisyonu
             case '9': {
                 const afterPlatform = bankIncome - bankPlatformComm;
                 const afterKDV = afterPlatform - totalKDV;
@@ -2035,7 +2119,7 @@ const FinanceEngine = {
     },
 
     // ============================================================
-    // TOPLU HESAPLAMA: Tum daireler icin
+    // TOPLU HESAPLAMA: Tüm daireler için
     // ============================================================
     calculateAll(year, month, apartmentFilter) {
         const results = [];
@@ -2075,7 +2159,7 @@ const FinanceEngine = {
         return { results, totalProfit };
     },
 
-    // Aylik bazda hesaplama (12 ay)
+    // Aylık bazda hesaplama (12 ay)
     calculateMonthly(year, apartmentFilter) {
         const monthly = [];
         for (let m = 0; m < 12; m++) {
@@ -2108,8 +2192,8 @@ const ApartmentDetail = {
         if (!aptId) {
             container.innerHTML = `<div class="empty-state">
                 <div class="empty-state-icon">&#127968;</div>
-                <h3>Daire Secin</h3>
-                <p>Detayli analiz icin bir daire secin</p>
+                <h3>Daire Seçin</h3>
+                <p>Detaylı analiz için bir daire seçin</p>
             </div>`;
             return;
         }
@@ -2124,7 +2208,7 @@ const ApartmentDetail = {
 
         const sys = CONFIG.SYSTEMS[apt.systemType];
 
-        // Yillik ozet
+        // Yıllık özet
         const totalIncome = result ? result.totalIncome : 0;
         const totalExpenses = result ? result.totalExpenses : 0;
         const totalProfit = yearData.totalProfit;
@@ -2181,11 +2265,11 @@ const ApartmentDetail = {
                 </div>
             </div>
 
-            <!-- Aylik Grafik -->
+            <!-- Aylık Grafik -->
             <div class="charts-grid">
                 <div class="chart-card full-width">
                     <div class="chart-header">
-                        <span class="chart-title">${apt.code} - ${year} Aylik Performans</span>
+                        <span class="chart-title">${apt.code} - ${year} Aylık Performans</span>
                     </div>
                     <div class="chart-body" style="height:350px">
                         <canvas id="aptDetailChart"></canvas>
@@ -2193,10 +2277,10 @@ const ApartmentDetail = {
                 </div>
             </div>
 
-            <!-- Aylik Tablo -->
+            <!-- Aylık Tablo -->
             <div class="data-table-container">
                 <div class="table-header">
-                    <span class="table-title">Aylik Detay - ${year}</span>
+                    <span class="table-title">Aylık Detay - ${year}</span>
                 </div>
                 <table class="data-table">
                     <thead>
@@ -2250,13 +2334,13 @@ const ApartmentDetail = {
                     <thead>
                         <tr>
                             <th>Misafir</th>
-                            <th>Giris</th>
-                            <th>Cikis</th>
+                            <th>Giriş</th>
+                            <th>Çıkış</th>
                             <th>Gece</th>
                             <th>Platform</th>
                             <th>Tutar</th>
                             <th>Platform Kom.</th>
-                            <th>Odeme</th>
+                            <th>Ödeme</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2351,7 +2435,7 @@ const ApartmentDetail = {
 };
 
 // ============================================================
-// 14. MONTHLY REPORT - Aylik Rapor
+// 14. MONTHLY REPORT - Aylık Rapor
 // ============================================================
 const MonthlyReport = {
     chart: null,
@@ -2362,7 +2446,7 @@ const MonthlyReport = {
         const container = document.getElementById('monthlyContent');
         const monthly = FinanceEngine.calculateMonthly(year, null);
 
-        // Yillik toplamlar
+        // Yıllık toplamlar
         const yearTotals = {
             income: monthly.reduce((s, m) => s + m.totalIncome, 0),
             expenses: monthly.reduce((s, m) => s + m.totalExpenses, 0),
@@ -2381,7 +2465,7 @@ const MonthlyReport = {
             : null;
 
         container.innerHTML = `
-            <!-- Yillik Ozet -->
+            <!-- Yıllık Özet -->
             <div class="metrics-grid">
                 <div class="metric-card highlight">
                     <div class="metric-label">${year} Toplam Kazanc</div>
@@ -2416,7 +2500,7 @@ const MonthlyReport = {
             <div class="charts-grid">
                 <div class="chart-card full-width">
                     <div class="chart-header">
-                        <span class="chart-title">${year} - Aylik Gelir / Gider / Kazanc</span>
+                        <span class="chart-title">${year} - Aylık Gelir / Gider / Kazanç</span>
                     </div>
                     <div class="chart-body" style="height:350px">
                         <canvas id="monthlyReportChart"></canvas>
@@ -2424,7 +2508,7 @@ const MonthlyReport = {
                 </div>
             </div>
 
-            <!-- Aylik Tablo -->
+            <!-- Aylık Tablo -->
             <div class="data-table-container">
                 <div class="table-header">
                     <span class="table-title">${year} - Ay Bazinda Detay</span>
@@ -2558,7 +2642,7 @@ const Forecast = {
             container.innerHTML = `<div class="empty-state">
                 <div class="empty-state-icon">&#128202;</div>
                 <h3>Yetersiz Veri</h3>
-                <p>Tahmin icin en az 2 aylik veri gerekli</p>
+                <p>Tahmin için en az 2 aylık veri gerekli</p>
             </div>`;
             return;
         }
@@ -2611,7 +2695,7 @@ const Forecast = {
                         <div class="metric-value">${Utils.formatEUR(forecasts.slice(0, 6).reduce((s, f) => s + f.value, 0))}</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-label">Aylik Ortalama</div>
+                        <div class="metric-label">Aylık Ortalama</div>
                         <div class="metric-value">${Utils.formatEUR(forecasts.reduce((s, f) => s + f.value, 0) / forecasts.length)}</div>
                     </div>
                 </div>
@@ -2736,7 +2820,7 @@ const Forecast = {
 };
 
 // ============================================================
-// 16. COMPARISON - Karsilastirma Modulu
+// 16. COMPARISON - Karşılaştırma Modülü
 // ============================================================
 const Comparison = {
     chart: null,
@@ -2760,7 +2844,7 @@ const Comparison = {
             container.innerHTML = `<div class="empty-state">
                 <div class="empty-state-icon">&#128197;</div>
                 <h3>Yetersiz Veri</h3>
-                <p>Yillik karsilastirma icin en az 2 yilin verisi gerekli</p>
+                <p>Yıllık karşılaştırma için en az 2 yılın verisi gerekli</p>
             </div>`;
             return;
         }
@@ -2781,15 +2865,15 @@ const Comparison = {
         container.innerHTML = `
             <div class="charts-grid" style="margin-bottom:24px">
                 <div class="chart-card full-width">
-                    <div class="chart-header"><span class="chart-title">Yillik Karsilastirma</span></div>
+                    <div class="chart-header"><span class="chart-title">Yıllık Karşılaştırma</span></div>
                     <div class="chart-body" style="height:350px"><canvas id="comparisonChart"></canvas></div>
                 </div>
             </div>
             <div class="data-table-container">
-                <div class="table-header"><span class="table-title">Yillik Detay</span></div>
+                <div class="table-header"><span class="table-title">Yıllık Detay</span></div>
                 <table class="data-table">
                     <thead>
-                        <tr><th>Yil</th><th>Aktif Daire</th><th>Rez.</th><th>Gece</th><th>Gelir</th><th>Gider</th><th>Kazanc</th><th>Degisim</th></tr>
+                        <tr><th>Yıl</th><th>Aktif Daire</th><th>Rez.</th><th>Gece</th><th>Gelir</th><th>Gider</th><th>Kazanç</th><th>Değişim</th></tr>
                     </thead>
                     <tbody>
                         ${yearlyData.map((d, i) => {
@@ -2874,7 +2958,7 @@ const Comparison = {
                 <div class="table-header"><span class="table-title">Tum Daireler - ${year} (Kazanca gore sirali)</span></div>
                 <table class="data-table">
                     <thead>
-                        <tr><th>Sira</th><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Gider</th><th>Kazanc</th><th>Ort. Gecelik</th></tr>
+                        <tr><th>Sira</th><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Gider</th><th>Kazanç</th><th>Ort. Gecelik</th></tr>
                     </thead>
                     <tbody>
                         ${sorted.map((r, i) => {
@@ -2926,7 +3010,7 @@ const Comparison = {
         }
     },
 
-    // Sistem bazli karsilastirma
+    // Sistem bazlı karşılaştırma
     systemComparison(container) {
         const years = [...new Set(appData.reservations.map(r => new Date(r.checkIn).getFullYear()))].sort((a, b) => b - a);
         const year = years[0] || new Date().getFullYear();
@@ -2948,7 +3032,7 @@ const Comparison = {
         container.innerHTML = `
             <div class="charts-grid" style="margin-bottom:24px">
                 <div class="chart-card full-width">
-                    <div class="chart-header"><span class="chart-title">Sistem Bazli Kazanc Karsilastirmasi - ${year}</span></div>
+                    <div class="chart-header"><span class="chart-title">Sistem Bazlı Kazanç Karşılaştırması - ${year}</span></div>
                     <div class="chart-body" style="height:350px"><canvas id="comparisonChart"></canvas></div>
                 </div>
             </div>
@@ -3032,7 +3116,7 @@ const ExportManager = {
 
         csv += `"TOPLAM","${data.results.length} daire",${t.res},${t.income.toFixed(2)},${t.bank.toFixed(2)},${t.cash.toFixed(2)},${t.platform.toFixed(2)},${t.exp.toFixed(2)},${t.kdv.toFixed(2)},${t.bankC.toFixed(2)},${t.cashC.toFixed(2)},${t.profit.toFixed(2)}\n`;
 
-        // BOM ekle (Excel Turkce karakter icin)
+        // BOM ekle (Excel Türkçe karakter için)
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -3041,7 +3125,7 @@ const ExportManager = {
         a.download = `lagirio-analiz-${year}${monthName}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-        Toast.success('CSV dosyasi indirildi');
+        Toast.success('CSV dosyası indirildi');
     },
 
     exportPDF() {
@@ -3088,7 +3172,7 @@ const ExportManager = {
             </div>
             <h2>Daire Bazinda Detay</h2>
             <table>
-                <thead><tr><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Platform Kom.</th><th>Gider</th><th>KDV</th><th>Kazanc</th></tr></thead>
+                <thead><tr><th>Daire</th><th>Sistem</th><th>Rez.</th><th>Gelir</th><th>Platform Kom.</th><th>Gider</th><th>KDV</th><th>Kazanç</th></tr></thead>
                 <tbody>
                     ${data.results.map(r => {
                         const sys = CONFIG.SYSTEMS[r.apartment.systemType];
@@ -3114,7 +3198,7 @@ const ExportManager = {
             <scr' + 'ipt>window.onload = () => { window.print(); }<\/scr' + 'ipt>
         </body></html>`);
         printWindow.document.close();
-        Toast.success('PDF yazdir penceresi acildi');
+        Toast.success('PDF yazdır penceresi açıldı');
     }
 };
 
@@ -3122,9 +3206,9 @@ const ExportManager = {
 // APP INIT
 // ============================================================
 (function init() {
-    // Onceki oturumu kontrol et
+    // Önceki oturumu kontrol et
     const hasSession = Auth.checkSession();
-    // Kayitli veriyi yukle
+    // Kayıtlı veriyi yükle
     DataSync.loadFromStorage();
 
     if (hasSession && appData.loaded) {
