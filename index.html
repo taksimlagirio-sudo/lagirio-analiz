@@ -6470,13 +6470,15 @@
         switchMainTab(tab) {
             // Hide all tab contents
             document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');  // ← DEĞİŞTİ
+                content.classList.remove('active');
+                content.classList.add('hidden');
             });
-            
+
             // Show selected tab content
             const selectedContent = document.getElementById(`${tab}-content`);
             if (selectedContent) {
-                selectedContent.classList.add('active');  // ← DEĞİŞTİ
+                selectedContent.classList.remove('hidden');
+                selectedContent.classList.add('active');
             }
             
             // Update tab buttons
