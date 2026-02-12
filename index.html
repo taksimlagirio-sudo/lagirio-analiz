@@ -1336,7 +1336,30 @@
                         </div>
                     </div>
                 </div>
-                
+
+                    <!-- Admin Giriş -->
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                            <i data-lucide="shield" class="w-4 h-4 text-blue-500"></i>
+                            Admin Girişi (Drive Yazma Yetkisi)
+                        </h3>
+                        <p class="text-xs text-gray-400 mb-2">Admin şifresi ile giriş yapıldığında eşleştirme Drive'a kaydedilebilir.</p>
+                        <div class="flex gap-2">
+                            <input type="password" id="adminPinInput" placeholder="Admin şifresi" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                            <button onclick="Projection.adminLogin()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">Giriş</button>
+                            <button onclick="Projection.adminLogout()" class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm text-gray-500">Çıkış</button>
+                        </div>
+                        <p id="adminStatusText" class="text-xs text-gray-400 mt-1.5">Admin girişi yapılmadı</p>
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <p class="text-[10px] text-gray-300 mb-1">Yeni admin şifresi belirle (sadece admin):</p>
+                            <div class="flex gap-2">
+                                <input type="password" id="newAdminPinInput" placeholder="Yeni şifre" class="flex-1 px-2 py-1.5 border border-gray-200 rounded-lg text-xs">
+                                <button onclick="Projection.changeAdminPin()" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-xs">Değiştir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-6 flex justify-end space-x-3">
                     <button onclick="Analytics.closeModal('settingsModal')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                         İptal
@@ -1348,7 +1371,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Apartment Matching Modal -->
     <div id="aptMatchingModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden animate-slide-up">
@@ -1373,7 +1396,10 @@
                 <span class="text-xs text-gray-400" id="aptMatchingSummary"></span>
                 <div class="flex gap-2">
                     <button onclick="Analytics.closeModal('aptMatchingModal')" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-100 transition">İptal</button>
-                    <button onclick="Projection.saveMatching()" class="px-4 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">Kaydet & Uygula</button>
+                    <button onclick="Projection.saveMatching()" class="px-4 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">Sadece Lokal Kaydet</button>
+                    <button id="aptMatchDriveBtn" onclick="Projection.saveMatchingToDrive()" class="px-4 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition hidden">
+                        <span class="flex items-center gap-1"><i data-lucide="cloud-upload" class="w-3 h-3"></i> Drive'a Kaydet</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1986,6 +2012,15 @@
                 Analytics.validateData();
                 Analytics.filteredData = data;
                 Analytics.processData();
+
+                // Drive'dan gelen mapping'i localStorage'a da sync et
+                if (data.aptMapping && Object.keys(data.aptMapping).length > 0) {
+                    localStorage.setItem('projAptMapping', JSON.stringify(data.aptMapping));
+                    // Projeksiyon varsa eşleştirme durumunu güncelle
+                    if (typeof Projection !== 'undefined') {
+                        Projection.checkMatchingStatus();
+                    }
+                }
 
                 const now = new Date().toLocaleTimeString('tr-TR');
                 this.showMessage('Drive\'dan yüklendi! (' + now + ')', 'success');
@@ -2959,13 +2994,21 @@
         MAPPING_KEY: 'projAptMapping',
 
         loadMapping() {
+            // Önce Analytics.data'dan (Drive sync), yoksa localStorage'dan
             try {
+                if (Analytics.data?.aptMapping && Object.keys(Analytics.data.aptMapping).length > 0) {
+                    return Analytics.data.aptMapping;
+                }
                 return JSON.parse(localStorage.getItem(this.MAPPING_KEY) || '{}');
             } catch { return {}; }
         },
 
         saveMapping(mapping) {
             localStorage.setItem(this.MAPPING_KEY, JSON.stringify(mapping));
+            // Analytics.data'ya da yaz (Drive'a kaydedilecek)
+            if (Analytics.data) {
+                Analytics.data.aptMapping = mapping;
+            }
         },
 
         // PMS'deki oda numaralarını alır
@@ -3121,6 +3164,13 @@
             if (summary) summary.textContent = matched + ' / ' + pmsIds.length + ' eşleşti';
 
             Analytics.showModal('aptMatchingModal');
+
+            // Admin ise Drive'a Kaydet butonunu göster
+            const driveBtn = document.getElementById('aptMatchDriveBtn');
+            if (driveBtn) {
+                driveBtn.classList.toggle('hidden', !this.isAdmin());
+            }
+
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
@@ -3156,6 +3206,105 @@
             if (summary) summary.textContent = matchedCount + ' / ' + allSelects.length + ' eşleşti';
         },
 
+        adminAuthenticated: false,
+
+        // Basit hash fonksiyonu (SHA-256 benzeri, güvenlik için yeterli)
+        async hashPin(pin) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(pin + '_lagirio_salt_2024');
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        },
+
+        async adminLogin() {
+            const input = document.getElementById('adminPinInput');
+            const pin = input?.value?.trim();
+            if (!pin) return;
+
+            const storedHash = Analytics.data?.adminPinHash;
+            if (!storedHash) {
+                // İlk kez şifre belirleniyor
+                const hash = await this.hashPin(pin);
+                if (!Analytics.data) Analytics.data = {};
+                Analytics.data.adminPinHash = hash;
+                this.adminAuthenticated = true;
+
+                // Drive'a kaydet
+                if (GoogleDrive.accessToken && GoogleDrive.getConfig().fileId) {
+                    await GoogleDrive.saveToDrive();
+                }
+
+                if (typeof Analytics.showToast === 'function') {
+                    Analytics.showToast('Admin şifresi oluşturuldu ve giriş yapıldı!', 'success');
+                }
+            } else {
+                const hash = await this.hashPin(pin);
+                if (hash === storedHash) {
+                    this.adminAuthenticated = true;
+                    if (typeof Analytics.showToast === 'function') {
+                        Analytics.showToast('Admin girişi başarılı!', 'success');
+                    }
+                } else {
+                    this.adminAuthenticated = false;
+                    if (typeof Analytics.showToast === 'function') {
+                        Analytics.showToast('Yanlış şifre!', 'error');
+                    }
+                }
+            }
+
+            if (input) input.value = '';
+            const statusEl = document.getElementById('adminStatusText');
+            if (statusEl) {
+                statusEl.textContent = this.adminAuthenticated ? 'Admin oturumu aktif' : 'Yanlış şifre';
+                statusEl.className = 'text-xs ' + (this.adminAuthenticated ? 'text-emerald-600 font-semibold' : 'text-red-500');
+            }
+        },
+
+        adminLogout() {
+            this.adminAuthenticated = false;
+            const statusEl = document.getElementById('adminStatusText');
+            if (statusEl) {
+                statusEl.textContent = 'Admin oturumu kapatıldı';
+                statusEl.className = 'text-xs text-gray-400';
+            }
+            if (typeof Analytics.showToast === 'function') {
+                Analytics.showToast('Admin oturumu kapatıldı', 'info');
+            }
+        },
+
+        async changeAdminPin() {
+            if (!this.adminAuthenticated) {
+                if (typeof Analytics.showToast === 'function') {
+                    Analytics.showToast('Önce admin girişi yapın!', 'error');
+                }
+                return;
+            }
+            const input = document.getElementById('newAdminPinInput');
+            const newPin = input?.value?.trim();
+            if (!newPin || newPin.length < 4) {
+                if (typeof Analytics.showToast === 'function') {
+                    Analytics.showToast('Şifre en az 4 karakter olmalı!', 'error');
+                }
+                return;
+            }
+            const hash = await this.hashPin(newPin);
+            Analytics.data.adminPinHash = hash;
+
+            if (GoogleDrive.accessToken && GoogleDrive.getConfig().fileId) {
+                await GoogleDrive.saveToDrive();
+            }
+
+            if (input) input.value = '';
+            if (typeof Analytics.showToast === 'function') {
+                Analytics.showToast('Admin şifresi değiştirildi!', 'success');
+            }
+        },
+
+        isAdmin() {
+            return this.adminAuthenticated;
+        },
+
         saveMatching() {
             const mapping = {};
             document.querySelectorAll('.apt-match-select').forEach(sel => {
@@ -3171,6 +3320,35 @@
             if (typeof Analytics.showToast === 'function') {
                 const count = Object.keys(mapping).length;
                 Analytics.showToast(count + ' daire eşleştirmesi kaydedildi!', 'success');
+            }
+        },
+
+        async saveMatchingToDrive() {
+            if (!this.isAdmin()) {
+                if (typeof Analytics.showToast === 'function') {
+                    Analytics.showToast('Drive\'a kaydetme yetkisi sadece admin kullanıcılara aittir.', 'error');
+                }
+                return;
+            }
+
+            // Önce mapping'i kaydet
+            const mapping = {};
+            document.querySelectorAll('.apt-match-select').forEach(sel => {
+                const pmsId = sel.dataset.pmsId;
+                if (sel.value) mapping[pmsId] = sel.value;
+            });
+            this.saveMapping(mapping);
+
+            // Drive'a kaydet
+            if (GoogleDrive.accessToken && GoogleDrive.getConfig().fileId) {
+                await GoogleDrive.saveToDrive();
+            }
+
+            Analytics.closeModal('aptMatchingModal');
+            this.calculate();
+
+            if (typeof Analytics.showToast === 'function') {
+                Analytics.showToast('Eşleştirme Drive\'a kaydedildi! Tüm kullanıcılar görecek.', 'success');
             }
         }
     };
@@ -6223,6 +6401,12 @@
         
         // Settings
         showSettings() {
+            // Admin durumunu göster
+            const adminStatus = document.getElementById('adminStatusText');
+            if (adminStatus) {
+                adminStatus.textContent = Projection.adminAuthenticated ? 'Admin oturumu aktif' : 'Admin girişi yapılmadı';
+                adminStatus.className = 'text-xs ' + (Projection.adminAuthenticated ? 'text-emerald-600 font-semibold' : 'text-gray-400');
+            }
             this.showModal('settingsModal');
         },
         
