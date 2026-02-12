@@ -17,6 +17,10 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Identity Services + API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
     
     <script>
         // Tailwind config
@@ -195,6 +199,10 @@
         /* ========= APP WRAPPER ========= */
         .app-wrapper { display: none; }
         .app-wrapper.active { display: block; animation: fadeIn 0.4s ease-out; }
+
+        /* ========= UPLOAD PANELS ========= */
+        .upload-panel.hidden { display: none; }
+        .upload-tab.active { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: white !important; border-color: transparent !important; box-shadow: 0 4px 12px rgba(22,163,74,0.3) !important; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-[#faf6f0] via-[#fdfcfa] to-[#faf6f0] font-inter min-h-screen">
@@ -296,6 +304,11 @@
                         <span class="hidden sm:inline">Excel</span>
                     </button>
                     
+                    <button onclick="GoogleDrive.saveToDrive()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Google Drive'a Kaydet">
+                        <i data-lucide="hard-drive" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Drive</span>
+                    </button>
+
                     <button onclick="Analytics.showSettings()" class="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
                         <i data-lucide="settings" class="w-5 h-5"></i>
                     </button>
@@ -312,26 +325,42 @@
     </header>
     
     <!-- Upload Section -->
-    <div id="uploadSection" class="container mx-auto px-4 py-12">
-        <div class="max-w-2xl mx-auto">
-            <div class="glass rounded-2xl shadow-2xl p-8 animate-fade-in">
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full mb-4 shadow-lg">
-                        <i data-lucide="upload-cloud" class="w-10 h-10 text-white"></i>
-                    </div>
-                    <h2 class="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent mb-2">
-                        Veri Yükleme Merkezi
-                    </h2>
-                    <p class="text-gray-600">JSON dosyanızı yükleyerek güçlü analizlere başlayın</p>
+    <div id="uploadSection" class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- Section Title -->
+            <div class="text-center mb-8 animate-fade-in">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full mb-4 shadow-lg">
+                    <i data-lucide="upload-cloud" class="w-10 h-10 text-white"></i>
                 </div>
-                
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent mb-2">
+                    Veri Yükleme Merkezi
+                </h2>
+                <p class="text-gray-500">Verilerinizi yükleyerek güçlü analizlere başlayın</p>
+            </div>
+
+            <!-- Upload Tabs -->
+            <div class="flex justify-center gap-2 mb-6">
+                <button onclick="UploadUI.switchTab('json')" id="uploadTab-json" class="upload-tab active px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-emerald-600 text-white shadow-lg">
+                    <i data-lucide="file-json" class="w-4 h-4"></i> JSON Dosya
+                </button>
+                <button onclick="UploadUI.switchTab('drive')" id="uploadTab-drive" class="upload-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600">
+                    <i data-lucide="hard-drive" class="w-4 h-4"></i> Google Drive
+                </button>
+                <button onclick="UploadUI.switchTab('html')" id="uploadTab-html" class="upload-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600">
+                    <i data-lucide="table" class="w-4 h-4"></i> PMS Rezervasyon
+                </button>
+            </div>
+
+            <!-- ===== JSON Upload Panel ===== -->
+            <div id="uploadPanel-json" class="upload-panel glass rounded-2xl shadow-2xl p-8 animate-fade-in">
                 <div id="uploadArea" class="border-2 border-dashed border-emerald-300 rounded-xl py-12 px-6 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all cursor-pointer group">
                     <div class="text-center">
                         <i data-lucide="folder-open" class="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Dosya Seçin veya Sürükleyin</h3>
-                        <p class="text-sm text-gray-500 mb-4">JSON formatında dışa aktarılmış veri dosyanız</p>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">JSON Dosya Seçin veya Sürükleyin</h3>
+                        <p class="text-sm text-gray-500 mb-4">Daire, rezervasyon ve gider verilerini içeren JSON dosyası</p>
                         <input type="file" id="fileInput" accept=".json" class="hidden">
-                        
+
                         <div class="flex items-center justify-center space-x-4 mt-6">
                             <button class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2">
                                 <i data-lucide="upload" class="w-4 h-4"></i>
@@ -344,26 +373,138 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="mt-6 grid grid-cols-3 gap-4">
-                    <div class="text-center">
-                        <div class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 rounded-full mb-2">
-                            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
-                        </div>
-                        <p class="text-xs text-gray-600">Güvenli İşlem</p>
+            </div>
+
+            <!-- ===== Google Drive Panel ===== -->
+            <div id="uploadPanel-drive" class="upload-panel glass rounded-2xl shadow-2xl p-8 hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                        <i data-lucide="hard-drive" class="w-8 h-8 text-blue-600"></i>
                     </div>
-                    <div class="text-center">
-                        <div class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 rounded-full mb-2">
-                            <i data-lucide="zap" class="w-5 h-5 text-emerald-600"></i>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Google Drive Bağlantısı</h3>
+                    <p class="text-sm text-gray-500">Verilerinizi Google Drive'da saklayın ve her yerden erişin</p>
+                </div>
+
+                <!-- Google Drive Status -->
+                <div id="driveStatus" class="mb-6">
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-amber-800">Yapılandırma Gerekli</p>
+                            <p class="text-xs text-amber-600 mt-1">Google Drive bağlantısı için Google Cloud Console'dan bir OAuth2 Client ID oluşturmanız gerekir.</p>
                         </div>
-                        <p class="text-xs text-gray-600">Hızlı Analiz</p>
                     </div>
+                </div>
+
+                <!-- Drive Config -->
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Google Client ID</label>
+                        <input type="text" id="driveClientId" placeholder="xxxx.apps.googleusercontent.com"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               onchange="GoogleDrive.saveConfig()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Drive Dosya ID (opsiyonel)</label>
+                        <input type="text" id="driveFileId" placeholder="Mevcut dosya ID'si (boş bırakırsanız yeni oluşturulur)"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               onchange="GoogleDrive.saveConfig()">
+                    </div>
+                </div>
+
+                <!-- Drive Actions -->
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button onclick="GoogleDrive.connect()" id="driveConnectBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:shadow-lg transition font-semibold">
+                        <i data-lucide="link" class="w-4 h-4"></i>
+                        Google ile Bağlan
+                    </button>
+                    <button onclick="GoogleDrive.loadFromDrive()" id="driveLoadBtn" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl flex items-center gap-2 hover:border-blue-300 hover:text-blue-600 transition font-semibold disabled:opacity-50" disabled>
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Drive'dan Yükle
+                    </button>
+                    <button onclick="GoogleDrive.saveToDrive()" id="driveSaveBtn" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl flex items-center gap-2 hover:border-emerald-300 hover:text-emerald-600 transition font-semibold disabled:opacity-50" disabled>
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        Drive'a Kaydet
+                    </button>
+                </div>
+                <p id="driveMessage" class="text-center text-sm mt-4 hidden"></p>
+            </div>
+
+            <!-- ===== PMS HTML Reservation Panel ===== -->
+            <div id="uploadPanel-html" class="upload-panel glass rounded-2xl shadow-2xl p-8 hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                        <i data-lucide="calendar-plus" class="w-8 h-8 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">PMS Rezervasyon Yükleme</h3>
+                    <p class="text-sm text-gray-500">Zirkon veya PMS sisteminden dışa aktarılan HTML dosyalarını yükleyin</p>
+                </div>
+
+                <div id="htmlUploadArea" class="border-2 border-dashed border-purple-300 rounded-xl py-10 px-6 hover:border-purple-500 hover:bg-purple-50/50 transition-all cursor-pointer group mb-4"
+                     onclick="document.getElementById('htmlFileInput').click()">
                     <div class="text-center">
-                        <div class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 rounded-full mb-2">
-                            <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-600"></i>
-                        </div>
-                        <p class="text-xs text-gray-600">Detaylı Raporlar</p>
+                        <i data-lucide="file-code" class="w-10 h-10 text-purple-400 mx-auto mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="text-base font-semibold text-gray-700 mb-1">HTML Dosya Sürükleyin veya Seçin</h3>
+                        <p class="text-xs text-gray-500">.html / .htm formatında PMS tablo dışa aktarması</p>
                     </div>
+                </div>
+                <input type="file" id="htmlFileInput" accept=".html,.htm" class="hidden" multiple onchange="HTMLReservations.handleFiles(event)">
+
+                <!-- Import Status -->
+                <div id="htmlImportStatus" class="hidden mb-4"></div>
+
+                <!-- Loaded Files List -->
+                <div id="htmlFilesList" class="hidden mb-4">
+                    <h4 class="text-sm font-bold text-gray-600 mb-2 flex items-center gap-2">
+                        <i data-lucide="files" class="w-4 h-4"></i> Yüklenen Dosyalar
+                    </h4>
+                    <div id="htmlFilesListContent" class="space-y-2"></div>
+                </div>
+
+                <!-- Reservation Stats (shown after import) -->
+                <div id="htmlResStats" class="hidden">
+                    <!-- Tabs: Future / Past -->
+                    <div class="flex gap-2 mb-4">
+                        <button onclick="HTMLReservations.switchTab('future')" id="resTab-future" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white transition-all">
+                            📅 Gelecek Rezervasyonlar <span id="resFutureCount" class="ml-1 text-xs">(0)</span>
+                        </button>
+                        <button onclick="HTMLReservations.switchTab('past')" id="resTab-past" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-gray-600 border border-gray-200 transition-all">
+                            📜 Geçmiş Rezervasyonlar <span id="resPastCount" class="ml-1 text-xs">(0)</span>
+                        </button>
+                    </div>
+
+                    <!-- Reservation List -->
+                    <div id="htmlResList" class="max-h-[400px] overflow-y-auto space-y-2"></div>
+                </div>
+
+                <!-- Merge to Analytics Button -->
+                <div id="htmlMergeSection" class="hidden mt-4 pt-4 border-t border-gray-200">
+                    <button onclick="HTMLReservations.mergeToAnalytics()" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition">
+                        <i data-lucide="merge" class="w-4 h-4"></i>
+                        Analize Aktar ve Dashboard'a Git
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Feature Icons -->
+            <div class="mt-6 grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 rounded-full mb-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <p class="text-xs text-gray-600">Güvenli İşlem</p>
+                </div>
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 rounded-full mb-2">
+                        <i data-lucide="zap" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <p class="text-xs text-gray-600">Hızlı Analiz</p>
+                </div>
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 rounded-full mb-2">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <p class="text-xs text-gray-600">Detaylı Raporlar</p>
                 </div>
             </div>
         </div>
@@ -1246,6 +1387,577 @@
             document.getElementById('appWrapper').classList.add('active');
             lucide.createIcons();
             Analytics.init();
+            GoogleDrive.loadConfig();
+            HTMLReservations.init();
+        }
+    };
+
+    // ============================================================
+    // UPLOAD UI - Tab Switching
+    // ============================================================
+    const UploadUI = {
+        switchTab(tab) {
+            document.querySelectorAll('.upload-tab').forEach(t => {
+                t.classList.remove('active');
+                t.className = t.className.replace(/bg-emerald-600 text-white shadow-lg/g, 'bg-white text-gray-600 border border-gray-200');
+            });
+            document.querySelectorAll('.upload-panel').forEach(p => p.classList.add('hidden'));
+
+            const btn = document.getElementById('uploadTab-' + tab);
+            if (btn) {
+                btn.classList.add('active');
+            }
+            const panel = document.getElementById('uploadPanel-' + tab);
+            if (panel) {
+                panel.classList.remove('hidden');
+                panel.style.animation = 'fadeIn 0.3s ease-out';
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    };
+
+    // ============================================================
+    // GOOGLE DRIVE - Veri Kaydetme/Yükleme
+    // ============================================================
+    const GoogleDrive = {
+        STORAGE_KEY: 'lagirioDriveConfig',
+        accessToken: null,
+        tokenClient: null,
+
+        saveConfig() {
+            const config = {
+                clientId: document.getElementById('driveClientId')?.value || '',
+                fileId: document.getElementById('driveFileId')?.value || ''
+            };
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
+        },
+
+        loadConfig() {
+            try {
+                const saved = localStorage.getItem(this.STORAGE_KEY);
+                if (saved) {
+                    const config = JSON.parse(saved);
+                    const clientEl = document.getElementById('driveClientId');
+                    const fileEl = document.getElementById('driveFileId');
+                    if (clientEl && config.clientId) clientEl.value = config.clientId;
+                    if (fileEl && config.fileId) fileEl.value = config.fileId;
+                    return config;
+                }
+            } catch(e) {}
+            return { clientId: '', fileId: '' };
+        },
+
+        showMessage(text, type) {
+            const el = document.getElementById('driveMessage');
+            if (!el) return;
+            el.textContent = text;
+            el.className = 'text-center text-sm mt-4 font-medium ' +
+                (type === 'error' ? 'text-red-600' : type === 'success' ? 'text-emerald-600' : 'text-blue-600');
+            el.classList.remove('hidden');
+        },
+
+        connect() {
+            const config = this.loadConfig();
+            if (!config.clientId) {
+                this.showMessage('Lütfen Google Client ID girin!', 'error');
+                return;
+            }
+
+            try {
+                this.tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: config.clientId,
+                    scope: 'https://www.googleapis.com/auth/drive.file',
+                    callback: (response) => {
+                        if (response.error) {
+                            this.showMessage('Bağlantı hatası: ' + response.error, 'error');
+                            return;
+                        }
+                        this.accessToken = response.access_token;
+                        document.getElementById('driveLoadBtn').disabled = false;
+                        document.getElementById('driveSaveBtn').disabled = false;
+                        document.getElementById('driveConnectBtn').innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Bağlı';
+                        document.getElementById('driveConnectBtn').classList.remove('from-blue-500', 'to-blue-600');
+                        document.getElementById('driveConnectBtn').classList.add('from-emerald-500', 'to-emerald-600');
+                        this.showMessage('Google Drive bağlantısı başarılı!', 'success');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                });
+                this.tokenClient.requestAccessToken();
+            } catch(e) {
+                this.showMessage('Google API yüklenemedi. Sayfayı yenileyin.', 'error');
+            }
+        },
+
+        async saveToDrive() {
+            if (!this.accessToken) {
+                this.showMessage('Önce Google ile bağlanın!', 'error');
+                return;
+            }
+            if (!Analytics.data) {
+                this.showMessage('Kaydedilecek veri yok. Önce veri yükleyin.', 'error');
+                return;
+            }
+
+            this.showMessage('Kaydediliyor...', 'info');
+            const config = this.loadConfig();
+            const fileContent = JSON.stringify(Analytics.data, null, 2);
+            const metadata = {
+                name: 'lagirio-analiz-data.json',
+                mimeType: 'application/json'
+            };
+
+            try {
+                const boundary = '-------314159265358979323846';
+                const body = '--' + boundary + '\r\n' +
+                    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                    JSON.stringify(metadata) + '\r\n' +
+                    '--' + boundary + '\r\n' +
+                    'Content-Type: application/json\r\n\r\n' +
+                    fileContent + '\r\n' +
+                    '--' + boundary + '--';
+
+                let url, method;
+                if (config.fileId) {
+                    url = 'https://www.googleapis.com/upload/drive/v3/files/' + config.fileId + '?uploadType=multipart';
+                    method = 'PATCH';
+                } else {
+                    url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+                    method = 'POST';
+                }
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': 'Bearer ' + this.accessToken,
+                        'Content-Type': 'multipart/related; boundary=' + boundary
+                    },
+                    body
+                });
+
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const result = await response.json();
+
+                if (!config.fileId && result.id) {
+                    document.getElementById('driveFileId').value = result.id;
+                    this.saveConfig();
+                }
+
+                this.showMessage('Drive\'a kaydedildi! (ID: ' + result.id + ')', 'success');
+            } catch(e) {
+                this.showMessage('Kaydetme hatası: ' + e.message, 'error');
+            }
+        },
+
+        async loadFromDrive() {
+            if (!this.accessToken) {
+                this.showMessage('Önce Google ile bağlanın!', 'error');
+                return;
+            }
+
+            const config = this.loadConfig();
+            if (!config.fileId) {
+                this.showMessage('Lütfen yüklemek için Drive Dosya ID girin!', 'error');
+                return;
+            }
+
+            this.showMessage('Yükleniyor...', 'info');
+            try {
+                const response = await fetch(
+                    'https://www.googleapis.com/drive/v3/files/' + config.fileId + '?alt=media',
+                    { headers: { 'Authorization': 'Bearer ' + this.accessToken } }
+                );
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                const data = await response.json();
+                Analytics.data = data;
+                Analytics.validateData();
+                Analytics.filteredData = data;
+                Analytics.processData();
+                this.showMessage('Drive\'dan veri yüklendi!', 'success');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive\'dan veri yüklendi!', 'success');
+            } catch(e) {
+                this.showMessage('Yükleme hatası: ' + e.message, 'error');
+            }
+        }
+    };
+
+    // ============================================================
+    // HTML RESERVATIONS - PMS HTML Import
+    // ============================================================
+    const HTMLReservations = {
+        reservations: [],
+        uploadedFiles: [],
+        currentTab: 'future',
+
+        init() {
+            const saved = localStorage.getItem('pmsReservations');
+            if (saved) {
+                try { this.reservations = JSON.parse(saved); } catch(e) {}
+            }
+            const savedFiles = localStorage.getItem('pmsUploadedFiles');
+            if (savedFiles) {
+                try { this.uploadedFiles = JSON.parse(savedFiles); } catch(e) {}
+            }
+            this.renderUI();
+
+            // Drag & drop
+            const area = document.getElementById('htmlUploadArea');
+            if (area) {
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.classList.add('border-purple-500', 'bg-purple-50/50');
+                });
+                area.addEventListener('dragleave', () => {
+                    area.classList.remove('border-purple-500', 'bg-purple-50/50');
+                });
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('border-purple-500', 'bg-purple-50/50');
+                    const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.html') || f.name.endsWith('.htm'));
+                    if (files.length > 0) this.processFiles(files);
+                });
+            }
+        },
+
+        handleFiles(event) {
+            const files = Array.from(event.target.files);
+            if (files.length > 0) this.processFiles(files);
+            event.target.value = '';
+        },
+
+        async processFiles(files) {
+            const statusEl = document.getElementById('htmlImportStatus');
+            statusEl.innerHTML = '<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700 flex items-center gap-2"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> İşleniyor...</div>';
+            statusEl.classList.remove('hidden');
+
+            let totalAdded = 0;
+            let totalSkipped = 0;
+
+            for (const file of files) {
+                try {
+                    const htmlContent = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = reject;
+                        reader.readAsText(file);
+                    });
+
+                    const { reservations: parsed, skipped } = this.parseHTML(htmlContent);
+
+                    // Remove old reservations from same file
+                    this.reservations = this.reservations.filter(r => r.sourceFile !== file.name);
+                    this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== file.name);
+
+                    // Add new
+                    const withSource = parsed.map(r => ({ ...r, sourceFile: file.name }));
+                    this.reservations.push(...withSource);
+                    this.uploadedFiles.push({
+                        name: file.name,
+                        uploadDate: new Date().toISOString(),
+                        count: parsed.length,
+                        skipped
+                    });
+
+                    totalAdded += parsed.length;
+                    totalSkipped += skipped.noApartment + skipped.noPrice + skipped.invalidDate;
+                } catch(e) {
+                    console.error('HTML parse error:', e);
+                }
+            }
+
+            this.save();
+            this.renderUI();
+
+            const msg = totalAdded > 0
+                ? `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-sm text-emerald-700">✅ ${totalAdded} rezervasyon yüklendi!${totalSkipped > 0 ? ' (' + totalSkipped + ' atlanan)' : ''}</div>`
+                : `<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-700">⚠️ Geçerli rezervasyon bulunamadı. (${totalSkipped} satır atlandı)</div>`;
+            statusEl.innerHTML = msg;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        parseHTML(htmlContent) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            const rows = doc.querySelectorAll('tr');
+            const reservationsList = [];
+            const skipped = { noPrice: 0, noApartment: 0, invalidDate: 0 };
+
+            const parseDate = (dateStr) => {
+                if (!dateStr) return null;
+                let m = dateStr.match(/(\d{2})\.(\d{2})\.(\d{4})\s*(\d{2})?:?(\d{2})?/);
+                if (m) return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||12), +(m[5]||0));
+                m = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+                if (m) return new Date(+m[1], +m[2]-1, +m[3], 12, 0);
+                m = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+                if (m) return new Date(+m[3], +m[2]-1, +m[1], 12, 0);
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? null : d;
+            };
+
+            const parsePrice = (s) => {
+                if (!s) return 0;
+                return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
+            };
+
+            const convertToEUR = (amount, currency) => {
+                const c = (currency || 'EUR').toUpperCase();
+                if (c === 'EUR') return amount;
+                if (c === 'TRY' || c === 'TL') return amount / 37.5;
+                if (c === 'USD' || c === '$') return amount * 0.92;
+                if (c === 'GBP' || c === '\u00a3') return amount * 1.17;
+                return amount;
+            };
+
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 8) return;
+
+                let roomNo, agency, guestName, checkInStr, checkOutStr, adults, children, currency, totalPrice;
+
+                if (cells.length >= 10) {
+                    roomNo = cells[1]?.textContent?.trim();
+                    agency = cells[2]?.textContent?.trim();
+                    guestName = cells[3]?.textContent?.trim();
+                    checkInStr = cells[4]?.textContent?.trim();
+                    checkOutStr = cells[5]?.textContent?.trim();
+                    adults = parseInt(cells[6]?.textContent?.trim()) || 0;
+                    children = parseInt(cells[7]?.textContent?.trim()) || 0;
+                    currency = cells[8]?.textContent?.trim() || 'EUR';
+                    totalPrice = parsePrice(cells[9]?.textContent?.trim());
+                } else {
+                    roomNo = cells[1]?.textContent?.trim();
+                    agency = cells[2]?.textContent?.trim();
+                    guestName = cells[3]?.textContent?.trim();
+                    checkInStr = cells[4]?.textContent?.trim();
+                    checkOutStr = cells[5]?.textContent?.trim();
+                    adults = parseInt(cells[6]?.textContent?.trim()) || 0;
+                    children = parseInt(cells[7]?.textContent?.trim()) || 0;
+                    currency = 'EUR';
+                    totalPrice = 0;
+                }
+
+                if (!roomNo || !checkInStr || !agency) return;
+                if (totalPrice <= 0) { skipped.noPrice++; return; }
+
+                const checkIn = parseDate(checkInStr);
+                const checkOut = parseDate(checkOutStr);
+                if (!checkIn || !checkOut) { skipped.invalidDate++; return; }
+
+                const nights = Math.max(1, Math.ceil((checkOut - checkIn) / 86400000));
+                const priceInEUR = convertToEUR(totalPrice, currency);
+
+                let platform = (agency || '').toUpperCase();
+                if (platform.includes('AIRBNB')) platform = 'Airbnb';
+                else if (platform.includes('BOOKING')) platform = 'Booking.com';
+                else if (platform.includes('WALKIN') || platform.includes('WALK')) platform = 'Direkt';
+                else if (platform.includes('ONLINE')) platform = 'Online';
+                else platform = agency;
+
+                reservationsList.push({
+                    id: 'pms-' + Date.now() + '-' + index,
+                    apartmentId: roomNo,
+                    platform,
+                    guestName: guestName || '',
+                    checkIn: checkIn.toISOString(),
+                    checkOut: checkOut.toISOString(),
+                    nights,
+                    adults,
+                    children,
+                    currency: 'EUR',
+                    originalCurrency: currency,
+                    originalPrice: totalPrice,
+                    totalPrice: Math.round(priceInEUR * 100) / 100,
+                    pricePerNight: Math.round((priceInEUR / nights) * 100) / 100
+                });
+            });
+
+            return { reservations: reservationsList, skipped };
+        },
+
+        save() {
+            localStorage.setItem('pmsReservations', JSON.stringify(this.reservations));
+            localStorage.setItem('pmsUploadedFiles', JSON.stringify(this.uploadedFiles));
+        },
+
+        switchTab(tab) {
+            this.currentTab = tab;
+            document.getElementById('resTab-future').className = tab === 'future'
+                ? 'flex-1 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white transition-all'
+                : 'flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-gray-600 border border-gray-200 transition-all';
+            document.getElementById('resTab-past').className = tab === 'past'
+                ? 'flex-1 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white transition-all'
+                : 'flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-gray-600 border border-gray-200 transition-all';
+            this.renderReservationList();
+        },
+
+        renderUI() {
+            // Files list
+            const filesEl = document.getElementById('htmlFilesList');
+            const filesContent = document.getElementById('htmlFilesListContent');
+            if (this.uploadedFiles.length > 0 && filesEl && filesContent) {
+                filesEl.classList.remove('hidden');
+                filesContent.innerHTML = this.uploadedFiles.map(f => `
+                    <div class="flex items-center justify-between bg-white rounded-lg px-3 py-2 text-sm border border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-purple-500">📄</span>
+                            <span class="font-medium">${f.name}</span>
+                            <span class="text-xs text-gray-400">${f.count} rez.</span>
+                        </div>
+                        <button onclick="HTMLReservations.removeFile('${f.name}')" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                    </div>
+                `).join('');
+            } else if (filesEl) {
+                filesEl.classList.add('hidden');
+            }
+
+            // Stats & list
+            const statsEl = document.getElementById('htmlResStats');
+            const mergeEl = document.getElementById('htmlMergeSection');
+            if (this.reservations.length > 0) {
+                if (statsEl) statsEl.classList.remove('hidden');
+                if (mergeEl) mergeEl.classList.remove('hidden');
+
+                const today = new Date(); today.setHours(0,0,0,0);
+                const future = this.reservations.filter(r => new Date(r.checkIn) >= today);
+                const past = this.reservations.filter(r => new Date(r.checkIn) < today);
+                document.getElementById('resFutureCount').textContent = '(' + future.length + ')';
+                document.getElementById('resPastCount').textContent = '(' + past.length + ')';
+                this.renderReservationList();
+            } else {
+                if (statsEl) statsEl.classList.add('hidden');
+                if (mergeEl) mergeEl.classList.add('hidden');
+            }
+        },
+
+        renderReservationList() {
+            const el = document.getElementById('htmlResList');
+            if (!el) return;
+            const today = new Date(); today.setHours(0,0,0,0);
+
+            const filtered = this.reservations.filter(r => {
+                const d = new Date(r.checkIn); d.setHours(0,0,0,0);
+                return this.currentTab === 'future' ? d >= today : d < today;
+            }).sort((a, b) => {
+                const da = new Date(a.checkIn), db = new Date(b.checkIn);
+                return this.currentTab === 'future' ? da - db : db - da;
+            });
+
+            if (filtered.length === 0) {
+                el.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">Rezervasyon bulunamadı</div>';
+                return;
+            }
+
+            // Group by month
+            const groups = {};
+            filtered.forEach(r => {
+                const d = new Date(r.checkIn);
+                const key = d.getFullYear() + '-' + (d.getMonth()+1);
+                const monthNames = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+                if (!groups[key]) groups[key] = { label: monthNames[d.getMonth()] + ' ' + d.getFullYear(), items: [], total: 0, nights: 0 };
+                groups[key].items.push(r);
+                groups[key].total += r.totalPrice || 0;
+                groups[key].nights += r.nights || 0;
+            });
+
+            el.innerHTML = Object.entries(groups).map(([key, g]) => `
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+                        <span class="font-semibold text-sm text-gray-700">📅 ${g.label}</span>
+                        <div class="flex gap-3 text-xs text-gray-500">
+                            <span>${g.items.length} rez.</span>
+                            <span>${g.nights} gece</span>
+                            <span class="font-semibold text-emerald-600">€${Math.round(g.total).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-gray-50">
+                        ${g.items.map(r => {
+                            const ci = new Date(r.checkIn);
+                            const co = new Date(r.checkOut);
+                            const fmt = d => d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear();
+                            return `<div class="flex items-center justify-between px-4 py-2.5 text-xs hover:bg-gray-50/50">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" style="background:${r.platform==='Airbnb'?'#fff0f0':r.platform==='Booking.com'?'#e8f0ff':'#f0fff0'};color:${r.platform==='Airbnb'?'#FF5A5F':r.platform==='Booking.com'?'#003580':'#16a34a'}">${r.platform}</span>
+                                    <span class="font-medium text-gray-700">${r.apartmentId}</span>
+                                    <span class="text-gray-400">${r.guestName || '-'}</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-gray-500">
+                                    <span>${fmt(ci)} → ${fmt(co)}</span>
+                                    <span>${r.nights}g</span>
+                                    <span class="font-bold text-gray-700">€${Math.round(r.totalPrice)}</span>
+                                    <span class="text-gray-400">€${r.pricePerNight}/g</span>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        },
+
+        removeFile(fileName) {
+            if (!confirm('"' + fileName + '" dosyasını ve rezervasyonlarını silmek istediğinizden emin misiniz?')) return;
+            this.reservations = this.reservations.filter(r => r.sourceFile !== fileName);
+            this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== fileName);
+            this.save();
+            this.renderUI();
+        },
+
+        mergeToAnalytics() {
+            if (this.reservations.length === 0) return;
+
+            // Convert PMS reservations to Analytics format
+            const converted = this.reservations.map(r => ({
+                id: r.id,
+                apartmentId: r.apartmentId,
+                guestName: r.guestName,
+                checkIn: r.checkIn.split('T')[0],
+                checkOut: r.checkOut.split('T')[0],
+                platform: r.platform,
+                totalAmount: r.totalPrice,
+                platformCommission: r.platform === 'Direkt' ? 0 : r.totalPrice * 0.15,
+                paymentMethod: 'Banka',
+                currency: 'EUR'
+            }));
+
+            if (!Analytics.data) {
+                // Create minimal data structure
+                Analytics.data = {
+                    apartments: [],
+                    reservations: converted,
+                    expenses: [],
+                    categories: ['Temizlik', 'Elektrik', 'Su', 'İnternet', 'Yönetim', 'Bakım'],
+                    capitalExpenses: []
+                };
+
+                // Auto-create apartments from reservation apartmentIds
+                const aptIds = [...new Set(converted.map(r => r.apartmentId))];
+                Analytics.data.apartments = aptIds.map(id => ({
+                    id, code: id, location: '', ownerName: '',
+                    systemType: '3', lagirioCommission: 15, taxRate: 8,
+                    incomeTaxRate: 0, stopajRate: 0
+                }));
+            } else {
+                // Merge: add new reservations, avoid duplicates by ID
+                const existingIds = new Set(Analytics.data.reservations.map(r => r.id));
+                const newOnes = converted.filter(r => !existingIds.has(r.id));
+                Analytics.data.reservations = [...Analytics.data.reservations, ...newOnes];
+
+                // Auto-create missing apartments
+                const existingAptIds = new Set(Analytics.data.apartments.map(a => a.id));
+                const newAptIds = [...new Set(newOnes.map(r => r.apartmentId))].filter(id => !existingAptIds.has(id));
+                for (const id of newAptIds) {
+                    Analytics.data.apartments.push({
+                        id, code: id, location: '', ownerName: '',
+                        systemType: '3', lagirioCommission: 15, taxRate: 8,
+                        incomeTaxRate: 0, stopajRate: 0
+                    });
+                }
+            }
+
+            Analytics.filteredData = Analytics.data;
+            Analytics.processData();
+            if (typeof Analytics.showToast === 'function') {
+                Analytics.showToast(converted.length + ' rezervasyon analize aktarıldı!', 'success');
+            }
         }
     };
 
