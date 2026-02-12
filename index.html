@@ -1130,19 +1130,19 @@
                 <!-- Projection Summary Cards -->
                 <div id="projSummaryCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 hidden">
                     <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
-                        <div class="text-sm opacity-80 mb-1">Tahmini Brüt Gelir</div>
+                        <div class="text-sm opacity-80 mb-1">Tahmini Aylık Brüt Gelir</div>
                         <div class="text-2xl font-bold" id="projGrossRevenue">€0</div>
-                        <div class="text-xs opacity-60 mt-1" id="projGrossDetail">Gelecek rezervasyonlar toplam</div>
+                        <div class="text-xs opacity-60 mt-1" id="projGrossDetail">Ort. gecelik × 25 gün/ay</div>
                     </div>
                     <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-5 text-white">
                         <div class="text-sm opacity-80 mb-1">Tahmini Giderler</div>
                         <div class="text-2xl font-bold" id="projExpenses">€0</div>
-                        <div class="text-xs opacity-60 mt-1" id="projExpenseDetail">Geçmiş gider oranına göre</div>
+                        <div class="text-xs opacity-60 mt-1" id="projExpenseDetail">Geçmiş gider/gelir oranından</div>
                     </div>
                     <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
                         <div class="text-sm opacity-80 mb-1">Lagirio Net Kazanç</div>
                         <div class="text-2xl font-bold" id="projLagirioNet">€0</div>
-                        <div class="text-xs opacity-60 mt-1" id="projLagirioDetail">Komisyon bazlı hesaplama</div>
+                        <div class="text-xs opacity-60 mt-1" id="projLagirioDetail">Sistem bazlı komisyon hesabı</div>
                     </div>
                     <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white">
                         <div class="text-sm opacity-80 mb-1">Ort. Gecelik Fiyat</div>
@@ -2433,6 +2433,11 @@
         },
 
         // ---- CORE: Projeksiyon Hesaplama ----
+        // Formül: Ort. gecelik fiyat × 25 gün = Tahmini aylık brüt gelir
+        // Gider & platform komisyonu geçmiş oranlarından tahmin edilir
+        // Lagirio kazancı her dairenin kendi sistemine göre calculateLagirioRevenue() ile hesaplanır
+        OCCUPANCY_DAYS: 25, // Ayda ortalama dolu gün varsayımı
+
         calculate() {
             const today = new Date(); today.setHours(0,0,0,0);
             const futureRes = this.reservations.filter(r => new Date(r.checkIn) >= today);
@@ -2444,93 +2449,121 @@
                 return;
             }
 
-            // --- 1. Geçmiş verilerden oranları hesapla ---
-            const historicalRatios = this.getHistoricalRatios();
+            // --- 1. Geçmiş verilerden daire bazlı oranları çek ---
+            const hist = this.getHistoricalRatios();
 
-            // --- 2. Gelecek rezervasyonları daire bazlı grupla ---
-            const byApartment = {};
+            // --- 2. Daire + Ay bazlı grupla ---
+            // key: "aptId|YYYY-MM"
+            const byAptMonth = {};
             futureRes.forEach(r => {
-                if (!byApartment[r.apartmentId]) byApartment[r.apartmentId] = [];
-                byApartment[r.apartmentId].push(r);
+                const d = new Date(r.checkIn);
+                const monthKey = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
+                const key = r.apartmentId + '|' + monthKey;
+                if (!byAptMonth[key]) byAptMonth[key] = { aptId: r.apartmentId, monthKey, reses: [] };
+                byAptMonth[key].reses.push(r);
             });
 
-            // --- 3. Her daire için projeksiyon hesapla ---
-            let totalGross = 0;
+            // --- 3. Her daire-ay çifti için projeksiyon hesapla ---
+            let totalEstGross = 0;
             let totalEstExpenses = 0;
             let totalLagirioNet = 0;
-            let totalNights = 0;
-            const apartmentResults = [];
-            const monthlyData = {};
+            let totalEstNights = 0;
+            const monthlyData = {};       // monthKey → { gross, expenses, lagirio, count }
+            const aptTotals = {};          // aptId → { gross, expenses, lagirio, months, avgNightly, count }
 
-            Object.entries(byApartment).forEach(([aptId, reses]) => {
+            Object.values(byAptMonth).forEach(({ aptId, monthKey, reses }) => {
                 const apartment = Analytics.data?.apartments?.find(a => a.id === aptId || a.code === aptId);
-                const aptGross = reses.reduce((s, r) => s + (r.totalPrice || 0), 0);
-                const aptNights = reses.reduce((s, r) => s + (r.nights || 0), 0);
 
-                // Tahmini gider: geçmiş expense/revenue oranına göre
-                const expRatio = historicalRatios.expenseRatio[aptId] || historicalRatios.avgExpenseRatio;
-                const aptEstExpenses = aptGross * expRatio;
+                // --- Ortalama gecelik fiyat ---
+                const nightlyPrices = reses
+                    .filter(r => r.pricePerNight > 0)
+                    .map(r => r.pricePerNight);
+                const avgNightly = nightlyPrices.length > 0
+                    ? nightlyPrices.reduce((a, b) => a + b, 0) / nightlyPrices.length
+                    : 0;
 
-                // Tahmini platform komisyon
-                const avgPlatformCommRate = historicalRatios.platformCommRate[aptId] || historicalRatios.avgPlatformCommRate;
-                const aptPlatformComm = aptGross * avgPlatformCommRate;
+                // --- Tahmini aylık brüt gelir = ort. gecelik × 25 ---
+                const estMonthlyGross = avgNightly * this.OCCUPANCY_DAYS;
 
-                // Lagirio kazancı hesapla
-                let lagirioNet = 0;
-                if (apartment) {
-                    // Gerçek hesaplama: fake reservation objeler oluştur
-                    const fakeReservations = reses.map(r => ({
-                        totalAmount: r.totalPrice || 0,
-                        currency: 'EUR',
-                        platformCommission: (r.totalPrice || 0) * avgPlatformCommRate,
-                        paymentMethod: 'Banka'
-                    }));
-                    const fakeExpenses = [{ amount: aptEstExpenses, currency: 'EUR' }];
-                    lagirioNet = Analytics.calculateLagirioRevenue
-                        ? Analytics.calculateLagirioRevenue(apartment, fakeReservations, fakeExpenses)
-                        : 0;
+                // --- Geçmiş oranlardan tahminler ---
+                const expRatio = hist.expenseRatio[aptId] ?? hist.avgExpenseRatio;
+                const platCommRatio = hist.platformCommRate[aptId] ?? hist.avgPlatformCommRate;
+                const bankCashRatio = hist.bankRatio[aptId] ?? hist.avgBankRatio; // banka gelir oranı
+
+                const estExpenses = estMonthlyGross * expRatio;
+                const estPlatformComm = estMonthlyGross * platCommRatio;
+
+                // --- Lagirio kazancı: calculateLagirioRevenue ile ---
+                let lagirioEarning = 0;
+                if (apartment && Analytics.calculateLagirioRevenue) {
+                    // Fake reservation: tüm gelir tek bir banka ödemesi olarak
+                    // Banka ve nakit oranlarını da geçmişe göre dağıt
+                    const bankAmount = estMonthlyGross * bankCashRatio;
+                    const cashAmount = estMonthlyGross * (1 - bankCashRatio);
+
+                    const fakeReservations = [];
+                    if (bankAmount > 0) {
+                        fakeReservations.push({
+                            totalAmount: bankAmount,
+                            currency: 'EUR',
+                            platformCommission: bankAmount * platCommRatio,
+                            paymentMethod: 'Banka',
+                            platform: 'Booking.com' // varsayılan
+                        });
+                    }
+                    if (cashAmount > 0) {
+                        fakeReservations.push({
+                            totalAmount: cashAmount,
+                            currency: 'EUR',
+                            platformCommission: cashAmount * platCommRatio,
+                            paymentMethod: 'Nakit',
+                            platform: 'Direkt'
+                        });
+                    }
+                    const fakeExpenses = [{ amount: estExpenses, currency: 'EUR' }];
+                    lagirioEarning = Analytics.calculateLagirioRevenue(apartment, fakeReservations, fakeExpenses);
                 } else {
-                    // Apartment tanımlı değilse basit hesap: %15 komisyon varsayımı
-                    lagirioNet = (aptGross - aptPlatformComm - aptEstExpenses) * 0.15;
+                    // Apartment tanımsızsa basit varsayım: %15
+                    lagirioEarning = (estMonthlyGross - estPlatformComm - estExpenses) * 0.15;
                 }
 
-                totalGross += aptGross;
-                totalEstExpenses += aptEstExpenses;
-                totalLagirioNet += lagirioNet;
-                totalNights += aptNights;
+                // --- Topla ---
+                totalEstGross += estMonthlyGross;
+                totalEstExpenses += estExpenses;
+                totalLagirioNet += lagirioEarning;
+                totalEstNights += this.OCCUPANCY_DAYS;
 
-                apartmentResults.push({
-                    id: aptId,
-                    code: apartment?.code || aptId,
-                    gross: aptGross,
-                    expenses: aptEstExpenses,
-                    lagirioNet,
-                    nights: aptNights,
-                    count: reses.length,
-                    avgNightly: aptNights > 0 ? aptGross / aptNights : 0
-                });
+                // Aylık veri
+                if (!monthlyData[monthKey]) monthlyData[monthKey] = { gross: 0, expenses: 0, lagirio: 0, count: 0, avgNightly: 0, aptCount: 0 };
+                monthlyData[monthKey].gross += estMonthlyGross;
+                monthlyData[monthKey].expenses += estExpenses;
+                monthlyData[monthKey].lagirio += lagirioEarning;
+                monthlyData[monthKey].count += reses.length;
+                monthlyData[monthKey].avgNightly += avgNightly;
+                monthlyData[monthKey].aptCount++;
 
-                // Aylık kırılım
-                reses.forEach(r => {
-                    const d = new Date(r.checkIn);
-                    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
-                    if (!monthlyData[key]) monthlyData[key] = { gross: 0, expenses: 0, lagirio: 0, count: 0, nights: 0 };
-                    const resGross = r.totalPrice || 0;
-                    const resExpRatio = expRatio;
-                    // Lagirio oranını global orana dayanarak hesapla
-                    const lagirioRatio = aptGross > 0 ? lagirioNet / aptGross : 0;
-                    monthlyData[key].gross += resGross;
-                    monthlyData[key].expenses += resGross * resExpRatio;
-                    monthlyData[key].lagirio += resGross * lagirioRatio;
-                    monthlyData[key].count++;
-                    monthlyData[key].nights += r.nights || 0;
-                });
+                // Daire toplamı
+                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment?.code || aptId, systemType: apartment?.systemType || '?', commission: apartment?.lagirioCommission || 0, gross: 0, expenses: 0, lagirio: 0, months: 0, avgNightly: 0, count: 0 };
+                aptTotals[aptId].gross += estMonthlyGross;
+                aptTotals[aptId].expenses += estExpenses;
+                aptTotals[aptId].lagirio += lagirioEarning;
+                aptTotals[aptId].months++;
+                aptTotals[aptId].avgNightly += avgNightly;
+                aptTotals[aptId].count += reses.length;
+            });
+
+            // Ay bazlı ortalamaları düzelt
+            Object.values(monthlyData).forEach(m => {
+                if (m.aptCount > 0) m.avgNightly = m.avgNightly / m.aptCount;
+            });
+            Object.values(aptTotals).forEach(a => {
+                if (a.months > 0) a.avgNightly = a.avgNightly / a.months;
             });
 
             // --- 4. UI Güncelle ---
-            this.renderSummaryCards(totalGross, totalEstExpenses, totalLagirioNet, totalNights, futureRes.length);
+            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalLagirioNet, futureRes.length, Object.keys(aptTotals).length);
             this.renderMonthlyChart(monthlyData);
-            this.renderApartmentList(apartmentResults);
+            this.renderApartmentList(Object.values(aptTotals));
             this.renderTable();
             this.renderPlatformFilter(futureRes);
 
@@ -2540,64 +2573,71 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
-        // Geçmiş verilerden expense/revenue ve platform komisyon oranlarını çıkar
+        // Geçmiş verilerden daire bazlı oranları çıkar
         getHistoricalRatios() {
             const result = {
-                expenseRatio: {},
-                platformCommRate: {},
-                avgExpenseRatio: 0.15,   // default %15
-                avgPlatformCommRate: 0.15 // default %15
+                expenseRatio: {},      // aptId → gider/gelir oranı
+                platformCommRate: {},   // aptId → platform komisyon/gelir oranı
+                bankRatio: {},          // aptId → banka gelir / toplam gelir oranı
+                avgExpenseRatio: 0.12,
+                avgPlatformCommRate: 0.15,
+                avgBankRatio: 0.85      // varsayılan %85 banka
             };
 
             if (!Analytics.data?.apartments) return result;
 
-            let totalRevenue = 0, totalExpenses = 0, totalPlatformComm = 0, totalGross = 0;
+            let gTotalGross = 0, gTotalExp = 0, gTotalPlatComm = 0, gTotalBank = 0;
 
             Analytics.data.apartments.forEach(apt => {
-                const reservations = Analytics.data.reservations?.filter(r => r.apartmentId === apt.id) || [];
-                const expenses = Analytics.data.expenses?.filter(e => e.apartmentId === apt.id) || [];
+                const reses = Analytics.data.reservations?.filter(r => r.apartmentId === apt.id) || [];
+                const exps = Analytics.data.expenses?.filter(e => e.apartmentId === apt.id) || [];
 
-                const aptGross = reservations.reduce((s, r) => s + Analytics.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
-                const aptExpenses = expenses.reduce((s, e) => s + Analytics.convertToEUR(e.amount, e.currency), 0);
-                const aptPlatformComm = reservations.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const aptGross = reses.reduce((s, r) => s + (Analytics.convertToEUR ? Analytics.convertToEUR(r.totalAmount, r.currency || 'EUR') : (r.totalAmount || 0)), 0);
+                const aptExp = exps.reduce((s, e) => s + (Analytics.convertToEUR ? Analytics.convertToEUR(e.amount, e.currency) : (e.amount || 0)), 0);
+                const aptPlatComm = reses.reduce((s, r) => s + (r.platformCommission || 0), 0);
+                const aptBankIncome = reses.filter(r => r.paymentMethod !== 'Nakit')
+                    .reduce((s, r) => s + (Analytics.convertToEUR ? Analytics.convertToEUR(r.totalAmount, r.currency || 'EUR') : (r.totalAmount || 0)), 0);
 
                 if (aptGross > 0) {
-                    result.expenseRatio[apt.id] = aptExpenses / aptGross;
-                    result.platformCommRate[apt.id] = aptPlatformComm / aptGross;
+                    result.expenseRatio[apt.id] = aptExp / aptGross;
+                    result.platformCommRate[apt.id] = aptPlatComm / aptGross;
+                    result.bankRatio[apt.id] = aptBankIncome / aptGross;
                 }
 
-                totalGross += aptGross;
-                totalExpenses += aptExpenses;
-                totalPlatformComm += aptPlatformComm;
+                gTotalGross += aptGross;
+                gTotalExp += aptExp;
+                gTotalPlatComm += aptPlatComm;
+                gTotalBank += aptBankIncome;
             });
 
-            if (totalGross > 0) {
-                result.avgExpenseRatio = totalExpenses / totalGross;
-                result.avgPlatformCommRate = totalPlatformComm / totalGross;
+            if (gTotalGross > 0) {
+                result.avgExpenseRatio = gTotalExp / gTotalGross;
+                result.avgPlatformCommRate = gTotalPlatComm / gTotalGross;
+                result.avgBankRatio = gTotalBank / gTotalGross;
             }
 
             return result;
         },
 
         // ---- Render Functions ----
-        renderSummaryCards(gross, expenses, lagirioNet, nights, count) {
-            document.getElementById('projGrossRevenue').textContent = '\u20ac' + Math.round(gross).toLocaleString();
-            document.getElementById('projGrossDetail').textContent = count + ' gelecek rez. | ' + nights + ' gece';
-            document.getElementById('projExpenses').textContent = '\u20ac' + Math.round(expenses).toLocaleString();
-            const expRatio = gross > 0 ? Math.round((expenses / gross) * 100) : 0;
-            document.getElementById('projExpenseDetail').textContent = 'Geçmiş oranı: %' + expRatio;
+        renderSummaryCards(estGross, estExpenses, lagirioNet, resCount, aptCount) {
+            document.getElementById('projGrossRevenue').textContent = '\u20ac' + Math.round(estGross).toLocaleString();
+            document.getElementById('projGrossDetail').textContent = resCount + ' rez. | ' + aptCount + ' daire | \u00d7' + this.OCCUPANCY_DAYS + ' g/ay';
+            document.getElementById('projExpenses').textContent = '\u20ac' + Math.round(estExpenses).toLocaleString();
+            const expRatio = estGross > 0 ? Math.round((estExpenses / estGross) * 100) : 0;
+            document.getElementById('projExpenseDetail').textContent = 'Ge\u00e7mi\u015f oran\u0131: %' + expRatio;
             document.getElementById('projLagirioNet').textContent = '\u20ac' + Math.round(lagirioNet).toLocaleString();
-            const lagirioRatio = gross > 0 ? Math.round((lagirioNet / gross) * 100) : 0;
-            document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + lagirioRatio + '\'i';
-            const avgNightly = nights > 0 ? Math.round(gross / nights) : 0;
+            const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
+            document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
+            const avgNightly = estGross > 0 ? Math.round(estGross / (aptCount * this.OCCUPANCY_DAYS || 1)) : 0;
             document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toLocaleString();
-            document.getElementById('projNightlyDetail').textContent = nights + ' gece toplam';
+            document.getElementById('projNightlyDetail').textContent = aptCount + ' daire \u00d7 ' + this.OCCUPANCY_DAYS + ' g/ay';
         },
 
         renderMonthlyChart(monthlyData) {
             const container = document.getElementById('projMonthlyChart');
             if (!container) return;
-            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
             const sortedKeys = Object.keys(monthlyData).sort();
 
             if (sortedKeys.length === 0) {
@@ -2607,43 +2647,48 @@
 
             const maxVal = Math.max(...sortedKeys.map(k => monthlyData[k].gross));
 
-            container.innerHTML = '<div class="flex items-end gap-2 h-56">' + sortedKeys.map(key => {
+            container.innerHTML = '<div class="flex items-end gap-3 h-56">' + sortedKeys.map(key => {
                 const d = monthlyData[key];
                 const [y, m] = key.split('-');
                 const label = monthNames[parseInt(m)-1] + ' ' + y.slice(2);
-                const grossH = maxVal > 0 ? Math.max(4, (d.gross / maxVal) * 200) : 4;
-                const lagirioH = maxVal > 0 ? Math.max(2, (d.lagirio / maxVal) * 200) : 2;
+                const grossH = maxVal > 0 ? Math.max(8, (d.gross / maxVal) * 190) : 8;
+                const lagirioH = maxVal > 0 ? Math.max(4, (d.lagirio / maxVal) * 190) : 4;
+                const expH = maxVal > 0 ? Math.max(2, (d.expenses / maxVal) * 190) : 2;
 
                 return '<div class="flex-1 flex flex-col items-center gap-1">' +
-                    '<span class="text-[10px] font-bold text-emerald-600">\u20ac' + Math.round(d.lagirio).toLocaleString() + '</span>' +
-                    '<div class="w-full relative rounded-t-md overflow-hidden" style="height:' + grossH + 'px">' +
-                    '<div class="absolute inset-0 bg-emerald-100 rounded-t-md"></div>' +
-                    '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-md" style="height:' + lagirioH + 'px"></div>' +
-                    '</div>' +
-                    '<span class="text-[10px] text-gray-500 whitespace-nowrap">' + label + '</span>' +
-                    '<span class="text-[9px] text-gray-400">' + d.count + ' rez.</span>' +
+                    '<div class="text-center mb-1">' +
+                    '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + Math.round(d.lagirio).toLocaleString() + '</span>' +
+                    '<span class="text-[9px] text-gray-400">\u20ac' + Math.round(d.avgNightly) + '/g</span></div>' +
+                    '<div class="w-full flex gap-0.5 items-end justify-center" style="height:' + grossH + 'px">' +
+                    '<div class="flex-1 bg-emerald-100 rounded-t-sm h-full relative">' +
+                    '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + lagirioH + 'px"></div></div>' +
+                    '<div class="w-2 bg-orange-300 rounded-t-sm" style="height:' + expH + 'px"></div></div>' +
+                    '<span class="text-[10px] text-gray-600 whitespace-nowrap font-medium">' + label + '</span>' +
+                    '<span class="text-[9px] text-gray-400">' + d.count + ' rez. | ' + d.aptCount + ' daire</span>' +
                     '</div>';
             }).join('') + '</div>' +
             '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
-            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Brüt Gelir</span>' +
-            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Lagirio Kazancı</span>' +
+            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Tahmini Br\u00fct (\u00d7' + this.OCCUPANCY_DAYS + 'g)</span>' +
+            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Lagirio Kazanc\u0131</span>' +
+            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-300 rounded"></span> Tahmini Gider</span>' +
             '</div>';
         },
 
         renderApartmentList(results) {
             const el = document.getElementById('projApartmentList');
             if (!el) return;
-            const sorted = results.sort((a, b) => b.lagirioNet - a.lagirioNet);
+            const sorted = results.sort((a, b) => b.lagirio - a.lagirio);
+            const sysNames = { '1': 'S1 Net', '2': 'S2 Br\u00fct', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar' };
 
             el.innerHTML = sorted.map((apt, i) =>
-                '<div class="flex items-center justify-between py-2 px-3 rounded-lg ' + (i % 2 === 0 ? 'bg-gray-50' : '') + '">' +
+                '<div class="flex items-center justify-between py-2.5 px-3 rounded-lg ' + (i % 2 === 0 ? 'bg-gray-50' : '') + '">' +
                 '<div class="flex items-center gap-2">' +
-                '<span class="text-xs font-bold text-gray-400 w-5">' + (i+1) + '</span>' +
+                '<span class="text-xs font-bold text-gray-300 w-5">' + (i+1) + '</span>' +
                 '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + '</p>' +
-                '<p class="text-[10px] text-gray-400">' + apt.count + ' rez. | ' + apt.nights + ' gece | Ort. \u20ac' + Math.round(apt.avgNightly) + '/g</p></div></div>' +
+                '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.count + ' rez. | ' + apt.months + ' ay | \u20ac' + Math.round(apt.avgNightly) + '/g</p></div></div>' +
                 '<div class="text-right">' +
-                '<p class="text-sm font-bold text-emerald-600">\u20ac' + Math.round(apt.lagirioNet).toLocaleString() + '</p>' +
-                '<p class="text-[10px] text-gray-400">Brüt: \u20ac' + Math.round(apt.gross).toLocaleString() + '</p></div></div>'
+                '<p class="text-sm font-bold text-emerald-600">\u20ac' + Math.round(apt.lagirio).toLocaleString() + '</p>' +
+                '<p class="text-[10px] text-gray-400">Br\u00fct: \u20ac' + Math.round(apt.gross).toLocaleString() + ' | Gider: \u20ac' + Math.round(apt.expenses).toLocaleString() + '</p></div></div>'
             ).join('');
         },
 
