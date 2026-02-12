@@ -347,9 +347,7 @@
                 <button onclick="UploadUI.switchTab('drive')" id="uploadTab-drive" class="upload-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600">
                     <i data-lucide="hard-drive" class="w-4 h-4"></i> Google Drive
                 </button>
-                <button onclick="UploadUI.switchTab('html')" id="uploadTab-html" class="upload-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600">
-                    <i data-lucide="table" class="w-4 h-4"></i> PMS Rezervasyon
-                </button>
+                <!-- PMS Rezervasyon tab artık Dashboard > Projeksiyon sekmesinde -->
             </div>
 
             <!-- ===== JSON Upload Panel ===== -->
@@ -503,60 +501,7 @@
             </div>
 
             <!-- ===== PMS HTML Reservation Panel ===== -->
-            <div id="uploadPanel-html" class="upload-panel glass rounded-2xl shadow-2xl p-8 hidden">
-                <div class="text-center mb-6">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-                        <i data-lucide="calendar-plus" class="w-8 h-8 text-purple-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">PMS Rezervasyon Yükleme</h3>
-                    <p class="text-sm text-gray-500">Zirkon veya PMS sisteminden dışa aktarılan HTML dosyalarını yükleyin</p>
-                </div>
-
-                <div id="htmlUploadArea" class="border-2 border-dashed border-purple-300 rounded-xl py-10 px-6 hover:border-purple-500 hover:bg-purple-50/50 transition-all cursor-pointer group mb-4"
-                     onclick="document.getElementById('htmlFileInput').click()">
-                    <div class="text-center">
-                        <i data-lucide="file-code" class="w-10 h-10 text-purple-400 mx-auto mb-3 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="text-base font-semibold text-gray-700 mb-1">HTML Dosya Sürükleyin veya Seçin</h3>
-                        <p class="text-xs text-gray-500">.html / .htm formatında PMS tablo dışa aktarması</p>
-                    </div>
-                </div>
-                <input type="file" id="htmlFileInput" accept=".html,.htm" class="hidden" multiple onchange="HTMLReservations.handleFiles(event)">
-
-                <!-- Import Status -->
-                <div id="htmlImportStatus" class="hidden mb-4"></div>
-
-                <!-- Loaded Files List -->
-                <div id="htmlFilesList" class="hidden mb-4">
-                    <h4 class="text-sm font-bold text-gray-600 mb-2 flex items-center gap-2">
-                        <i data-lucide="files" class="w-4 h-4"></i> Yüklenen Dosyalar
-                    </h4>
-                    <div id="htmlFilesListContent" class="space-y-2"></div>
-                </div>
-
-                <!-- Reservation Stats (shown after import) -->
-                <div id="htmlResStats" class="hidden">
-                    <!-- Tabs: Future / Past -->
-                    <div class="flex gap-2 mb-4">
-                        <button onclick="HTMLReservations.switchTab('future')" id="resTab-future" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white transition-all">
-                            📅 Gelecek Rezervasyonlar <span id="resFutureCount" class="ml-1 text-xs">(0)</span>
-                        </button>
-                        <button onclick="HTMLReservations.switchTab('past')" id="resTab-past" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white text-gray-600 border border-gray-200 transition-all">
-                            📜 Geçmiş Rezervasyonlar <span id="resPastCount" class="ml-1 text-xs">(0)</span>
-                        </button>
-                    </div>
-
-                    <!-- Reservation List -->
-                    <div id="htmlResList" class="max-h-[400px] overflow-y-auto space-y-2"></div>
-                </div>
-
-                <!-- Merge to Analytics Button -->
-                <div id="htmlMergeSection" class="hidden mt-4 pt-4 border-t border-gray-200">
-                    <button onclick="HTMLReservations.mergeToAnalytics()" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition">
-                        <i data-lucide="merge" class="w-4 h-4"></i>
-                        Analize Aktar ve Dashboard'a Git
-                    </button>
-                </div>
-            </div>
+            <!-- PMS Rezervasyon paneli artık Dashboard > Projeksiyon sekmesinde -->
 
             <!-- Bottom Feature Icons -->
             <div class="mt-6 grid grid-cols-3 gap-4">
@@ -749,6 +694,10 @@
                     <button onclick="Analytics.switchMainTab('reports')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="reports">
                         <i data-lucide="file-bar-chart" class="w-4 h-4"></i>
                         <span>Raporlar</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('projection')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="projection">
+                        <i data-lucide="telescope" class="w-4 h-4"></i>
+                        <span>Projeksiyon</span>
                     </button>
                 </nav>
             </div>
@@ -1138,6 +1087,111 @@
                     <!-- Dynamic report content -->
                 </div>
             </div>
+
+            <!-- ===== PROJEKSIYON TAB ===== -->
+            <div id="projection-content" class="tab-content hidden bg-white/95 p-6">
+
+                <!-- PMS HTML Import Section (inside dashboard) -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                            <i data-lucide="calendar-plus" class="w-5 h-5 text-purple-600"></i>
+                            <span>Gelecek Rezervasyonları Yükle (PMS)</span>
+                        </h3>
+                        <span class="text-xs text-gray-400">Zirkon / PMS HTML dışa aktarma</span>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <!-- Drop zone -->
+                        <div id="projHtmlUploadArea" class="flex-1 border-2 border-dashed border-purple-200 rounded-xl py-6 px-4 hover:border-purple-400 hover:bg-purple-50/30 transition-all cursor-pointer group text-center"
+                             onclick="document.getElementById('projHtmlFileInput').click()">
+                            <i data-lucide="file-code" class="w-8 h-8 text-purple-300 mx-auto mb-2 group-hover:scale-110 transition-transform"></i>
+                            <p class="text-sm font-medium text-gray-600">HTML Dosya Sürükle / Seç</p>
+                            <p class="text-xs text-gray-400">.html, .htm</p>
+                        </div>
+                        <input type="file" id="projHtmlFileInput" accept=".html,.htm" class="hidden" multiple onchange="Projection.handleHTMLFiles(event)">
+
+                        <!-- Loaded files summary -->
+                        <div class="w-72 bg-gray-50 rounded-xl p-4">
+                            <div class="text-xs font-bold text-gray-400 uppercase mb-2">Yüklenen Dosyalar</div>
+                            <div id="projFilesList" class="space-y-1.5 max-h-24 overflow-y-auto">
+                                <p class="text-xs text-gray-400">Henüz dosya yüklenmedi</p>
+                            </div>
+                            <div id="projResCounts" class="mt-2 pt-2 border-t border-gray-200 text-xs hidden">
+                                <span class="text-emerald-600 font-semibold"><span id="projFutureCount">0</span> gelecek</span>
+                                <span class="text-gray-300 mx-1">|</span>
+                                <span class="text-gray-500"><span id="projPastCount">0</span> geçmiş</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="projImportStatus" class="mt-3 hidden"></div>
+                </div>
+
+                <!-- Projection Summary Cards -->
+                <div id="projSummaryCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 hidden">
+                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
+                        <div class="text-sm opacity-80 mb-1">Tahmini Brüt Gelir</div>
+                        <div class="text-2xl font-bold" id="projGrossRevenue">€0</div>
+                        <div class="text-xs opacity-60 mt-1" id="projGrossDetail">Gelecek rezervasyonlar toplam</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-5 text-white">
+                        <div class="text-sm opacity-80 mb-1">Tahmini Giderler</div>
+                        <div class="text-2xl font-bold" id="projExpenses">€0</div>
+                        <div class="text-xs opacity-60 mt-1" id="projExpenseDetail">Geçmiş gider oranına göre</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
+                        <div class="text-sm opacity-80 mb-1">Lagirio Net Kazanç</div>
+                        <div class="text-2xl font-bold" id="projLagirioNet">€0</div>
+                        <div class="text-xs opacity-60 mt-1" id="projLagirioDetail">Komisyon bazlı hesaplama</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white">
+                        <div class="text-sm opacity-80 mb-1">Ort. Gecelik Fiyat</div>
+                        <div class="text-2xl font-bold" id="projAvgNightly">€0</div>
+                        <div class="text-xs opacity-60 mt-1" id="projNightlyDetail">Gelecek rez. ortalaması</div>
+                    </div>
+                </div>
+
+                <!-- Monthly Breakdown -->
+                <div id="projMonthlySection" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 hidden">
+                    <!-- Monthly chart -->
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-600"></i>
+                            <span>Aylık Projeksiyon (Lagirio Kazancı)</span>
+                        </h3>
+                        <div class="chart-container" id="projMonthlyChart" style="height:280px"></div>
+                    </div>
+
+                    <!-- Per-apartment summary -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="building-2" class="w-5 h-5 text-blue-600"></i>
+                            <span>Daire Bazlı Tahmin</span>
+                        </h3>
+                        <div id="projApartmentList" class="space-y-2 max-h-[300px] overflow-y-auto">
+                            <p class="text-sm text-gray-400">Veri bekleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Future Reservations Table -->
+                <div id="projResTableSection" class="bg-white rounded-xl shadow-lg p-6 hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                            <i data-lucide="list" class="w-5 h-5 text-purple-600"></i>
+                            <span>Gelecek Rezervasyonlar Listesi</span>
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <select id="projPlatformFilter" onchange="Projection.renderTable()" class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg">
+                                <option value="all">Tüm Platformlar</option>
+                            </select>
+                            <button onclick="Projection.clearAll()" class="text-xs text-red-400 hover:text-red-600 px-2 py-1">Temizle</button>
+                        </div>
+                    </div>
+                    <div id="projResTable" class="max-h-[400px] overflow-y-auto"></div>
+                </div>
+
+            </div>
         </div>
     </div>
     <!-- Notification Modal -->
@@ -1459,7 +1513,6 @@
             document.getElementById('appWrapper').classList.add('active');
             lucide.createIcons();
             Analytics.init();
-            HTMLReservations.init();
 
             // Google Drive: UI'ı güncelle ve otomatik bağlanmayı dene
             GoogleDrive.updateUI();
@@ -2245,6 +2298,411 @@
             if (typeof Analytics.showToast === 'function') {
                 Analytics.showToast(converted.length + ' rezervasyon analize aktarıldı!', 'success');
             }
+        }
+    };
+
+    // ============================================================
+    // PROJECTION - Gelecek Rezervasyon Projeksiyonu & Lagirio Kazancı
+    // ============================================================
+    const Projection = {
+        STORAGE_KEY: 'projReservations',
+        FILES_KEY: 'projUploadedFiles',
+        reservations: [],
+        uploadedFiles: [],
+
+        init() {
+            try {
+                const saved = localStorage.getItem(this.STORAGE_KEY);
+                if (saved) this.reservations = JSON.parse(saved);
+            } catch(e) {}
+            try {
+                const saved = localStorage.getItem(this.FILES_KEY);
+                if (saved) this.uploadedFiles = JSON.parse(saved);
+            } catch(e) {}
+
+            // Drag & drop
+            const area = document.getElementById('projHtmlUploadArea');
+            if (area) {
+                area.addEventListener('dragover', (e) => { e.preventDefault(); area.classList.add('border-purple-400', 'bg-purple-50/30'); });
+                area.addEventListener('dragleave', () => { area.classList.remove('border-purple-400', 'bg-purple-50/30'); });
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('border-purple-400', 'bg-purple-50/30');
+                    const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.html') || f.name.endsWith('.htm'));
+                    if (files.length > 0) this.processFiles(files);
+                });
+            }
+            this.updateFilesUI();
+        },
+
+        save() {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
+            localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
+        },
+
+        handleHTMLFiles(event) {
+            const files = Array.from(event.target.files);
+            if (files.length > 0) this.processFiles(files);
+            event.target.value = '';
+        },
+
+        async processFiles(files) {
+            const statusEl = document.getElementById('projImportStatus');
+            if (statusEl) {
+                statusEl.innerHTML = '<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700 flex items-center gap-2"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> HTML dosyası işleniyor...</div>';
+                statusEl.classList.remove('hidden');
+            }
+
+            let totalAdded = 0;
+            for (const file of files) {
+                try {
+                    const htmlContent = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = reject;
+                        reader.readAsText(file);
+                    });
+
+                    // Reuse HTMLReservations parser
+                    const { reservations: parsed, skipped } = HTMLReservations.parseHTML(htmlContent);
+
+                    // Remove old data from same file
+                    this.reservations = this.reservations.filter(r => r.sourceFile !== file.name);
+                    this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== file.name);
+
+                    const withSource = parsed.map(r => ({ ...r, sourceFile: file.name }));
+                    this.reservations.push(...withSource);
+                    this.uploadedFiles.push({ name: file.name, uploadDate: new Date().toISOString(), count: parsed.length });
+                    totalAdded += parsed.length;
+                } catch(e) { console.error('Projection HTML parse error:', e); }
+            }
+
+            this.save();
+            this.updateFilesUI();
+            this.calculate();
+
+            if (statusEl) {
+                statusEl.innerHTML = totalAdded > 0
+                    ? '<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-sm text-emerald-700">\u2705 ' + totalAdded + ' rezervasyon yüklendi!</div>'
+                    : '<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-700">\u26a0\ufe0f Geçerli rezervasyon bulunamadı</div>';
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        updateFilesUI() {
+            const el = document.getElementById('projFilesList');
+            if (!el) return;
+            if (this.uploadedFiles.length === 0) {
+                el.innerHTML = '<p class="text-xs text-gray-400">Henüz dosya yüklenmedi</p>';
+                return;
+            }
+            el.innerHTML = this.uploadedFiles.map(f =>
+                '<div class="flex items-center justify-between text-xs">' +
+                '<span class="text-gray-600 truncate"><span class="text-purple-400 mr-1">\ud83d\udcc4</span>' + f.name + ' <span class="text-gray-400">(' + f.count + ')</span></span>' +
+                '<button onclick="Projection.removeFile(\'' + f.name + '\')" class="text-red-300 hover:text-red-500 ml-1">\u2715</button></div>'
+            ).join('');
+
+            const today = new Date(); today.setHours(0,0,0,0);
+            const future = this.reservations.filter(r => new Date(r.checkIn) >= today);
+            const past = this.reservations.filter(r => new Date(r.checkIn) < today);
+            const countsEl = document.getElementById('projResCounts');
+            if (countsEl && this.reservations.length > 0) {
+                countsEl.classList.remove('hidden');
+                document.getElementById('projFutureCount').textContent = future.length;
+                document.getElementById('projPastCount').textContent = past.length;
+            }
+        },
+
+        removeFile(name) {
+            this.reservations = this.reservations.filter(r => r.sourceFile !== name);
+            this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== name);
+            this.save();
+            this.updateFilesUI();
+            this.calculate();
+        },
+
+        clearAll() {
+            if (!confirm('Tüm projeksiyon verilerini temizlemek istediğinizden emin misiniz?')) return;
+            this.reservations = [];
+            this.uploadedFiles = [];
+            this.save();
+            this.updateFilesUI();
+            document.getElementById('projSummaryCards')?.classList.add('hidden');
+            document.getElementById('projMonthlySection')?.classList.add('hidden');
+            document.getElementById('projResTableSection')?.classList.add('hidden');
+        },
+
+        // ---- CORE: Projeksiyon Hesaplama ----
+        calculate() {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const futureRes = this.reservations.filter(r => new Date(r.checkIn) >= today);
+
+            if (futureRes.length === 0) {
+                document.getElementById('projSummaryCards')?.classList.add('hidden');
+                document.getElementById('projMonthlySection')?.classList.add('hidden');
+                document.getElementById('projResTableSection')?.classList.add('hidden');
+                return;
+            }
+
+            // --- 1. Geçmiş verilerden oranları hesapla ---
+            const historicalRatios = this.getHistoricalRatios();
+
+            // --- 2. Gelecek rezervasyonları daire bazlı grupla ---
+            const byApartment = {};
+            futureRes.forEach(r => {
+                if (!byApartment[r.apartmentId]) byApartment[r.apartmentId] = [];
+                byApartment[r.apartmentId].push(r);
+            });
+
+            // --- 3. Her daire için projeksiyon hesapla ---
+            let totalGross = 0;
+            let totalEstExpenses = 0;
+            let totalLagirioNet = 0;
+            let totalNights = 0;
+            const apartmentResults = [];
+            const monthlyData = {};
+
+            Object.entries(byApartment).forEach(([aptId, reses]) => {
+                const apartment = Analytics.data?.apartments?.find(a => a.id === aptId || a.code === aptId);
+                const aptGross = reses.reduce((s, r) => s + (r.totalPrice || 0), 0);
+                const aptNights = reses.reduce((s, r) => s + (r.nights || 0), 0);
+
+                // Tahmini gider: geçmiş expense/revenue oranına göre
+                const expRatio = historicalRatios.expenseRatio[aptId] || historicalRatios.avgExpenseRatio;
+                const aptEstExpenses = aptGross * expRatio;
+
+                // Tahmini platform komisyon
+                const avgPlatformCommRate = historicalRatios.platformCommRate[aptId] || historicalRatios.avgPlatformCommRate;
+                const aptPlatformComm = aptGross * avgPlatformCommRate;
+
+                // Lagirio kazancı hesapla
+                let lagirioNet = 0;
+                if (apartment) {
+                    // Gerçek hesaplama: fake reservation objeler oluştur
+                    const fakeReservations = reses.map(r => ({
+                        totalAmount: r.totalPrice || 0,
+                        currency: 'EUR',
+                        platformCommission: (r.totalPrice || 0) * avgPlatformCommRate,
+                        paymentMethod: 'Banka'
+                    }));
+                    const fakeExpenses = [{ amount: aptEstExpenses, currency: 'EUR' }];
+                    lagirioNet = Analytics.calculateLagirioRevenue
+                        ? Analytics.calculateLagirioRevenue(apartment, fakeReservations, fakeExpenses)
+                        : 0;
+                } else {
+                    // Apartment tanımlı değilse basit hesap: %15 komisyon varsayımı
+                    lagirioNet = (aptGross - aptPlatformComm - aptEstExpenses) * 0.15;
+                }
+
+                totalGross += aptGross;
+                totalEstExpenses += aptEstExpenses;
+                totalLagirioNet += lagirioNet;
+                totalNights += aptNights;
+
+                apartmentResults.push({
+                    id: aptId,
+                    code: apartment?.code || aptId,
+                    gross: aptGross,
+                    expenses: aptEstExpenses,
+                    lagirioNet,
+                    nights: aptNights,
+                    count: reses.length,
+                    avgNightly: aptNights > 0 ? aptGross / aptNights : 0
+                });
+
+                // Aylık kırılım
+                reses.forEach(r => {
+                    const d = new Date(r.checkIn);
+                    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
+                    if (!monthlyData[key]) monthlyData[key] = { gross: 0, expenses: 0, lagirio: 0, count: 0, nights: 0 };
+                    const resGross = r.totalPrice || 0;
+                    const resExpRatio = expRatio;
+                    // Lagirio oranını global orana dayanarak hesapla
+                    const lagirioRatio = aptGross > 0 ? lagirioNet / aptGross : 0;
+                    monthlyData[key].gross += resGross;
+                    monthlyData[key].expenses += resGross * resExpRatio;
+                    monthlyData[key].lagirio += resGross * lagirioRatio;
+                    monthlyData[key].count++;
+                    monthlyData[key].nights += r.nights || 0;
+                });
+            });
+
+            // --- 4. UI Güncelle ---
+            this.renderSummaryCards(totalGross, totalEstExpenses, totalLagirioNet, totalNights, futureRes.length);
+            this.renderMonthlyChart(monthlyData);
+            this.renderApartmentList(apartmentResults);
+            this.renderTable();
+            this.renderPlatformFilter(futureRes);
+
+            document.getElementById('projSummaryCards')?.classList.remove('hidden');
+            document.getElementById('projMonthlySection')?.classList.remove('hidden');
+            document.getElementById('projResTableSection')?.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        // Geçmiş verilerden expense/revenue ve platform komisyon oranlarını çıkar
+        getHistoricalRatios() {
+            const result = {
+                expenseRatio: {},
+                platformCommRate: {},
+                avgExpenseRatio: 0.15,   // default %15
+                avgPlatformCommRate: 0.15 // default %15
+            };
+
+            if (!Analytics.data?.apartments) return result;
+
+            let totalRevenue = 0, totalExpenses = 0, totalPlatformComm = 0, totalGross = 0;
+
+            Analytics.data.apartments.forEach(apt => {
+                const reservations = Analytics.data.reservations?.filter(r => r.apartmentId === apt.id) || [];
+                const expenses = Analytics.data.expenses?.filter(e => e.apartmentId === apt.id) || [];
+
+                const aptGross = reservations.reduce((s, r) => s + Analytics.convertToEUR(r.totalAmount, r.currency || 'EUR'), 0);
+                const aptExpenses = expenses.reduce((s, e) => s + Analytics.convertToEUR(e.amount, e.currency), 0);
+                const aptPlatformComm = reservations.reduce((s, r) => s + (r.platformCommission || 0), 0);
+
+                if (aptGross > 0) {
+                    result.expenseRatio[apt.id] = aptExpenses / aptGross;
+                    result.platformCommRate[apt.id] = aptPlatformComm / aptGross;
+                }
+
+                totalGross += aptGross;
+                totalExpenses += aptExpenses;
+                totalPlatformComm += aptPlatformComm;
+            });
+
+            if (totalGross > 0) {
+                result.avgExpenseRatio = totalExpenses / totalGross;
+                result.avgPlatformCommRate = totalPlatformComm / totalGross;
+            }
+
+            return result;
+        },
+
+        // ---- Render Functions ----
+        renderSummaryCards(gross, expenses, lagirioNet, nights, count) {
+            document.getElementById('projGrossRevenue').textContent = '\u20ac' + Math.round(gross).toLocaleString();
+            document.getElementById('projGrossDetail').textContent = count + ' gelecek rez. | ' + nights + ' gece';
+            document.getElementById('projExpenses').textContent = '\u20ac' + Math.round(expenses).toLocaleString();
+            const expRatio = gross > 0 ? Math.round((expenses / gross) * 100) : 0;
+            document.getElementById('projExpenseDetail').textContent = 'Geçmiş oranı: %' + expRatio;
+            document.getElementById('projLagirioNet').textContent = '\u20ac' + Math.round(lagirioNet).toLocaleString();
+            const lagirioRatio = gross > 0 ? Math.round((lagirioNet / gross) * 100) : 0;
+            document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + lagirioRatio + '\'i';
+            const avgNightly = nights > 0 ? Math.round(gross / nights) : 0;
+            document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toLocaleString();
+            document.getElementById('projNightlyDetail').textContent = nights + ' gece toplam';
+        },
+
+        renderMonthlyChart(monthlyData) {
+            const container = document.getElementById('projMonthlyChart');
+            if (!container) return;
+            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const sortedKeys = Object.keys(monthlyData).sort();
+
+            if (sortedKeys.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">Veri yok</p>';
+                return;
+            }
+
+            const maxVal = Math.max(...sortedKeys.map(k => monthlyData[k].gross));
+
+            container.innerHTML = '<div class="flex items-end gap-2 h-56">' + sortedKeys.map(key => {
+                const d = monthlyData[key];
+                const [y, m] = key.split('-');
+                const label = monthNames[parseInt(m)-1] + ' ' + y.slice(2);
+                const grossH = maxVal > 0 ? Math.max(4, (d.gross / maxVal) * 200) : 4;
+                const lagirioH = maxVal > 0 ? Math.max(2, (d.lagirio / maxVal) * 200) : 2;
+
+                return '<div class="flex-1 flex flex-col items-center gap-1">' +
+                    '<span class="text-[10px] font-bold text-emerald-600">\u20ac' + Math.round(d.lagirio).toLocaleString() + '</span>' +
+                    '<div class="w-full relative rounded-t-md overflow-hidden" style="height:' + grossH + 'px">' +
+                    '<div class="absolute inset-0 bg-emerald-100 rounded-t-md"></div>' +
+                    '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-md" style="height:' + lagirioH + 'px"></div>' +
+                    '</div>' +
+                    '<span class="text-[10px] text-gray-500 whitespace-nowrap">' + label + '</span>' +
+                    '<span class="text-[9px] text-gray-400">' + d.count + ' rez.</span>' +
+                    '</div>';
+            }).join('') + '</div>' +
+            '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
+            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Brüt Gelir</span>' +
+            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Lagirio Kazancı</span>' +
+            '</div>';
+        },
+
+        renderApartmentList(results) {
+            const el = document.getElementById('projApartmentList');
+            if (!el) return;
+            const sorted = results.sort((a, b) => b.lagirioNet - a.lagirioNet);
+
+            el.innerHTML = sorted.map((apt, i) =>
+                '<div class="flex items-center justify-between py-2 px-3 rounded-lg ' + (i % 2 === 0 ? 'bg-gray-50' : '') + '">' +
+                '<div class="flex items-center gap-2">' +
+                '<span class="text-xs font-bold text-gray-400 w-5">' + (i+1) + '</span>' +
+                '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + '</p>' +
+                '<p class="text-[10px] text-gray-400">' + apt.count + ' rez. | ' + apt.nights + ' gece | Ort. \u20ac' + Math.round(apt.avgNightly) + '/g</p></div></div>' +
+                '<div class="text-right">' +
+                '<p class="text-sm font-bold text-emerald-600">\u20ac' + Math.round(apt.lagirioNet).toLocaleString() + '</p>' +
+                '<p class="text-[10px] text-gray-400">Brüt: \u20ac' + Math.round(apt.gross).toLocaleString() + '</p></div></div>'
+            ).join('');
+        },
+
+        renderPlatformFilter(futureRes) {
+            const select = document.getElementById('projPlatformFilter');
+            if (!select) return;
+            const platforms = [...new Set(futureRes.map(r => r.platform))];
+            const current = select.value;
+            select.innerHTML = '<option value="all">Tüm Platformlar</option>' +
+                platforms.map(p => '<option value="' + p + '">' + p + '</option>').join('');
+            select.value = current;
+        },
+
+        renderTable() {
+            const el = document.getElementById('projResTable');
+            if (!el) return;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const platform = document.getElementById('projPlatformFilter')?.value || 'all';
+
+            const filtered = this.reservations
+                .filter(r => new Date(r.checkIn) >= today)
+                .filter(r => platform === 'all' || r.platform === platform)
+                .sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+
+            if (filtered.length === 0) {
+                el.innerHTML = '<p class="text-center py-8 text-sm text-gray-400">Gelecek rezervasyon yok</p>';
+                return;
+            }
+
+            const fmt = d => { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
+            const platformColor = p => {
+                if (p === 'Airbnb') return 'bg-red-50 text-red-600';
+                if (p === 'Booking.com') return 'bg-blue-50 text-blue-700';
+                return 'bg-green-50 text-green-600';
+            };
+
+            el.innerHTML = '<table class="w-full text-xs">' +
+                '<thead class="bg-gray-50 sticky top-0"><tr>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Daire</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Platform</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Misafir</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Giriş</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Çıkış</th>' +
+                '<th class="text-right py-2 px-3 font-semibold text-gray-500">Gece</th>' +
+                '<th class="text-right py-2 px-3 font-semibold text-gray-500">Toplam</th>' +
+                '<th class="text-right py-2 px-3 font-semibold text-gray-500">/Gece</th>' +
+                '</tr></thead><tbody>' +
+                filtered.map(r =>
+                    '<tr class="border-t border-gray-50 hover:bg-gray-50/50">' +
+                    '<td class="py-2 px-3 font-medium text-gray-700">' + r.apartmentId + '</td>' +
+                    '<td class="py-2 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + platformColor(r.platform) + '">' + r.platform + '</span></td>' +
+                    '<td class="py-2 px-3 text-gray-500">' + (r.guestName || '-') + '</td>' +
+                    '<td class="py-2 px-3 text-gray-600">' + fmt(r.checkIn) + '</td>' +
+                    '<td class="py-2 px-3 text-gray-600">' + fmt(r.checkOut) + '</td>' +
+                    '<td class="py-2 px-3 text-right text-gray-600">' + r.nights + '</td>' +
+                    '<td class="py-2 px-3 text-right font-bold text-gray-800">\u20ac' + Math.round(r.totalPrice) + '</td>' +
+                    '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + r.pricePerNight + '</td></tr>'
+                ).join('') +
+                '</tbody></table>';
         }
     };
 
@@ -5383,6 +5841,13 @@
 
             if (tab === 'efficiency' && !this.charts.costEfficiency) {
                 setTimeout(() => this.createEfficiencyCharts(), 100);
+            }
+
+            if (tab === 'projection') {
+                setTimeout(() => {
+                    Projection.init();
+                    if (Projection.reservations.length > 0) Projection.calculate();
+                }, 100);
             }
         },
         
