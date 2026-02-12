@@ -1128,26 +1128,60 @@
                 </div>
 
                 <!-- Projection Summary Cards -->
-                <div id="projSummaryCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 hidden">
-                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
-                        <div class="text-sm opacity-80 mb-1">Tahmini Aylık Brüt Gelir</div>
-                        <div class="text-2xl font-bold" id="projGrossRevenue">€0</div>
-                        <div class="text-xs opacity-60 mt-1" id="projGrossDetail">Ort. gecelik × 25 gün/ay</div>
+                <div id="projSummaryCards" class="hidden mb-6">
+                    <!-- Top row: big cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
+                            <div class="text-sm opacity-80 mb-1">Tahmini Brüt Gelir</div>
+                            <div class="text-2xl font-bold" id="projGrossRevenue">€0</div>
+                            <div class="text-xs opacity-60 mt-1" id="projGrossDetail">Ort. gecelik × 25 gün/ay</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
+                            <div class="text-sm opacity-80 mb-1">Lagirio Net Kazanç</div>
+                            <div class="text-2xl font-bold" id="projLagirioNet">€0</div>
+                            <div class="text-xs opacity-60 mt-1" id="projLagirioDetail">Sistem bazlı komisyon hesabı</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white">
+                            <div class="text-sm opacity-80 mb-1">Ort. Gecelik Fiyat</div>
+                            <div class="text-2xl font-bold" id="projAvgNightly">€0</div>
+                            <div class="text-xs opacity-60 mt-1" id="projNightlyDetail">Gelecek rez. ortalaması</div>
+                        </div>
                     </div>
-                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-5 text-white">
-                        <div class="text-sm opacity-80 mb-1">Tahmini Giderler</div>
-                        <div class="text-2xl font-bold" id="projExpenses">€0</div>
-                        <div class="text-xs opacity-60 mt-1" id="projExpenseDetail">Geçmiş gider/gelir oranından</div>
-                    </div>
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
-                        <div class="text-sm opacity-80 mb-1">Lagirio Net Kazanç</div>
-                        <div class="text-2xl font-bold" id="projLagirioNet">€0</div>
-                        <div class="text-xs opacity-60 mt-1" id="projLagirioDetail">Sistem bazlı komisyon hesabı</div>
-                    </div>
-                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white">
-                        <div class="text-sm opacity-80 mb-1">Ort. Gecelik Fiyat</div>
-                        <div class="text-2xl font-bold" id="projAvgNightly">€0</div>
-                        <div class="text-xs opacity-60 mt-1" id="projNightlyDetail">Gelecek rez. ortalaması</div>
+                    <!-- Bottom row: kesintiler -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white border border-orange-200 rounded-xl p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-xs font-semibold text-orange-500 uppercase">Tahmini Giderler</div>
+                                    <div class="text-xl font-bold text-gray-800 mt-1" id="projExpenses">€0</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-400" id="projExpenseDetail">%0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-red-200 rounded-xl p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-xs font-semibold text-red-500 uppercase">Tahmini KDV</div>
+                                    <div class="text-xl font-bold text-gray-800 mt-1" id="projKDV">€0</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-400" id="projKDVDetail">Sistem bazlı</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-indigo-200 rounded-xl p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-xs font-semibold text-indigo-500 uppercase">Tahmini Platform Komisyonu</div>
+                                    <div class="text-xl font-bold text-gray-800 mt-1" id="projPlatComm">€0</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-400" id="projPlatCommDetail">%0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2466,10 +2500,15 @@
             // --- 3. Her daire-ay çifti için projeksiyon hesapla ---
             let totalEstGross = 0;
             let totalEstExpenses = 0;
+            let totalEstKDV = 0;
+            let totalEstPlatComm = 0;
             let totalLagirioNet = 0;
-            let totalEstNights = 0;
-            const monthlyData = {};       // monthKey → { gross, expenses, lagirio, count }
-            const aptTotals = {};          // aptId → { gross, expenses, lagirio, months, avgNightly, count }
+            const monthlyData = {};
+            const aptTotals = {};
+
+            // KDV uygulanan sistemler
+            const kdvSystems = new Set(['1','3','4','5','9']);
+            const kdvBookingOnlySystems = new Set(['7']);
 
             Object.values(byAptMonth).forEach(({ aptId, monthKey, reses }) => {
                 const apartment = Analytics.data?.apartments?.find(a => a.id === aptId || a.code === aptId);
@@ -2488,17 +2527,33 @@
                 // --- Geçmiş oranlardan tahminler ---
                 const expRatio = hist.expenseRatio[aptId] ?? hist.avgExpenseRatio;
                 const platCommRatio = hist.platformCommRate[aptId] ?? hist.avgPlatformCommRate;
-                const bankCashRatio = hist.bankRatio[aptId] ?? hist.avgBankRatio; // banka gelir oranı
+                const bankCashRatio = hist.bankRatio[aptId] ?? hist.avgBankRatio;
 
                 const estExpenses = estMonthlyGross * expRatio;
                 const estPlatformComm = estMonthlyGross * platCommRatio;
 
+                // --- Tahmini KDV: dairenin taxRate'i ve sistem tipine göre ---
+                let estKDV = 0;
+                const sysType = apartment?.systemType || '?';
+                const taxRate = apartment?.taxRate || 0;
+                const bankAmount = estMonthlyGross * bankCashRatio;
+
+                if (taxRate > 0) {
+                    if (kdvSystems.has(sysType)) {
+                        // Banka gelirinden KDV hesapla: amount × rate / (1 + rate)
+                        estKDV = bankAmount * (taxRate / 100) / (1 + taxRate / 100);
+                    } else if (kdvBookingOnlySystems.has(sysType)) {
+                        // S7: Sadece Booking/Direct kısmından (tamamı bankadan varsay)
+                        // Geçmişteki Airbnb oranını bilmediğimiz için %70 Booking varsayalım
+                        const bookingPortion = bankAmount * 0.7;
+                        estKDV = bookingPortion * (taxRate / 100) / (1 + taxRate / 100);
+                    }
+                    // S2, S6, S8: KDV yok → estKDV = 0
+                }
+
                 // --- Lagirio kazancı: calculateLagirioRevenue ile ---
                 let lagirioEarning = 0;
                 if (apartment && Analytics.calculateLagirioRevenue) {
-                    // Fake reservation: tüm gelir tek bir banka ödemesi olarak
-                    // Banka ve nakit oranlarını da geçmişe göre dağıt
-                    const bankAmount = estMonthlyGross * bankCashRatio;
                     const cashAmount = estMonthlyGross * (1 - bankCashRatio);
 
                     const fakeReservations = [];
@@ -2508,7 +2563,7 @@
                             currency: 'EUR',
                             platformCommission: bankAmount * platCommRatio,
                             paymentMethod: 'Banka',
-                            platform: 'Booking.com' // varsayılan
+                            platform: 'Booking.com'
                         });
                     }
                     if (cashAmount > 0) {
@@ -2523,29 +2578,33 @@
                     const fakeExpenses = [{ amount: estExpenses, currency: 'EUR' }];
                     lagirioEarning = Analytics.calculateLagirioRevenue(apartment, fakeReservations, fakeExpenses);
                 } else {
-                    // Apartment tanımsızsa basit varsayım: %15
                     lagirioEarning = (estMonthlyGross - estPlatformComm - estExpenses) * 0.15;
                 }
 
                 // --- Topla ---
                 totalEstGross += estMonthlyGross;
                 totalEstExpenses += estExpenses;
+                totalEstKDV += estKDV;
+                totalEstPlatComm += estPlatformComm;
                 totalLagirioNet += lagirioEarning;
-                totalEstNights += this.OCCUPANCY_DAYS;
 
                 // Aylık veri
-                if (!monthlyData[monthKey]) monthlyData[monthKey] = { gross: 0, expenses: 0, lagirio: 0, count: 0, avgNightly: 0, aptCount: 0 };
+                if (!monthlyData[monthKey]) monthlyData[monthKey] = { gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, count: 0, avgNightly: 0, aptCount: 0 };
                 monthlyData[monthKey].gross += estMonthlyGross;
                 monthlyData[monthKey].expenses += estExpenses;
+                monthlyData[monthKey].kdv += estKDV;
+                monthlyData[monthKey].platComm += estPlatformComm;
                 monthlyData[monthKey].lagirio += lagirioEarning;
                 monthlyData[monthKey].count += reses.length;
                 monthlyData[monthKey].avgNightly += avgNightly;
                 monthlyData[monthKey].aptCount++;
 
                 // Daire toplamı
-                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment?.code || aptId, systemType: apartment?.systemType || '?', commission: apartment?.lagirioCommission || 0, gross: 0, expenses: 0, lagirio: 0, months: 0, avgNightly: 0, count: 0 };
+                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment?.code || aptId, systemType: sysType, commission: apartment?.lagirioCommission || 0, gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, months: 0, avgNightly: 0, count: 0 };
                 aptTotals[aptId].gross += estMonthlyGross;
                 aptTotals[aptId].expenses += estExpenses;
+                aptTotals[aptId].kdv += estKDV;
+                aptTotals[aptId].platComm += estPlatformComm;
                 aptTotals[aptId].lagirio += lagirioEarning;
                 aptTotals[aptId].months++;
                 aptTotals[aptId].avgNightly += avgNightly;
@@ -2561,7 +2620,7 @@
             });
 
             // --- 4. UI Güncelle ---
-            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalLagirioNet, futureRes.length, Object.keys(aptTotals).length);
+            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, futureRes.length, Object.keys(aptTotals).length);
             this.renderMonthlyChart(monthlyData);
             this.renderApartmentList(Object.values(aptTotals));
             this.renderTable();
@@ -2620,18 +2679,31 @@
         },
 
         // ---- Render Functions ----
-        renderSummaryCards(estGross, estExpenses, lagirioNet, resCount, aptCount) {
+        renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, resCount, aptCount) {
+            // Üst satır: Brüt, Lagirio, Gecelik
             document.getElementById('projGrossRevenue').textContent = '\u20ac' + Math.round(estGross).toLocaleString();
             document.getElementById('projGrossDetail').textContent = resCount + ' rez. | ' + aptCount + ' daire | \u00d7' + this.OCCUPANCY_DAYS + ' g/ay';
-            document.getElementById('projExpenses').textContent = '\u20ac' + Math.round(estExpenses).toLocaleString();
-            const expRatio = estGross > 0 ? Math.round((estExpenses / estGross) * 100) : 0;
-            document.getElementById('projExpenseDetail').textContent = 'Ge\u00e7mi\u015f oran\u0131: %' + expRatio;
+
             document.getElementById('projLagirioNet').textContent = '\u20ac' + Math.round(lagirioNet).toLocaleString();
             const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
             document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
+
             const avgNightly = estGross > 0 ? Math.round(estGross / (aptCount * this.OCCUPANCY_DAYS || 1)) : 0;
             document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toLocaleString();
             document.getElementById('projNightlyDetail').textContent = aptCount + ' daire \u00d7 ' + this.OCCUPANCY_DAYS + ' g/ay';
+
+            // Alt satır: Gider, KDV, Platform Komis.
+            document.getElementById('projExpenses').textContent = '\u20ac' + Math.round(estExpenses).toLocaleString();
+            const expRatio = estGross > 0 ? Math.round((estExpenses / estGross) * 100) : 0;
+            document.getElementById('projExpenseDetail').textContent = 'Ge\u00e7mi\u015f oran\u0131: %' + expRatio;
+
+            document.getElementById('projKDV').textContent = '\u20ac' + Math.round(estKDV).toLocaleString();
+            const kdvRatio = estGross > 0 ? ((estKDV / estGross) * 100).toFixed(1) : 0;
+            document.getElementById('projKDVDetail').textContent = 'Br\u00fct\u00fcn %' + kdvRatio + '\'i';
+
+            document.getElementById('projPlatComm').textContent = '\u20ac' + Math.round(estPlatComm).toLocaleString();
+            const platRatio = estGross > 0 ? Math.round((estPlatComm / estGross) * 100) : 0;
+            document.getElementById('projPlatCommDetail').textContent = 'Ge\u00e7mi\u015f oran\u0131: %' + platRatio;
         },
 
         renderMonthlyChart(monthlyData) {
@@ -2678,7 +2750,7 @@
             const el = document.getElementById('projApartmentList');
             if (!el) return;
             const sorted = results.sort((a, b) => b.lagirio - a.lagirio);
-            const sysNames = { '1': 'S1 Net', '2': 'S2 Br\u00fct', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar' };
+            const sysNames = { '1': 'S1 Net', '2': 'S2 Br\u00fct', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
 
             el.innerHTML = sorted.map((apt, i) =>
                 '<div class="flex items-center justify-between py-2.5 px-3 rounded-lg ' + (i % 2 === 0 ? 'bg-gray-50' : '') + '">' +
@@ -2688,7 +2760,7 @@
                 '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.count + ' rez. | ' + apt.months + ' ay | \u20ac' + Math.round(apt.avgNightly) + '/g</p></div></div>' +
                 '<div class="text-right">' +
                 '<p class="text-sm font-bold text-emerald-600">\u20ac' + Math.round(apt.lagirio).toLocaleString() + '</p>' +
-                '<p class="text-[10px] text-gray-400">Br\u00fct: \u20ac' + Math.round(apt.gross).toLocaleString() + ' | Gider: \u20ac' + Math.round(apt.expenses).toLocaleString() + '</p></div></div>'
+                '<p class="text-[10px] text-gray-400">Br\u00fct \u20ac' + Math.round(apt.gross).toLocaleString() + ' | Gdr \u20ac' + Math.round(apt.expenses).toLocaleString() + ' | KDV \u20ac' + Math.round(apt.kdv).toLocaleString() + ' | Plt \u20ac' + Math.round(apt.platComm).toLocaleString() + '</p></div></div>'
             ).join('');
         },
 
@@ -3315,6 +3387,7 @@
                 case '3':
                 case '4':
                 case '5':
+                case '9': // Sistem 9 - KDV var
                     totalKDV = bank.reduce((sum, res) => {
                         const amountInEur = this.convertToEUR(res.totalAmount, res.currency || 'EUR');
                         return sum + amountInEur * (apartment.taxRate / 100) / (1 + apartment.taxRate / 100);
@@ -3411,6 +3484,15 @@
                     const cashAfterPlatform8 = cashIncome - cashCommission;
                     const cashLagirioComm8 = cashAfterPlatform8 * (apartment.lagirioCommission / 100);
                     lagirioProfit = bankLagirioComm8 + cashLagirioComm8;
+                    break;
+
+                case '9': // Sistem 9 - Stopajlı (KDV Düşülmüş)
+                    const afterPlatform9 = bankIncome - bankCommission;
+                    const afterKDV9 = afterPlatform9 - totalKDV;
+                    const bankLagirioComm9 = afterKDV9 > 0 ? afterKDV9 * (apartment.lagirioCommission / 100) : 0;
+                    const cashAfterPlatform9 = cashIncome - cashCommission;
+                    const cashLagirioComm9 = cashAfterPlatform9 > 0 ? cashAfterPlatform9 * (apartment.lagirioCommission / 100) : 0;
+                    lagirioProfit = bankLagirioComm9 + cashLagirioComm9;
                     break;
 
                 default:
