@@ -6647,6 +6647,12 @@
                 content.classList.add('hidden');
             });
 
+            // Sekme geçişinde dinamik sonuç panellerini gizle
+            const compRes = document.getElementById('comparisonResults');
+            if (compRes) { compRes.classList.add('hidden'); compRes.innerHTML = ''; }
+            const reportPrev = document.getElementById('reportPreview');
+            if (reportPrev) { reportPrev.classList.add('hidden'); reportPrev.innerHTML = ''; }
+
             // Show selected tab content
             const selectedContent = document.getElementById(`${tab}-content`);
             if (selectedContent) {
