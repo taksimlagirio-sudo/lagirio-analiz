@@ -1125,6 +1125,19 @@
                         </div>
                     </div>
                     <div id="projImportStatus" class="mt-3 hidden"></div>
+
+                    <!-- Eşleştirme butonu -->
+                    <div id="projMatchingBar" class="mt-3 hidden">
+                        <div class="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="link-2" class="w-4 h-4 text-amber-500"></i>
+                                <span class="text-xs text-amber-700" id="projMatchingStatus">Eşleşmeyen daireler var</span>
+                            </div>
+                            <button onclick="Projection.showMatchingModal()" class="text-xs font-semibold bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600 transition">
+                                Daire Eşleştir
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Projection Summary Cards -->
@@ -1185,10 +1198,9 @@
                     </div>
                 </div>
 
-                <!-- Monthly Breakdown -->
-                <div id="projMonthlySection" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 hidden">
-                    <!-- Monthly chart -->
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                <!-- Monthly Chart -->
+                <div id="projMonthlySection" class="mb-6 hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-600"></i>
                             <span>Aylık Projeksiyon (Lagirio Kazancı)</span>
@@ -1196,13 +1208,14 @@
                         <div class="chart-container" id="projMonthlyChart" style="height:280px"></div>
                     </div>
 
-                    <!-- Per-apartment summary -->
+                    <!-- Per-apartment accordion -->
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="building-2" class="w-5 h-5 text-blue-600"></i>
                             <span>Daire Bazlı Tahmin</span>
+                            <span class="text-xs text-gray-400 ml-2">(tıklayarak aylık detay görün)</span>
                         </h3>
-                        <div id="projApartmentList" class="space-y-2 max-h-[300px] overflow-y-auto">
+                        <div id="projApartmentList" class="space-y-1">
                             <p class="text-sm text-gray-400">Veri bekleniyor...</p>
                         </div>
                     </div>
@@ -1336,6 +1349,36 @@
         </div>
     </div>
     
+    <!-- Apartment Matching Modal -->
+    <div id="aptMatchingModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden animate-slide-up">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-white">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold flex items-center space-x-2">
+                        <i data-lucide="link-2" class="w-5 h-5"></i>
+                        <span>Daire Eşleştirme</span>
+                    </h2>
+                    <button onclick="Analytics.closeModal('aptMatchingModal')" class="p-1 hover:bg-white/20 rounded-lg transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-white/70 mt-1">PMS'deki oda numaralarını analiz dairelerine eşleştirin. Eşleşenler sistem tipi, KDV ve komisyon bilgilerini otomatik alır.</p>
+            </div>
+            <div class="p-5 max-h-[65vh] overflow-y-auto">
+                <div id="aptMatchingContent" class="space-y-3">
+                    <p class="text-sm text-gray-400">Yükleniyor...</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50">
+                <span class="text-xs text-gray-400" id="aptMatchingSummary"></span>
+                <div class="flex gap-2">
+                    <button onclick="Analytics.closeModal('aptMatchingModal')" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-100 transition">İptal</button>
+                    <button onclick="Projection.saveMatching()" class="px-4 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">Kaydet & Uygula</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Report Modal -->
     <div id="customReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
@@ -2367,6 +2410,8 @@
                 });
             }
             this.updateFilesUI();
+            // Sayfa yüklendiğinde mevcut verilerle eşleştirme durumunu kontrol et
+            setTimeout(() => this.checkMatchingStatus(), 500);
         },
 
         save() {
@@ -2413,6 +2458,7 @@
 
             this.save();
             this.updateFilesUI();
+            this.checkMatchingStatus();
             this.calculate();
 
             if (statusEl) {
@@ -2505,13 +2551,14 @@
             let totalLagirioNet = 0;
             const monthlyData = {};
             const aptTotals = {};
+            const aptMonthlyDetail = {}; // aptId → { monthKey → { gross, expenses, kdv, platComm, lagirio, avgNightly, resCount } }
 
             // KDV uygulanan sistemler
             const kdvSystems = new Set(['1','3','4','5','9']);
             const kdvBookingOnlySystems = new Set(['7']);
 
             Object.values(byAptMonth).forEach(({ aptId, monthKey, reses }) => {
-                const apartment = Analytics.data?.apartments?.find(a => a.id === aptId || a.code === aptId);
+                const apartment = this.resolveApartment(aptId);
 
                 // --- Ortalama gecelik fiyat ---
                 const nightlyPrices = reses
@@ -2609,6 +2656,18 @@
                 aptTotals[aptId].months++;
                 aptTotals[aptId].avgNightly += avgNightly;
                 aptTotals[aptId].count += reses.length;
+
+                // Daire-ay detayı
+                if (!aptMonthlyDetail[aptId]) aptMonthlyDetail[aptId] = {};
+                aptMonthlyDetail[aptId][monthKey] = {
+                    gross: estMonthlyGross,
+                    expenses: estExpenses,
+                    kdv: estKDV,
+                    platComm: estPlatformComm,
+                    lagirio: lagirioEarning,
+                    avgNightly: avgNightly,
+                    resCount: reses.length
+                };
             });
 
             // Ay bazlı ortalamaları düzelt
@@ -2622,7 +2681,7 @@
             // --- 4. UI Güncelle ---
             this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, futureRes.length, Object.keys(aptTotals).length);
             this.renderMonthlyChart(monthlyData);
-            this.renderApartmentList(Object.values(aptTotals));
+            this.renderApartmentList(Object.values(aptTotals), aptMonthlyDetail);
             this.renderTable();
             this.renderPlatformFilter(futureRes);
 
@@ -2674,6 +2733,16 @@
                 result.avgPlatformCommRate = gTotalPlatComm / gTotalGross;
                 result.avgBankRatio = gTotalBank / gTotalGross;
             }
+
+            // Mapping: PMS aptId → Analytics aptId ise, oranları PMS ID'ye de kopyala
+            const mapping = this.loadMapping();
+            Object.entries(mapping).forEach(([pmsId, analyticsId]) => {
+                if (pmsId !== analyticsId) {
+                    if (result.expenseRatio[analyticsId] !== undefined) result.expenseRatio[pmsId] = result.expenseRatio[analyticsId];
+                    if (result.platformCommRate[analyticsId] !== undefined) result.platformCommRate[pmsId] = result.platformCommRate[analyticsId];
+                    if (result.bankRatio[analyticsId] !== undefined) result.bankRatio[pmsId] = result.bankRatio[analyticsId];
+                }
+            });
 
             return result;
         },
@@ -2746,22 +2815,84 @@
             '</div>';
         },
 
-        renderApartmentList(results) {
+        renderApartmentList(results, aptMonthlyDetail) {
             const el = document.getElementById('projApartmentList');
             if (!el) return;
+            this._aptMonthlyDetail = aptMonthlyDetail || {};
             const sorted = results.sort((a, b) => b.lagirio - a.lagirio);
             const sysNames = { '1': 'S1 Net', '2': 'S2 Br\u00fct', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
+            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
 
-            el.innerHTML = sorted.map((apt, i) =>
-                '<div class="flex items-center justify-between py-2.5 px-3 rounded-lg ' + (i % 2 === 0 ? 'bg-gray-50' : '') + '">' +
-                '<div class="flex items-center gap-2">' +
-                '<span class="text-xs font-bold text-gray-300 w-5">' + (i+1) + '</span>' +
-                '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + '</p>' +
-                '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.count + ' rez. | ' + apt.months + ' ay | \u20ac' + Math.round(apt.avgNightly) + '/g</p></div></div>' +
-                '<div class="text-right">' +
-                '<p class="text-sm font-bold text-emerald-600">\u20ac' + Math.round(apt.lagirio).toLocaleString() + '</p>' +
-                '<p class="text-[10px] text-gray-400">Br\u00fct \u20ac' + Math.round(apt.gross).toLocaleString() + ' | Gdr \u20ac' + Math.round(apt.expenses).toLocaleString() + ' | KDV \u20ac' + Math.round(apt.kdv).toLocaleString() + ' | Plt \u20ac' + Math.round(apt.platComm).toLocaleString() + '</p></div></div>'
-            ).join('');
+            el.innerHTML = sorted.map((apt, i) => {
+                const detail = this._aptMonthlyDetail[apt.id] || {};
+                const months = Object.keys(detail).sort();
+
+                // Aylık detay tablosu
+                let monthRows = '';
+                if (months.length > 0) {
+                    monthRows = months.map(mk => {
+                        const d = detail[mk];
+                        const [y, m] = mk.split('-');
+                        const mName = monthNames[parseInt(m)-1] + ' ' + y;
+                        return '<tr class="border-t border-gray-100">' +
+                            '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(d.avgNightly) + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + Math.round(d.gross).toLocaleString() + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + Math.round(d.expenses).toLocaleString() + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + Math.round(d.kdv).toLocaleString() + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + Math.round(d.platComm).toLocaleString() + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + Math.round(d.lagirio).toLocaleString() + '</td>' +
+                            '</tr>';
+                    }).join('');
+                }
+
+                const detailTable = '<div id="projAptDetail_' + i + '" class="hidden mt-2 mb-1 mx-1">' +
+                    '<div class="bg-gray-50 rounded-lg p-3 overflow-x-auto">' +
+                    '<table class="w-full text-xs">' +
+                    '<thead><tr class="text-gray-400 text-[10px] uppercase">' +
+                    '<th class="py-1 px-2 text-left">Ay</th>' +
+                    '<th class="py-1 px-2 text-right">Rez</th>' +
+                    '<th class="py-1 px-2 text-right">Gecelik</th>' +
+                    '<th class="py-1 px-2 text-right">Br\u00fct</th>' +
+                    '<th class="py-1 px-2 text-right">Gider</th>' +
+                    '<th class="py-1 px-2 text-right">KDV</th>' +
+                    '<th class="py-1 px-2 text-right">Plt.Kom</th>' +
+                    '<th class="py-1 px-2 text-right">Lagirio</th>' +
+                    '</tr></thead><tbody>' + monthRows +
+                    '<tr class="border-t-2 border-gray-300 font-bold">' +
+                    '<td class="py-1.5 px-2 text-xs">TOPLAM</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right">' + apt.count + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(apt.avgNightly) + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(apt.gross).toLocaleString() + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + Math.round(apt.expenses).toLocaleString() + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + Math.round(apt.kdv).toLocaleString() + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + Math.round(apt.platComm).toLocaleString() + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + Math.round(apt.lagirio).toLocaleString() + '</td>' +
+                    '</tr></tbody></table></div></div>';
+
+                return '<div class="border border-gray-100 rounded-lg overflow-hidden">' +
+                    '<div class="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="Projection.toggleAptDetail(' + i + ')">' +
+                    '<div class="flex items-center gap-2">' +
+                    '<span class="text-xs font-bold text-gray-300 w-5">' + (i+1) + '</span>' +
+                    '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="projAptChev_' + i + '"></i>' +
+                    '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + '</p>' +
+                    '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.count + ' rez. | ' + apt.months + ' ay | \u20ac' + Math.round(apt.avgNightly) + '/g</p></div></div>' +
+                    '<div class="text-right">' +
+                    '<p class="text-sm font-bold text-emerald-600">\u20ac' + Math.round(apt.lagirio).toLocaleString() + '</p>' +
+                    '<p class="text-[10px] text-gray-400">Br\u00fct \u20ac' + Math.round(apt.gross).toLocaleString() + ' | Gdr \u20ac' + Math.round(apt.expenses).toLocaleString() + ' | KDV \u20ac' + Math.round(apt.kdv).toLocaleString() + ' | Plt \u20ac' + Math.round(apt.platComm).toLocaleString() + '</p></div></div>' +
+                    detailTable + '</div>';
+            }).join('');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        toggleAptDetail(idx) {
+            const detail = document.getElementById('projAptDetail_' + idx);
+            const chev = document.getElementById('projAptChev_' + idx);
+            if (!detail) return;
+            const isHidden = detail.classList.contains('hidden');
+            detail.classList.toggle('hidden');
+            if (chev) chev.style.transform = isHidden ? 'rotate(90deg)' : '';
         },
 
         renderPlatformFilter(futureRes) {
@@ -2820,6 +2951,227 @@
                     '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + r.pricePerNight + '</td></tr>'
                 ).join('') +
                 '</tbody></table>';
+        },
+
+        // ============================================================
+        // APARTMENT MATCHING SYSTEM
+        // ============================================================
+        MAPPING_KEY: 'projAptMapping',
+
+        loadMapping() {
+            try {
+                return JSON.parse(localStorage.getItem(this.MAPPING_KEY) || '{}');
+            } catch { return {}; }
+        },
+
+        saveMapping(mapping) {
+            localStorage.setItem(this.MAPPING_KEY, JSON.stringify(mapping));
+        },
+
+        // PMS'deki oda numaralarını alır
+        getPmsApartmentIds() {
+            return [...new Set(this.reservations.map(r => r.apartmentId))].sort();
+        },
+
+        // Analytics'teki daire listesi
+        getAnalyticsApartments() {
+            return (Analytics.data?.apartments || []).map(a => ({
+                id: a.id,
+                code: a.code,
+                systemType: a.systemType,
+                commission: a.lagirioCommission,
+                taxRate: a.taxRate
+            }));
+        },
+
+        // Otomatik eşleştirme: tam eşleşme veya normalize edilmiş eşleşme
+        autoMatch(pmsIds, analyticsApts) {
+            const mapping = this.loadMapping();
+            const analyticsMap = {};
+            analyticsApts.forEach(a => {
+                analyticsMap[a.id] = a;
+                analyticsMap[a.code] = a;
+                // Normalize: boşluk/tire çıkar, küçük harf
+                const normId = a.id.replace(/[\s\-_\.]/g, '').toLowerCase();
+                const normCode = a.code.replace(/[\s\-_\.]/g, '').toLowerCase();
+                if (!analyticsMap[normId]) analyticsMap[normId] = a;
+                if (!analyticsMap[normCode]) analyticsMap[normCode] = a;
+            });
+
+            pmsIds.forEach(pmsId => {
+                if (mapping[pmsId]) return; // zaten eşleştirilmiş
+
+                // Tam eşleşme
+                if (analyticsMap[pmsId]) {
+                    mapping[pmsId] = analyticsMap[pmsId].id;
+                    return;
+                }
+                // Normalize eşleşme
+                const normPms = pmsId.replace(/[\s\-_\.]/g, '').toLowerCase();
+                if (analyticsMap[normPms]) {
+                    mapping[pmsId] = analyticsMap[normPms].id;
+                    return;
+                }
+                // Sayısal eşleşme: "Oda 3" → "3", "D-03" → "03" vs.
+                const pmsNum = pmsId.replace(/\D/g, '');
+                if (pmsNum) {
+                    const match = analyticsApts.find(a => {
+                        const aNum = a.id.replace(/\D/g, '');
+                        const cNum = a.code.replace(/\D/g, '');
+                        return (aNum && aNum === pmsNum) || (cNum && cNum === pmsNum);
+                    });
+                    if (match) {
+                        mapping[pmsId] = match.id;
+                    }
+                }
+            });
+
+            return mapping;
+        },
+
+        // Resolve: PMS apartmentId → Analytics apartment object
+        resolveApartment(pmsAptId) {
+            const mapping = this.loadMapping();
+            const targetId = mapping[pmsAptId] || pmsAptId;
+            return Analytics.data?.apartments?.find(a => a.id === targetId || a.code === targetId) || null;
+        },
+
+        // Eşleştirme durumunu kontrol et ve bar'ı göster/gizle
+        checkMatchingStatus() {
+            const pmsIds = this.getPmsApartmentIds();
+            const analyticsApts = this.getAnalyticsApartments();
+            if (pmsIds.length === 0 || analyticsApts.length === 0) {
+                document.getElementById('projMatchingBar')?.classList.add('hidden');
+                return;
+            }
+
+            const mapping = this.autoMatch(pmsIds, analyticsApts);
+            this.saveMapping(mapping);
+
+            const unmatched = pmsIds.filter(id => !mapping[id]);
+            const bar = document.getElementById('projMatchingBar');
+            const status = document.getElementById('projMatchingStatus');
+
+            if (unmatched.length > 0) {
+                if (bar) bar.classList.remove('hidden');
+                if (status) status.textContent = unmatched.length + ' / ' + pmsIds.length + ' daire eşleşmedi';
+            } else {
+                if (bar) bar.classList.add('hidden');
+            }
+        },
+
+        showMatchingModal() {
+            const pmsIds = this.getPmsApartmentIds();
+            const analyticsApts = this.getAnalyticsApartments();
+            const mapping = this.loadMapping();
+
+            const sysNames = { '1': 'S1', '2': 'S2', '3': 'S3', '4': 'S4', '5': 'S5', '6': 'S6', '7': 'S7', '8': 'S8', '9': 'S9' };
+
+            const content = document.getElementById('aptMatchingContent');
+            if (!content) return;
+
+            if (pmsIds.length === 0) {
+                content.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">PMS\'den yüklenen rezervasyon yok.</p>';
+                Analytics.showModal('aptMatchingModal');
+                return;
+            }
+
+            // Analytics apt seçenekleri
+            const aptOptions = analyticsApts.map(a =>
+                '<option value="' + a.id + '">' + a.code + ' (' + (sysNames[a.systemType] || '?') + ', %' + a.commission + ', KDV %' + a.taxRate + ')</option>'
+            ).join('');
+
+            let matched = 0;
+            const rows = pmsIds.map(pmsId => {
+                const isMatched = !!mapping[pmsId];
+                const matchedApt = isMatched ? analyticsApts.find(a => a.id === mapping[pmsId]) : null;
+                if (isMatched) matched++;
+
+                const statusIcon = isMatched
+                    ? '<span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">&#10003;</span>'
+                    : '<span class="w-6 h-6 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-xs font-bold">?</span>';
+
+                const matchInfo = isMatched && matchedApt
+                    ? '<span class="text-[10px] text-emerald-600">' + (sysNames[matchedApt.systemType] || '?') + ' | %' + matchedApt.commission + ' | KDV %' + matchedApt.taxRate + '</span>'
+                    : '<span class="text-[10px] text-red-400">Varsayılan: S3, %15, KDV %8</span>';
+
+                return '<div class="flex items-center gap-3 p-2.5 rounded-lg border ' + (isMatched ? 'border-emerald-100 bg-emerald-50/30' : 'border-red-100 bg-red-50/30') + '">' +
+                    statusIcon +
+                    '<div class="flex-1 min-w-0">' +
+                    '<div class="flex items-center gap-2">' +
+                    '<span class="text-sm font-bold text-gray-700">' + pmsId + '</span>' +
+                    '<i data-lucide="arrow-right" class="w-3.5 h-3.5 text-gray-300"></i>' +
+                    '<select data-pms-id="' + pmsId + '" class="apt-match-select text-xs border border-gray-200 rounded-lg px-2 py-1 min-w-[200px] ' + (isMatched ? 'bg-emerald-50 border-emerald-200' : 'bg-white') + '" onchange="Projection.onMatchChange(this)">' +
+                    '<option value="">-- Eşleştirme yok --</option>' +
+                    aptOptions +
+                    '</select></div>' +
+                    matchInfo +
+                    '</div></div>';
+            }).join('');
+
+            content.innerHTML = rows;
+
+            // Mevcut eşleştirmeleri select'lere yansıt
+            content.querySelectorAll('.apt-match-select').forEach(sel => {
+                const pmsId = sel.dataset.pmsId;
+                if (mapping[pmsId]) sel.value = mapping[pmsId];
+            });
+
+            const summary = document.getElementById('aptMatchingSummary');
+            if (summary) summary.textContent = matched + ' / ' + pmsIds.length + ' eşleşti';
+
+            Analytics.showModal('aptMatchingModal');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        onMatchChange(selectEl) {
+            const pmsId = selectEl.dataset.pmsId;
+            const row = selectEl.closest('.flex.items-center');
+            const analyticsApts = this.getAnalyticsApartments();
+            const sysNames = { '1': 'S1', '2': 'S2', '3': 'S3', '4': 'S4', '5': 'S5', '6': 'S6', '7': 'S7', '8': 'S8', '9': 'S9' };
+
+            if (selectEl.value) {
+                const apt = analyticsApts.find(a => a.id === selectEl.value);
+                row.className = row.className.replace(/border-red-100 bg-red-50\/30/g, 'border-emerald-100 bg-emerald-50/30');
+                selectEl.className = selectEl.className.replace('bg-white', 'bg-emerald-50 border-emerald-200');
+                const infoSpan = row.querySelector('.text-\\[10px\\]');
+                if (infoSpan && apt) {
+                    infoSpan.className = 'text-[10px] text-emerald-600';
+                    infoSpan.textContent = (sysNames[apt.systemType] || '?') + ' | %' + apt.commission + ' | KDV %' + apt.taxRate;
+                }
+            } else {
+                row.className = row.className.replace(/border-emerald-100 bg-emerald-50\/30/g, 'border-red-100 bg-red-50/30');
+                selectEl.className = selectEl.className.replace('bg-emerald-50 border-emerald-200', 'bg-white');
+                const infoSpan = row.querySelector('.text-\\[10px\\]');
+                if (infoSpan) {
+                    infoSpan.className = 'text-[10px] text-red-400';
+                    infoSpan.textContent = 'Varsayılan: S3, %15, KDV %8';
+                }
+            }
+
+            // Sayacı güncelle
+            const allSelects = document.querySelectorAll('.apt-match-select');
+            const matchedCount = [...allSelects].filter(s => s.value).length;
+            const summary = document.getElementById('aptMatchingSummary');
+            if (summary) summary.textContent = matchedCount + ' / ' + allSelects.length + ' eşleşti';
+        },
+
+        saveMatching() {
+            const mapping = {};
+            document.querySelectorAll('.apt-match-select').forEach(sel => {
+                const pmsId = sel.dataset.pmsId;
+                if (sel.value) mapping[pmsId] = sel.value;
+            });
+            this.saveMapping(mapping);
+            Analytics.closeModal('aptMatchingModal');
+
+            // Yeniden hesapla
+            this.calculate();
+
+            if (typeof Analytics.showToast === 'function') {
+                const count = Object.keys(mapping).length;
+                Analytics.showToast(count + ' daire eşleştirmesi kaydedildi!', 'success');
+            }
         }
     };
 
