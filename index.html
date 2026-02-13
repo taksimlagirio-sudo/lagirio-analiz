@@ -2724,19 +2724,25 @@
         },
 
         // Rezervasyon listesinden ortalama gecelik ve toplam gelir hesapla
+        // HTML (PMS) format: { totalPrice, pricePerNight, nights, currency }
+        // JSON (Analytics) format: { totalAmount, paymentMethod, platformCommission, currency }
         calcRevenueFromRes(reservations) {
             const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
             let totalNights = 0, totalRevenue = 0;
             reservations.forEach(r => {
+                // Gece sayısı: PMS 'nights' alanı var, JSON'da yoksa tarihten hesapla
                 const nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
-                const amount = r.totalPrice || r.totalAmount || 0;
+                // Tutar: PMS 'totalPrice' kullanır, JSON 'totalAmount' kullanır
+                const amount = r.totalPrice ?? r.totalAmount ?? 0;
                 const currency = r.currency || 'EUR';
                 totalNights += nights;
                 totalRevenue += convertEUR(amount, currency);
             });
+            const avgNightly = totalNights > 0 ? totalRevenue / totalNights : 0;
             return {
-                avgNightly: totalNights > 0 ? totalRevenue / totalNights : 0,
-                totalRevenue,
+                avgNightly,
+                estMonthlyGross: avgNightly * this.OCCUPANCY_DAYS, // Tam ay tahmini (×25 gün)
+                totalRevenue,  // Gerçek rezervasyon toplamı
                 totalNights,
                 count: reservations.length
             };
@@ -2868,8 +2874,9 @@
                 months12.forEach(({ month, year, monthKey }) => {
                     // --- Karma gelir tahmini ---
                     const estimate = this.estimateMonthRevenue(aptId, month, year, defaultAdjust);
-                    const estMonthlyGross = estimate.totalRevenue;
                     const avgNightly = estimate.avgNightly;
+                    // Brüt gelir = ort. gecelik fiyat × doluluk günü (tam ay tahmini)
+                    const estMonthlyGross = avgNightly * this.OCCUPANCY_DAYS;
 
                     // --- Gider: daire bazlı standart (ekstrem eliminasyonlu) ---
                     const estExpenses = stdExpense;
@@ -2938,12 +2945,14 @@
                     // Daire-ay detayı
                     aptMonthlyDetail[aptId][monthKey] = {
                         gross: estMonthlyGross,
+                        actualRevenue: estimate.totalRevenue,
                         expenses: estExpenses,
                         kdv: estKDV,
                         platComm: estPlatformComm,
                         lagirio: lagirioEarning,
                         avgNightly: avgNightly,
                         resCount: estimate.count,
+                        totalNights: estimate.totalNights,
                         source: estimate.source,
                         sourceLabel: estimate.sourceLabel,
                         sourceColor: estimate.sourceColor,
@@ -3043,9 +3052,9 @@
             const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
             document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
 
-            const avgNightly = estGross > 0 ? Math.round(estGross / (aptCount * this.OCCUPANCY_DAYS || 1)) : 0;
+            const avgNightly = estGross > 0 ? Math.round(estGross / (aptCount * 12 * this.OCCUPANCY_DAYS || 1)) : 0;
             document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toLocaleString();
-            document.getElementById('projNightlyDetail').textContent = aptCount + ' daire \u00d7 ' + this.OCCUPANCY_DAYS + ' g/ay';
+            document.getElementById('projNightlyDetail').textContent = aptCount + ' daire | ' + this.OCCUPANCY_DAYS + ' gün/ay | Brüt/' + (aptCount*12) + ' ay';
 
             // Alt satır: Gider, KDV, Platform Komis.
             document.getElementById('projExpenses').textContent = '\u20ac' + Math.round(estExpenses).toLocaleString();
@@ -3124,12 +3133,13 @@
                         const adjustInput = d.needsAdjustment
                             ? ' <input type="number" value="' + (d.adjustPct || 0) + '" style="width:45px;font-size:10px;padding:1px 3px;border:1px solid #ddd;border-radius:3px;text-align:center;" onchange="Projection.updateChainAdjust(\'' + d.adjustKey + '\', this.value)" title="% ayarlama">%'
                             : '';
+                        const nightsInfo = d.totalNights > 0 ? d.totalNights + 'g' : '-';
                         return '<tr class="border-t border-gray-100 ' + rowClass + '">' +
                             '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + '</td>' +
                             '<td class="py-1.5 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + ' <span class="text-gray-300">(' + nightsInfo + ')</span></td>' +
                             '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(d.avgNightly) + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + Math.round(d.gross).toLocaleString() + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + Math.round(d.gross).toLocaleString() + ' <span class="text-[9px] text-gray-300">\u00d7' + Projection.OCCUPANCY_DAYS + 'g</span></td>' +
                             '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + Math.round(d.expenses).toLocaleString() + '</td>' +
                             '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + Math.round(d.kdv).toLocaleString() + '</td>' +
                             '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + Math.round(d.platComm).toLocaleString() + '</td>' +
@@ -3144,9 +3154,9 @@
                     '<thead><tr class="text-gray-400 text-[10px] uppercase">' +
                     '<th class="py-1 px-2 text-left">Ay</th>' +
                     '<th class="py-1 px-2 text-left">Kaynak</th>' +
-                    '<th class="py-1 px-2 text-right">Rez</th>' +
-                    '<th class="py-1 px-2 text-right">Gecelik</th>' +
-                    '<th class="py-1 px-2 text-right">Brüt</th>' +
+                    '<th class="py-1 px-2 text-right">Rez (Gece)</th>' +
+                    '<th class="py-1 px-2 text-right">/Gece</th>' +
+                    '<th class="py-1 px-2 text-right">Brüt (\u00d725g)</th>' +
                     '<th class="py-1 px-2 text-right">Gider</th>' +
                     '<th class="py-1 px-2 text-right">KDV</th>' +
                     '<th class="py-1 px-2 text-right">Plt.Kom</th>' +
