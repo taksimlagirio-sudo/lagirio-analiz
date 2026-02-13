@@ -3931,12 +3931,24 @@
                     if (!systemGroups[sys]) systemGroups[sys] = { apartments: [], totalExpenses: 0, expenseCount: 0 };
                     const aptExpenses = this.data.expenses.filter(e => e.apartmentId === apt.id);
                     const aptTotal = aptExpenses.reduce((s, e) => s + this.convertToEUR(e.amount, e.currency), 0);
+                    // Aylık kırılım hesapla
+                    const monthlyBreakdown = {};
+                    aptExpenses.forEach(e => {
+                        const d = new Date(e.date);
+                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                        if (!monthlyBreakdown[key]) monthlyBreakdown[key] = { count: 0, totalEUR: 0, items: [] };
+                        const eur = this.convertToEUR(e.amount, e.currency);
+                        monthlyBreakdown[key].count++;
+                        monthlyBreakdown[key].totalEUR += eur;
+                        monthlyBreakdown[key].items.push({ amount: e.amount, currency: e.currency, eur, category: e.category, date: e.date });
+                    });
+
                     systemGroups[sys].apartments.push({
                         code: apt.code, id: apt.id,
                         expenseCount: aptExpenses.length,
                         totalEUR: Math.round(aptTotal * 100) / 100,
                         currencies: [...new Set(aptExpenses.map(e => e.currency))],
-                        sampleExpenses: aptExpenses.slice(0, 3).map(e => ({ amount: e.amount, currency: e.currency, date: e.date, category: e.category }))
+                        monthlyBreakdown
                     });
                     systemGroups[sys].totalExpenses += aptTotal;
                     systemGroups[sys].expenseCount += aptExpenses.length;
@@ -3945,8 +3957,13 @@
                     console.log(`\n📊 Sistem ${sys}: ${data.apartments.length} daire, ${data.expenseCount} gider, toplam €${Math.round(data.totalExpenses)}`);
                     data.apartments.forEach(a => {
                         console.log(`   ${a.code} (${a.id}): ${a.expenseCount} gider = €${a.totalEUR} [${a.currencies.join(',')}]`);
-                        if (a.sampleExpenses.length > 0) {
-                            a.sampleExpenses.forEach(e => console.log(`      örnek: ${e.amount} ${e.currency} - ${e.category} (${e.date})`));
+                        // Aylık kırılım
+                        if (a.monthlyBreakdown) {
+                            Object.keys(a.monthlyBreakdown).sort().forEach(month => {
+                                const m = a.monthlyBreakdown[month];
+                                console.log(`      ${month}: ${m.count} gider = €${m.totalEUR.toFixed(2)}`);
+                                m.items.forEach(e => console.log(`        - ${e.amount} ${e.currency} → €${e.eur.toFixed(2)} | ${e.category} (${e.date})`));
+                            });
                         }
                     });
                 });
