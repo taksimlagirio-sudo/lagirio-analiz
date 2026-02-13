@@ -2669,11 +2669,17 @@
 
             if (validExpenses.length === 0) return 0;
 
-            // En düşük gider = standart
-            const minExp = Math.min(...validExpenses);
-            // %50'den fazla sapanları ele
-            const threshold = minExp * 1.5;
-            const normalExp = validExpenses.filter(e => e <= threshold);
+            // Önce ortalama hesapla (ekstrem düşük eleme için)
+            const avg = validExpenses.reduce((s, e) => s + e, 0) / validExpenses.length;
+            // Ekstrem düşük: ortalamanın 1/10'undan az olanları ele
+            const nonTrivial = validExpenses.filter(e => e >= avg / 10);
+            if (nonTrivial.length === 0) return 0;
+
+            // En düşük gider = standart (trivial olanlar elendikten sonra)
+            const minExp = Math.min(...nonTrivial);
+            // %100'den fazla sapanları ele (en düşüğün 2 katını aşanlar)
+            const threshold = minExp * 2;
+            const normalExp = nonTrivial.filter(e => e <= threshold);
 
             if (normalExp.length === 0) return minExp;
             return normalExp.reduce((s, e) => s + e, 0) / normalExp.length;
