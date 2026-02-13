@@ -3827,19 +3827,6 @@
             this.data.capitalExpenses = this.data.capitalExpenses || [];
             this.data.lagirioExpenses = this.data.lagirioExpenses || [];
 
-            // Demirbaş giderleri normal giderlere dahil et
-            // (lagirio-analiz her yerde sadece data.expenses'e bakıyor, capitalExpenses atlanıyordu)
-            if (this.data.capitalExpenses.length > 0) {
-                const existingIds = new Set(this.data.expenses.map(e => e.id));
-                this.data.capitalExpenses.forEach(capExp => {
-                    if (!existingIds.has(capExp.id)) {
-                        this.data.expenses.push({
-                            ...capExp,
-                            _isCapital: true
-                        });
-                    }
-                });
-            }
         },
         
         // Load sample data for testing
@@ -3933,6 +3920,45 @@
         
         processData() {
             console.log('📦 processData başladı');
+
+            // DEBUG: Sistem tipine göre gider dökümü
+            if (this.data?.apartments && this.data?.expenses) {
+                console.log('🔍 === GİDER DEBUG BAŞLANGIÇ ===');
+                console.log('Toplam gider kaydı:', this.data.expenses.length);
+                const systemGroups = {};
+                this.data.apartments.forEach(apt => {
+                    const sys = apt.systemType || '?';
+                    if (!systemGroups[sys]) systemGroups[sys] = { apartments: [], totalExpenses: 0, expenseCount: 0 };
+                    const aptExpenses = this.data.expenses.filter(e => e.apartmentId === apt.id);
+                    const aptTotal = aptExpenses.reduce((s, e) => s + this.convertToEUR(e.amount, e.currency), 0);
+                    systemGroups[sys].apartments.push({
+                        code: apt.code, id: apt.id,
+                        expenseCount: aptExpenses.length,
+                        totalEUR: Math.round(aptTotal * 100) / 100,
+                        currencies: [...new Set(aptExpenses.map(e => e.currency))],
+                        sampleExpenses: aptExpenses.slice(0, 3).map(e => ({ amount: e.amount, currency: e.currency, date: e.date, category: e.category }))
+                    });
+                    systemGroups[sys].totalExpenses += aptTotal;
+                    systemGroups[sys].expenseCount += aptExpenses.length;
+                });
+                Object.entries(systemGroups).forEach(([sys, data]) => {
+                    console.log(`\n📊 Sistem ${sys}: ${data.apartments.length} daire, ${data.expenseCount} gider, toplam €${Math.round(data.totalExpenses)}`);
+                    data.apartments.forEach(a => {
+                        console.log(`   ${a.code} (${a.id}): ${a.expenseCount} gider = €${a.totalEUR} [${a.currencies.join(',')}]`);
+                        if (a.sampleExpenses.length > 0) {
+                            a.sampleExpenses.forEach(e => console.log(`      örnek: ${e.amount} ${e.currency} - ${e.category} (${e.date})`));
+                        }
+                    });
+                });
+                // Eşleşmeyen giderler (apartmentId'si hiçbir daireye ait olmayan)
+                const aptIds = new Set(this.data.apartments.map(a => a.id));
+                const orphanExpenses = this.data.expenses.filter(e => !aptIds.has(e.apartmentId));
+                if (orphanExpenses.length > 0) {
+                    console.log(`\n⚠️ UYARI: ${orphanExpenses.length} gider hiçbir daireyle eşleşmiyor!`);
+                    orphanExpenses.slice(0, 5).forEach(e => console.log(`   apartmentId: "${e.apartmentId}", amount: ${e.amount} ${e.currency}`));
+                }
+                console.log('🔍 === GİDER DEBUG BİTİŞ ===');
+            }
             
             // Hide upload section
             document.getElementById('uploadSection').classList.add('hidden');
