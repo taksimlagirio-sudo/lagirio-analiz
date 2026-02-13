@@ -2671,8 +2671,8 @@
 
             // Önce ortalama hesapla (ekstrem düşük eleme için)
             const avg = validExpenses.reduce((s, e) => s + e, 0) / validExpenses.length;
-            // Ekstrem düşük: ortalamanın 1/10'undan az olanları ele
-            const nonTrivial = validExpenses.filter(e => e >= avg / 10);
+            // Ekstrem düşük: ortalamanın 1/5'inden az olanları ele
+            const nonTrivial = validExpenses.filter(e => e >= avg / 5);
             if (nonTrivial.length === 0) return 0;
 
             // En düşük gider = standart (trivial olanlar elendikten sonra)
