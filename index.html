@@ -7684,17 +7684,36 @@
 
         // Helper: Calculate apartment metrics
         calculateApartmentMetrics(apartment, startDate, endDate) {
+            // DEBUG: Karşılaştırma gider analizi
+            console.log(`\n🔎 calculateApartmentMetrics: ${apartment.code} (${apartment.id})`);
+            console.log(`   Dönem: ${startDate.toISOString()} → ${endDate.toISOString()}`);
+            console.log(`   startDate local: ${startDate.toString()}`);
+            console.log(`   endDate local: ${endDate.toString()}`);
+
+            // Tüm bu daireye ait giderleri bul (tarih filtresi OLMADAN)
+            const allAptExpenses = this.data.expenses?.filter(exp => exp.apartmentId === apartment.id) || [];
+            console.log(`   Bu daireye ait TOPLAM gider sayısı (filtersiz): ${allAptExpenses.length}`);
+
+            // Her bir giderin tarih karşılaştırmasını göster
+            allAptExpenses.forEach(exp => {
+                const date = new Date(exp.date);
+                const inRange = date >= startDate && date <= endDate;
+                console.log(`   ${inRange ? '✅' : '❌'} exp.date="${exp.date}" → parsed=${date.toISOString()} (${date.toString()}) | ${exp.amount} ${exp.currency} | >= start: ${date >= startDate}, <= end: ${date <= endDate}`);
+            });
+
             const reservations = this.data.reservations?.filter(res => {
                 const checkIn = new Date(res.checkIn);
                 return res.apartmentId === apartment.id &&
                     checkIn >= startDate && checkIn <= endDate;
             }) || [];
-            
+
             const expenses = this.data.expenses?.filter(exp => {
                 const date = new Date(exp.date);
                 return exp.apartmentId === apartment.id &&
                     date >= startDate && date <= endDate;
             }) || [];
+
+            console.log(`   Filtrelenmiş gider sayısı: ${expenses.length}`);
             
             const lagirioRevenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
             const ownerShare = this.calculateOwnerShare(apartment, reservations, expenses);
