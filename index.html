@@ -2669,10 +2669,12 @@
 
             if (validExpenses.length === 0) return 0;
 
-            // Önce ortalama hesapla (ekstrem düşük eleme için)
-            const avg = validExpenses.reduce((s, e) => s + e, 0) / validExpenses.length;
-            // Ekstrem düşük: ortalamanın 1/5'inden az olanları ele
-            const nonTrivial = validExpenses.filter(e => e >= avg / 5);
+            // Medyan hesapla (ekstrem düşük eleme için - ortalamadan daha sağlıklı, uç değerlerden etkilenmez)
+            const sorted = [...validExpenses].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+            // Ekstrem düşük: medyanın 1/5'inden az olanları ele
+            const nonTrivial = validExpenses.filter(e => e >= median / 5);
             if (nonTrivial.length === 0) return 0;
 
             // En düşük gider = standart (trivial olanlar elendikten sonra)
