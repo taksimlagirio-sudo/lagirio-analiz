@@ -3826,6 +3826,20 @@
             this.data.categories = this.data.categories || [];
             this.data.capitalExpenses = this.data.capitalExpenses || [];
             this.data.lagirioExpenses = this.data.lagirioExpenses || [];
+
+            // Demirbaş giderleri normal giderlere dahil et
+            // (lagirio-analiz her yerde sadece data.expenses'e bakıyor, capitalExpenses atlanıyordu)
+            if (this.data.capitalExpenses.length > 0) {
+                const existingIds = new Set(this.data.expenses.map(e => e.id));
+                this.data.capitalExpenses.forEach(capExp => {
+                    if (!existingIds.has(capExp.id)) {
+                        this.data.expenses.push({
+                            ...capExp,
+                            _isCapital: true
+                        });
+                    }
+                });
+            }
         },
         
         // Load sample data for testing
