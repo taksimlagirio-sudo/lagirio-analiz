@@ -2241,16 +2241,14 @@
                 if (!cleaned) return 0;
                 const lastDot = cleaned.lastIndexOf('.');
                 const lastComma = cleaned.lastIndexOf(',');
-                const afterDot = lastDot >= 0 ? cleaned.length - lastDot - 1 : 0;
-                const afterComma = lastComma >= 0 ? cleaned.length - lastComma - 1 : 0;
-                // Her iki ayraç da varsa ve son ayraçtan sonra 2 basamak = ondalık (380.049,00 → 380.05)
+                // Her iki ayraç da var: son ayraç = ondalık, öncekiler binlik (380.049,32 → 380.32)
                 if (lastDot >= 0 && lastComma >= 0) {
-                    if (lastComma > lastDot && afterComma === 2) return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
-                    if (lastDot > lastComma && afterDot === 2) return parseFloat(cleaned.replace(/,/g, '')) || 0;
+                    if (lastComma > lastDot) return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+                    if (lastDot > lastComma) return parseFloat(cleaned.replace(/,/g, '')) || 0;
                 }
-                // Tek ayraç + sonrası ≤3 basamak = ondalık
-                if (lastDot >= 0 && lastComma < 0 && afterDot <= 3) return parseFloat(cleaned) || 0;
-                if (lastComma >= 0 && lastDot < 0 && afterComma <= 3) return parseFloat(cleaned.replace(',', '.')) || 0;
+                // Tek ayraç: ondalık (380,32 → 380.32 veya 380.32 → 380.32)
+                if (lastComma >= 0 && lastDot < 0) return parseFloat(cleaned.replace(',', '.')) || 0;
+                if (lastDot >= 0 && lastComma < 0) return parseFloat(cleaned) || 0;
                 return parseFloat(cleaned) || 0;
             };
 
@@ -3316,8 +3314,8 @@
                     html += '<td class="py-2 px-3 text-center text-gray-600">' + fmt(res.checkOut) + '</td>';
                     html += '<td class="py-2 px-3 text-center font-semibold">' + nights + '</td>';
                     html += '<td class="py-2 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + platformColor + '">' + (res.platform || '-') + '</span></td>';
-                    html += '<td class="py-2 px-3 text-right font-medium">\u20ac' + Math.round(amountEUR).toLocaleString() + '</td>';
-                    html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + Math.round(perNight) + '</td>';
+                    html += '<td class="py-2 px-3 text-right font-medium">\u20ac' + amountEUR.toFixed(2) + '</td>';
+                    html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + perNight.toFixed(2) + '</td>';
                     html += '</tr>';
                 });
 
@@ -3328,14 +3326,14 @@
                 html += '<td></td>';
                 html += '<td class="py-2 px-3 text-center">' + totalNights + '</td>';
                 html += '<td></td>';
-                html += '<td class="py-2 px-3 text-right text-emerald-600">\u20ac' + Math.round(totalAmount).toLocaleString() + '</td>';
-                html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + Math.round(avgNightly) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-emerald-600">\u20ac' + totalAmount.toFixed(2) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + avgNightly.toFixed(2) + '</td>';
                 html += '</tr>';
                 html += '</tbody></table></div>';
 
                 // Summary cards
                 html += '<div class="flex gap-3 mt-3 flex-wrap">';
-                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-emerald-700">\u20ac' + Math.round(avgNightly) + '</strong></div>';
+                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-emerald-700">\u20ac' + avgNightly.toFixed(2) + '</strong></div>';
                 html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + totalNights + '</strong></div>';
                 html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Sayısı:</span> <strong class="text-amber-700">' + section.reservations.length + '</strong></div>';
                 html += '</div>';
