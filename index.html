@@ -3953,11 +3953,11 @@
                     systemGroups[sys].totalExpenses += aptTotal;
                     systemGroups[sys].expenseCount += aptExpenses.length;
                 });
-                Object.entries(systemGroups).forEach(([sys, data]) => {
+                // Sadece Sistem 2 (Kişi Şirketi) göster
+                Object.entries(systemGroups).filter(([sys]) => sys === '2').forEach(([sys, data]) => {
                     console.log(`\n📊 Sistem ${sys}: ${data.apartments.length} daire, ${data.expenseCount} gider, toplam €${Math.round(data.totalExpenses)}`);
                     data.apartments.forEach(a => {
                         console.log(`   ${a.code} (${a.id}): ${a.expenseCount} gider = €${a.totalEUR} [${a.currencies.join(',')}]`);
-                        // Aylık kırılım
                         if (a.monthlyBreakdown) {
                             Object.keys(a.monthlyBreakdown).sort().forEach(month => {
                                 const m = a.monthlyBreakdown[month];
@@ -7684,17 +7684,36 @@
 
         // Helper: Calculate apartment metrics
         calculateApartmentMetrics(apartment, startDate, endDate) {
+            // DEBUG: Sadece Sistem 2 (Kişi Şirketi) için
+            if (apartment.systemType === '2') {
+                console.log(`\n🔎 calculateApartmentMetrics: ${apartment.code} (${apartment.id})`);
+                console.log(`   Dönem: ${startDate.toISOString()} → ${endDate.toISOString()}`);
+                console.log(`   startDate local: ${startDate.toString()}`);
+                console.log(`   endDate local: ${endDate.toString()}`);
+
+                const allAptExpenses = this.data.expenses?.filter(exp => exp.apartmentId === apartment.id) || [];
+                console.log(`   Bu daireye ait TOPLAM gider sayısı (filtersiz): ${allAptExpenses.length}`);
+
+                allAptExpenses.forEach(exp => {
+                    const date = new Date(exp.date);
+                    const inRange = date >= startDate && date <= endDate;
+                    console.log(`   ${inRange ? '✅' : '❌'} exp.date="${exp.date}" → parsed=${date.toISOString()} (${date.toString()}) | ${exp.amount} ${exp.currency} | >= start: ${date >= startDate}, <= end: ${date <= endDate}`);
+                });
+            }
+
             const reservations = this.data.reservations?.filter(res => {
                 const checkIn = new Date(res.checkIn);
                 return res.apartmentId === apartment.id &&
                     checkIn >= startDate && checkIn <= endDate;
             }) || [];
-            
+
             const expenses = this.data.expenses?.filter(exp => {
                 const date = new Date(exp.date);
                 return exp.apartmentId === apartment.id &&
                     date >= startDate && date <= endDate;
             }) || [];
+
+            console.log(`   Filtrelenmiş gider sayısı: ${expenses.length}`);
             
             const lagirioRevenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
             const ownerShare = this.calculateOwnerShare(apartment, reservations, expenses);
