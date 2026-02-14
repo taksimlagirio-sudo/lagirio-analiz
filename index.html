@@ -3142,8 +3142,10 @@
                             ? ' <input type="number" value="' + (d.adjustPct || 0) + '" style="width:45px;font-size:10px;padding:1px 3px;border:1px solid #ddd;border-radius:3px;text-align:center;" onchange="Projection.updateChainAdjust(\'' + d.adjustKey + '\', this.value)" title="% ayarlama">%'
                             : '';
                         const nightsInfo = d.totalNights > 0 ? d.totalNights + 'g' : '-';
-                        return '<tr class="border-t border-gray-100 ' + rowClass + '">' +
-                            '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + '</td>' +
+                        const isClickable = d.resCount > 0 && d.source !== 'veri-yok';
+                        const clickAttr = isClickable ? ' onclick="event.stopPropagation(); Projection.showReservationDetail(\'' + apt.id + '\',' + (parseInt(m)-1) + ',' + y + ')" style="cursor:pointer;" title="Rezervasyon detayı için tıklayın"' : '';
+                        return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-gray-100 transition-colors' : '') + '"' + clickAttr + '>' +
+                            '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + (isClickable ? ' <i data-lucide="search" class="w-3 h-3 inline text-gray-300"></i>' : '') + '</td>' +
                             '<td class="py-1.5 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
                             '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + ' <span class="text-gray-300">(' + nightsInfo + ')</span></td>' +
                             '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(d.avgNightly) + '</td>' +
@@ -3203,6 +3205,138 @@
             const isHidden = detail.classList.contains('hidden');
             detail.classList.toggle('hidden');
             if (chev) chev.style.transform = isHidden ? 'rotate(90deg)' : '';
+        },
+
+        showReservationDetail(aptId, month, year) {
+            const monthNamesFull = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+            const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
+            const apt = Analytics.data?.apartments?.find(a => a.id === aptId);
+            const aptCode = apt ? apt.code : aptId;
+
+            // Get reservations from all sources
+            const futureFromPms = this.getPmsResForMonth(aptId, month, year);
+            const futureFromAnalytics = this.getAnalyticsResForMonth(aptId, month, year);
+            const pastFromPms = this.getPmsResForMonth(aptId, month, year - 1);
+            const pastFromAnalytics = this.getAnalyticsResForMonth(aptId, month, year - 1);
+            const futureRes = futureFromPms.concat(futureFromAnalytics);
+            const pastRes = pastFromPms.concat(pastFromAnalytics);
+            const hasFuture = futureRes.length > 0;
+            const hasPast = pastRes.length > 0;
+
+            let sections = [];
+            if (hasFuture && !hasPast) {
+                sections.push({ title: 'Mevcut Rezervasyonlar (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: 'Gerçek Veri', badgeColor: 'emerald', note: null });
+            } else if (!hasFuture && hasPast) {
+                sections.push({ title: 'Geçmiş Yıl Rezervasyonları (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Geçmiş Yıl +5%', badgeColor: 'amber', note: 'Bu ay için ' + year + ' yılında rezervasyon bulunmadığından, ' + (year - 1) + ' yılı verileri %5 artışla kullanılmıştır.' });
+            } else if (hasFuture && hasPast) {
+                sections.push({ title: 'Mevcut Rezervasyonlar (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: 'Gelecek', badgeColor: 'emerald', note: null });
+                sections.push({ title: 'Geçmiş Yıl Rezervasyonları (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Geçmiş Yıl', badgeColor: 'amber', note: 'Her iki yılın ortalaması alınarak hesaplanmıştır.' });
+            } else {
+                const chain = this.chainBackward(aptId, month, year);
+                if (chain) {
+                    const adjustKey = aptId + '_' + month + '_' + year;
+                    const adjustPct = this.chainAdjustments[adjustKey] !== undefined ? this.chainAdjustments[adjustKey] : 0;
+                    sections.push({ title: 'Zincir Kaynak: ' + monthNamesFull[chain.month] + ' ' + chain.year, reservations: chain.reservations, badge: 'Zincir ' + (adjustPct >= 0 ? '+' : '') + adjustPct + '%', badgeColor: 'orange', note: 'Bu ay için doğrudan veri bulunmadığından, en yakın veri olan ' + monthNamesFull[chain.month] + ' ' + chain.year + ' ayı kullanılmıştır.' });
+                }
+            }
+
+            if (sections.length === 0) return;
+
+            const badgeColorMap = { emerald: 'bg-emerald-100 text-emerald-700', amber: 'bg-amber-100 text-amber-700', orange: 'bg-orange-100 text-orange-700', blue: 'bg-blue-100 text-blue-700' };
+            const borderColorMap = { emerald: 'border-emerald-400', amber: 'border-amber-400', orange: 'border-orange-400', blue: 'border-blue-400' };
+            const fmt = d => { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
+
+            let html = '<div id="projResDetailOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">';
+            html += '<div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">';
+
+            // Header
+            html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl flex justify-between items-center">';
+            html += '<div><h3 class="text-lg font-bold">' + aptCode + ' - ' + monthNamesFull[month] + ' ' + year + '</h3>';
+            html += '<p class="text-emerald-100 text-sm mt-1">Hesaplamaya Dahil Edilen Rezervasyonlar</p></div>';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
+            html += '</div>';
+
+            html += '<div class="p-5 space-y-6">';
+
+            sections.forEach(function(section) {
+                html += '<div>';
+                html += '<div class="flex items-center gap-3 mb-3">';
+                html += '<h4 class="text-sm font-bold text-gray-700">' + section.title + '</h4>';
+                html += '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + (badgeColorMap[section.badgeColor] || 'bg-gray-100 text-gray-600') + '">' + section.badge + '</span>';
+                html += '</div>';
+
+                if (section.note) {
+                    html += '<p class="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mb-3 border-l-3 ' + (borderColorMap[section.badgeColor] || '') + '">' + section.note + '</p>';
+                }
+
+                html += '<div class="overflow-x-auto"><table class="w-full text-xs">';
+                html += '<thead class="bg-gray-50"><tr>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Giriş</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Çıkış</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+                html += '</tr></thead><tbody>';
+
+                let totalAmount = 0, totalNights = 0;
+
+                section.reservations.forEach(function(res) {
+                    const nights = res.nights || Math.max(1, Math.round((new Date(res.checkOut) - new Date(res.checkIn)) / 86400000));
+                    const amount = res.totalPrice ?? res.totalAmount ?? 0;
+                    const currency = res.currency || 'EUR';
+                    const amountEUR = convertEUR(amount, currency);
+                    const perNight = nights > 0 ? amountEUR / nights : 0;
+                    totalAmount += amountEUR;
+                    totalNights += nights;
+                    const platformColor = (res.platform === 'Airbnb') ? 'bg-red-50 text-red-600' : (res.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-600';
+
+                    html += '<tr class="border-t border-gray-100 hover:bg-gray-50">';
+                    html += '<td class="py-2 px-3 font-medium text-gray-700">' + (res.guestName || '-') + '</td>';
+                    html += '<td class="py-2 px-3 text-center text-gray-600">' + fmt(res.checkIn) + '</td>';
+                    html += '<td class="py-2 px-3 text-center text-gray-600">' + fmt(res.checkOut) + '</td>';
+                    html += '<td class="py-2 px-3 text-center font-semibold">' + nights + '</td>';
+                    html += '<td class="py-2 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + platformColor + '">' + (res.platform || '-') + '</span></td>';
+                    html += '<td class="py-2 px-3 text-right font-medium">\u20ac' + Math.round(amountEUR).toLocaleString() + '</td>';
+                    html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + Math.round(perNight) + '</td>';
+                    html += '</tr>';
+                });
+
+                // Total row
+                const avgNightly = totalNights > 0 ? totalAmount / totalNights : 0;
+                html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
+                html += '<td class="py-2 px-3" colspan="2">TOPLAM</td>';
+                html += '<td></td>';
+                html += '<td class="py-2 px-3 text-center">' + totalNights + '</td>';
+                html += '<td></td>';
+                html += '<td class="py-2 px-3 text-right text-emerald-600">\u20ac' + Math.round(totalAmount).toLocaleString() + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + Math.round(avgNightly) + '</td>';
+                html += '</tr>';
+                html += '</tbody></table></div>';
+
+                // Summary cards
+                html += '<div class="flex gap-3 mt-3 flex-wrap">';
+                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-emerald-700">\u20ac' + Math.round(avgNightly) + '</strong></div>';
+                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + totalNights + '</strong></div>';
+                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Sayısı:</span> <strong class="text-amber-700">' + section.reservations.length + '</strong></div>';
+                html += '</div>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            // Footer
+            html += '<div class="p-4 border-t border-gray-100 flex justify-end">';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">Kapat</button>';
+            html += '</div>';
+
+            html += '</div></div>';
+
+            // Remove existing overlay if any
+            document.getElementById('projResDetailOverlay')?.remove();
+            document.body.insertAdjacentHTML('beforeend', html);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
         renderPlatformFilter(futureRes) {
