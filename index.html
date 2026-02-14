@@ -2243,11 +2243,14 @@
                 const lastComma = cleaned.lastIndexOf(',');
                 const afterDot = lastDot >= 0 ? cleaned.length - lastDot - 1 : 0;
                 const afterComma = lastComma >= 0 ? cleaned.length - lastComma - 1 : 0;
-                // Tek ayraç + sonrası ≤3 basamak = ondalık (380.049→380.049, 126.683→126.683)
+                // Her iki ayraç da varsa ve son ayraçtan sonra 2 basamak = ondalık (380.049,00 → 380.05)
+                if (lastDot >= 0 && lastComma >= 0) {
+                    if (lastComma > lastDot && afterComma === 2) return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+                    if (lastDot > lastComma && afterDot === 2) return parseFloat(cleaned.replace(/,/g, '')) || 0;
+                }
+                // Tek ayraç + sonrası ≤3 basamak = ondalık
                 if (lastDot >= 0 && lastComma < 0 && afterDot <= 3) return parseFloat(cleaned) || 0;
                 if (lastComma >= 0 && lastDot < 0 && afterComma <= 3) return parseFloat(cleaned.replace(',', '.')) || 0;
-                if (lastComma > lastDot) return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
-                if (lastDot > lastComma) return parseFloat(cleaned.replace(/,/g, '')) || 0;
                 return parseFloat(cleaned) || 0;
             };
 
