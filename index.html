@@ -2243,7 +2243,27 @@
                 const lastComma = cleaned.lastIndexOf(',');
                 // Her iki ayraç da var: son ayraç = ondalık, öncekiler binlik (380.049,32 → 380.32)
                 if (lastDot >= 0 && lastComma >= 0) {
-                    if (lastComma > lastDot) return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+                    if (lastComma > lastDot) {
+                        // European format: dot = thousands, comma = decimal
+                        const dotCount = (cleaned.match(/\./g) || []).length;
+                        const firstDot = cleaned.indexOf('.');
+                        const beforeFirstDot = cleaned.substring(0, firstDot);
+                        const middlePart = cleaned.substring(firstDot + 1, lastComma);
+                        const firstNum = parseFloat(beforeFirstDot) || 0;
+
+                        // Detect malformed pattern: "NNN.0XX,XX" where NNN < 1000
+                        // e.g., "380.049,00" should be "380,00" not "380049,00"
+                        // Valid: "1.234,56" = 1234.56 (first part has 1 digit)
+                        // Valid: "2.034,56" = 2034.56 (first part has 1 digit)
+                        // Invalid: "380.049,00" (first part has 3 digits < 1000, middle starts with 0)
+                        if (dotCount === 1 && beforeFirstDot.length === 3 && firstNum < 1000 && middlePart.charAt(0) === '0') {
+                            const decimalPart = cleaned.substring(lastComma + 1);
+                            return parseFloat(beforeFirstDot + '.' + decimalPart) || 0;
+                        }
+
+                        // Normal European format with valid thousands separator
+                        return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+                    }
                     if (lastDot > lastComma) return parseFloat(cleaned.replace(/,/g, '')) || 0;
                 }
                 // Tek ayraç: ondalık (380,32 → 380.32 veya 380.32 → 380.32)
