@@ -2419,7 +2419,7 @@
                         <div class="flex gap-3 text-xs text-gray-500">
                             <span>${g.items.length} rez.</span>
                             <span>${g.nights} gece</span>
-                            <span class="font-semibold text-emerald-600">€${Math.round(g.total).toLocaleString()}</span>
+                            <span class="font-semibold text-emerald-600">€${g.total.toFixed(2)}</span>
                         </div>
                     </div>
                     <div class="divide-y divide-gray-50">
@@ -2436,8 +2436,8 @@
                                 <div class="flex items-center gap-3 text-gray-500">
                                     <span>${fmt(ci)} → ${fmt(co)}</span>
                                     <span>${r.nights}g</span>
-                                    <span class="font-bold text-gray-700">€${Math.round(r.totalPrice)}</span>
-                                    <span class="text-gray-400">€${r.pricePerNight}/g</span>
+                                    <span class="font-bold text-gray-700">€${(r.totalPrice || 0).toFixed(2)}</span>
+                                    <span class="text-gray-400">€${(r.pricePerNight || 0).toFixed(2)}/g</span>
                                 </div>
                             </div>`;
                         }).join('')}
@@ -3069,27 +3069,27 @@
         // ---- Render Functions ----
         renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, resCount, aptCount) {
             // Üst satır: Brüt, Lagirio, Gecelik
-            document.getElementById('projGrossRevenue').textContent = '\u20ac' + Math.round(estGross).toLocaleString();
+            document.getElementById('projGrossRevenue').textContent = '\u20ac' + estGross.toFixed(2);
             document.getElementById('projGrossDetail').textContent = aptCount + ' daire | 12 ay | Karma tahmin';
 
-            document.getElementById('projLagirioNet').textContent = '\u20ac' + Math.round(lagirioNet).toLocaleString();
+            document.getElementById('projLagirioNet').textContent = '\u20ac' + lagirioNet.toFixed(2);
             const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
             document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
 
-            const avgNightly = estGross > 0 ? Math.round(estGross / (aptCount * 12 * this.OCCUPANCY_DAYS || 1)) : 0;
-            document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toLocaleString();
+            const avgNightly = estGross > 0 ? estGross / (aptCount * 12 * this.OCCUPANCY_DAYS || 1) : 0;
+            document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toFixed(2);
             document.getElementById('projNightlyDetail').textContent = aptCount + ' daire | ' + this.OCCUPANCY_DAYS + ' gün/ay | Brüt/' + (aptCount*12) + ' ay';
 
             // Alt satır: Gider, KDV, Platform Komis.
-            document.getElementById('projExpenses').textContent = '\u20ac' + Math.round(estExpenses).toLocaleString();
+            document.getElementById('projExpenses').textContent = '\u20ac' + estExpenses.toFixed(2);
             const expRatio = estGross > 0 ? Math.round((estExpenses / estGross) * 100) : 0;
             document.getElementById('projExpenseDetail').textContent = 'Daire bazlı standart (ekstrem eleme)';
 
-            document.getElementById('projKDV').textContent = '\u20ac' + Math.round(estKDV).toLocaleString();
+            document.getElementById('projKDV').textContent = '\u20ac' + estKDV.toFixed(2);
             const kdvRatio = estGross > 0 ? ((estKDV / estGross) * 100).toFixed(1) : 0;
             document.getElementById('projKDVDetail').textContent = 'Br\u00fct\u00fcn %' + kdvRatio + '\'i';
 
-            document.getElementById('projPlatComm').textContent = '\u20ac' + Math.round(estPlatComm).toLocaleString();
+            document.getElementById('projPlatComm').textContent = '\u20ac' + estPlatComm.toFixed(2);
             const platRatio = estGross > 0 ? Math.round((estPlatComm / estGross) * 100) : 0;
             document.getElementById('projPlatCommDetail').textContent = 'Ge\u00e7mi\u015f oran\u0131: %' + platRatio;
         },
@@ -3117,8 +3117,8 @@
 
                 return '<div class="flex-1 flex flex-col items-center gap-1">' +
                     '<div class="text-center mb-1">' +
-                    '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + Math.round(d.lagirio).toLocaleString() + '</span>' +
-                    '<span class="text-[9px] text-gray-400">\u20ac' + Math.round(d.avgNightly) + '/g</span></div>' +
+                    '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + d.lagirio.toFixed(2) + '</span>' +
+                    '<span class="text-[9px] text-gray-400">\u20ac' + d.avgNightly.toFixed(2) + '/g</span></div>' +
                     '<div class="w-full flex gap-0.5 items-end justify-center" style="height:' + grossH + 'px">' +
                     '<div class="flex-1 bg-emerald-100 rounded-t-sm h-full relative">' +
                     '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + lagirioH + 'px"></div></div>' +
@@ -3164,12 +3164,12 @@
                             '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + (isClickable ? ' <i data-lucide="search" class="w-3 h-3 inline text-gray-300"></i>' : '') + '</td>' +
                             '<td class="py-1.5 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
                             '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + ' <span class="text-gray-300">(' + nightsInfo + ')</span></td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(d.avgNightly) + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + Math.round(d.gross).toLocaleString() + ' <span class="text-[9px] text-gray-300">\u00d7' + Projection.OCCUPANCY_DAYS + 'g</span></td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + Math.round(d.expenses).toLocaleString() + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + Math.round(d.kdv).toLocaleString() + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + Math.round(d.platComm).toLocaleString() + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + Math.round(d.lagirio).toLocaleString() + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + d.avgNightly.toFixed(2) + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + d.gross.toFixed(2) + ' <span class="text-[9px] text-gray-300">\u00d7' + Projection.OCCUPANCY_DAYS + 'g</span></td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + d.expenses.toFixed(2) + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + d.kdv.toFixed(2) + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + d.platComm.toFixed(2) + '</td>' +
+                            '<td class="py-1.5 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + d.lagirio.toFixed(2) + '</td>' +
                             '</tr>';
                     }).join('');
                 }
@@ -3191,12 +3191,12 @@
                     '<tr class="border-t-2 border-gray-300 font-bold">' +
                     '<td class="py-1.5 px-2 text-xs" colspan="2">TOPLAM (12 Ay)</td>' +
                     '<td class="py-1.5 px-2 text-xs text-right">' + apt.count + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(apt.avgNightly) + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + Math.round(apt.gross).toLocaleString() + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + Math.round(apt.expenses).toLocaleString() + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + Math.round(apt.kdv).toLocaleString() + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + Math.round(apt.platComm).toLocaleString() + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + Math.round(apt.lagirio).toLocaleString() + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.avgNightly.toFixed(2) + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.gross.toFixed(2) + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + apt.expenses.toFixed(2) + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + apt.kdv.toFixed(2) + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + apt.platComm.toFixed(2) + '</td>' +
+                    '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + apt.lagirio.toFixed(2) + '</td>' +
                     '</tr></tbody></table></div></div>';
 
                 return '<div class="border border-gray-100 rounded-lg overflow-hidden">' +
@@ -3205,10 +3205,10 @@
                     '<span class="text-xs font-bold text-gray-300 w-5">' + (i+1) + '</span>' +
                     '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="projAptChev_' + i + '"></i>' +
                     '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + '</p>' +
-                    '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.months + ' ay | \u20ac' + Math.round(apt.avgNightly) + '/g</p></div></div>' +
+                    '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.months + ' ay | \u20ac' + apt.avgNightly.toFixed(2) + '/g</p></div></div>' +
                     '<div class="text-right">' +
-                    '<p class="text-sm font-bold text-emerald-600">\u20ac' + Math.round(apt.lagirio).toLocaleString() + '</p>' +
-                    '<p class="text-[10px] text-gray-400">Brüt \u20ac' + Math.round(apt.gross).toLocaleString() + ' | Gdr \u20ac' + Math.round(apt.expenses).toLocaleString() + ' | KDV \u20ac' + Math.round(apt.kdv).toLocaleString() + ' | Plt \u20ac' + Math.round(apt.platComm).toLocaleString() + '</p></div></div>' +
+                    '<p class="text-sm font-bold text-emerald-600">\u20ac' + apt.lagirio.toFixed(2) + '</p>' +
+                    '<p class="text-[10px] text-gray-400">Brüt \u20ac' + apt.gross.toFixed(2) + ' | Gdr \u20ac' + apt.expenses.toFixed(2) + ' | KDV \u20ac' + apt.kdv.toFixed(2) + ' | Plt \u20ac' + apt.platComm.toFixed(2) + '</p></div></div>' +
                     detailTable + '</div>';
             }).join('');
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -3407,8 +3407,8 @@
                     '<td class="py-2 px-3 text-gray-600">' + fmt(r.checkIn) + '</td>' +
                     '<td class="py-2 px-3 text-gray-600">' + fmt(r.checkOut) + '</td>' +
                     '<td class="py-2 px-3 text-right text-gray-600">' + r.nights + '</td>' +
-                    '<td class="py-2 px-3 text-right font-bold text-gray-800">\u20ac' + Math.round(r.totalPrice) + '</td>' +
-                    '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + r.pricePerNight + '</td></tr>'
+                    '<td class="py-2 px-3 text-right font-bold text-gray-800">\u20ac' + (r.totalPrice || 0).toFixed(2) + '</td>' +
+                    '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + (r.pricePerNight || 0).toFixed(2) + '</td></tr>'
                 ).join('') +
                 '</tbody></table>';
         },
@@ -4342,7 +4342,7 @@
             const exps = (this.data?.lagirioExpenses || []).sort((a, b) => new Date(b.date) - new Date(a.date));
             const total = exps.reduce((s, e) => s + this.convertToEUR(e.amount, e.currency), 0);
 
-            if (totalEl) totalEl.textContent = 'Toplam: \u20ac' + Math.round(total).toLocaleString();
+            if (totalEl) totalEl.textContent = 'Toplam: \u20ac' + total.toFixed(2);
 
             if (exps.length === 0) {
                 el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Henüz şirket gideri yok</p>';
@@ -8124,11 +8124,11 @@
             let formattedValue;
             
             if (unit === 'EUR') {
-                formattedValue = `€${value.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                formattedValue = `€${value.toFixed(2)}`;
             } else if (unit === '%') {
                 formattedValue = `${value.toFixed(1)}%`;
             } else {
-                formattedValue = Math.round(value).toLocaleString();
+                formattedValue = value.toFixed(2);
             }
             
             return `
@@ -8145,11 +8145,11 @@
             let icon, colorClass;
             
             if (unit === 'EUR') {
-                formattedDiff = `€${Math.abs(diffValue).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                formattedDiff = `€${Math.abs(diffValue).toFixed(2)}`;
             } else if (unit === '%') {
                 formattedDiff = `${Math.abs(diffValue).toFixed(1)}%`;
             } else {
-                formattedDiff = Math.abs(Math.round(diffValue)).toLocaleString();
+                formattedDiff = Math.abs(diffValue).toFixed(2);
             }
             
             // Determine color and icon
@@ -8747,9 +8747,9 @@
             const quarterForecast = document.getElementById('quarterForecast');
             const yearlyTarget = document.getElementById('yearlyTarget');
 
-            if (nextMonthForecast) nextMonthForecast.textContent = `€${Math.round(avgRevenue).toLocaleString()}`;
-            if (quarterForecast) quarterForecast.textContent = `€${Math.round(avgRevenue * 3).toLocaleString()}`;
-            if (yearlyTarget) yearlyTarget.textContent = `€${Math.round(avgRevenue * 12).toLocaleString()}`;
+            if (nextMonthForecast) nextMonthForecast.textContent = `€${avgRevenue.toFixed(2)}`;
+            if (quarterForecast) quarterForecast.textContent = `€${(avgRevenue * 3).toFixed(2)}`;
+            if (yearlyTarget) yearlyTarget.textContent = `€${(avgRevenue * 12).toFixed(2)}`;
         },
 
         // ==================== EFFICIENCY CHARTS ====================
@@ -9083,24 +9083,24 @@
                     <div class="grid grid-cols-3 gap-4 mb-6">
                         <div class="bg-green-50 rounded-lg p-4 border border-green-200">
                             <p class="text-sm text-gray-600">Lagirio Brüt Kazanç</p>
-                            <p class="text-2xl font-bold text-green-600">\u20ac${Math.round(lagirioBrut).toLocaleString()}</p>
+                            <p class="text-2xl font-bold text-green-600">\u20ac${lagirioBrut.toFixed(2)}</p>
                             <p class="text-[10px] text-gray-400 mt-1">Dairelerden komisyon/kar payı (giderler zaten düşük)</p>
                         </div>
                         <div class="bg-orange-50 rounded-lg p-4 border border-orange-200">
                             <p class="text-sm text-gray-600">Şirket Giderleri</p>
-                            <p class="text-2xl font-bold text-orange-600">\u20ac${Math.round(totalCompanyExp).toLocaleString()}</p>
+                            <p class="text-2xl font-bold text-orange-600">\u20ac${totalCompanyExp.toFixed(2)}</p>
                             <p class="text-[10px] text-gray-400 mt-1">Ofis, personel, yazılım vb.</p>
                         </div>
                         <div class="${netBg} rounded-lg p-4 border">
                             <p class="text-sm text-gray-600">${netLabel}</p>
-                            <p class="text-2xl font-bold ${netColor}">\u20ac${Math.round(netProfit).toLocaleString()}</p>
+                            <p class="text-2xl font-bold ${netColor}">\u20ac${netProfit.toFixed(2)}</p>
                             <p class="text-[10px] text-gray-400 mt-1">Brüt Kazanç - Şirket Giderleri</p>
                         </div>
                     </div>
 
                     <!-- Referans: Daire Giderleri -->
                     <div class="bg-gray-50 rounded-lg p-3 mb-6 text-xs text-gray-500">
-                        <span class="font-semibold">Referans:</span> Daire giderleri toplamı \u20ac${Math.round(totalAptExpenses).toLocaleString()}
+                        <span class="font-semibold">Referans:</span> Daire giderleri toplamı \u20ac${totalAptExpenses.toFixed(2)}
                         (bu tutar zaten sistem bazlı hesaplamada brüt kazançtan düşülmüştür)
                     </div>
 
@@ -9117,7 +9117,7 @@
                             ${Object.entries(platformRevenue).map(([platform, revenue]) => `
                                 <tr class="border-b">
                                     <td class="px-4 py-2 border">${platform}</td>
-                                    <td class="px-4 py-2 text-right border">\u20ac${Math.round(revenue).toLocaleString()}</td>
+                                    <td class="px-4 py-2 text-right border">\u20ac${revenue.toFixed(2)}</td>
                                     <td class="px-4 py-2 text-right border">${stats.totalPortfolio > 0 ? ((revenue / stats.totalPortfolio) * 100).toFixed(1) : 0}%</td>
                                 </tr>
                             `).join('')}
@@ -9128,11 +9128,11 @@
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-blue-50 rounded-lg p-4">
                             <p class="text-sm text-gray-600">Banka Transferi</p>
-                            <p class="text-xl font-bold text-blue-600">\u20ac${Math.round(paymentData.bank).toLocaleString()}</p>
+                            <p class="text-xl font-bold text-blue-600">\u20ac${paymentData.bank.toFixed(2)}</p>
                         </div>
                         <div class="bg-green-50 rounded-lg p-4">
                             <p class="text-sm text-gray-600">Nakit</p>
-                            <p class="text-xl font-bold text-green-600">\u20ac${Math.round(paymentData.cash).toLocaleString()}</p>
+                            <p class="text-xl font-bold text-green-600">\u20ac${paymentData.cash.toFixed(2)}</p>
                         </div>
                     </div>
 
@@ -9150,7 +9150,7 @@
                             ${Object.entries(companyExpCategories).map(([category, amount]) => `
                                 <tr class="border-b">
                                     <td class="px-4 py-2 border">${category}</td>
-                                    <td class="px-4 py-2 text-right border">\u20ac${Math.round(amount).toLocaleString()}</td>
+                                    <td class="px-4 py-2 text-right border">\u20ac${amount.toFixed(2)}</td>
                                     <td class="px-4 py-2 text-right border">${totalCompanyExp > 0 ? ((amount / totalCompanyExp) * 100).toFixed(1) : 0}%</td>
                                 </tr>
                             `).join('')}
