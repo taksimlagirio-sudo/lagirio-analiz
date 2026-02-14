@@ -2233,7 +2233,30 @@
 
             const parsePrice = (s) => {
                 if (!s) return 0;
-                return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
+                // PMS HTML hücrelerinde görünmez Unicode karakterler (Braille Pattern Blank U+2800,
+                // zero-width space, NBSP vb.) iki ayrı değeri birleştirebilir (ör: "380,04⠀9,00")
+                // Bu karakterleri boşluğa çevirip sadece ilk sayıyı alıyoruz
+                s = s.replace(/[\u2800\u200B-\u200D\uFEFF\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, ' ').trim();
+                s = s.replace(/[€$£₺]/g, '').trim();
+                const parts = s.split(/\s+/);
+                const numStr = parts.find(p => /^\d/.test(p));
+                if (!numStr) return 0;
+                const cleaned = numStr.replace(/[^\d.,-]/g, '');
+                if (!cleaned) return 0;
+                const lastDot = cleaned.lastIndexOf('.');
+                const lastComma = cleaned.lastIndexOf(',');
+                if (lastComma > lastDot) {
+                    // Avrupa formatı: "1.234,56" → 1234.56
+                    return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+                }
+                if (lastDot > lastComma) {
+                    // US/İngiliz formatı: "1,234.56" → 1234.56
+                    return parseFloat(cleaned.replace(/,/g, '')) || 0;
+                }
+                if (lastComma >= 0) {
+                    return parseFloat(cleaned.replace(',', '.')) || 0;
+                }
+                return parseFloat(cleaned) || 0;
             };
 
             const convertToEUR = (amount, currency) => {
