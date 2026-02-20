@@ -1886,7 +1886,7 @@
             } else if (hasClientId) {
                 this.showStatus('<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Client ID kayıtlı. Google ile giriş yaparak bağlanın.</div>');
             } else {
-                this.showStatus('<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600"><p class="font-semibold mb-1">Nasıl Kurulur?</p><ol class="list-decimal list-inside text-xs space-y-1 text-gray-500"><li><a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>\'a gidin</li><li>APIs &amp; Services &gt; Credentials &gt; Create OAuth Client ID</li><li>Application type: <b>Web application</b></li><li>Authorized JavaScript origins: sitenizin URL\'ini ekleyin</li><li>Oluşan Client ID\'yi yukarıya yapıştırın</li></ol></div>');
+                this.showStatus('<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600"><p class="font-semibold mb-1">Nasıl Kurulur?</p><ol class="list-decimal list-inside text-xs space-y-1 text-gray-500"><li><a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>\'a gidin</li><li>APIs &amp; Services &gt; Credentials &gt; Create OAuth Client ID</li><li>Application type: <b>Web application</b></li><li>Authorized JavaScript origins: <b>https://analizlagirio.netlify.app</b> ekleyin</li><li>Oluşan Client ID\'yi yukarıya yapıştırın</li><li class="text-amber-600 font-medium">OAuth consent screen &gt; Test users &gt; giriş yapacak Gmail\'i ekleyin</li><li class="text-amber-600">Ya da "Publish App" ile uygulamayı yayınlayın</li></ol></div>');
             }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1912,7 +1912,25 @@
                     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
                     callback: async (response) => {
                         if (response.error) {
-                            this.showMessage('Bağlantı hatası: ' + response.error, 'error');
+                            if (response.error === 'access_denied') {
+                                this.showMessage(
+                                    '<div class="text-left">' +
+                                    '<p class="font-bold text-red-700 mb-2">Google Doğrulama Hatası (403: access_denied)</p>' +
+                                    '<p class="mb-2">OAuth consent screen <b>"Testing"</b> modunda. Bu durumda sadece test kullanıcıları giriş yapabilir.</p>' +
+                                    '<p class="font-semibold mb-1">Çözüm:</p>' +
+                                    '<ol class="list-decimal list-inside text-xs space-y-1 mb-2">' +
+                                    '<li><a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" class="text-blue-600 underline">Google Cloud Console &gt; OAuth consent screen</a>\'a gidin</li>' +
+                                    '<li><b>"Test users"</b> bölümüne tıklayın &gt; <b>"+ Add Users"</b></li>' +
+                                    '<li>Giriş yapmak istediğiniz Gmail adresini ekleyin</li>' +
+                                    '<li>Kaydedin ve tekrar deneyin</li>' +
+                                    '</ol>' +
+                                    '<p class="text-xs text-gray-500">Ya da herkese açmak için: OAuth consent screen &gt; <b>"Publish App"</b> butonuna tıklayın (doğrulama gerekebilir).</p>' +
+                                    '</div>',
+                                    'error'
+                                );
+                            } else {
+                                this.showMessage('Bağlantı hatası: ' + response.error, 'error');
+                            }
                             return;
                         }
                         this.accessToken = response.access_token;
