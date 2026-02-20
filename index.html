@@ -203,6 +203,26 @@
         /* ========= UPLOAD PANELS ========= */
         .upload-panel.hidden { display: none; }
         .upload-tab.active { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: white !important; border-color: transparent !important; box-shadow: 0 4px 12px rgba(22,163,74,0.3) !important; }
+
+        /* ========= OWNER MODE ========= */
+        body.owner-mode #uploadSection,
+        body.owner-mode [data-tab="comparison"],
+        body.owner-mode [data-tab="efficiency"],
+        body.owner-mode [data-tab="reports"],
+        body.owner-mode #comparison-content,
+        body.owner-mode #efficiency-content,
+        body.owner-mode #reports-content,
+        body.owner-mode .admin-only,
+        body.owner-mode [data-analysis="system"],
+        body.owner-mode [data-analysis="owner"],
+        body.owner-mode #system-analysis,
+        body.owner-mode #owner-analysis {
+            display: none !important;
+        }
+        body.owner-mode .owner-readonly {
+            pointer-events: none;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-[#faf6f0] via-[#fdfcfa] to-[#faf6f0] font-inter min-h-screen">
@@ -304,12 +324,12 @@
                         <span class="hidden sm:inline">Excel</span>
                     </button>
                     
-                    <button onclick="GoogleDrive.accessToken ? GoogleDrive.saveToDrive() : UploadUI.switchTab('drive')" id="headerDriveBtn" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Google Drive'a Kaydet">
+                    <button onclick="GoogleDrive.accessToken ? GoogleDrive.saveToDrive() : UploadUI.switchTab('drive')" id="headerDriveBtn" class="admin-only bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Google Drive'a Kaydet">
                         <i data-lucide="hard-drive" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">Drive</span>
                     </button>
 
-                    <button onclick="Analytics.showSettings()" class="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                    <button onclick="Analytics.showSettings()" class="admin-only bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
                         <i data-lucide="settings" class="w-5 h-5"></i>
                     </button>
 
@@ -526,6 +546,40 @@
             </div>
         </div>
     </div>
+
+    <!-- ========= OWNER WELCOME SCREEN ========= -->
+    <div id="ownerWelcome" class="hidden container mx-auto px-4 py-12 text-center">
+        <div class="max-w-lg mx-auto glass rounded-2xl p-10 shadow-2xl">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mb-6 shadow-lg">
+                <i data-lucide="cloud-download" class="w-10 h-10 text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2" id="ownerWelcomeTitle">Hoş Geldiniz</h2>
+            <p class="text-gray-500 text-sm mb-6" id="ownerWelcomeMsg">Google Drive'dan verileriniz otomatik olarak çekilecektir.</p>
+
+            <!-- İlk kullanım: Drive henüz bağlı değilse -->
+            <div id="ownerDriveSetup" class="hidden mt-2 text-left">
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                    <p class="text-sm text-amber-700 text-center font-medium">İlk kullanım için Google Drive bağlantısı gerekli.</p>
+                    <p class="text-xs text-amber-500 text-center mt-1">Yöneticinizden aldığınız Client ID'yi girin.</p>
+                </div>
+                <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Google Client ID</label>
+                <input type="text" id="ownerClientId" placeholder="xxxx.apps.googleusercontent.com"
+                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm mb-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition">
+                <button onclick="GoogleDrive.ownerConnect()" class="w-full px-4 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+                    <i data-lucide="link" class="w-4 h-4"></i> Google ile Bağlan
+                </button>
+            </div>
+
+            <!-- Yükleme animasyonu -->
+            <div id="ownerLoadingIndicator" class="hidden mt-4">
+                <div class="flex items-center justify-center gap-2 text-blue-600">
+                    <i data-lucide="loader" class="w-5 h-5 animate-spin"></i>
+                    <span class="text-sm font-medium">Veriler yükleniyor...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Dashboard (Hidden initially) -->
     <div id="mainDashboard" class="container mx-auto px-4 py-6 hidden">
         
@@ -563,13 +617,13 @@
                 <div class="flex items-center space-x-3">
                     <div class="flex items-center space-x-2 bg-white/50 px-3 py-2 rounded-lg">
                         <span class="text-sm text-gray-600">€/₺</span>
-                        <input type="number" id="exchangeRateTL" value="48.5" step="0.1" class="w-16 px-2 py-1 bg-white border border-gray-200 rounded text-sm">
+                        <input type="number" id="exchangeRateTL" value="48.5" step="0.1" class="owner-readonly w-16 px-2 py-1 bg-white border border-gray-200 rounded text-sm">
                     </div>
                     <div class="flex items-center space-x-2 bg-white/50 px-3 py-2 rounded-lg">
                         <span class="text-sm text-gray-600">€/$</span>
-                        <input type="number" id="exchangeRateUSD" value="0.86" step="0.01" class="w-16 px-2 py-1 bg-white border border-gray-200 rounded text-sm">
+                        <input type="number" id="exchangeRateUSD" value="0.86" step="0.01" class="owner-readonly w-16 px-2 py-1 bg-white border border-gray-200 rounded text-sm">
                     </div>
-                    <button onclick="Analytics.refreshData()" class="bg-emerald-100 text-emerald-700 p-2 rounded-lg hover:bg-emerald-200 transition" title="Verileri Yenile">
+                    <button onclick="Analytics.refreshData()" class="admin-only bg-emerald-100 text-emerald-700 p-2 rounded-lg hover:bg-emerald-200 transition" title="Verileri Yenile">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -1153,8 +1207,8 @@
             <!-- ===== PROJEKSIYON TAB ===== -->
             <div id="projection-content" class="tab-content hidden bg-white/95 p-6">
 
-                <!-- PMS HTML Import Section (inside dashboard) -->
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <!-- PMS HTML Import Section (inside dashboard) - admin only -->
+                <div class="admin-only bg-white rounded-xl shadow-lg p-6 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                             <i data-lucide="calendar-plus" class="w-5 h-5 text-purple-600"></i>
@@ -1202,8 +1256,8 @@
                     </div>
                 </div>
 
-                <!-- Karma Tahmin Ayarları -->
-                <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+                <!-- Karma Tahmin Ayarları - admin only -->
+                <div class="admin-only bg-white rounded-xl shadow-lg p-4 mb-6">
                     <div class="flex items-center gap-4 flex-wrap">
                         <div class="flex items-center gap-2">
                             <i data-lucide="sliders" class="w-4 h-4 text-gray-400"></i>
@@ -1453,6 +1507,35 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Daire Sahibi Hesap Yönetimi (sadece admin) -->
+                    <div class="admin-only">
+                        <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                            <i data-lucide="users" class="w-4 h-4 text-purple-500"></i>
+                            Daire Sahibi Hesapları
+                        </h3>
+                        <p class="text-xs text-gray-400 mb-2">Daire sahipleri için giriş hesabı oluşturun. Her hesap belirli dairelere erişim sağlar.</p>
+                        <div id="ownerAccountsList" class="space-y-2 mb-3">
+                            <p class="text-xs text-gray-400">Henüz daire sahibi hesabı yok.</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                            <p class="text-xs font-semibold text-gray-500 mb-2">Yeni Hesap Ekle</p>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <input type="text" id="newOwnerUser" placeholder="Kullanıcı adı" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none">
+                                <input type="password" id="newOwnerPass" placeholder="Şifre" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none">
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-[10px] text-gray-400 mb-1">Erişim verilecek daireler (Ctrl+Click ile çoklu seçim)</label>
+                                <select id="newOwnerApt" multiple size="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none">
+                                    <!-- Daire listesi dinamik doldurulacak -->
+                                </select>
+                            </div>
+                            <button onclick="Auth.addOwnerAccount()" class="w-full px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                                Hesap Ekle
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-3">
@@ -1650,11 +1733,17 @@
     const Auth = {
         currentUser: null,
         STORAGE_KEY: 'lagirioAnalytics_auth',
+        USERS_STORAGE_KEY: 'lagirioUsers',
 
-        users: [
-            { username: 'admin', password: 'lagirio2025', role: 'admin' },
-            { username: 'viewer', password: 'view2025', role: 'viewer' }
-        ],
+        getUsers() {
+            const base = [
+                { username: 'admin', password: 'lagirio2025', role: 'admin' }
+            ];
+            try {
+                const saved = JSON.parse(localStorage.getItem(this.USERS_STORAGE_KEY) || '[]');
+                return [...base, ...saved];
+            } catch(e) { return base; }
+        },
 
         login() {
             const username = document.getElementById('loginUser').value.trim();
@@ -1667,7 +1756,7 @@
                 return;
             }
 
-            const user = this.users.find(u => u.username === username && u.password === password);
+            const user = this.getUsers().find(u => u.username === username && u.password === password);
             if (!user) {
                 errorEl.textContent = 'Geçersiz kullanıcı adı veya şifre';
                 errorEl.style.display = 'block';
@@ -1675,7 +1764,7 @@
                 return;
             }
 
-            this.currentUser = { username: user.username, role: user.role };
+            this.currentUser = { username: user.username, role: user.role, apartmentIds: user.apartmentIds || [] };
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.currentUser));
             errorEl.style.display = 'none';
             this.showApp();
@@ -1684,11 +1773,14 @@
         logout() {
             this.currentUser = null;
             localStorage.removeItem(this.STORAGE_KEY);
+            document.body.classList.remove('owner-mode');
             document.getElementById('appWrapper').classList.remove('active');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
             document.getElementById('loginError').style.display = 'none';
+            // Owner welcome ekranını gizle
+            document.getElementById('ownerWelcome')?.classList.add('hidden');
         },
 
         checkSession() {
@@ -1696,9 +1788,9 @@
                 const saved = localStorage.getItem(this.STORAGE_KEY);
                 if (saved) {
                     const session = JSON.parse(saved);
-                    const valid = this.users.find(u => u.username === session.username);
+                    const valid = this.getUsers().find(u => u.username === session.username);
                     if (valid) {
-                        this.currentUser = session;
+                        this.currentUser = { ...session, apartmentIds: valid.apartmentIds || session.apartmentIds || [] };
                         return true;
                     }
                 }
@@ -1706,10 +1798,105 @@
             return false;
         },
 
+        syncUsersFromData(data) {
+            if (data.users && Array.isArray(data.users)) {
+                localStorage.setItem(this.USERS_STORAGE_KEY, JSON.stringify(data.users));
+            }
+        },
+
+        addOwnerAccount() {
+            const username = document.getElementById('newOwnerUser')?.value?.trim();
+            const password = document.getElementById('newOwnerPass')?.value?.trim();
+            const aptSelect = document.getElementById('newOwnerApt');
+            const apartmentIds = aptSelect ? [...aptSelect.selectedOptions].map(o => o.value) : [];
+
+            if (!username || !password || !apartmentIds.length) {
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Tüm alanları doldurun ve en az bir daire seçin!', 'error');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem(this.USERS_STORAGE_KEY) || '[]');
+            if (users.find(u => u.username === username) || username === 'admin') {
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Bu kullanıcı adı zaten kullanılıyor!', 'error');
+                return;
+            }
+
+            users.push({ username, password, role: 'owner', apartmentIds });
+            localStorage.setItem(this.USERS_STORAGE_KEY, JSON.stringify(users));
+            this.renderOwnerAccounts();
+            if (typeof Analytics !== 'undefined') Analytics.showToast('Hesap oluşturuldu: ' + username, 'success');
+
+            document.getElementById('newOwnerUser').value = '';
+            document.getElementById('newOwnerPass').value = '';
+            if (aptSelect) [...aptSelect.options].forEach(o => o.selected = false);
+        },
+
+        removeOwnerAccount(username) {
+            if (!confirm(username + ' hesabını silmek istediğinize emin misiniz?')) return;
+            let users = JSON.parse(localStorage.getItem(this.USERS_STORAGE_KEY) || '[]');
+            users = users.filter(u => u.username !== username);
+            localStorage.setItem(this.USERS_STORAGE_KEY, JSON.stringify(users));
+            this.renderOwnerAccounts();
+            if (typeof Analytics !== 'undefined') Analytics.showToast(username + ' hesabı silindi', 'success');
+        },
+
+        renderOwnerAccounts() {
+            const container = document.getElementById('ownerAccountsList');
+            if (!container) return;
+            const users = JSON.parse(localStorage.getItem(this.USERS_STORAGE_KEY) || '[]');
+            const apartments = (typeof Analytics !== 'undefined' && Analytics.data?.apartments) || [];
+
+            if (!users.length) {
+                container.innerHTML = '<p class="text-xs text-gray-400">Henüz daire sahibi hesabı yok.</p>';
+            } else {
+                container.innerHTML = users.map(u => {
+                    const aptNames = (u.apartmentIds || []).map(id => {
+                        const apt = apartments.find(a => a.id === id);
+                        return apt ? apt.code : id;
+                    }).join(', ');
+                    return '<div class="flex items-center justify-between bg-white p-2 rounded-lg border">' +
+                        '<div><span class="text-sm font-medium">' + u.username + '</span>' +
+                        '<span class="text-xs text-gray-400 ml-2">' + aptNames + '</span></div>' +
+                        '<button onclick="Auth.removeOwnerAccount(\'' + u.username + '\')" class="text-red-400 hover:text-red-600 p-1">' +
+                        '<i data-lucide="trash-2" class="w-3 h-3"></i></button></div>';
+                }).join('');
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            const aptSelect = document.getElementById('newOwnerApt');
+            if (aptSelect && apartments.length) {
+                aptSelect.innerHTML = apartments.map(a =>
+                    '<option value="' + a.id + '">' + a.code + ' - ' + (a.ownerName || a.id) + '</option>'
+                ).join('');
+            }
+        },
+
         showApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appWrapper').classList.add('active');
             lucide.createIcons();
+
+            // Owner modunu uygula
+            if (this.currentUser && this.currentUser.role === 'owner') {
+                document.body.classList.add('owner-mode');
+                document.getElementById('uploadSection')?.classList.add('hidden');
+                document.getElementById('ownerWelcome')?.classList.remove('hidden');
+                // Drive config yoksa setup ekranını göster
+                const driveConfig = GoogleDrive.getConfig();
+                if (!driveConfig.clientId) {
+                    document.getElementById('ownerDriveSetup')?.classList.remove('hidden');
+                    document.getElementById('ownerLoadingIndicator')?.classList.add('hidden');
+                } else {
+                    document.getElementById('ownerDriveSetup')?.classList.add('hidden');
+                    document.getElementById('ownerLoadingIndicator')?.classList.remove('hidden');
+                }
+            } else {
+                document.body.classList.remove('owner-mode');
+                document.getElementById('uploadSection')?.classList.remove('hidden');
+                document.getElementById('ownerWelcome')?.classList.add('hidden');
+            }
+
             Analytics.init();
 
             // Google Drive: UI'ı güncelle ve otomatik bağlanmayı dene
@@ -1886,7 +2073,7 @@
             } else if (hasClientId) {
                 this.showStatus('<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Client ID kayıtlı. Google ile giriş yaparak bağlanın.</div>');
             } else {
-                this.showStatus('<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600"><p class="font-semibold mb-1">Nasıl Kurulur?</p><ol class="list-decimal list-inside text-xs space-y-1 text-gray-500"><li><a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>\'a gidin</li><li>APIs &amp; Services &gt; Credentials &gt; Create OAuth Client ID</li><li>Application type: <b>Web application</b></li><li>Authorized JavaScript origins: sitenizin URL\'ini ekleyin</li><li>Oluşan Client ID\'yi yukarıya yapıştırın</li></ol></div>');
+                this.showStatus('<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600"><p class="font-semibold mb-1">Nasıl Kurulur?</p><ol class="list-decimal list-inside text-xs space-y-1 text-gray-500"><li><a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>\'a gidin</li><li>APIs &amp; Services &gt; Credentials &gt; Create OAuth Client ID</li><li>Application type: <b>Web application</b></li><li>Authorized JavaScript origins: <b>https://analizlagirio.netlify.app</b> ekleyin</li><li>Oluşan Client ID\'yi yukarıya yapıştırın</li><li class="text-amber-600 font-medium">OAuth consent screen &gt; Test users &gt; giriş yapacak Gmail\'i ekleyin</li><li class="text-amber-600">Ya da "Publish App" ile uygulamayı yayınlayın</li></ol></div>');
             }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1912,7 +2099,25 @@
                     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
                     callback: async (response) => {
                         if (response.error) {
-                            this.showMessage('Bağlantı hatası: ' + response.error, 'error');
+                            if (response.error === 'access_denied') {
+                                this.showMessage(
+                                    '<div class="text-left">' +
+                                    '<p class="font-bold text-red-700 mb-2">Google Doğrulama Hatası (403: access_denied)</p>' +
+                                    '<p class="mb-2">OAuth consent screen <b>"Testing"</b> modunda. Bu durumda sadece test kullanıcıları giriş yapabilir.</p>' +
+                                    '<p class="font-semibold mb-1">Çözüm:</p>' +
+                                    '<ol class="list-decimal list-inside text-xs space-y-1 mb-2">' +
+                                    '<li><a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" class="text-blue-600 underline">Google Cloud Console &gt; OAuth consent screen</a>\'a gidin</li>' +
+                                    '<li><b>"Test users"</b> bölümüne tıklayın &gt; <b>"+ Add Users"</b></li>' +
+                                    '<li>Giriş yapmak istediğiniz Gmail adresini ekleyin</li>' +
+                                    '<li>Kaydedin ve tekrar deneyin</li>' +
+                                    '</ol>' +
+                                    '<p class="text-xs text-gray-500">Ya da herkese açmak için: OAuth consent screen &gt; <b>"Publish App"</b> butonuna tıklayın (doğrulama gerekebilir).</p>' +
+                                    '</div>',
+                                    'error'
+                                );
+                            } else {
+                                this.showMessage('Bağlantı hatası: ' + response.error, 'error');
+                            }
                             return;
                         }
                         this.accessToken = response.access_token;
@@ -2059,6 +2264,23 @@
             this.showMessage('<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> Drive\'a kaydediliyor...', 'info');
 
             try {
+                // Uygulama ayarlarını data'ya ekle
+                Analytics.data.appSettings = {
+                    exchangeRates: {
+                        eurTl: parseFloat(document.getElementById('exchangeRateTL')?.value) || 48.5,
+                        eurUsd: parseFloat(document.getElementById('exchangeRateUSD')?.value) || 0.86
+                    },
+                    projectionDefaults: {
+                        defaultAdjust: parseFloat(document.getElementById('projDefaultAdjust')?.value) || 0
+                    }
+                };
+
+                // Kullanıcı listesini data'ya ekle
+                try {
+                    const savedUsers = JSON.parse(localStorage.getItem(Auth.USERS_STORAGE_KEY) || '[]');
+                    Analytics.data.users = savedUsers;
+                } catch(ue) {}
+
                 const fileContent = JSON.stringify(Analytics.data, null, 2);
                 const response = await fetch(
                     'https://www.googleapis.com/upload/drive/v3/files/' + config.fileId + '?uploadType=media',
@@ -2105,13 +2327,41 @@
                 const data = await response.json();
                 Analytics.data = data;
                 Analytics.validateData();
-                Analytics.filteredData = data;
+
+                // Kaydedilmiş ayarları uygula
+                if (data.appSettings) {
+                    if (data.appSettings.exchangeRates) {
+                        const tlEl = document.getElementById('exchangeRateTL');
+                        const usdEl = document.getElementById('exchangeRateUSD');
+                        if (tlEl) tlEl.value = data.appSettings.exchangeRates.eurTl;
+                        if (usdEl) usdEl.value = data.appSettings.exchangeRates.eurUsd;
+                    }
+                    if (data.appSettings.projectionDefaults) {
+                        const adjEl = document.getElementById('projDefaultAdjust');
+                        if (adjEl) adjEl.value = data.appSettings.projectionDefaults.defaultAdjust;
+                    }
+                }
+
+                // Kullanıcıları localStorage'a sync et
+                Auth.syncUsersFromData(data);
+
+                // Owner ise veriyi filtrele
+                if (Auth.currentUser && Auth.currentUser.role === 'owner' && Auth.currentUser.apartmentIds) {
+                    Analytics.applyOwnerFilter(Auth.currentUser.apartmentIds);
+                }
+
+                Analytics.filteredData = Analytics.data;
                 Analytics.processData();
+
+                // Owner welcome ekranını gizle, dashboard'u göster
+                if (Auth.currentUser && Auth.currentUser.role === 'owner') {
+                    document.getElementById('ownerWelcome')?.classList.add('hidden');
+                    document.getElementById('mainDashboard')?.classList.remove('hidden');
+                }
 
                 // Drive'dan gelen mapping'i localStorage'a da sync et
                 if (data.aptMapping && Object.keys(data.aptMapping).length > 0) {
                     localStorage.setItem('projAptMapping', JSON.stringify(data.aptMapping));
-                    // Projeksiyon varsa eşleştirme durumunu güncelle
                     if (typeof Projection !== 'undefined') {
                         Projection.checkMatchingStatus();
                     }
@@ -2125,6 +2375,80 @@
                 console.error('Drive load error:', e);
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        // Owner için basitleştirilmiş Drive bağlantısı
+        async ownerConnect() {
+            const clientId = document.getElementById('ownerClientId')?.value?.trim();
+            if (!clientId) {
+                this.showMessage('Lütfen Client ID girin!', 'error');
+                return;
+            }
+
+            // Client ID'yi kaydet
+            const config = this.getConfig();
+            config.clientId = clientId;
+            config.autoLoad = true;
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
+
+            // OAuth başlat
+            const statusEl = document.getElementById('ownerWelcomeMsg');
+            if (statusEl) statusEl.textContent = 'Google hesabına bağlanılıyor...';
+
+            try {
+                this.tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: clientId,
+                    scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+                    callback: async (response) => {
+                        if (response.error) {
+                            if (statusEl) statusEl.textContent = 'Bağlantı hatası: ' + response.error;
+                            return;
+                        }
+                        this.accessToken = response.access_token;
+
+                        try {
+                            const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                                headers: { 'Authorization': 'Bearer ' + this.accessToken }
+                            });
+                            if (r.ok) this.userEmail = (await r.json()).email;
+                        } catch(e) {}
+
+                        if (statusEl) statusEl.textContent = 'Bağlantı kuruldu! Dosya aranıyor...';
+
+                        // Drive'daki lagirio dosyasını otomatik bul
+                        await this.autoFindAndLoad();
+                    }
+                });
+                this.tokenClient.requestAccessToken({ prompt: 'consent' });
+            } catch(e) {
+                if (statusEl) statusEl.textContent = 'Bağlantı hatası: ' + e.message;
+            }
+        },
+
+        // Drive'daki lagirio veri dosyasını otomatik bul ve yükle
+        async autoFindAndLoad() {
+            const statusEl = document.getElementById('ownerWelcomeMsg');
+            try {
+                const searchUrl = 'https://www.googleapis.com/drive/v3/files?q=name%3D%27lagirio-analiz-data.json%27&fields=files(id,name,modifiedTime)&orderBy=modifiedTime%20desc';
+                const r = await fetch(searchUrl, {
+                    headers: { 'Authorization': 'Bearer ' + this.accessToken }
+                });
+                if (!r.ok) throw new Error('Arama hatası: HTTP ' + r.status);
+
+                const result = await r.json();
+                if (result.files && result.files.length > 0) {
+                    const file = result.files[0];
+                    this.saveFileLink(file.id, file.name);
+                    this.updateUI();
+                    if (statusEl) statusEl.textContent = 'Dosya bulundu! Veriler yükleniyor...';
+                    await this.loadFromDrive(false);
+                } else {
+                    if (statusEl) statusEl.textContent = 'Drive\'da veri dosyası bulunamadı. Admin henüz veri yüklememiş olabilir.';
+                }
+            } catch(e) {
+                if (statusEl) statusEl.textContent = 'Dosya arama hatası: ' + e.message;
+                console.error('Auto find error:', e);
+            }
         }
     };
 
@@ -3946,6 +4270,7 @@
     const Analytics = {
         // Data properties
         data: null,
+        _fullData: null,
         filteredData: null,
         charts: {},
         
@@ -4103,6 +4428,9 @@
                 try {
                     this.data = JSON.parse(e.target.result);
                     this.validateData();
+                    if (Auth.currentUser && Auth.currentUser.role === 'owner' && Auth.currentUser.apartmentIds) {
+                        this.applyOwnerFilter(Auth.currentUser.apartmentIds);
+                    }
                     this.filteredData = this.data;
                     this.processData();
                     this.showToast('Veri başarıyla yüklendi!', 'success');
@@ -4142,7 +4470,26 @@
             this.data.lagirioExpenses = this.data.lagirioExpenses || [];
 
         },
-        
+
+        // Owner veri filtreleme - sadece sahibin dairelerini göster
+        applyOwnerFilter(apartmentIds) {
+            if (!apartmentIds || !apartmentIds.length || !this.data) return;
+
+            // Orijinal veriyi sakla
+            if (!this._fullData) {
+                this._fullData = JSON.parse(JSON.stringify(this.data));
+            }
+
+            this.data = {
+                ...this.data,
+                apartments: this.data.apartments.filter(a => apartmentIds.includes(a.id)),
+                reservations: (this.data.reservations || []).filter(r => apartmentIds.includes(r.apartmentId)),
+                expenses: (this.data.expenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
+                capitalExpenses: (this.data.capitalExpenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
+                lagirioExpenses: (this.data.lagirioExpenses || []).filter(e => apartmentIds.includes(e.apartmentId))
+            };
+        },
+
         // Load sample data for testing
         loadSampleData() {
             this.showLoading();
@@ -7163,6 +7510,8 @@
                 adminStatus.textContent = Projection.adminAuthenticated ? 'Admin oturumu aktif' : 'Admin girişi yapılmadı';
                 adminStatus.className = 'text-xs ' + (Projection.adminAuthenticated ? 'text-emerald-600 font-semibold' : 'text-gray-400');
             }
+            // Daire sahibi hesaplarını render et
+            Auth.renderOwnerAccounts();
             this.showModal('settingsModal');
         },
         
@@ -7258,8 +7607,13 @@
             this.currentMainTab = tab;
 
             // Initialize specific tab content if needed
-            if (tab === 'analysis' && !this.charts.systemComparison) {
-                setTimeout(() => this.createSystemAnalysisCharts(), 100);
+            if (tab === 'analysis') {
+                // Owner modunda varsayılan olarak daire analizini göster
+                if (Auth.currentUser && Auth.currentUser.role === 'owner') {
+                    this.switchAnalysisTab('apartment');
+                } else if (!this.charts.systemComparison) {
+                    setTimeout(() => this.createSystemAnalysisCharts(), 100);
+                }
             }
 
             if (tab === 'trends' && !this.charts.revenueTrendAnalysis) {
