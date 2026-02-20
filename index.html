@@ -329,6 +329,11 @@
                         <span class="hidden sm:inline">Drive</span>
                     </button>
 
+                    <button onclick="DataManager.open()" class="admin-only bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Veri Yönetimi">
+                        <i data-lucide="database" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Veri</span>
+                    </button>
+
                     <button onclick="Analytics.showSettings()" class="admin-only bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
                         <i data-lucide="settings" class="w-5 h-5"></i>
                     </button>
@@ -575,6 +580,262 @@
                 <div class="flex items-center justify-center gap-2 text-blue-600">
                     <i data-lucide="loader" class="w-5 h-5 animate-spin"></i>
                     <span class="text-sm font-medium">Veriler yükleniyor...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========= VERİ YÖNETİMİ SAYFASI ========= -->
+    <div id="dataManagerSection" class="container mx-auto px-4 py-8 hidden">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6 animate-fade-in">
+                <div class="flex items-center gap-3">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl shadow-lg">
+                        <i data-lucide="database" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Veri Yönetimi</h2>
+                        <p class="text-sm text-gray-500">Veri yükleme, Drive bağlantısı ve kullanıcı yönetimi</p>
+                    </div>
+                </div>
+                <button onclick="DataManager.goBack()" id="dmBackBtn" class="hidden bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Dashboard'a Dön
+                </button>
+            </div>
+
+            <!-- Current Data Info Banner -->
+            <div id="dmCurrentData" class="mb-6 hidden animate-fade-in">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-semibold text-emerald-800 text-sm flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i> Yüklü Veri
+                        </h4>
+                        <button onclick="DataManager.clearData()" class="text-xs text-red-400 hover:text-red-600 underline">Veriyi Temizle</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div class="bg-white rounded-lg p-2">
+                            <p class="text-lg font-bold text-emerald-700" id="dmApartmentCount">0</p>
+                            <p class="text-[10px] text-gray-400">Daire</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-2">
+                            <p class="text-lg font-bold text-blue-700" id="dmReservationCount">0</p>
+                            <p class="text-[10px] text-gray-400">Rezervasyon</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-2">
+                            <p class="text-lg font-bold text-orange-700" id="dmExpenseCount">0</p>
+                            <p class="text-[10px] text-gray-400">Gider</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-6">
+                <button onclick="DataManager.switchTab('upload')" id="dmTab-upload" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-emerald-600 text-white shadow-lg">
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i> Veri Yükle
+                </button>
+                <button onclick="DataManager.switchTab('drive')" id="dmTab-drive" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600">
+                    <i data-lucide="hard-drive" class="w-4 h-4"></i> Google Drive
+                </button>
+                <button onclick="DataManager.switchTab('users')" id="dmTab-users" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600">
+                    <i data-lucide="users" class="w-4 h-4"></i> Kullanıcılar
+                </button>
+            </div>
+
+            <!-- ===== Upload Panel ===== -->
+            <div id="dmPanel-upload" class="glass rounded-2xl shadow-2xl p-8 animate-fade-in">
+                <div id="dmUploadArea" class="border-2 border-dashed border-emerald-300 rounded-xl py-12 px-6 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all cursor-pointer group">
+                    <div class="text-center">
+                        <i data-lucide="folder-open" class="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">JSON Dosya Seçin veya Sürükleyin</h3>
+                        <p class="text-sm text-gray-500 mb-4">Daire, rezervasyon ve gider verilerini içeren JSON dosyası</p>
+                        <input type="file" id="dmFileInput" accept=".json" class="hidden">
+                        <div class="flex items-center justify-center space-x-4 mt-6">
+                            <button onclick="document.getElementById('dmFileInput').click()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                <span>Dosya Seç</span>
+                            </button>
+                            <button onclick="Analytics.loadSampleData()" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-orange-700 transition shadow-lg flex items-center space-x-2">
+                                <i data-lucide="database" class="w-4 h-4"></i>
+                                <span>Örnek Veri</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Google Drive Panel ===== -->
+            <div id="dmPanel-drive" class="glass rounded-2xl shadow-2xl p-8 hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                        <i data-lucide="hard-drive" class="w-8 h-8 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Google Drive Bağlantısı</h3>
+                    <p class="text-sm text-gray-500">Bir dosyaya bağlanın, verilerinizi Drive'da saklayın</p>
+                </div>
+
+                <!-- Step indicator -->
+                <div id="dmDriveSteps" class="flex items-center justify-center gap-2 mb-6 text-xs font-semibold">
+                    <div id="dmDriveStep1" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-100 text-blue-700">
+                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">1</span>
+                        Client ID
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
+                    <div id="dmDriveStep2" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-400">
+                        <span class="w-5 h-5 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px]">2</span>
+                        Bağlan
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
+                    <div id="dmDriveStep3" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-400">
+                        <span class="w-5 h-5 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px]">3</span>
+                        Dosya Seç
+                    </div>
+                </div>
+
+                <!-- Status Banner -->
+                <div id="dmDriveStatus" class="mb-6"></div>
+
+                <!-- Phase 1: Client ID -->
+                <div id="dmDrivePhase1" class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Google Cloud Client ID</label>
+                        <input type="text" id="dmDriveClientId" placeholder="xxxx.apps.googleusercontent.com"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-[11px] text-gray-400 mt-1.5">Google Cloud Console &gt; APIs &gt; Credentials &gt; OAuth 2.0 Client ID</p>
+                    </div>
+                </div>
+
+                <!-- Phase 2: Connect Button -->
+                <div id="dmDrivePhase2" class="mb-6 text-center">
+                    <button onclick="GoogleDrive.connectFromModal()" id="dmDriveConnectBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-3 rounded-xl flex items-center gap-2 hover:shadow-lg transition font-semibold mx-auto">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"/></svg>
+                        Google ile Giriş Yap
+                    </button>
+                </div>
+
+                <!-- Phase 3: File Selection -->
+                <div id="dmDrivePhase3" class="hidden mb-6">
+                    <div id="dmDriveLinkedFile" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                    <i data-lucide="file-check" class="w-5 h-5 text-emerald-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-sm text-emerald-800" id="dmDriveFileName">lagirio-analiz-data.json</p>
+                                    <p class="text-[11px] text-emerald-600" id="dmDriveFileInfo">Bağlı dosya</p>
+                                </div>
+                            </div>
+                            <button onclick="GoogleDrive.unlinkFile(); GoogleDrive.updateModalUI();" class="text-xs text-red-400 hover:text-red-600 underline">Bağlantıyı Kes</button>
+                        </div>
+                    </div>
+
+                    <div id="dmDriveFileSelect" class="hidden space-y-3">
+                        <p class="text-sm text-gray-600 font-medium text-center mb-3">Hangi dosyayı kullanmak istersiniz?</p>
+                        <button onclick="GoogleDrive.createNewFile()" class="w-full bg-white border-2 border-dashed border-blue-300 rounded-xl p-4 text-left hover:border-blue-500 hover:bg-blue-50/50 transition group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+                                    <i data-lucide="file-plus" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-sm text-gray-800">Yeni Dosya Oluştur</p>
+                                    <p class="text-[11px] text-gray-400">Drive'da yeni bir JSON dosyası oluşturulur</p>
+                                </div>
+                            </div>
+                        </button>
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                            <div class="relative flex justify-center text-xs"><span class="bg-white px-3 text-gray-400">veya</span></div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl p-4">
+                            <p class="font-semibold text-sm text-gray-800 mb-2">Mevcut Dosya ID Gir</p>
+                            <div class="flex gap-2">
+                                <input type="text" id="dmDriveFileId" placeholder="Drive dosya ID'si yapıştırın"
+                                       class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <button onclick="GoogleDrive.linkExistingFileFromModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                                    Bağla
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions (connected + linked) -->
+                <div id="dmDriveActions" class="hidden">
+                    <div class="flex gap-3 justify-center mb-3">
+                        <button onclick="GoogleDrive.loadFromDrive()" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition font-semibold">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            Drive'dan Veri Çek
+                        </button>
+                        <button onclick="GoogleDrive.saveToDrive()" class="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition font-semibold">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            Drive'a Kaydet
+                        </button>
+                    </div>
+                    <label class="flex items-center justify-center gap-2 cursor-pointer group">
+                        <input type="checkbox" id="dmDriveAutoLoad" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked onchange="GoogleDrive.saveConfig()">
+                        <span class="text-xs text-gray-500 group-hover:text-gray-700">Giriş yapıldığında otomatik Drive'dan çek</span>
+                    </label>
+                </div>
+
+                <!-- Message area -->
+                <p id="dmDriveMessage" class="text-center text-sm mt-4 hidden"></p>
+
+                <!-- Connected user info -->
+                <div id="dmDriveUserInfo" class="hidden mt-4 pt-4 border-t border-gray-100 text-center">
+                    <p class="text-xs text-gray-400">Bağlı hesap: <span id="dmDriveUserEmail" class="font-semibold text-gray-600"></span></p>
+                </div>
+            </div>
+
+            <!-- ===== Users Panel ===== -->
+            <div id="dmPanel-users" class="glass rounded-2xl shadow-2xl p-8 hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                        <i data-lucide="users" class="w-8 h-8 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Daire Sahibi Hesapları</h3>
+                    <p class="text-sm text-gray-500">Daire sahipleri için giriş hesabı oluşturun. Hesaplar Google Drive'a kaydedilir.</p>
+                </div>
+
+                <!-- Existing accounts -->
+                <div id="dmOwnerAccountsList" class="space-y-2 mb-6">
+                    <p class="text-sm text-gray-400 text-center">Henüz daire sahibi hesabı yok.</p>
+                </div>
+
+                <!-- Add new account form -->
+                <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                    <h4 class="text-sm font-semibold text-gray-600 mb-4 flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-4 h-4 text-purple-500"></i> Yeni Hesap Ekle
+                    </h4>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">Kullanıcı Adı</label>
+                            <input type="text" id="dmNewOwnerUser" placeholder="ornek_kullanici" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">Şifre</label>
+                            <input type="password" id="dmNewOwnerPass" placeholder="Güvenli şifre" class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[11px] text-gray-400 mb-1">Erişim verilecek daireler (Ctrl+Click ile çoklu seçim)</label>
+                        <select id="dmNewOwnerApt" multiple size="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                        </select>
+                    </div>
+                    <button onclick="DataManager.addOwnerAccount()" class="w-full px-3 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                        <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                        Hesap Ekle
+                    </button>
+                </div>
+
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <p class="text-xs text-blue-600 flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                        Hesap bilgileri Drive'a kaydedilir. Değişiklik yaptıktan sonra Drive'a kaydetmeyi unutmayın.
+                    </p>
                 </div>
             </div>
         </div>
@@ -1508,33 +1769,16 @@
                         </div>
                     </div>
 
-                    <!-- Daire Sahibi Hesap Yönetimi (sadece admin) -->
+                    <!-- Daire Sahibi Hesap Yönetimi - Veri Yönetimi'ne taşındı -->
                     <div class="admin-only">
                         <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                             <i data-lucide="users" class="w-4 h-4 text-purple-500"></i>
                             Daire Sahibi Hesapları
                         </h3>
-                        <p class="text-xs text-gray-400 mb-2">Daire sahipleri için giriş hesabı oluşturun. Her hesap belirli dairelere erişim sağlar.</p>
-                        <div id="ownerAccountsList" class="space-y-2 mb-3">
-                            <p class="text-xs text-gray-400">Henüz daire sahibi hesabı yok.</p>
-                        </div>
-                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                            <p class="text-xs font-semibold text-gray-500 mb-2">Yeni Hesap Ekle</p>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <input type="text" id="newOwnerUser" placeholder="Kullanıcı adı" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none">
-                                <input type="password" id="newOwnerPass" placeholder="Şifre" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none">
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-[10px] text-gray-400 mb-1">Erişim verilecek daireler (Ctrl+Click ile çoklu seçim)</label>
-                                <select id="newOwnerApt" multiple size="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none">
-                                    <!-- Daire listesi dinamik doldurulacak -->
-                                </select>
-                            </div>
-                            <button onclick="Auth.addOwnerAccount()" class="w-full px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition shadow-sm flex items-center justify-center gap-1.5">
-                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-                                Hesap Ekle
-                            </button>
-                        </div>
+                        <button onclick="Analytics.closeModal('settingsModal'); DataManager.open('users');" class="w-full px-3 py-2.5 bg-purple-50 border border-purple-200 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-100 transition flex items-center justify-center gap-2">
+                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            Veri Yönetimi'nden yönet
+                        </button>
                     </div>
                 </div>
 
@@ -1728,6 +1972,210 @@
     });
 
     // ============================================================
+    // DATA MANAGER MODULE - Veri Yönetimi Sayfası
+    // ============================================================
+    const DataManager = {
+        open(tab) {
+            document.getElementById('mainDashboard')?.classList.add('hidden');
+            document.getElementById('uploadSection')?.classList.add('hidden');
+            document.getElementById('ownerWelcome')?.classList.add('hidden');
+            document.getElementById('dataManagerSection')?.classList.remove('hidden');
+
+            // "Dashboard'a Dön" butonunu göster (veri varsa)
+            const backBtn = document.getElementById('dmBackBtn');
+            if (backBtn && Analytics.data) backBtn.classList.remove('hidden');
+
+            // Veri bilgisini güncelle
+            this.updateDataInfo();
+
+            // Drive UI güncelle
+            GoogleDrive.updateModalUI();
+
+            // Kullanıcı listesini güncelle
+            this.renderOwnerAccounts();
+
+            // Belirtilen tab varsa aç
+            if (tab) this.switchTab(tab);
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // File input event binding
+            this.bindFileInput();
+        },
+
+        close() {
+            // Alias for goBack
+            this.goBack();
+        },
+
+        goBack() {
+            document.getElementById('dataManagerSection')?.classList.add('hidden');
+            if (Analytics.data) {
+                document.getElementById('mainDashboard')?.classList.remove('hidden');
+            } else {
+                document.getElementById('uploadSection')?.classList.remove('hidden');
+            }
+        },
+
+        switchTab(tabName) {
+            // Tab butonlarını güncelle
+            document.querySelectorAll('.dm-tab').forEach(btn => {
+                btn.className = 'dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200';
+            });
+
+            const colors = { upload: 'emerald', drive: 'blue', users: 'purple' };
+            const color = colors[tabName] || 'emerald';
+            const activeTab = document.getElementById('dmTab-' + tabName);
+            if (activeTab) {
+                activeTab.className = 'dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-' + color + '-600 text-white shadow-lg';
+            }
+
+            // Panelleri göster/gizle
+            ['upload', 'drive', 'users'].forEach(panel => {
+                const el = document.getElementById('dmPanel-' + panel);
+                if (el) el.classList.toggle('hidden', panel !== tabName);
+            });
+
+            if (tabName === 'drive') GoogleDrive.updateModalUI();
+            if (tabName === 'users') this.renderOwnerAccounts();
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        updateDataInfo() {
+            const container = document.getElementById('dmCurrentData');
+            if (!container) return;
+
+            if (Analytics.data && (Analytics.data.apartments?.length || Analytics.data.reservations?.length)) {
+                container.classList.remove('hidden');
+                const aptEl = document.getElementById('dmApartmentCount');
+                const resEl = document.getElementById('dmReservationCount');
+                const expEl = document.getElementById('dmExpenseCount');
+                if (aptEl) aptEl.textContent = Analytics.data.apartments?.length || 0;
+                if (resEl) resEl.textContent = Analytics.data.reservations?.length || 0;
+                if (expEl) expEl.textContent = Analytics.data.expenses?.length || 0;
+            } else {
+                container.classList.add('hidden');
+            }
+        },
+
+        clearData() {
+            if (!confirm('Tarayıcıdaki tüm veriyi silmek istediğinize emin misiniz? Drive\'daki veri etkilenmez.')) return;
+            localStorage.removeItem('lagirioAnalyticsData');
+            Analytics.data = null;
+            document.getElementById('dataManagerSection')?.classList.add('hidden');
+            document.getElementById('mainDashboard')?.classList.add('hidden');
+            document.getElementById('uploadSection')?.classList.remove('hidden');
+            if (typeof Analytics.showToast === 'function') Analytics.showToast('Tarayıcıdaki veri temizlendi.', 'info');
+        },
+
+        bindFileInput() {
+            const fileInput = document.getElementById('dmFileInput');
+            const uploadArea = document.getElementById('dmUploadArea');
+
+            if (fileInput && !fileInput._dmBound) {
+                fileInput._dmBound = true;
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files[0]) {
+                        Analytics.handleFile(e.target.files[0]);
+                        document.getElementById('dataManagerSection')?.classList.add('hidden');
+                    }
+                });
+            }
+
+            if (uploadArea && !uploadArea._dmBound) {
+                uploadArea._dmBound = true;
+                uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('border-emerald-500', 'bg-emerald-50'); });
+                uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('border-emerald-500', 'bg-emerald-50'); });
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('border-emerald-500', 'bg-emerald-50');
+                    if (e.dataTransfer.files[0]) {
+                        Analytics.handleFile(e.dataTransfer.files[0]);
+                        document.getElementById('dataManagerSection')?.classList.add('hidden');
+                    }
+                });
+                uploadArea.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                        fileInput?.click();
+                    }
+                });
+            }
+        },
+
+        // Owner hesap yönetimi
+        addOwnerAccount() {
+            const username = document.getElementById('dmNewOwnerUser')?.value?.trim();
+            const password = document.getElementById('dmNewOwnerPass')?.value?.trim();
+            const aptSelect = document.getElementById('dmNewOwnerApt');
+            const apartmentIds = aptSelect ? [...aptSelect.selectedOptions].map(o => o.value) : [];
+
+            if (!username || !password || !apartmentIds.length) {
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Tüm alanları doldurun ve en az bir daire seçin!', 'error');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem(Auth.USERS_STORAGE_KEY) || '[]');
+            if (users.find(u => u.username === username) || username === 'admin') {
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Bu kullanıcı adı zaten kullanılıyor!', 'error');
+                return;
+            }
+
+            users.push({ username, password, role: 'owner', apartmentIds });
+            localStorage.setItem(Auth.USERS_STORAGE_KEY, JSON.stringify(users));
+            this.renderOwnerAccounts();
+            if (typeof Analytics !== 'undefined') Analytics.showToast('Hesap oluşturuldu: ' + username, 'success');
+
+            document.getElementById('dmNewOwnerUser').value = '';
+            document.getElementById('dmNewOwnerPass').value = '';
+            if (aptSelect) [...aptSelect.options].forEach(o => o.selected = false);
+        },
+
+        removeOwnerAccount(username) {
+            if (!confirm(username + ' hesabını silmek istediğinize emin misiniz?')) return;
+            let users = JSON.parse(localStorage.getItem(Auth.USERS_STORAGE_KEY) || '[]');
+            users = users.filter(u => u.username !== username);
+            localStorage.setItem(Auth.USERS_STORAGE_KEY, JSON.stringify(users));
+            this.renderOwnerAccounts();
+            if (typeof Analytics !== 'undefined') Analytics.showToast(username + ' hesabı silindi', 'success');
+        },
+
+        renderOwnerAccounts() {
+            const container = document.getElementById('dmOwnerAccountsList');
+            if (!container) return;
+            const users = JSON.parse(localStorage.getItem(Auth.USERS_STORAGE_KEY) || '[]');
+            const apartments = (typeof Analytics !== 'undefined' && Analytics.data?.apartments) || [];
+
+            if (!users.length) {
+                container.innerHTML = '<p class="text-sm text-gray-400 text-center">Henüz daire sahibi hesabı yok.</p>';
+            } else {
+                container.innerHTML = users.map(u => {
+                    const aptNames = (u.apartmentIds || []).map(id => {
+                        const apt = apartments.find(a => a.id === id);
+                        return apt ? apt.code : id;
+                    }).join(', ');
+                    return '<div class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 shadow-sm">' +
+                        '<div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><i data-lucide="user" class="w-4 h-4 text-purple-600"></i></div>' +
+                        '<div><span class="text-sm font-medium text-gray-800">' + u.username + '</span>' +
+                        '<p class="text-[11px] text-gray-400">' + aptNames + '</p></div></div>' +
+                        '<button onclick="DataManager.removeOwnerAccount(\'' + u.username + '\')" class="text-red-400 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition">' +
+                        '<i data-lucide="trash-2" class="w-4 h-4"></i></button></div>';
+                }).join('');
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // Daire listesini doldur
+            const aptSelect = document.getElementById('dmNewOwnerApt');
+            if (aptSelect && apartments.length) {
+                aptSelect.innerHTML = apartments.map(a =>
+                    '<option value="' + a.id + '">' + a.code + ' - ' + (a.ownerName || a.id) + '</option>'
+                ).join('');
+            }
+        }
+    };
+
+    // ============================================================
     // AUTH MODULE - Kullanıcı Kimlik Doğrulama
     // ============================================================
     const Auth = {
@@ -1893,8 +2341,34 @@
                 }
             } else {
                 document.body.classList.remove('owner-mode');
-                document.getElementById('uploadSection')?.classList.remove('hidden');
                 document.getElementById('ownerWelcome')?.classList.add('hidden');
+
+                // localStorage'da kayıtlı veri varsa direkt dashboard'a geç
+                try {
+                    const savedData = localStorage.getItem('lagirioAnalyticsData');
+                    if (savedData) {
+                        const parsed = JSON.parse(savedData);
+                        if (parsed && (parsed.apartments?.length || parsed.reservations?.length)) {
+                            document.getElementById('uploadSection')?.classList.add('hidden');
+                            Analytics.data = parsed;
+                            Analytics.init();
+                            Analytics.processData();
+                            // Drive bağlantısını dene
+                            GoogleDrive.updateUI();
+                            const tryAuto = () => {
+                                if (typeof google !== 'undefined' && google.accounts) {
+                                    GoogleDrive.tryAutoConnect();
+                                } else {
+                                    setTimeout(tryAuto, 500);
+                                }
+                            };
+                            setTimeout(tryAuto, 300);
+                            return; // showApp'tan erken çık
+                        }
+                    }
+                } catch(e) {}
+
+                document.getElementById('uploadSection')?.classList.remove('hidden');
             }
 
             Analytics.init();
@@ -2077,6 +2551,9 @@
             }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // Veri Yönetimi sayfasındaki Drive panelini de güncelle
+            this.updateModalUI();
         },
 
         // ---- Core Actions ----
@@ -2257,20 +2734,184 @@
         // Header Drive buton aksiyonu
         headerDriveAction() {
             if (this.accessToken && this.getConfig().fileId) {
-                // Bağlı ve dosya var → direkt kaydet
                 this.saveToDrive();
-            } else if (this.accessToken && !this.getConfig().fileId) {
-                // Bağlı ama dosya yok → upload section'a yönlendir
-                document.getElementById('uploadSection')?.classList.remove('hidden');
-                document.getElementById('mainDashboard')?.classList.add('hidden');
-                UploadUI.switchTab('drive');
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce bir Drive dosyası oluşturun veya bağlayın.', 'info');
             } else {
-                // Bağlı değil → upload section'daki Drive sekmesine yönlendir
-                document.getElementById('uploadSection')?.classList.remove('hidden');
-                document.getElementById('mainDashboard')?.classList.add('hidden');
-                UploadUI.switchTab('drive');
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce Google Drive\'a bağlanın.', 'info');
+                // Veri Yönetimi sayfasını Drive sekmesiyle aç
+                DataManager.open('drive');
+                if (!this.accessToken) {
+                    if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce Google Drive\'a bağlanın.', 'info');
+                } else {
+                    if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce bir Drive dosyası oluşturun veya bağlayın.', 'info');
+                }
+            }
+        },
+
+        // Veri Yönetimi sayfasındaki Drive panelini güncelle
+        updateModalUI() {
+            const config = this.getConfig();
+            const hasClientId = !!config.clientId;
+            const isConnected = !!this.accessToken;
+            const hasFile = !!config.fileId;
+
+            // Client ID input
+            const clientEl = document.getElementById('dmDriveClientId');
+            if (clientEl && config.clientId) clientEl.value = config.clientId;
+
+            // AutoLoad checkbox
+            const autoEl = document.getElementById('dmDriveAutoLoad');
+            if (autoEl) autoEl.checked = config.autoLoad !== false;
+
+            // Phase 1: Client ID
+            const p1 = document.getElementById('dmDrivePhase1');
+            if (p1) p1.style.display = hasClientId && isConnected ? 'none' : '';
+
+            // Phase 2: Connect button
+            const p2 = document.getElementById('dmDrivePhase2');
+            if (p2) p2.style.display = isConnected ? 'none' : '';
+
+            // Phase 3: File selection/linked
+            const p3 = document.getElementById('dmDrivePhase3');
+            if (p3) p3.classList.toggle('hidden', !isConnected);
+
+            const linkedEl = document.getElementById('dmDriveLinkedFile');
+            const selectEl = document.getElementById('dmDriveFileSelect');
+            if (hasFile && isConnected) {
+                if (linkedEl) linkedEl.classList.remove('hidden');
+                if (selectEl) selectEl.classList.add('hidden');
+                const nameEl = document.getElementById('dmDriveFileName');
+                const infoEl = document.getElementById('dmDriveFileInfo');
+                if (nameEl) nameEl.textContent = config.fileName || 'lagirio-analiz-data.json';
+                if (infoEl) infoEl.textContent = 'ID: ' + config.fileId.substring(0, 16) + '...' + (config.linkedAt ? ' | Bağlantı: ' + new Date(config.linkedAt).toLocaleDateString('tr-TR') : '');
+            } else if (isConnected) {
+                if (linkedEl) linkedEl.classList.add('hidden');
+                if (selectEl) selectEl.classList.remove('hidden');
+            }
+
+            // Actions
+            const actionsEl = document.getElementById('dmDriveActions');
+            if (actionsEl) actionsEl.classList.toggle('hidden', !(isConnected && hasFile));
+
+            // User info
+            const userEl = document.getElementById('dmDriveUserInfo');
+            if (userEl && this.userEmail) {
+                userEl.classList.remove('hidden');
+                const emailEl = document.getElementById('dmDriveUserEmail');
+                if (emailEl) emailEl.textContent = this.userEmail;
+            }
+
+            // Steps
+            const setModalStep = (step) => {
+                for (let i = 1; i <= 3; i++) {
+                    const el = document.getElementById('dmDriveStep' + i);
+                    if (!el) continue;
+                    const circle = el.querySelector('span');
+                    if (i < step) {
+                        el.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700';
+                        if (circle) circle.className = 'w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]';
+                    } else if (i === step) {
+                        el.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-100 text-blue-700';
+                        if (circle) circle.className = 'w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]';
+                    } else {
+                        el.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-400';
+                        if (circle) circle.className = 'w-5 h-5 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px]';
+                    }
+                }
+            };
+
+            if (!hasClientId) setModalStep(1);
+            else if (!isConnected) setModalStep(2);
+            else if (!hasFile) setModalStep(3);
+            else setModalStep(4);
+
+            // Status banner
+            const statusEl = document.getElementById('dmDriveStatus');
+            if (statusEl) {
+                if (isConnected && hasFile) {
+                    statusEl.innerHTML = '<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700"><i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i> Drive bağlantısı aktif.</div>';
+                } else if (isConnected) {
+                    statusEl.innerHTML = '<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Bağlantı kuruldu! Bir dosya seçin veya yeni oluşturun.</div>';
+                } else if (hasClientId) {
+                    statusEl.innerHTML = '<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Client ID kayıtlı. Google ile giriş yapın.</div>';
+                } else {
+                    statusEl.innerHTML = '<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600"><p class="font-semibold mb-1">Nasıl Kurulur?</p><ol class="list-decimal list-inside text-xs space-y-1 text-gray-500"><li><a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>\'a gidin</li><li>APIs &amp; Services &gt; Credentials &gt; Create OAuth Client ID</li><li>Application type: <b>Web application</b></li><li>Authorized JavaScript origins: <b>' + window.location.origin + '</b> ekleyin</li><li>Client ID\'yi yukarıya yapıştırın</li></ol></div>';
+                }
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        // Veri Yönetimi sayfasından bağlan
+        connectFromModal() {
+            const clientEl = document.getElementById('dmDriveClientId');
+            const clientId = clientEl?.value?.trim() || this.getConfig().clientId;
+            if (!clientId) {
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Lütfen Google Client ID girin!', 'error');
+                return;
+            }
+
+            // Save clientId
+            const config = this.getConfig();
+            config.clientId = clientId;
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
+
+            // Also update original panel if visible
+            const origEl = document.getElementById('driveClientId');
+            if (origEl) origEl.value = clientId;
+
+            try {
+                this.tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: clientId,
+                    scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+                    callback: async (response) => {
+                        if (response.error) {
+                            if (typeof Analytics.showToast === 'function') Analytics.showToast('Bağlantı hatası: ' + response.error, 'error');
+                            return;
+                        }
+                        this.accessToken = response.access_token;
+
+                        try {
+                            const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                                headers: { 'Authorization': 'Bearer ' + this.accessToken }
+                            });
+                            if (r.ok) this.userEmail = (await r.json()).email;
+                        } catch(e) {}
+
+                        this.updateUI();
+                        this.updateModalUI();
+
+                        const cfg = this.getConfig();
+                        if (cfg.fileId && cfg.autoLoad !== false) {
+                            this.loadFromDrive(true);
+                        }
+                    }
+                });
+                this.tokenClient.requestAccessToken();
+            } catch(e) {
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Google API yüklenemedi. Sayfayı yenileyin.', 'error');
+            }
+        },
+
+        // Veri Yönetimi sayfasından mevcut dosya bağla
+        async linkExistingFileFromModal() {
+            if (!this.accessToken) return;
+            const fileId = document.getElementById('dmDriveFileId')?.value?.trim();
+            if (!fileId) {
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Lütfen bir dosya ID girin!', 'error');
+                return;
+            }
+
+            try {
+                const r = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?fields=id,name,modifiedTime', {
+                    headers: { 'Authorization': 'Bearer ' + this.accessToken }
+                });
+                if (!r.ok) throw new Error('Dosya bulunamadı (HTTP ' + r.status + ')');
+                const info = await r.json();
+                this.saveFileLink(info.id, info.name);
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Dosya bağlandı: ' + info.name, 'success');
+                this.updateUI();
+                this.updateModalUI();
+            } catch(e) {
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Hata: ' + e.message, 'error');
             }
         },
 
@@ -2313,12 +2954,17 @@
                         body: fileContent
                     }
                 );
-                if (!response.ok) throw new Error('HTTP ' + response.status);
+                if (!response.ok) {
+                    const errText = await response.text().catch(() => '');
+                    throw new Error('HTTP ' + response.status + (errText ? ': ' + errText.substring(0, 100) : ''));
+                }
                 const now = new Date().toLocaleTimeString('tr-TR');
                 this.showMessage('Drive\'a kaydedildi! (Son: ' + now + ')', 'success');
                 if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive\'a kaydedildi!', 'success');
             } catch(e) {
+                console.error('Drive kaydetme hatası:', e);
                 this.showMessage('Kaydetme hatası: ' + e.message, 'error');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive kaydetme hatası: ' + e.message, 'error');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
@@ -4658,9 +5304,17 @@
                 console.log('🔍 === GİDER DEBUG BİTİŞ ===');
             }
             
+            // Veriyi localStorage'a kaydet (sayfa yenilemede korunsun)
+            try {
+                localStorage.setItem('lagirioAnalyticsData', JSON.stringify(this.data));
+            } catch(e) {
+                console.warn('localStorage kayıt hatası (veri çok büyük olabilir):', e.message);
+            }
+
             // Hide upload section
             document.getElementById('uploadSection').classList.add('hidden');
-            
+            document.getElementById('ownerWelcome')?.classList.add('hidden');
+
             // Show main dashboard
             document.getElementById('mainDashboard').classList.remove('hidden');
             
