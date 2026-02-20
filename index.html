@@ -324,7 +324,7 @@
                         <span class="hidden sm:inline">Excel</span>
                     </button>
                     
-                    <button onclick="GoogleDrive.accessToken ? GoogleDrive.saveToDrive() : UploadUI.switchTab('drive')" id="headerDriveBtn" class="admin-only bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Google Drive'a Kaydet">
+                    <button onclick="GoogleDrive.headerDriveAction()" id="headerDriveBtn" class="admin-only bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Google Drive'a Kaydet">
                         <i data-lucide="hard-drive" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">Drive</span>
                     </button>
@@ -1426,7 +1426,7 @@
                     </button>
                 </div>
             </div>
-            <div class="p-6">
+            <div class="p-6 overflow-y-auto" style="max-height: calc(80vh - 80px);">
                 <div class="space-y-6">
                     <!-- Display Settings -->
                     <div>
@@ -2252,6 +2252,26 @@
             delete config.linkedAt;
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
             this.updateUI();
+        },
+
+        // Header Drive buton aksiyonu
+        headerDriveAction() {
+            if (this.accessToken && this.getConfig().fileId) {
+                // Bağlı ve dosya var → direkt kaydet
+                this.saveToDrive();
+            } else if (this.accessToken && !this.getConfig().fileId) {
+                // Bağlı ama dosya yok → upload section'a yönlendir
+                document.getElementById('uploadSection')?.classList.remove('hidden');
+                document.getElementById('mainDashboard')?.classList.add('hidden');
+                UploadUI.switchTab('drive');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce bir Drive dosyası oluşturun veya bağlayın.', 'info');
+            } else {
+                // Bağlı değil → upload section'daki Drive sekmesine yönlendir
+                document.getElementById('uploadSection')?.classList.remove('hidden');
+                document.getElementById('mainDashboard')?.classList.add('hidden');
+                UploadUI.switchTab('drive');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce Google Drive\'a bağlanın.', 'info');
+            }
         },
 
         async saveToDrive() {
@@ -6359,6 +6379,7 @@
             // Sistem metriklerini hesapla
             this.data.apartments?.forEach(apartment => {
                 const system = apartment.systemType;
+                if (!systemData[system]) return; // Bilinmeyen sistem tipi atla
                 systemData[system].apartmentCount++;
                 systemData[system].commissions.push(apartment.lagirioCommission);
                 
