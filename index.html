@@ -216,7 +216,9 @@
         body.owner-mode [data-analysis="system"],
         body.owner-mode [data-analysis="owner"],
         body.owner-mode #system-analysis,
-        body.owner-mode #owner-analysis {
+        body.owner-mode #owner-analysis,
+        body.owner-mode #topPerformersSection,
+        body.owner-mode #systemPerformanceGrid {
             display: none !important;
         }
         body.owner-mode .owner-readonly {
@@ -327,11 +329,11 @@
                     <!-- Quick Stats -->
                     <div class="hidden lg:flex items-center space-x-6 mr-6">
                         <div class="text-center">
-                            <p class="text-emerald-200 text-xs">Portföy Değeri</p>
+                            <p class="text-emerald-200 text-xs" id="headerPortfolioLabel">Portföy Değeri</p>
                             <p class="text-white font-bold text-lg" id="headerPortfolioValue">€0</p>
                         </div>
                         <div class="text-center">
-                            <p class="text-emerald-200 text-xs">Bu Ay</p>
+                            <p class="text-emerald-200 text-xs" id="headerMonthlyLabel">Bu Ay</p>
                             <p class="text-white font-bold text-lg" id="headerMonthlyValue">€0</p>
                         </div>
                     </div>
@@ -931,7 +933,7 @@
                         </div>
                         <span class="text-xs text-emerald-600 font-semibold" id="portfolioTrend">+0%</span>
                     </div>
-                    <p class="text-xs text-gray-500 mb-1">Toplam Portföy</p>
+                    <p class="text-xs text-gray-500 mb-1" id="portfolioLabel">Toplam Portföy</p>
                     <p class="text-2xl font-bold text-gray-800" id="totalPortfolioValue">€0</p>
                     <div class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
                         <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-500" id="portfolioProgress" style="width: 0%"></div>
@@ -1003,7 +1005,7 @@
                         </div>
                         <i data-lucide="crown" class="w-4 h-4 text-yellow-500"></i>
                     </div>
-                    <p class="text-xs text-gray-500 mb-1">En Karlı Sistem</p>
+                    <p class="text-xs text-gray-500 mb-1" id="bestSystemLabel">En Karlı Sistem</p>
                     <p class="text-xl font-bold text-gray-800" id="bestSystem">-</p>
                     <p class="text-xs text-emerald-600 font-semibold mt-2" id="systemProfit">€0</p>
                 </div>
@@ -1047,6 +1049,17 @@
             
             <!-- Overview Tab Content -->
             <div id="overview-content" class="tab-content active bg-white/95 p-6">
+                <!-- Owner Financial Summary - sadece owner modunda görünür -->
+                <div id="ownerFinancialSummary" class="hidden mb-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="receipt" class="w-5 h-5 text-emerald-600"></i>
+                            <span>Finansal Özet</span>
+                        </h3>
+                        <div id="ownerFinancialDetail"></div>
+                    </div>
+                </div>
+
                 <!-- Performance Metrics Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <!-- Revenue Trend Chart -->
@@ -1067,7 +1080,7 @@
                     </div>
                     
                     <!-- Top Performers -->
-                    <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div id="topPerformersSection" class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="trophy" class="w-5 h-5 text-yellow-500"></i>
                             <span>En İyi Performans</span>
@@ -1077,9 +1090,9 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- System Performance Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div id="systemPerformanceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <!-- System cards will be dynamically generated -->
                     <div id="systemPerformanceCards"></div>
                 </div>
@@ -5545,9 +5558,14 @@
                 }, 200);
                 
                 lucide.createIcons();
+
+                // Owner modunda finansal özet kartını render et
+                if (Auth.currentUser?.role === 'owner') {
+                    this.renderOwnerFinancialSummary();
+                }
             }, 300);
         },
-                
+
         updateAllMetrics() {
             this.updateQuickStats();
             this.updateKPICards();
@@ -5557,7 +5575,12 @@
             this.updateRecentActivity();
             this.updateAlerts();
             this.updateEfficiencyMetrics();
-            
+
+            // Owner modunda finansal özet güncelle
+            if (Auth.currentUser?.role === 'owner') {
+                this.renderOwnerFinancialSummary();
+            }
+
             // Grafikleri yeniden çiz
             if (Object.keys(this.charts).length > 0) {
                 this.resizeAllCharts();
@@ -5604,38 +5627,165 @@
         // Update quick stats in header and cards
         updateQuickStats() {
             const stats = this.calculateQuickStats();
-            
+            const isOwner = Auth.currentUser?.role === 'owner';
+
             // Header stats
             document.getElementById('headerPortfolioValue').textContent = `€${stats.totalPortfolio.toLocaleString()}`;
             document.getElementById('headerMonthlyValue').textContent = `€${stats.monthlyRevenue.toLocaleString()}`;
-            
+
             // KPI Cards
             document.getElementById('totalPortfolioValue').textContent = `€${stats.totalPortfolio.toLocaleString()}`;
             document.getElementById('monthlyRevenue').textContent = `€${stats.monthlyRevenue.toLocaleString()}`;
             document.getElementById('activeProperties').textContent = `${stats.activeProperties}/${stats.totalProperties}`;
             document.getElementById('avgOccupancy').textContent = `${stats.avgOccupancy.toFixed(1)}%`;
-            document.getElementById('bestSystem').textContent = `Sistem ${stats.bestSystem.id}`;
-            document.getElementById('systemProfit').textContent = `€${stats.bestSystem.profit.toLocaleString()}`;
-            
+
+            if (isOwner) {
+                // Owner modunda KPI etiketlerini değiştir
+                const portfolioLabel = document.getElementById('portfolioLabel');
+                if (portfolioLabel) portfolioLabel.textContent = 'Net Kazancınız';
+                const headerPortLabel = document.getElementById('headerPortfolioLabel');
+                if (headerPortLabel) headerPortLabel.textContent = 'Net Kazanç';
+                const headerMonthLabel = document.getElementById('headerMonthlyLabel');
+                if (headerMonthLabel) headerMonthLabel.textContent = 'Bu Ay Kazanç';
+
+                // "En Karlı Sistem" → "Toplam Gider"
+                const systemLabel = document.getElementById('bestSystemLabel');
+                if (systemLabel) systemLabel.textContent = 'Toplam Gider';
+                document.getElementById('bestSystem').textContent = `€${stats.totalExpenses.toLocaleString()}`;
+                const systemProfitEl = document.getElementById('systemProfit');
+                if (systemProfitEl) systemProfitEl.textContent = `${stats.totalProperties} daire`;
+            } else {
+                document.getElementById('bestSystem').textContent = `Sistem ${stats.bestSystem.id}`;
+                document.getElementById('systemProfit').textContent = `€${stats.bestSystem.profit.toLocaleString()}`;
+            }
+
             // Update trends and indicators
-            this.updateTrendIndicators(stats); // ← Çağrı burada
-            
+            this.updateTrendIndicators(stats);
+
             // Update progress bars
             const portfolioProgress = document.getElementById('portfolioProgress');
             if (portfolioProgress) {
                 const progressPercent = Math.min(100, (stats.monthlyRevenue / stats.monthlyTarget) * 100);
                 portfolioProgress.style.width = `${progressPercent}%`;
             }
-            
+
             // Active percentage badge
             const activePercentage = (stats.activeProperties / stats.totalProperties * 100).toFixed(0);
             document.getElementById('activePercentage').textContent = `${activePercentage}%`;
-            
+
             // Notification count
             document.getElementById('notificationCount').textContent = this.notifications.length;
         },
 
-        // ✅ BURAYA EKLE (updateQuickStats fonksiyonunun DIŞINDA)
+        // Owner finansal özet kartı render
+        renderOwnerFinancialSummary() {
+            if (Auth.currentUser?.role !== 'owner') return;
+
+            const container = document.getElementById('ownerFinancialSummary');
+            const detail = document.getElementById('ownerFinancialDetail');
+            if (!container || !detail) return;
+            container.classList.remove('hidden');
+
+            let totalDetail = { grossIncome: 0, platformComm: 0, lagirioComm: 0, kdv: 0, expenses: 0, netOwner: 0, nights: 0, reservations: 0 };
+            let apartmentCards = '';
+
+            this.data.apartments?.forEach(apartment => {
+                const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
+                const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
+                const d = this.calculateOwnerShareDetailed(apartment, reservations, expenses);
+
+                totalDetail.grossIncome += d.grossIncome.total;
+                totalDetail.platformComm += d.platformCommission.total;
+                totalDetail.lagirioComm += d.lagirioCommission;
+                totalDetail.kdv += d.kdv;
+                totalDetail.expenses += d.expenses;
+                totalDetail.netOwner += d.netOwnerShare;
+                totalDetail.nights += d.nightCount;
+                totalDetail.reservations += d.reservationCount;
+
+                // Sistem tipi bilgisi
+                const sysInfo = apartment.systemType === '1' ? 'Tümü Lagirio' :
+                    `%${apartment.lagirioCommission || 0} komisyon`;
+
+                apartmentCards += `
+                <div class="bg-gray-50 rounded-lg p-4 mb-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-700">${apartment.code}</h4>
+                            <span class="text-[10px] text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">Sistem ${apartment.systemType} - ${sysInfo}</span>
+                        </div>
+                        <span class="text-lg font-bold ${d.netOwnerShare >= 0 ? 'text-emerald-600' : 'text-red-600'}">€${d.netOwnerShare.toFixed(2)}</span>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                        <div class="bg-white rounded p-2">
+                            <p class="text-gray-400">Brüt Gelir</p>
+                            <p class="font-semibold text-gray-700">€${d.grossIncome.total.toFixed(2)}</p>
+                            <p class="text-[10px] text-gray-400">Banka: €${d.grossIncome.bank.toFixed(2)} | Nakit: €${d.grossIncome.cash.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <p class="text-gray-400">Platform Komisyonu</p>
+                            <p class="font-semibold text-red-500">-€${d.platformCommission.total.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <p class="text-gray-400">Lagirio Komisyonu</p>
+                            <p class="font-semibold text-red-500">-€${d.lagirioCommission.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <p class="text-gray-400">KDV/Vergiler</p>
+                            <p class="font-semibold text-red-500">-€${d.kdv.toFixed(2)}</p>
+                            ${d.incomeTaxRate ? '<p class="text-[10px] text-gray-400">Gelir vergisi: %' + d.incomeTaxRate + '</p>' : ''}
+                            ${d.stopajRate ? '<p class="text-[10px] text-gray-400">Stopaj: %' + d.stopajRate + '</p>' : ''}
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <p class="text-gray-400">Giderler</p>
+                            <p class="font-semibold text-red-500">-€${d.expenses.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <p class="text-gray-400">${d.reservationCount} rez. / ${d.nightCount} gece</p>
+                            <p class="font-semibold text-gray-700">Ort. €${d.avgNightlyRate.toFixed(2)}/gece</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            // Toplam özet banner + per-apartment cards
+            detail.innerHTML = `
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-3 text-center text-xs">
+                    <div>
+                        <p class="text-gray-500">Brüt Gelir</p>
+                        <p class="font-bold text-gray-800">€${totalDetail.grossIncome.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Platform Kom.</p>
+                        <p class="font-bold text-red-500">-€${totalDetail.platformComm.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Lagirio Kom.</p>
+                        <p class="font-bold text-red-500">-€${totalDetail.lagirioComm.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">KDV/Vergiler</p>
+                        <p class="font-bold text-red-500">-€${totalDetail.kdv.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Giderler</p>
+                        <p class="font-bold text-red-500">-€${totalDetail.expenses.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Net Kazanç</p>
+                        <p class="font-bold text-emerald-600 text-lg">€${totalDetail.netOwner.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-t border-emerald-200 text-center text-[10px] text-gray-500">
+                    Toplam ${totalDetail.reservations} rezervasyon / ${totalDetail.nights} gece
+                </div>
+            </div>
+            ${apartmentCards}`;
+
+            lucide.createIcons();
+        },
+
         updateTrendIndicators(stats) {
             // Portfolio trend
             const trendElement = document.getElementById('portfolioTrend');
@@ -5769,17 +5919,20 @@
                 totalProperties: this.data.apartments?.length || 0,
                 activeProperties: 0,
                 avgOccupancy: 0,
+                totalExpenses: 0,
                 bestSystem: { id: '-', profit: 0 },
                 monthlyTarget: 10000 // Default target
             };
-            
+
             // Calculate total portfolio value
             this.data.apartments?.forEach(apartment => {
                 const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                 const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
-                const revenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
+                const revenue = this.getRelevantRevenue(apartment, reservations, expenses);
                 stats.totalPortfolio += revenue;
-                
+                stats.totalExpenses += expenses.reduce((sum, exp) =>
+                    sum + this.convertToEUR(exp.amount, exp.currency), 0);
+
                 if (reservations.length > 0) {
                     stats.activeProperties++;
                 }
@@ -5805,7 +5958,7 @@
                            date.getFullYear() === currentYear;
                 }) || [];
                 
-                stats.monthlyRevenue += this.calculateLagirioRevenue(apartment, monthlyReservations, monthlyExpenses);
+                stats.monthlyRevenue += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
             });
             
             // Calculate average occupancy
@@ -5833,7 +5986,7 @@
                 
                 const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                 const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
-                systemRevenues[systemType] += this.calculateLagirioRevenue(apartment, reservations, expenses);
+                systemRevenues[systemType] += this.getRelevantRevenue(apartment, reservations, expenses);
             });
             
             Object.entries(systemRevenues).forEach(([system, revenue]) => {
@@ -6150,12 +6303,31 @@
                     const profit8 = bankIncome - totalExpenses - bankCommission;
                     const lagirioComm8 = profit8 > 0 ? profit8 * (apartment.lagirioCommission / 100) : 0;
                     const bankOwner8 = bankIncome - totalExpenses - bankCommission - lagirioComm8;
-                    
+
                     const cashAfter8 = cashIncome - cashCommission;
                     const cashLagirioComm8 = cashAfter8 * (apartment.lagirioCommission / 100);
                     const cashOwner8 = cashAfter8 - cashLagirioComm8;
-                    
+
                     ownerShare = bankOwner8 + cashOwner8;
+                    break;
+
+                case '9': // Sistem 9 - Stopajlı (KDV Düşülmüş)
+                    const kdv9 = bank.reduce((sum, res) => {
+                        const amountInEur = this.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                        return sum + amountInEur * (apartment.taxRate / 100) / (1 + apartment.taxRate / 100);
+                    }, 0);
+                    const afterPlatform9 = bankIncome - bankCommission;
+                    const afterKDV9 = afterPlatform9 - kdv9;
+                    const lagirioComm9 = afterKDV9 > 0 ? afterKDV9 * (apartment.lagirioCommission / 100) : 0;
+                    const afterLagirio9 = afterKDV9 - lagirioComm9 - totalExpenses;
+                    const stopaj9 = afterLagirio9 > 0 ? afterLagirio9 * ((apartment.stopajRate || 0) / 100) : 0;
+                    const bankOwner9 = afterLagirio9 - stopaj9;
+
+                    const cashAfter9 = cashIncome - cashCommission;
+                    const cashLagirioComm9 = cashAfter9 > 0 ? cashAfter9 * (apartment.lagirioCommission / 100) : 0;
+                    const cashOwner9 = cashAfter9 - cashLagirioComm9;
+
+                    ownerShare = bankOwner9 + cashOwner9;
                     break;
 
                 default:
@@ -6163,6 +6335,91 @@
             }
 
             return ownerShare;
+        },
+
+        // Detaylı daire sahibi kazanç kırılımı (finansal özet kartı için)
+        calculateOwnerShareDetailed(apartment, reservations, expenses = []) {
+            const bank = reservations.filter(r => r.paymentMethod !== 'Nakit');
+            const cash = reservations.filter(r => r.paymentMethod === 'Nakit');
+
+            const bankIncome = bank.reduce((sum, res) =>
+                sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
+            const cashIncome = cash.reduce((sum, res) =>
+                sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
+            const totalIncome = bankIncome + cashIncome;
+
+            const bankCommission = bank.reduce((sum, res) => sum + (res.platformCommission || 0), 0);
+            const cashCommission = cash.reduce((sum, res) => sum + (res.platformCommission || 0), 0);
+            const totalPlatformCommission = bankCommission + cashCommission;
+
+            const totalExpenses = expenses.reduce((sum, exp) =>
+                sum + this.convertToEUR(exp.amount, exp.currency), 0);
+
+            // KDV hesaplama - sistem bazlı
+            let totalKDV = 0;
+            switch(apartment.systemType) {
+                case '1': case '3': case '4': case '5': case '9':
+                    totalKDV = bank.reduce((sum, res) => {
+                        const amt = this.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                        return sum + amt * (apartment.taxRate / 100) / (1 + apartment.taxRate / 100);
+                    }, 0);
+                    break;
+                case '7':
+                    const bookingDirect = reservations.filter(r => r.platform !== 'Airbnb');
+                    const bookingBank = bookingDirect.filter(r => r.paymentMethod !== 'Nakit');
+                    const bookingBankInc = bookingBank.reduce((sum, res) =>
+                        sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
+                    totalKDV = bookingBankInc * (apartment.taxRate / 100) / (1 + apartment.taxRate / 100);
+                    break;
+            }
+
+            // Gelir vergisi
+            let incomeTax = 0;
+            switch(apartment.systemType) {
+                case '3': case '4': case '7':
+                    incomeTax = (apartment.incomeTaxRate || 0);
+                    break;
+            }
+
+            // Stopaj
+            let stopaj = 0;
+            switch(apartment.systemType) {
+                case '5': case '9':
+                    stopaj = (apartment.stopajRate || 0);
+                    break;
+            }
+
+            const lagirioRevenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
+            const ownerShare = this.calculateOwnerShare(apartment, reservations, expenses);
+
+            const nightCount = reservations.reduce((sum, r) => {
+                const ci = new Date(r.checkIn);
+                const co = new Date(r.checkOut);
+                return sum + Math.max(0, Math.ceil((co - ci) / (1000 * 60 * 60 * 24)));
+            }, 0);
+
+            return {
+                grossIncome: { bank: bankIncome, cash: cashIncome, total: totalIncome },
+                platformCommission: { bank: bankCommission, cash: cashCommission, total: totalPlatformCommission },
+                lagirioCommission: lagirioRevenue,
+                kdv: totalKDV,
+                incomeTaxRate: incomeTax,
+                stopajRate: stopaj,
+                expenses: totalExpenses,
+                netOwnerShare: ownerShare,
+                reservationCount: reservations.length,
+                nightCount: nightCount,
+                avgNightlyRate: nightCount > 0 ? totalIncome / nightCount : 0,
+                systemType: apartment.systemType
+            };
+        },
+
+        // Revenue dispatcher - rol bazlı gelir hesaplama
+        getRelevantRevenue(apartment, reservations, expenses) {
+            if (Auth.currentUser?.role === 'owner') {
+                return this.calculateOwnerShare(apartment, reservations, expenses);
+            }
+            return this.calculateLagirioRevenue(apartment, reservations, expenses);
         },
 
         // 4. Doluluk oranı hesaplama
@@ -6223,7 +6480,7 @@
             this.data.apartments?.forEach(apartment => {
                 const reservations = this.data.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                 const expenses = this.data.expenses?.filter(e => e.apartmentId === apartment.id) || [];
-                const revenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
+                const revenue = this.getRelevantRevenue(apartment, reservations, expenses);
                 stats.totalPortfolio += revenue;
                 
                 if (reservations.length > 0) {
@@ -6259,7 +6516,7 @@
                         date.getFullYear() === targetYear;
                 }) || [];
                 
-                stats.monthlyRevenue += this.calculateLagirioRevenue(apartment, monthlyReservations, monthlyExpenses);
+                stats.monthlyRevenue += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
             });
             
             // Ortalama doluluk - sadece aktif daireleri say
@@ -6307,7 +6564,7 @@
                         date.getFullYear() === targetYear;
                 }) || [];
                 
-                systemRevenues[systemType] += this.calculateLagirioRevenue(apartment, monthlyReservations, monthlyExpenses);
+                systemRevenues[systemType] += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
             });
             
             Object.entries(systemRevenues).forEach(([system, revenue]) => {
@@ -6382,7 +6639,7 @@
                         date.getFullYear() === targetYear;
                 }) || [];
                 
-                totalRevenue += this.calculateLagirioRevenue(apartment, monthlyReservations, monthlyExpenses);
+                totalRevenue += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
             });
             
             return totalRevenue;
@@ -6412,13 +6669,13 @@
                             date.getFullYear() === targetYear;
                     }) || [];
                     
-                    total += this.calculateLagirioRevenue(apartment, monthlyReservations, monthlyExpenses);
+                    total += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
                 });
             } else {
                 this.data.apartments?.forEach(apartment => {
                     const reservations = this.data.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                     const expenses = this.data.expenses?.filter(e => e.apartmentId === apartment.id) || [];
-                    total += this.calculateLagirioRevenue(apartment, reservations, expenses);
+                    total += this.getRelevantRevenue(apartment, reservations, expenses);
                 });
             }
             
@@ -6515,7 +6772,7 @@
                     expenses = this.data.expenses?.filter(e => e.apartmentId === apartment.id) || [];
                 }
                 
-                const revenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
+                const revenue = this.getRelevantRevenue(apartment, reservations, expenses);
                 const ownerShare = this.calculateOwnerShare(apartment, reservations, expenses);
                 const occupancy = this.calculateOccupancyRate(apartment.id);
                 
@@ -7013,7 +7270,7 @@
                                     expDate.toDateString() === date.toDateString();
                             }) || [];
                             
-                            dayRevenue += this.calculateLagirioRevenue(apartment, dayReservations, dayExpenses);
+                            dayRevenue += this.getRelevantRevenue(apartment, dayReservations, dayExpenses);
                         });
                         data.values.push(dayRevenue);
                     }
@@ -7043,7 +7300,7 @@
                                     expDate >= weekStart && expDate <= weekEnd;
                             }) || [];
                             
-                            weekRevenue += this.calculateLagirioRevenue(apartment, weekReservations, weekExpenses);
+                            weekRevenue += this.getRelevantRevenue(apartment, weekReservations, weekExpenses);
                         });
                         data.values.push(weekRevenue);
                     }
@@ -7069,7 +7326,7 @@
                                     expDate.getFullYear() === year;
                             }) || [];
                             
-                            yearRevenue += this.calculateLagirioRevenue(apartment, yearReservations, yearExpenses);
+                            yearRevenue += this.getRelevantRevenue(apartment, yearReservations, yearExpenses);
                         });
                         data.values.push(yearRevenue);
                     }
@@ -7099,7 +7356,7 @@
                                     expDate.getFullYear() === monthDate.getFullYear();
                             }) || [];
                             
-                            monthRevenue += this.calculateLagirioRevenue(apartment, monthReservations, monthExpenses);
+                            monthRevenue += this.getRelevantRevenue(apartment, monthReservations, monthExpenses);
                         });
                         data.values.push(monthRevenue);
                     }
@@ -7255,7 +7512,7 @@
                     expenses = this.data.expenses?.filter(e => e.apartmentId === apartment.id) || [];
                 }
                 
-                const revenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
+                const revenue = this.getRelevantRevenue(apartment, reservations, expenses);
                 systemData[system].revenue += revenue;
                 
                 // Sadece rezervasyonu olan daireleri doluluk hesabına kat
@@ -7457,7 +7714,7 @@
                         const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                         const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
                         
-                        totalRevenue += this.calculateLagirioRevenue(apartment, reservations, expenses);
+                        totalRevenue += this.getRelevantRevenue(apartment, reservations, expenses);
                         totalOccupancy += this.calculateOccupancyRate(apartment.id);
                         commissions.push(apartment.lagirioCommission);
                     });
@@ -7778,7 +8035,7 @@
                 const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartmentId) || [];
                 const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartmentId) || [];
                 
-                metrics.totalRevenue += this.calculateLagirioRevenue(apartment, reservations, expenses);
+                metrics.totalRevenue += this.getRelevantRevenue(apartment, reservations, expenses);
                 metrics.totalOwnerShare += this.calculateOwnerShare(apartment, reservations, expenses);
                 metrics.totalExpenses += expenses.reduce((sum, exp) => 
                     sum + this.convertToEUR(exp.amount, exp.currency), 0);
@@ -7835,7 +8092,7 @@
                            date >= startDate && date <= endDate;
                 }) || [];
                 
-                metrics.totalRevenue += this.calculateLagirioRevenue(apartment, reservations, expenses);
+                metrics.totalRevenue += this.getRelevantRevenue(apartment, reservations, expenses);
                 metrics.totalOwnerShare += this.calculateOwnerShare(apartment, reservations, expenses);
                 metrics.totalExpenses += expenses.reduce((sum, exp) => 
                     sum + this.convertToEUR(exp.amount, exp.currency), 0);
@@ -9762,7 +10019,7 @@
                             date.getFullYear() === targetDate.getFullYear();
                     }) || [];
 
-                    monthRevenue += this.calculateLagirioRevenue(apartment, monthReservations, monthExpensesList);
+                    monthRevenue += this.getRelevantRevenue(apartment, monthReservations, monthExpensesList);
                     monthExpenses += monthExpensesList.reduce((sum, exp) =>
                         sum + this.convertToEUR(exp.amount, exp.currency), 0);
                 });
@@ -9950,7 +10207,7 @@
                         return exp.apartmentId === apartment.id && expMonth === month && expYear === resYear;
                     }) || [];
 
-                    monthlyData[month] += this.calculateLagirioRevenue(apartment, [res], expenses);
+                    monthlyData[month] += this.getRelevantRevenue(apartment, [res], expenses);
                     monthlyCounts[month]++;
                 });
             });
@@ -10025,7 +10282,7 @@
                         return exp.apartmentId === apartment.id && expYear === year;
                     }) || [];
 
-                    yearlyData[year].revenue += this.calculateLagirioRevenue(apartment, [res], expenses);
+                    yearlyData[year].revenue += this.getRelevantRevenue(apartment, [res], expenses);
                     yearlyData[year].count++;
                 });
             });
@@ -10125,7 +10382,7 @@
                             date.getFullYear() === targetDate.getFullYear();
                     }) || [];
 
-                    monthRevenue += this.calculateLagirioRevenue(apartment, monthReservations, monthExpenses);
+                    monthRevenue += this.getRelevantRevenue(apartment, monthReservations, monthExpenses);
                 });
 
                 revenues.push(monthRevenue);
