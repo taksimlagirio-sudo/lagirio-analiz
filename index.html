@@ -1583,6 +1583,9 @@
 
                 <!-- Projection Summary Cards -->
                 <div id="projSummaryCards" class="hidden mb-6">
+                    <!-- Owner Waterfall - sadece owner modunda -->
+                    <div id="projOwnerWaterfall" class="hidden mb-4"></div>
+
                     <!-- Top row: big cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
@@ -1591,7 +1594,7 @@
                             <div class="text-xs opacity-60 mt-1" id="projGrossDetail">Ort. gecelik × 25 gün/ay</div>
                         </div>
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
-                            <div class="text-sm opacity-80 mb-1">Lagirio Net Kazanç</div>
+                            <div class="text-sm opacity-80 mb-1" id="projMainLabel">Lagirio Net Kazanç</div>
                             <div class="text-2xl font-bold" id="projLagirioNet">€0</div>
                             <div class="text-xs opacity-60 mt-1" id="projLagirioDetail">Sistem bazlı komisyon hesabı</div>
                         </div>
@@ -1602,37 +1605,51 @@
                         </div>
                     </div>
                     <!-- Bottom row: kesintiler -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white border border-orange-200 rounded-xl p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="text-xs font-semibold text-orange-500 uppercase">Tahmini Giderler</div>
-                                    <div class="text-xl font-bold text-gray-800 mt-1" id="projExpenses">€0</div>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-xs text-gray-400" id="projExpenseDetail">%0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white border border-red-200 rounded-xl p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="text-xs font-semibold text-red-500 uppercase">Tahmini KDV</div>
-                                    <div class="text-xl font-bold text-gray-800 mt-1" id="projKDV">€0</div>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-xs text-gray-400" id="projKDVDetail">Sistem bazlı</span>
+                    <div id="projDeductionCards">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="projDeductionGrid">
+                            <div class="bg-white border border-orange-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-xs font-semibold text-orange-500 uppercase">Tahmini Giderler</div>
+                                        <div class="text-xl font-bold text-gray-800 mt-1" id="projExpenses">€0</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs text-gray-400" id="projExpenseDetail">%0</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="bg-white border border-indigo-200 rounded-xl p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="text-xs font-semibold text-indigo-500 uppercase">Tahmini Platform Komisyonu</div>
-                                    <div class="text-xl font-bold text-gray-800 mt-1" id="projPlatComm">€0</div>
+                            <div class="bg-white border border-red-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-xs font-semibold text-red-500 uppercase">Tahmini KDV</div>
+                                        <div class="text-xl font-bold text-gray-800 mt-1" id="projKDV">€0</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs text-gray-400" id="projKDVDetail">Sistem bazlı</span>
+                                    </div>
                                 </div>
-                                <div class="text-right">
-                                    <span class="text-xs text-gray-400" id="projPlatCommDetail">%0</span>
+                            </div>
+                            <div class="bg-white border border-indigo-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-xs font-semibold text-indigo-500 uppercase">Tahmini Platform Komisyonu</div>
+                                        <div class="text-xl font-bold text-gray-800 mt-1" id="projPlatComm">€0</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs text-gray-400" id="projPlatCommDetail">%0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Lagirio Komisyonu - owner modunda görünür -->
+                            <div id="projLagirioCommCard" class="bg-white border border-blue-200 rounded-xl p-4 hidden">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-xs font-semibold text-blue-500 uppercase">Tahmini Lagirio Komisyonu</div>
+                                        <div class="text-xl font-bold text-gray-800 mt-1" id="projLagirioComm">€0</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs text-gray-400" id="projLagirioCommDetail">%0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1644,7 +1661,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-600"></i>
-                            <span>Aylık Projeksiyon (Lagirio Kazancı)</span>
+                            <span id="projChartTitle">Aylık Projeksiyon (Lagirio Kazancı)</span>
                         </h3>
                         <div class="chart-container" id="projMonthlyChart" style="height:280px"></div>
                     </div>
@@ -1653,8 +1670,8 @@
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="calendar-range" class="w-5 h-5 text-indigo-600"></i>
-                            <span>Aylık Lagirio Kazanç Detayı</span>
-                            <span class="text-xs text-gray-400 ml-2">(tüm daireler toplam)</span>
+                            <span id="projTableTitle">Aylık Lagirio Kazanç Detayı</span>
+                            <span class="text-xs text-gray-400 ml-2" id="projTableSubtitle">(tüm daireler toplam)</span>
                         </h3>
                         <div id="projMonthlyOverview"></div>
                     </div>
@@ -1677,7 +1694,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                             <i data-lucide="list" class="w-5 h-5 text-purple-600"></i>
-                            <span>Gelecek Rezervasyonlar Listesi</span>
+                            <span id="projResListTitle">Gelecek Rezervasyonlar Listesi</span>
                         </h3>
                         <div class="flex items-center gap-2">
                             <select id="projPlatformFilter" onchange="Projection.renderTable()" class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg">
@@ -4105,7 +4122,7 @@
             const kdvSystems = new Set(['1','3','4','5','9']);
             const kdvBookingOnlySystems = new Set(['7']);
 
-            let totalEstGross = 0, totalEstExpenses = 0, totalEstKDV = 0, totalEstPlatComm = 0, totalLagirioNet = 0;
+            let totalEstGross = 0, totalEstExpenses = 0, totalEstKDV = 0, totalEstPlatComm = 0, totalLagirioNet = 0, totalOwnerNet = 0;
             const monthlyData = {};
             const aptTotals = {};
             const aptMonthlyDetail = {};
@@ -4122,7 +4139,7 @@
                 const platCommRatio = hist.platformCommRate[aptId] ?? hist.avgPlatformCommRate;
                 const bankCashRatio = hist.bankRatio[aptId] ?? hist.avgBankRatio;
 
-                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment.code || aptId, systemType: sysType, commission: apartment.lagirioCommission || 0, gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, months: 0, avgNightly: 0, count: 0 };
+                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment.code || aptId, systemType: sysType, commission: apartment.lagirioCommission || 0, gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, ownerShare: 0, months: 0, avgNightly: 0, count: 0 };
                 if (!aptMonthlyDetail[aptId]) aptMonthlyDetail[aptId] = {};
 
                 months12.forEach(({ month, year, monthKey }) => {
@@ -4152,19 +4169,27 @@
 
                     // --- Lagirio kazancı ---
                     let lagirioEarning = 0;
+                    let ownerEarning = 0;
+                    const cashAmount = estMonthlyGross * (1 - bankCashRatio);
+                    const fakeReservations = [];
+                    if (bankAmount > 0) {
+                        fakeReservations.push({ totalAmount: bankAmount, currency: 'EUR', platformCommission: bankAmount * platCommRatio, paymentMethod: 'Banka', platform: 'Booking.com' });
+                    }
+                    if (cashAmount > 0) {
+                        fakeReservations.push({ totalAmount: cashAmount, currency: 'EUR', platformCommission: cashAmount * platCommRatio, paymentMethod: 'Nakit', platform: 'Direkt' });
+                    }
+                    const fakeExpenses = [{ amount: estExpenses, currency: 'EUR' }];
+
                     if (Analytics.calculateLagirioRevenue) {
-                        const cashAmount = estMonthlyGross * (1 - bankCashRatio);
-                        const fakeReservations = [];
-                        if (bankAmount > 0) {
-                            fakeReservations.push({ totalAmount: bankAmount, currency: 'EUR', platformCommission: bankAmount * platCommRatio, paymentMethod: 'Banka', platform: 'Booking.com' });
-                        }
-                        if (cashAmount > 0) {
-                            fakeReservations.push({ totalAmount: cashAmount, currency: 'EUR', platformCommission: cashAmount * platCommRatio, paymentMethod: 'Nakit', platform: 'Direkt' });
-                        }
-                        const fakeExpenses = [{ amount: estExpenses, currency: 'EUR' }];
                         lagirioEarning = Analytics.calculateLagirioRevenue(apartment, fakeReservations, fakeExpenses);
                     } else {
                         lagirioEarning = (estMonthlyGross - estPlatformComm - estExpenses) * 0.15;
+                    }
+
+                    if (Analytics.calculateOwnerShare) {
+                        ownerEarning = Analytics.calculateOwnerShare(apartment, fakeReservations, fakeExpenses);
+                    } else {
+                        ownerEarning = estMonthlyGross - estPlatformComm - estExpenses - lagirioEarning;
                     }
 
                     // --- Topla ---
@@ -4173,15 +4198,17 @@
                     totalEstKDV += estKDV;
                     totalEstPlatComm += estPlatformComm;
                     totalLagirioNet += lagirioEarning;
+                    totalOwnerNet += ownerEarning;
                     totalResCount += estimate.count;
 
                     // Aylık veri
-                    if (!monthlyData[monthKey]) monthlyData[monthKey] = { gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, count: 0, avgNightly: 0, aptCount: 0 };
+                    if (!monthlyData[monthKey]) monthlyData[monthKey] = { gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, ownerShare: 0, count: 0, avgNightly: 0, aptCount: 0 };
                     monthlyData[monthKey].gross += estMonthlyGross;
                     monthlyData[monthKey].expenses += estExpenses;
                     monthlyData[monthKey].kdv += estKDV;
                     monthlyData[monthKey].platComm += estPlatformComm;
                     monthlyData[monthKey].lagirio += lagirioEarning;
+                    monthlyData[monthKey].ownerShare += ownerEarning;
                     monthlyData[monthKey].count += estimate.count;
                     monthlyData[monthKey].avgNightly += avgNightly;
                     monthlyData[monthKey].aptCount++;
@@ -4192,6 +4219,7 @@
                     aptTotals[aptId].kdv += estKDV;
                     aptTotals[aptId].platComm += estPlatformComm;
                     aptTotals[aptId].lagirio += lagirioEarning;
+                    aptTotals[aptId].ownerShare += ownerEarning;
                     aptTotals[aptId].months++;
                     aptTotals[aptId].avgNightly += avgNightly;
                     aptTotals[aptId].count += estimate.count;
@@ -4204,6 +4232,7 @@
                         kdv: estKDV,
                         platComm: estPlatformComm,
                         lagirio: lagirioEarning,
+                        ownerShare: ownerEarning,
                         avgNightly: avgNightly,
                         resCount: estimate.count,
                         totalNights: estimate.totalNights,
@@ -4227,7 +4256,7 @@
             });
 
             // --- 4. UI Güncelle ---
-            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, totalResCount, Object.keys(aptTotals).length);
+            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, totalOwnerNet, totalResCount, Object.keys(aptTotals).length);
             this.renderMonthlyChart(monthlyData);
             this.renderMonthlyOverview(monthlyData, aptMonthlyDetail);
             this.renderApartmentList(Object.values(aptTotals), aptMonthlyDetail);
@@ -4237,6 +4266,14 @@
 
             document.getElementById('projSummaryCards')?.classList.remove('hidden');
             document.getElementById('projMonthlySection')?.classList.remove('hidden');
+            // Owner heading güncellemeleri
+            const isOwner = Auth.currentUser?.role === 'owner';
+            const chartTitle = document.getElementById('projChartTitle');
+            const tableTitle = document.getElementById('projTableTitle');
+            const tableSubtitle = document.getElementById('projTableSubtitle');
+            if (chartTitle) chartTitle.textContent = isOwner ? 'Aylık Projeksiyon (Net Kazancınız)' : 'Aylık Projeksiyon (Lagirio Kazancı)';
+            if (tableTitle) tableTitle.textContent = isOwner ? 'Aylık Kazanç Detayı' : 'Aylık Lagirio Kazanç Detayı';
+            if (tableSubtitle) tableSubtitle.textContent = isOwner ? '(tüm daireleriniz toplam)' : '(tüm daireler toplam)';
             document.getElementById('projResTableSection')?.classList.remove('hidden');
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
@@ -4298,36 +4335,150 @@
         },
 
         // ---- Render Functions ----
-        renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, resCount, aptCount) {
-            // Üst satır: Brüt, Lagirio, Gecelik
+        renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, ownerNet, resCount, aptCount) {
+            const isOwner = Auth.currentUser?.role === 'owner';
+
+            // Üst satır: Brüt, Ana Kazanç, Gecelik
             document.getElementById('projGrossRevenue').textContent = '\u20ac' + estGross.toFixed(2);
             document.getElementById('projGrossDetail').textContent = aptCount + ' daire | 12 ay | Karma tahmin';
 
-            document.getElementById('projLagirioNet').textContent = '\u20ac' + lagirioNet.toFixed(2);
-            const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
-            document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
+            if (isOwner) {
+                document.getElementById('projMainLabel').textContent = 'Tahmini Net Kazancınız';
+                document.getElementById('projLagirioNet').textContent = '\u20ac' + ownerNet.toFixed(2);
+                const ownerRatio = estGross > 0 ? Math.round((ownerNet / estGross) * 100) : 0;
+                document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + ownerRatio + '\'i';
+            } else {
+                document.getElementById('projMainLabel').textContent = 'Lagirio Net Kazanç';
+                document.getElementById('projLagirioNet').textContent = '\u20ac' + lagirioNet.toFixed(2);
+                const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
+                document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + lagirioRatio + '\'i';
+            }
 
             const avgNightly = estGross > 0 ? estGross / (aptCount * 12 * this.OCCUPANCY_DAYS || 1) : 0;
             document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toFixed(2);
             document.getElementById('projNightlyDetail').textContent = aptCount + ' daire | ' + this.OCCUPANCY_DAYS + ' gün/ay | Brüt/' + (aptCount*12) + ' ay';
 
-            // Alt satır: Gider, KDV, Platform Komis.
+            // Alt satır: Gider, KDV, Platform Komis. (+ Owner: Lagirio Komis.)
             document.getElementById('projExpenses').textContent = '\u20ac' + estExpenses.toFixed(2);
-            const expRatio = estGross > 0 ? Math.round((estExpenses / estGross) * 100) : 0;
             document.getElementById('projExpenseDetail').textContent = 'Daire bazlı standart (ekstrem eleme)';
 
             document.getElementById('projKDV').textContent = '\u20ac' + estKDV.toFixed(2);
             const kdvRatio = estGross > 0 ? ((estKDV / estGross) * 100).toFixed(1) : 0;
-            document.getElementById('projKDVDetail').textContent = 'Br\u00fct\u00fcn %' + kdvRatio + '\'i';
+            document.getElementById('projKDVDetail').textContent = 'Brütün %' + kdvRatio + '\'i';
 
             document.getElementById('projPlatComm').textContent = '\u20ac' + estPlatComm.toFixed(2);
             const platRatio = estGross > 0 ? Math.round((estPlatComm / estGross) * 100) : 0;
-            document.getElementById('projPlatCommDetail').textContent = 'Ge\u00e7mi\u015f oran\u0131: %' + platRatio;
+            document.getElementById('projPlatCommDetail').textContent = 'Geçmiş oranı: %' + platRatio;
+
+            // Owner: 4. kart - Lagirio Komisyonu göster + grid 4 sütun yap
+            const lagirioCommCard = document.getElementById('projLagirioCommCard');
+            const deductionGrid = document.getElementById('projDeductionGrid');
+            if (isOwner) {
+                if (lagirioCommCard) {
+                    lagirioCommCard.classList.remove('hidden');
+                    document.getElementById('projLagirioComm').textContent = '\u20ac' + lagirioNet.toFixed(2);
+                    const lagirioCommRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
+                    document.getElementById('projLagirioCommDetail').textContent = 'Brütün %' + lagirioCommRatio + '\'i';
+                }
+                if (deductionGrid) deductionGrid.classList.replace('md:grid-cols-3', 'md:grid-cols-4');
+            } else {
+                if (lagirioCommCard) lagirioCommCard.classList.add('hidden');
+                if (deductionGrid) {
+                    deductionGrid.classList.remove('md:grid-cols-4');
+                    deductionGrid.classList.add('md:grid-cols-3');
+                }
+            }
+
+            // Owner: Waterfall diyagramı render et
+            if (isOwner) {
+                this.renderOwnerWaterfall(estGross, estPlatComm, lagirioNet, estKDV, estExpenses, ownerNet);
+            } else {
+                const wf = document.getElementById('projOwnerWaterfall');
+                if (wf) wf.classList.add('hidden');
+            }
+        },
+
+        renderOwnerWaterfall(estGross, estPlatComm, lagirioComm, estKDV, estExpenses, ownerNet) {
+            const wf = document.getElementById('projOwnerWaterfall');
+            if (!wf) return;
+            wf.classList.remove('hidden');
+
+            const steps = [
+                { label: 'Br\u00fct Gelir', value: estGross, color: 'bg-blue-500', textColor: 'text-blue-700' },
+                { label: 'Platform Kom.', value: -estPlatComm, color: 'bg-orange-400', textColor: 'text-orange-600' },
+                { label: 'Lagirio Kom.', value: -lagirioComm, color: 'bg-indigo-400', textColor: 'text-indigo-600' },
+                { label: 'KDV/Vergiler', value: -estKDV, color: 'bg-red-400', textColor: 'text-red-600' },
+                { label: 'Giderler', value: -estExpenses, color: 'bg-amber-400', textColor: 'text-amber-600' },
+                { label: 'Net Kazanc\u0131n\u0131z', value: ownerNet, color: 'bg-emerald-500', textColor: 'text-emerald-700', isResult: true }
+            ];
+
+            const maxVal = estGross;
+            const barWidth = maxVal > 0 ? 100 : 0;
+
+            let running = estGross;
+            let html = '<div class="bg-white rounded-xl shadow-lg p-6">' +
+                '<h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">' +
+                '<i data-lucide="git-branch" class="w-5 h-5 text-emerald-600"></i>' +
+                '<span>Kazan\u00e7 Ak\u0131\u015f\u0131</span>' +
+                '<span class="text-xs text-gray-400 ml-2">(Br\u00fct gelirden net kazanca)</span></h3>';
+
+            html += '<div class="space-y-2">';
+
+            steps.forEach((step, i) => {
+                if (i === 0) {
+                    // Br\u00fct Gelir - full bar
+                    const w = maxVal > 0 ? (step.value / maxVal * 100) : 0;
+                    html += '<div class="flex items-center gap-3">' +
+                        '<div class="w-28 text-right text-xs font-medium text-gray-600">' + step.label + '</div>' +
+                        '<div class="flex-1 h-8 bg-gray-100 rounded-lg relative overflow-hidden">' +
+                        '<div class="h-full ' + step.color + ' rounded-lg flex items-center justify-end pr-2 transition-all" style="width:' + w.toFixed(1) + '%">' +
+                        '<span class="text-white text-xs font-bold">\u20ac' + step.value.toFixed(0) + '</span></div></div>' +
+                        '<div class="w-20 text-right text-xs font-bold ' + step.textColor + '">\u20ac' + step.value.toFixed(0) + '</div></div>';
+                } else if (step.isResult) {
+                    // Net sonu\u00e7 - ye\u015fil bar
+                    const w = maxVal > 0 ? (step.value / maxVal * 100) : 0;
+                    html += '<div class="border-t-2 border-dashed border-gray-300 pt-2 mt-1"></div>' +
+                        '<div class="flex items-center gap-3">' +
+                        '<div class="w-28 text-right text-xs font-bold text-emerald-700">' + step.label + '</div>' +
+                        '<div class="flex-1 h-10 bg-gray-100 rounded-lg relative overflow-hidden">' +
+                        '<div class="h-full ' + step.color + ' rounded-lg flex items-center justify-end pr-2 transition-all" style="width:' + w.toFixed(1) + '%">' +
+                        '<span class="text-white text-sm font-bold">\u20ac' + step.value.toFixed(0) + '</span></div></div>' +
+                        '<div class="w-20 text-right text-sm font-bold ' + step.textColor + '">\u20ac' + step.value.toFixed(0) + '</div></div>';
+                } else {
+                    // Kesinti - ince bar (sa\u011fdan sola do\u011fru)
+                    const absVal = Math.abs(step.value);
+                    const w = maxVal > 0 ? (absVal / maxVal * 100) : 0;
+                    running += step.value; // running decreases
+                    const offset = maxVal > 0 ? (running / maxVal * 100) : 0;
+                    html += '<div class="flex items-center gap-3">' +
+                        '<div class="w-28 text-right text-xs font-medium text-gray-500">' + step.label + '</div>' +
+                        '<div class="flex-1 h-6 bg-gray-100 rounded-lg relative overflow-hidden">' +
+                        '<div class="absolute h-full ' + step.color + ' rounded-sm opacity-80" style="left:' + offset.toFixed(1) + '%;width:' + w.toFixed(1) + '%"></div>' +
+                        '</div>' +
+                        '<div class="w-20 text-right text-xs font-medium ' + step.textColor + '">-\u20ac' + absVal.toFixed(0) + '</div></div>';
+                }
+            });
+
+            // Percentage summary
+            const pctOwner = estGross > 0 ? (ownerNet / estGross * 100).toFixed(1) : '0.0';
+            const pctDeductions = estGross > 0 ? ((estGross - ownerNet) / estGross * 100).toFixed(1) : '0.0';
+            html += '</div>' +
+                '<div class="flex items-center justify-center gap-6 mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500">' +
+                '<span>Br\u00fct Gelir: <strong class="text-gray-700">\u20ac' + estGross.toFixed(0) + '</strong></span>' +
+                '<span class="text-gray-300">|</span>' +
+                '<span>Toplam Kesinti: <strong class="text-red-500">%' + pctDeductions + '</strong></span>' +
+                '<span class="text-gray-300">|</span>' +
+                '<span>Elinize Ge\u00e7en: <strong class="text-emerald-600">%' + pctOwner + '</strong></span>' +
+                '</div></div>';
+
+            wf.innerHTML = html;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
         renderMonthlyChart(monthlyData) {
             const container = document.getElementById('projMonthlyChart');
             if (!container) return;
+            const isOwner = Auth.currentUser?.role === 'owner';
             const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
             const sortedKeys = Object.keys(monthlyData).sort();
 
@@ -4338,36 +4489,67 @@
 
             const maxVal = Math.max(...sortedKeys.map(k => monthlyData[k].gross));
 
-            container.innerHTML = '<div class="flex items-end gap-3 h-56">' + sortedKeys.map(key => {
-                const d = monthlyData[key];
-                const [y, m] = key.split('-');
-                const label = monthNames[parseInt(m)-1] + ' ' + y.slice(2);
-                const grossH = maxVal > 0 ? Math.max(8, (d.gross / maxVal) * 190) : 8;
-                const lagirioH = maxVal > 0 ? Math.max(4, (d.lagirio / maxVal) * 190) : 4;
-                const expH = maxVal > 0 ? Math.max(2, (d.expenses / maxVal) * 190) : 2;
+            if (isOwner) {
+                // Owner: Br\u00fct Gelir (a\u00e7\u0131k ye\u015fil bar) + Net Kazan\u00e7 (\u00fcst\u00fcnde koyu ye\u015fil) + Kesintiler (k\u0131rm\u0131z\u0131 \u00e7izgi)
+                container.innerHTML = '<div class="flex items-end gap-3 h-56">' + sortedKeys.map(key => {
+                    const d = monthlyData[key];
+                    const [y, m] = key.split('-');
+                    const label = monthNames[parseInt(m)-1] + ' ' + y.slice(2);
+                    const grossH = maxVal > 0 ? Math.max(8, (d.gross / maxVal) * 190) : 8;
+                    const ownerH = maxVal > 0 ? Math.max(4, (d.ownerShare / maxVal) * 190) : 4;
+                    const deductions = d.gross - d.ownerShare;
 
-                return '<div class="flex-1 flex flex-col items-center gap-1">' +
-                    '<div class="text-center mb-1">' +
-                    '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + d.lagirio.toFixed(2) + '</span>' +
-                    '<span class="text-[9px] text-gray-400">\u20ac' + d.avgNightly.toFixed(2) + '/g</span></div>' +
-                    '<div class="w-full flex gap-0.5 items-end justify-center" style="height:' + grossH + 'px">' +
-                    '<div class="flex-1 bg-emerald-100 rounded-t-sm h-full relative">' +
-                    '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + lagirioH + 'px"></div></div>' +
-                    '<div class="w-2 bg-orange-300 rounded-t-sm" style="height:' + expH + 'px"></div></div>' +
-                    '<span class="text-[10px] text-gray-600 whitespace-nowrap font-medium">' + label + '</span>' +
-                    '<span class="text-[9px] text-gray-400">' + d.count + ' rez. | ' + d.aptCount + ' daire</span>' +
-                    '</div>';
-            }).join('') + '</div>' +
-            '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
-            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Karma Tahmini Brüt</span>' +
-            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Lagirio Kazancı</span>' +
-            '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-300 rounded"></span> Standart Gider</span>' +
-            '</div>';
+                    return '<div class="flex-1 flex flex-col items-center gap-1">' +
+                        '<div class="text-center mb-1">' +
+                        '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + d.ownerShare.toFixed(0) + '</span>' +
+                        '<span class="text-[9px] text-gray-400">\u20ac' + d.avgNightly.toFixed(2) + '/g</span></div>' +
+                        '<div class="w-full flex gap-0.5 items-end justify-center" style="height:' + grossH + 'px">' +
+                        '<div class="flex-1 bg-emerald-100 rounded-t-sm h-full relative">' +
+                        '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + ownerH + 'px"></div></div>' +
+                        '<div class="w-2 bg-red-300 rounded-t-sm" style="height:' + Math.max(2, grossH - ownerH) + 'px"></div></div>' +
+                        '<span class="text-[10px] text-gray-600 whitespace-nowrap font-medium">' + label + '</span>' +
+                        '<span class="text-[9px] text-gray-400">' + d.count + ' rez.</span>' +
+                        '</div>';
+                }).join('') + '</div>' +
+                '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Tahmini Br\u00fct</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Net Kazanc\u0131n\u0131z</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-300 rounded"></span> Toplam Kesinti</span>' +
+                '</div>';
+            } else {
+                // Admin: mevcut g\u00f6r\u00fcn\u00fcm
+                container.innerHTML = '<div class="flex items-end gap-3 h-56">' + sortedKeys.map(key => {
+                    const d = monthlyData[key];
+                    const [y, m] = key.split('-');
+                    const label = monthNames[parseInt(m)-1] + ' ' + y.slice(2);
+                    const grossH = maxVal > 0 ? Math.max(8, (d.gross / maxVal) * 190) : 8;
+                    const lagirioH = maxVal > 0 ? Math.max(4, (d.lagirio / maxVal) * 190) : 4;
+                    const expH = maxVal > 0 ? Math.max(2, (d.expenses / maxVal) * 190) : 2;
+
+                    return '<div class="flex-1 flex flex-col items-center gap-1">' +
+                        '<div class="text-center mb-1">' +
+                        '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + d.lagirio.toFixed(2) + '</span>' +
+                        '<span class="text-[9px] text-gray-400">\u20ac' + d.avgNightly.toFixed(2) + '/g</span></div>' +
+                        '<div class="w-full flex gap-0.5 items-end justify-center" style="height:' + grossH + 'px">' +
+                        '<div class="flex-1 bg-emerald-100 rounded-t-sm h-full relative">' +
+                        '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + lagirioH + 'px"></div></div>' +
+                        '<div class="w-2 bg-orange-300 rounded-t-sm" style="height:' + expH + 'px"></div></div>' +
+                        '<span class="text-[10px] text-gray-600 whitespace-nowrap font-medium">' + label + '</span>' +
+                        '<span class="text-[9px] text-gray-400">' + d.count + ' rez. | ' + d.aptCount + ' daire</span>' +
+                        '</div>';
+                }).join('') + '</div>' +
+                '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Karma Tahmini Br\u00fct</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Lagirio Kazanc\u0131</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-300 rounded"></span> Standart Gider</span>' +
+                '</div>';
+            }
         },
 
         renderMonthlyOverview(monthlyData, aptMonthlyDetail) {
             const container = document.getElementById('projMonthlyOverview');
             if (!container) return;
+            const isOwner = Auth.currentUser?.role === 'owner';
             const monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
             const sortedKeys = Object.keys(monthlyData).sort();
 
@@ -4377,50 +4559,75 @@
             }
 
             // Grand totals
-            let grandGross = 0, grandExp = 0, grandKdv = 0, grandPlat = 0, grandLagirio = 0, grandCount = 0;
+            let grandGross = 0, grandExp = 0, grandKdv = 0, grandPlat = 0, grandLagirio = 0, grandOwner = 0, grandCount = 0;
             sortedKeys.forEach(k => {
                 const d = monthlyData[k];
                 grandGross += d.gross; grandExp += d.expenses; grandKdv += d.kdv;
-                grandPlat += d.platComm; grandLagirio += d.lagirio; grandCount += d.count;
+                grandPlat += d.platComm; grandLagirio += d.lagirio; grandOwner += (d.ownerShare || 0); grandCount += d.count;
             });
 
-            let html = '<div class="overflow-x-auto">' +
-                '<table class="w-full text-xs border-collapse">' +
-                '<thead><tr class="bg-gray-50 text-gray-500">' +
-                '<th class="py-2 px-3 text-left font-medium">Ay</th>' +
-                '<th class="py-2 px-3 text-right font-medium">Rez.</th>' +
-                '<th class="py-2 px-3 text-right font-medium">Daire</th>' +
-                '<th class="py-2 px-3 text-right font-medium">Ort. Gecelik</th>' +
-                '<th class="py-2 px-3 text-right font-medium">Br\u00fct Gelir</th>' +
-                '<th class="py-2 px-3 text-right font-medium">Gider</th>' +
-                '<th class="py-2 px-3 text-right font-medium">KDV</th>' +
-                '<th class="py-2 px-3 text-right font-medium">Plt.Kom</th>' +
-                '<th class="py-2 px-3 text-right font-medium text-emerald-700">Lagirio</th>' +
-                '</tr></thead><tbody>';
+            let html = '<div class="overflow-x-auto"><table class="w-full text-xs border-collapse"><thead><tr class="bg-gray-50 text-gray-500">';
+
+            if (isOwner) {
+                // Owner: sadele\u015ftirilmi\u015f s\u00fctunlar
+                html += '<th class="py-2 px-3 text-left font-medium">Ay</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Rez.</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Ort. Gecelik</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Br\u00fct Gelir</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Kesintiler</th>' +
+                    '<th class="py-2 px-3 text-right font-medium text-emerald-700">Net Kazanc\u0131n\u0131z</th>';
+            } else {
+                // Admin: t\u00fcm s\u00fctunlar
+                html += '<th class="py-2 px-3 text-left font-medium">Ay</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Rez.</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Daire</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Ort. Gecelik</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Br\u00fct Gelir</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Gider</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">KDV</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">Plt.Kom</th>' +
+                    '<th class="py-2 px-3 text-right font-medium text-emerald-700">Lagirio</th>';
+            }
+            html += '</tr></thead><tbody>';
+
+            const colSpan = isOwner ? 6 : 9;
 
             sortedKeys.forEach((mk, idx) => {
                 const d = monthlyData[mk];
                 const [y, m] = mk.split('-');
                 const mName = monthNames[parseInt(m) - 1] + ' ' + y;
-                const lagirioRatio = d.gross > 0 ? ((d.lagirio / d.gross) * 100).toFixed(1) : '0.0';
 
-                html += '<tr class="border-t border-gray-100 hover:bg-indigo-50/40 cursor-pointer transition-colors" onclick="Projection.toggleMonthlyDetail(' + idx + ')">' +
-                    '<td class="py-2.5 px-3 font-medium text-gray-700"><i data-lucide="chevron-right" class="w-3 h-3 inline mr-1 text-gray-400 transition-transform" id="projMonthChev_' + idx + '"></i>' + mName + '</td>' +
-                    '<td class="py-2.5 px-3 text-right text-gray-600">' + d.count + '</td>' +
-                    '<td class="py-2.5 px-3 text-right text-gray-600">' + d.aptCount + '</td>' +
-                    '<td class="py-2.5 px-3 text-right text-gray-600">\u20ac' + d.avgNightly.toFixed(2) + '</td>' +
-                    '<td class="py-2.5 px-3 text-right font-medium text-gray-700">\u20ac' + d.gross.toFixed(2) + '</td>' +
-                    '<td class="py-2.5 px-3 text-right text-orange-500">\u20ac' + d.expenses.toFixed(2) + '</td>' +
-                    '<td class="py-2.5 px-3 text-right text-red-500">\u20ac' + d.kdv.toFixed(2) + '</td>' +
-                    '<td class="py-2.5 px-3 text-right text-indigo-500">\u20ac' + d.platComm.toFixed(2) + '</td>' +
-                    '<td class="py-2.5 px-3 text-right font-bold text-emerald-600">\u20ac' + d.lagirio.toFixed(2) + ' <span class="text-[9px] text-gray-400 font-normal">%' + lagirioRatio + '</span></td>' +
-                    '</tr>';
+                if (isOwner) {
+                    const ownerVal = d.ownerShare || 0;
+                    const deductions = d.gross - ownerVal;
+                    const ownerRatio = d.gross > 0 ? ((ownerVal / d.gross) * 100).toFixed(1) : '0.0';
+                    html += '<tr class="border-t border-gray-100 hover:bg-indigo-50/40 cursor-pointer transition-colors" onclick="Projection.toggleMonthlyDetail(' + idx + ')">' +
+                        '<td class="py-2.5 px-3 font-medium text-gray-700"><i data-lucide="chevron-right" class="w-3 h-3 inline mr-1 text-gray-400 transition-transform" id="projMonthChev_' + idx + '"></i>' + mName + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-gray-600">' + d.count + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-gray-600">\u20ac' + d.avgNightly.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right font-medium text-gray-700">\u20ac' + d.gross.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-red-500">-\u20ac' + deductions.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right font-bold text-emerald-600">\u20ac' + ownerVal.toFixed(2) + ' <span class="text-[9px] text-gray-400 font-normal">%' + ownerRatio + '</span></td>' +
+                        '</tr>';
+                } else {
+                    const lagirioRatio = d.gross > 0 ? ((d.lagirio / d.gross) * 100).toFixed(1) : '0.0';
+                    html += '<tr class="border-t border-gray-100 hover:bg-indigo-50/40 cursor-pointer transition-colors" onclick="Projection.toggleMonthlyDetail(' + idx + ')">' +
+                        '<td class="py-2.5 px-3 font-medium text-gray-700"><i data-lucide="chevron-right" class="w-3 h-3 inline mr-1 text-gray-400 transition-transform" id="projMonthChev_' + idx + '"></i>' + mName + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-gray-600">' + d.count + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-gray-600">' + d.aptCount + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-gray-600">\u20ac' + d.avgNightly.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right font-medium text-gray-700">\u20ac' + d.gross.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-orange-500">\u20ac' + d.expenses.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-red-500">\u20ac' + d.kdv.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right text-indigo-500">\u20ac' + d.platComm.toFixed(2) + '</td>' +
+                        '<td class="py-2.5 px-3 text-right font-bold text-emerald-600">\u20ac' + d.lagirio.toFixed(2) + ' <span class="text-[9px] text-gray-400 font-normal">%' + lagirioRatio + '</span></td>' +
+                        '</tr>';
+                }
 
                 // Expandable apartment detail for this month
-                html += '<tr id="projMonthDetail_' + idx + '" class="hidden"><td colspan="9" class="p-0">';
+                html += '<tr id="projMonthDetail_' + idx + '" class="hidden"><td colspan="' + colSpan + '" class="p-0">';
                 html += '<div class="bg-indigo-50/30 px-4 py-3 border-t border-indigo-100">';
 
-                // Get per-apartment data for this month
                 const aptRows = [];
                 if (aptMonthlyDetail) {
                     Object.entries(aptMonthlyDetail).forEach(([aptId, months]) => {
@@ -4433,36 +4640,57 @@
                         }
                     });
                 }
-                aptRows.sort((a, b) => b.lagirio - a.lagirio);
+                aptRows.sort((a, b) => (isOwner ? (b.ownerShare || 0) - (a.ownerShare || 0) : b.lagirio - a.lagirio));
 
                 if (aptRows.length > 0) {
-                    html += '<table class="w-full text-[11px]">' +
-                        '<thead><tr class="text-gray-400">' +
-                        '<th class="py-1 px-2 text-left font-medium">Daire</th>' +
-                        '<th class="py-1 px-2 text-left font-medium">Kaynak</th>' +
-                        '<th class="py-1 px-2 text-right font-medium">Rez.</th>' +
-                        '<th class="py-1 px-2 text-right font-medium">Ort.Gclk</th>' +
-                        '<th class="py-1 px-2 text-right font-medium">Br\u00fct</th>' +
-                        '<th class="py-1 px-2 text-right font-medium">Gider</th>' +
-                        '<th class="py-1 px-2 text-right font-medium">KDV</th>' +
-                        '<th class="py-1 px-2 text-right font-medium">Plt.Kom</th>' +
-                        '<th class="py-1 px-2 text-right font-medium text-emerald-700">Lagirio</th>' +
-                        '</tr></thead><tbody>';
+                    html += '<table class="w-full text-[11px]"><thead><tr class="text-gray-400">';
+                    if (isOwner) {
+                        html += '<th class="py-1 px-2 text-left font-medium">Daire</th>' +
+                            '<th class="py-1 px-2 text-left font-medium">Kaynak</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Rez.</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Br\u00fct</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Kesinti</th>' +
+                            '<th class="py-1 px-2 text-right font-medium text-emerald-700">Net</th>';
+                    } else {
+                        html += '<th class="py-1 px-2 text-left font-medium">Daire</th>' +
+                            '<th class="py-1 px-2 text-left font-medium">Kaynak</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Rez.</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Ort.Gclk</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Br\u00fct</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Gider</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">KDV</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">Plt.Kom</th>' +
+                            '<th class="py-1 px-2 text-right font-medium text-emerald-700">Lagirio</th>';
+                    }
+                    html += '</tr></thead><tbody>';
 
                     const sourceColors = { emerald: 'text-emerald-600', amber: 'text-amber-600', blue: 'text-blue-600', orange: 'text-orange-500', red: 'text-red-400' };
                     aptRows.forEach(a => {
                         const sColor = sourceColors[a.sourceColor] || 'text-gray-500';
-                        html += '<tr class="border-t border-gray-100/60">' +
-                            '<td class="py-1.5 px-2 font-medium text-gray-700">' + a.code + '</td>' +
-                            '<td class="py-1.5 px-2 ' + sColor + '">' + (a.sourceLabel || '-') + '</td>' +
-                            '<td class="py-1.5 px-2 text-right text-gray-600">' + (a.resCount || 0) + '</td>' +
-                            '<td class="py-1.5 px-2 text-right text-gray-600">\u20ac' + (a.avgNightly || 0).toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-right text-gray-700">\u20ac' + (a.gross || 0).toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-right text-orange-500">\u20ac' + (a.expenses || 0).toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-right text-red-500">\u20ac' + (a.kdv || 0).toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-right text-indigo-500">\u20ac' + (a.platComm || 0).toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-right font-bold text-emerald-600">\u20ac' + (a.lagirio || 0).toFixed(2) + '</td>' +
-                            '</tr>';
+                        if (isOwner) {
+                            const ownerVal = a.ownerShare || 0;
+                            const deduction = (a.gross || 0) - ownerVal;
+                            html += '<tr class="border-t border-gray-100/60">' +
+                                '<td class="py-1.5 px-2 font-medium text-gray-700">' + a.code + '</td>' +
+                                '<td class="py-1.5 px-2 ' + sColor + '">' + (a.sourceLabel || '-') + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-gray-600">' + (a.resCount || 0) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-gray-700">\u20ac' + (a.gross || 0).toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-red-500">-\u20ac' + deduction.toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right font-bold text-emerald-600">\u20ac' + ownerVal.toFixed(2) + '</td>' +
+                                '</tr>';
+                        } else {
+                            html += '<tr class="border-t border-gray-100/60">' +
+                                '<td class="py-1.5 px-2 font-medium text-gray-700">' + a.code + '</td>' +
+                                '<td class="py-1.5 px-2 ' + sColor + '">' + (a.sourceLabel || '-') + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-gray-600">' + (a.resCount || 0) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-gray-600">\u20ac' + (a.avgNightly || 0).toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-gray-700">\u20ac' + (a.gross || 0).toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-orange-500">\u20ac' + (a.expenses || 0).toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-red-500">\u20ac' + (a.kdv || 0).toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right text-indigo-500">\u20ac' + (a.platComm || 0).toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-right font-bold text-emerald-600">\u20ac' + (a.lagirio || 0).toFixed(2) + '</td>' +
+                                '</tr>';
+                        }
                     });
                     html += '</tbody></table>';
                 } else {
@@ -4472,18 +4700,31 @@
             });
 
             // Grand total row
-            const grandRatio = grandGross > 0 ? ((grandLagirio / grandGross) * 100).toFixed(1) : '0.0';
-            html += '<tr class="border-t-2 border-gray-300 bg-gray-50 font-bold">' +
-                '<td class="py-2.5 px-3 text-gray-800">TOPLAM (12 Ay)</td>' +
-                '<td class="py-2.5 px-3 text-right text-gray-700">' + grandCount + '</td>' +
-                '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
-                '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
-                '<td class="py-2.5 px-3 text-right text-gray-800">\u20ac' + grandGross.toFixed(2) + '</td>' +
-                '<td class="py-2.5 px-3 text-right text-orange-600">\u20ac' + grandExp.toFixed(2) + '</td>' +
-                '<td class="py-2.5 px-3 text-right text-red-600">\u20ac' + grandKdv.toFixed(2) + '</td>' +
-                '<td class="py-2.5 px-3 text-right text-indigo-600">\u20ac' + grandPlat.toFixed(2) + '</td>' +
-                '<td class="py-2.5 px-3 text-right text-emerald-700">\u20ac' + grandLagirio.toFixed(2) + ' <span class="text-[9px] text-gray-400 font-normal">%' + grandRatio + '</span></td>' +
-                '</tr>';
+            if (isOwner) {
+                const grandOwnerRatio = grandGross > 0 ? ((grandOwner / grandGross) * 100).toFixed(1) : '0.0';
+                const grandDeductions = grandGross - grandOwner;
+                html += '<tr class="border-t-2 border-gray-300 bg-gray-50 font-bold">' +
+                    '<td class="py-2.5 px-3 text-gray-800">TOPLAM (12 Ay)</td>' +
+                    '<td class="py-2.5 px-3 text-right text-gray-700">' + grandCount + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
+                    '<td class="py-2.5 px-3 text-right text-gray-800">\u20ac' + grandGross.toFixed(2) + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-red-600">-\u20ac' + grandDeductions.toFixed(2) + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-emerald-700">\u20ac' + grandOwner.toFixed(2) + ' <span class="text-[9px] text-gray-400 font-normal">%' + grandOwnerRatio + '</span></td>' +
+                    '</tr>';
+            } else {
+                const grandRatio = grandGross > 0 ? ((grandLagirio / grandGross) * 100).toFixed(1) : '0.0';
+                html += '<tr class="border-t-2 border-gray-300 bg-gray-50 font-bold">' +
+                    '<td class="py-2.5 px-3 text-gray-800">TOPLAM (12 Ay)</td>' +
+                    '<td class="py-2.5 px-3 text-right text-gray-700">' + grandCount + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
+                    '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
+                    '<td class="py-2.5 px-3 text-right text-gray-800">\u20ac' + grandGross.toFixed(2) + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-orange-600">\u20ac' + grandExp.toFixed(2) + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-red-600">\u20ac' + grandKdv.toFixed(2) + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-indigo-600">\u20ac' + grandPlat.toFixed(2) + '</td>' +
+                    '<td class="py-2.5 px-3 text-right text-emerald-700">\u20ac' + grandLagirio.toFixed(2) + ' <span class="text-[9px] text-gray-400 font-normal">%' + grandRatio + '</span></td>' +
+                    '</tr>';
+            }
 
             html += '</tbody></table></div>';
             container.innerHTML = html;
@@ -4501,10 +4742,13 @@
         renderApartmentList(results, aptMonthlyDetail) {
             const el = document.getElementById('projApartmentList');
             if (!el) return;
+            const isOwner = Auth.currentUser?.role === 'owner';
             this._aptMonthlyDetail = aptMonthlyDetail || {};
-            const sorted = results.sort((a, b) => b.lagirio - a.lagirio);
-            const sysNames = { '1': 'S1 Net', '2': 'S2 Brüt', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
-            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const sorted = isOwner
+                ? results.sort((a, b) => (b.ownerShare || 0) - (a.ownerShare || 0))
+                : results.sort((a, b) => b.lagirio - a.lagirio);
+            const sysNames = { '1': 'S1 Net', '2': 'S2 Br\u00fct', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
             const sourceColorMap = { emerald: 'bg-emerald-50 border-l-2 border-emerald-400', amber: 'bg-amber-50 border-l-2 border-amber-400', blue: 'bg-blue-50 border-l-2 border-blue-400', orange: 'bg-orange-50 border-l-2 border-orange-400', red: 'bg-red-50 border-l-2 border-red-300' };
 
             el.innerHTML = sorted.map((apt, i) => {
@@ -4523,45 +4767,84 @@
                             : '';
                         const nightsInfo = d.totalNights > 0 ? d.totalNights + 'g' : '-';
                         const isClickable = d.resCount > 0 && d.source !== 'veri-yok';
-                        const clickAttr = isClickable ? ' onclick="event.stopPropagation(); Projection.showReservationDetail(\'' + apt.id + '\',' + (parseInt(m)-1) + ',' + y + ')" style="cursor:pointer;" title="Rezervasyon detayı için tıklayın"' : '';
-                        return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-gray-100 transition-colors' : '') + '"' + clickAttr + '>' +
-                            '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + (isClickable ? ' <i data-lucide="search" class="w-3 h-3 inline text-gray-300"></i>' : '') + '</td>' +
-                            '<td class="py-1.5 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + ' <span class="text-gray-300">(' + nightsInfo + ')</span></td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + d.avgNightly.toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + d.gross.toFixed(2) + ' <span class="text-[9px] text-gray-300">\u00d7' + Projection.OCCUPANCY_DAYS + 'g</span></td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + d.expenses.toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + d.kdv.toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + d.platComm.toFixed(2) + '</td>' +
-                            '<td class="py-1.5 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + d.lagirio.toFixed(2) + '</td>' +
-                            '</tr>';
+                        const clickAttr = isClickable ? ' onclick="event.stopPropagation(); Projection.showReservationDetail(\'' + apt.id + '\',' + (parseInt(m)-1) + ',' + y + ')" style="cursor:pointer;" title="Rezervasyon detay\u0131 i\u00e7in t\u0131klay\u0131n"' : '';
+
+                        if (isOwner) {
+                            const ownerVal = d.ownerShare || 0;
+                            const deduction = (d.gross || 0) - ownerVal;
+                            return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-gray-100 transition-colors' : '') + '"' + clickAttr + '>' +
+                                '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + (isClickable ? ' <i data-lucide="search" class="w-3 h-3 inline text-gray-300"></i>' : '') + '</td>' +
+                                '<td class="py-1.5 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + ' <span class="text-gray-300">(' + nightsInfo + ')</span></td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + d.gross.toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right text-red-500">-\u20ac' + deduction.toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + ownerVal.toFixed(2) + '</td>' +
+                                '</tr>';
+                        } else {
+                            return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-gray-100 transition-colors' : '') + '"' + clickAttr + '>' +
+                                '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + (isClickable ? ' <i data-lucide="search" class="w-3 h-3 inline text-gray-300"></i>' : '') + '</td>' +
+                                '<td class="py-1.5 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + ' <span class="text-gray-300">(' + nightsInfo + ')</span></td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + d.avgNightly.toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + d.gross.toFixed(2) + ' <span class="text-[9px] text-gray-300">\u00d7' + Projection.OCCUPANCY_DAYS + 'g</span></td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + d.expenses.toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + d.kdv.toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + d.platComm.toFixed(2) + '</td>' +
+                                '<td class="py-1.5 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + d.lagirio.toFixed(2) + '</td>' +
+                                '</tr>';
+                        }
                     }).join('');
+                }
+
+                // Detail table headers
+                let detailHeaders, detailTotalRow;
+                if (isOwner) {
+                    const ownerTotal = apt.ownerShare || 0;
+                    const totalDeduction = (apt.gross || 0) - ownerTotal;
+                    detailHeaders = '<th class="py-1 px-2 text-left">Ay</th>' +
+                        '<th class="py-1 px-2 text-left">Kaynak</th>' +
+                        '<th class="py-1 px-2 text-right">Rez (Gece)</th>' +
+                        '<th class="py-1 px-2 text-right">Br\u00fct</th>' +
+                        '<th class="py-1 px-2 text-right">Kesinti</th>' +
+                        '<th class="py-1 px-2 text-right">Net</th>';
+                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="2">TOPLAM (12 Ay)</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right">' + apt.count + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.gross.toFixed(2) + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right text-red-500">-\u20ac' + totalDeduction.toFixed(2) + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + ownerTotal.toFixed(2) + '</td>';
+                } else {
+                    detailHeaders = '<th class="py-1 px-2 text-left">Ay</th>' +
+                        '<th class="py-1 px-2 text-left">Kaynak</th>' +
+                        '<th class="py-1 px-2 text-right">Rez (Gece)</th>' +
+                        '<th class="py-1 px-2 text-right">/Gece</th>' +
+                        '<th class="py-1 px-2 text-right">Br\u00fct (\u00d725g)</th>' +
+                        '<th class="py-1 px-2 text-right">Gider</th>' +
+                        '<th class="py-1 px-2 text-right">KDV</th>' +
+                        '<th class="py-1 px-2 text-right">Plt.Kom</th>' +
+                        '<th class="py-1 px-2 text-right">Lagirio</th>';
+                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="2">TOPLAM (12 Ay)</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right">' + apt.count + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.avgNightly.toFixed(2) + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.gross.toFixed(2) + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + apt.expenses.toFixed(2) + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + apt.kdv.toFixed(2) + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + apt.platComm.toFixed(2) + '</td>' +
+                        '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + apt.lagirio.toFixed(2) + '</td>';
                 }
 
                 const detailTable = '<div id="projAptDetail_' + i + '" class="hidden mt-2 mb-1 mx-1">' +
                     '<div class="bg-gray-50 rounded-lg p-3 overflow-x-auto">' +
                     '<table class="w-full text-xs">' +
-                    '<thead><tr class="text-gray-400 text-[10px] uppercase">' +
-                    '<th class="py-1 px-2 text-left">Ay</th>' +
-                    '<th class="py-1 px-2 text-left">Kaynak</th>' +
-                    '<th class="py-1 px-2 text-right">Rez (Gece)</th>' +
-                    '<th class="py-1 px-2 text-right">/Gece</th>' +
-                    '<th class="py-1 px-2 text-right">Brüt (\u00d725g)</th>' +
-                    '<th class="py-1 px-2 text-right">Gider</th>' +
-                    '<th class="py-1 px-2 text-right">KDV</th>' +
-                    '<th class="py-1 px-2 text-right">Plt.Kom</th>' +
-                    '<th class="py-1 px-2 text-right">Lagirio</th>' +
+                    '<thead><tr class="text-gray-400 text-[10px] uppercase">' + detailHeaders +
                     '</tr></thead><tbody>' + monthRows +
-                    '<tr class="border-t-2 border-gray-300 font-bold">' +
-                    '<td class="py-1.5 px-2 text-xs" colspan="2">TOPLAM (12 Ay)</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right">' + apt.count + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.avgNightly.toFixed(2) + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.gross.toFixed(2) + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-orange-500">\u20ac' + apt.expenses.toFixed(2) + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-red-500">\u20ac' + apt.kdv.toFixed(2) + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-indigo-500">\u20ac' + apt.platComm.toFixed(2) + '</td>' +
-                    '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + apt.lagirio.toFixed(2) + '</td>' +
+                    '<tr class="border-t-2 border-gray-300 font-bold">' + detailTotalRow +
                     '</tr></tbody></table></div></div>';
+
+                // Summary line for each apartment
+                const mainValue = isOwner ? (apt.ownerShare || 0) : apt.lagirio;
+                const summaryLine = isOwner
+                    ? 'Br\u00fct \u20ac' + apt.gross.toFixed(2) + ' | Kesinti -\u20ac' + ((apt.gross || 0) - (apt.ownerShare || 0)).toFixed(2)
+                    : 'Br\u00fct \u20ac' + apt.gross.toFixed(2) + ' | Gdr \u20ac' + apt.expenses.toFixed(2) + ' | KDV \u20ac' + apt.kdv.toFixed(2) + ' | Plt \u20ac' + apt.platComm.toFixed(2);
 
                 return '<div class="border border-gray-100 rounded-lg overflow-hidden">' +
                     '<div class="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="Projection.toggleAptDetail(' + i + ')">' +
@@ -4571,8 +4854,8 @@
                     '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + '</p>' +
                     '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.months + ' ay | \u20ac' + apt.avgNightly.toFixed(2) + '/g</p></div></div>' +
                     '<div class="text-right">' +
-                    '<p class="text-sm font-bold text-emerald-600">\u20ac' + apt.lagirio.toFixed(2) + '</p>' +
-                    '<p class="text-[10px] text-gray-400">Brüt \u20ac' + apt.gross.toFixed(2) + ' | Gdr \u20ac' + apt.expenses.toFixed(2) + ' | KDV \u20ac' + apt.kdv.toFixed(2) + ' | Plt \u20ac' + apt.platComm.toFixed(2) + '</p></div></div>' +
+                    '<p class="text-sm font-bold text-emerald-600">\u20ac' + mainValue.toFixed(2) + '</p>' +
+                    '<p class="text-[10px] text-gray-400">' + summaryLine + '</p></div></div>' +
                     detailTable + '</div>';
             }).join('');
             if (typeof lucide !== 'undefined') lucide.createIcons();
