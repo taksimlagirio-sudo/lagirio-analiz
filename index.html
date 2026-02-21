@@ -5938,26 +5938,33 @@
                 }
             });
             
-            // Calculate monthly revenue
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
-            
+            // Calculate monthly revenue - tarih filtresine göre
+            let targetMonth, targetYear;
+            if (this.dateFilter.start || this.dateFilter.end) {
+                const filterDate = this.dateFilter.start || this.dateFilter.end;
+                targetMonth = filterDate.getMonth();
+                targetYear = filterDate.getFullYear();
+            } else {
+                const now = new Date();
+                targetMonth = now.getMonth();
+                targetYear = now.getFullYear();
+            }
+
             this.data.apartments?.forEach(apartment => {
                 const monthlyReservations = this.data.reservations?.filter(res => {
                     const date = new Date(res.checkIn);
                     return res.apartmentId === apartment.id &&
-                           date.getMonth() === currentMonth &&
-                           date.getFullYear() === currentYear;
+                           date.getMonth() === targetMonth &&
+                           date.getFullYear() === targetYear;
                 }) || [];
-                
+
                 const monthlyExpenses = this.data.expenses?.filter(exp => {
                     const date = new Date(exp.date);
                     return exp.apartmentId === apartment.id &&
-                           date.getMonth() === currentMonth &&
-                           date.getFullYear() === currentYear;
+                           date.getMonth() === targetMonth &&
+                           date.getFullYear() === targetYear;
                 }) || [];
-                
+
                 stats.monthlyRevenue += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
             });
             
@@ -6460,123 +6467,6 @@
         },
 
         // 5. Hızlı istatistikleri hesaplama
-        calculateQuickStats() {
-            const cacheKey = 'quickStats';
-            if (this.cache.calculations.has(cacheKey)) {
-                return this.cache.calculations.get(cacheKey);
-            }
-            
-            const stats = {
-                totalPortfolio: 0,
-                monthlyRevenue: 0,
-                totalProperties: this.data.apartments?.length || 0,
-                activeProperties: 0,
-                avgOccupancy: 0,
-                bestSystem: { id: '-', profit: 0 },
-                monthlyTarget: 10000
-            };
-            
-            // Tüm zamanlar için toplam portföy değeri
-            this.data.apartments?.forEach(apartment => {
-                const reservations = this.data.reservations?.filter(r => r.apartmentId === apartment.id) || [];
-                const expenses = this.data.expenses?.filter(e => e.apartmentId === apartment.id) || [];
-                const revenue = this.getRelevantRevenue(apartment, reservations, expenses);
-                stats.totalPortfolio += revenue;
-                
-                if (reservations.length > 0) {
-                    stats.activeProperties++;
-                }
-            });
-            
-            // Aylık gelir - tarih filtresine göre
-            let targetMonth, targetYear;
-            
-            if (this.dateFilter.start || this.dateFilter.end) {
-                const filterDate = this.dateFilter.start || this.dateFilter.end;
-                targetMonth = filterDate.getMonth();
-                targetYear = filterDate.getFullYear();
-            } else {
-                const now = new Date();
-                targetMonth = now.getMonth();
-                targetYear = now.getFullYear();
-            }
-            
-            this.data.apartments?.forEach(apartment => {
-                const monthlyReservations = this.data.reservations?.filter(res => {
-                    const date = new Date(res.checkIn);
-                    return res.apartmentId === apartment.id &&
-                        date.getMonth() === targetMonth &&
-                        date.getFullYear() === targetYear;
-                }) || [];
-                
-                const monthlyExpenses = this.data.expenses?.filter(exp => {
-                    const date = new Date(exp.date);
-                    return exp.apartmentId === apartment.id &&
-                        date.getMonth() === targetMonth &&
-                        date.getFullYear() === targetYear;
-                }) || [];
-                
-                stats.monthlyRevenue += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
-            });
-            
-            // Ortalama doluluk - sadece aktif daireleri say
-            let totalOccupancy = 0;
-            let activeCount = 0;
-            
-            this.data.apartments?.forEach(apartment => {
-                // Bu dönemde rezervasyonu var mı kontrol et
-                const hasReservations = this.data.reservations?.some(res => {
-                    const date = new Date(res.checkIn);
-                    return res.apartmentId === apartment.id &&
-                        date.getMonth() === targetMonth &&
-                        date.getFullYear() === targetYear;
-                });
-                
-                if (hasReservations) {
-                    const occupancy = this.calculateOccupancyRate(apartment.id);
-                    totalOccupancy += occupancy;
-                    activeCount++;
-                }
-            });
-            
-            stats.avgOccupancy = activeCount > 0 ? totalOccupancy / activeCount : 0;
-            
-            // En iyi sistem
-            const systemRevenues = {};
-            
-            this.data.apartments?.forEach(apartment => {
-                const systemType = apartment.systemType;
-                if (!systemRevenues[systemType]) {
-                    systemRevenues[systemType] = 0;
-                }
-                
-                const monthlyReservations = this.data.reservations?.filter(res => {
-                    const date = new Date(res.checkIn);
-                    return res.apartmentId === apartment.id &&
-                        date.getMonth() === targetMonth &&
-                        date.getFullYear() === targetYear;
-                }) || [];
-                
-                const monthlyExpenses = this.data.expenses?.filter(exp => {
-                    const date = new Date(exp.date);
-                    return exp.apartmentId === apartment.id &&
-                        date.getMonth() === targetMonth &&
-                        date.getFullYear() === targetYear;
-                }) || [];
-                
-                systemRevenues[systemType] += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
-            });
-            
-            Object.entries(systemRevenues).forEach(([system, revenue]) => {
-                if (revenue > stats.bestSystem.profit) {
-                    stats.bestSystem = { id: system, profit: revenue };
-                }
-            });
-            
-            this.cache.calculations.set(cacheKey, stats);
-            return stats;
-        },
-
         // 6. Aktif daire sayısı hesaplama
         calculateActiveApartments() {
             const activeApartments = new Set();
@@ -6909,8 +6799,9 @@
                     textStyle: { color: '#fff' },
                     formatter: params => {
                         const value = params[0].value;
+                        const label = Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Kazanç';
                         return `${params[0].name}<br/>
-                                <span style="color:${params[0].color}">●</span> Kazanç: €${value.toLocaleString()}`;
+                                <span style="color:${params[0].color}">●</span> ${label}: €${value.toLocaleString()}`;
                     }
                 },
                 grid: {
@@ -10037,7 +9928,7 @@
                     borderColor: 'transparent'
                 },
                 legend: {
-                    data: ['Gelir', 'Gider', 'Net Kâr'],
+                    data: [Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir', 'Gider', 'Net Kâr'],
                     bottom: 0
                 },
                 grid: {
@@ -10060,7 +9951,7 @@
                 },
                 series: [
                     {
-                        name: 'Gelir',
+                        name: Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir',
                         type: 'line',
                         data: data.revenues,
                         smooth: true,
@@ -10193,22 +10084,29 @@
             const chart = echarts.init(container);
             this.charts.seasonalAnalysis = chart;
 
-            // Aylara göre ortalama kazanç
+            // Aylara göre ortalama kazanç - ay+yıl bazında grupla, sonra hesapla
             const monthlyData = Array(12).fill(0);
             const monthlyCounts = Array(12).fill(0);
 
             this.data.apartments?.forEach(apartment => {
+                // Önce ay+yıl bazında grupla
+                const monthYearGroups = {};
                 this.data.reservations?.filter(res => res.apartmentId === apartment.id).forEach(res => {
-                    const month = new Date(res.checkIn).getMonth();
+                    const date = new Date(res.checkIn);
+                    const key = `${date.getMonth()}-${date.getFullYear()}`;
+                    if (!monthYearGroups[key]) monthYearGroups[key] = { month: date.getMonth(), year: date.getFullYear(), reservations: [] };
+                    monthYearGroups[key].reservations.push(res);
+                });
+
+                // Her grup için tek seferde hesapla
+                Object.values(monthYearGroups).forEach(group => {
                     const expenses = this.data.expenses?.filter(exp => {
-                        const expMonth = new Date(exp.date).getMonth();
-                        const expYear = new Date(exp.date).getFullYear();
-                        const resYear = new Date(res.checkIn).getFullYear();
-                        return exp.apartmentId === apartment.id && expMonth === month && expYear === resYear;
+                        const expDate = new Date(exp.date);
+                        return exp.apartmentId === apartment.id && expDate.getMonth() === group.month && expDate.getFullYear() === group.year;
                     }) || [];
 
-                    monthlyData[month] += this.getRelevantRevenue(apartment, [res], expenses);
-                    monthlyCounts[month]++;
+                    monthlyData[group.month] += this.getRelevantRevenue(apartment, group.reservations, expenses);
+                    monthlyCounts[group.month]++;
                 });
             });
 
@@ -10221,7 +10119,10 @@
             const option = {
                 tooltip: {
                     trigger: 'axis',
-                    formatter: params => `${params[0].name}<br/>Ort. Kazanç: €${params[0].value.toLocaleString()}`
+                    formatter: params => {
+                        const label = Auth.currentUser?.role === 'owner' ? 'Ort. Net Kazanç' : 'Ort. Kazanç';
+                        return `${params[0].name}<br/>${label}: €${params[0].value.toLocaleString()}`;
+                    }
                 },
                 grid: {
                     left: '3%',
@@ -10241,7 +10142,7 @@
                     }
                 },
                 series: [{
-                    name: 'Ortalama Kazanç',
+                    name: Auth.currentUser?.role === 'owner' ? 'Ort. Net Kazanç' : 'Ortalama Kazanç',
                     type: 'bar',
                     data: avgMonthlyRevenue,
                     itemStyle: {
@@ -10267,22 +10168,30 @@
             const chart = echarts.init(container);
             this.charts.growthAnalysis = chart;
 
-            // Yıllık büyüme analizi
+            // Yıllık büyüme analizi - yıl bazında grupla, sonra hesapla
             const yearlyData = {};
 
             this.data.apartments?.forEach(apartment => {
+                // Yıl bazında grupla
+                const yearGroups = {};
                 this.data.reservations?.filter(res => res.apartmentId === apartment.id).forEach(res => {
                     const year = new Date(res.checkIn).getFullYear();
+                    if (!yearGroups[year]) yearGroups[year] = [];
+                    yearGroups[year].push(res);
+                });
+
+                // Her yıl için tek seferde hesapla
+                Object.entries(yearGroups).forEach(([year, reservations]) => {
                     if (!yearlyData[year]) {
                         yearlyData[year] = { revenue: 0, count: 0 };
                     }
 
                     const expenses = this.data.expenses?.filter(exp => {
                         const expYear = new Date(exp.date).getFullYear();
-                        return exp.apartmentId === apartment.id && expYear === year;
+                        return exp.apartmentId === apartment.id && expYear === parseInt(year);
                     }) || [];
 
-                    yearlyData[year].revenue += this.getRelevantRevenue(apartment, [res], expenses);
+                    yearlyData[year].revenue += this.getRelevantRevenue(apartment, reservations, expenses);
                     yearlyData[year].count++;
                 });
             });
@@ -10299,7 +10208,7 @@
                     trigger: 'axis'
                 },
                 legend: {
-                    data: ['Gelir', 'Büyüme %'],
+                    data: [Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir', 'Büyüme %'],
                     bottom: 0
                 },
                 grid: {
@@ -10316,7 +10225,7 @@
                 yAxis: [
                     {
                         type: 'value',
-                        name: 'Gelir',
+                        name: Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir',
                         position: 'left',
                         axisLabel: {
                             formatter: value => `€${(value / 1000).toFixed(0)}k`
@@ -10333,7 +10242,7 @@
                 ],
                 series: [
                     {
-                        name: 'Gelir',
+                        name: Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir',
                         type: 'bar',
                         data: revenues,
                         itemStyle: {
