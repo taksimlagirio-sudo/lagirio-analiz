@@ -1285,7 +1285,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
-                            <span>Gelir Trend Analizi</span>
+                            <span id="revenueTrendTitle">Gelir Trend Analizi</span>
                         </h3>
                         <div class="chart-container" id="revenueTrendAnalysisChart"></div>
                     </div>
@@ -9884,8 +9884,14 @@
             const chart = echarts.init(container);
             this.charts.revenueTrendAnalysis = chart;
 
+            const isOwner = Auth.currentUser?.role === 'owner';
+
+            // Başlığı güncelle
+            const titleEl = document.getElementById('revenueTrendTitle');
+            if (titleEl) titleEl.textContent = isOwner ? 'Kazanç Trendi' : 'Gelir Trend Analizi';
+
             // Son 12 aylık veri
-            const data = { months: [], revenues: [], expenses: [], profit: [] };
+            const data = { months: [], revenues: [], expenses: [], profit: [], grossIncome: [] };
             const now = new Date();
 
             for (let i = 11; i >= 0; i--) {
@@ -9894,6 +9900,7 @@
 
                 let monthRevenue = 0;
                 let monthExpenses = 0;
+                let monthGrossIncome = 0;
 
                 this.data.apartments?.forEach(apartment => {
                     const monthReservations = this.data.reservations?.filter(res => {
@@ -9913,45 +9920,58 @@
                     monthRevenue += this.getRelevantRevenue(apartment, monthReservations, monthExpensesList);
                     monthExpenses += monthExpensesList.reduce((sum, exp) =>
                         sum + this.convertToEUR(exp.amount, exp.currency), 0);
+
+                    if (isOwner) {
+                        monthGrossIncome += monthReservations.reduce((sum, res) =>
+                            sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
+                    }
                 });
 
                 data.months.push(monthName);
                 data.revenues.push(monthRevenue);
                 data.expenses.push(monthExpenses);
                 data.profit.push(monthRevenue - monthExpenses);
+                data.grossIncome.push(monthGrossIncome);
             }
 
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                    borderColor: 'transparent'
-                },
-                legend: {
-                    data: [Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir', 'Gider', 'Net Kâr'],
-                    bottom: 0
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '15%',
-                    top: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: data.months,
-                    axisLabel: { rotate: 45, fontSize: 10 }
-                },
-                yAxis: {
-                    type: 'value',
-                    axisLabel: {
-                        formatter: value => `€${(value / 1000).toFixed(0)}k`
-                    }
-                },
-                series: [
+            let legendData, seriesData;
+
+            if (isOwner) {
+                // Owner: Brüt Gelir vs Net Kazanç (gider zaten calculateOwnerShare içinde düşülmüş)
+                legendData = ['Brüt Gelir', 'Net Kazanç'];
+                seriesData = [
                     {
-                        name: Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir',
+                        name: 'Brüt Gelir',
+                        type: 'line',
+                        data: data.grossIncome,
+                        smooth: true,
+                        itemStyle: { color: '#3b82f6' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(59, 130, 246, 0.2)' },
+                                { offset: 1, color: 'rgba(59, 130, 246, 0.02)' }
+                            ])
+                        }
+                    },
+                    {
+                        name: 'Net Kazanç',
+                        type: 'bar',
+                        data: data.revenues,
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#10b981' },
+                                { offset: 1, color: '#059669' }
+                            ]),
+                            borderRadius: [4, 4, 0, 0]
+                        }
+                    }
+                ];
+            } else {
+                // Admin: Gelir, Gider, Net Kâr
+                legendData = ['Gelir', 'Gider', 'Net Kâr'];
+                seriesData = [
+                    {
+                        name: 'Gelir',
                         type: 'line',
                         data: data.revenues,
                         smooth: true,
@@ -9987,7 +10007,38 @@
                             ])
                         }
                     }
-                ]
+                ];
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    borderColor: 'transparent'
+                },
+                legend: {
+                    data: legendData,
+                    bottom: 0
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: data.months,
+                    axisLabel: { rotate: 45, fontSize: 10 }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: value => `€${(value / 1000).toFixed(0)}k`
+                    }
+                },
+                series: seriesData
             };
 
             chart.setOption(option);
