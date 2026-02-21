@@ -4274,7 +4274,11 @@
             if (chartTitle) chartTitle.textContent = isOwner ? 'Aylık Projeksiyon (Net Kazancınız)' : 'Aylık Projeksiyon (Lagirio Kazancı)';
             if (tableTitle) tableTitle.textContent = isOwner ? 'Aylık Kazanç Detayı' : 'Aylık Lagirio Kazanç Detayı';
             if (tableSubtitle) tableSubtitle.textContent = isOwner ? '(tüm daireleriniz toplam)' : '(tüm daireler toplam)';
-            document.getElementById('projResTableSection')?.classList.remove('hidden');
+            if (!isOwner) {
+                document.getElementById('projResTableSection')?.classList.remove('hidden');
+            } else {
+                document.getElementById('projResTableSection')?.classList.add('hidden');
+            }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
@@ -4751,9 +4755,17 @@
             const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
             const sourceColorMap = { emerald: 'bg-emerald-50 border-l-2 border-emerald-400', amber: 'bg-amber-50 border-l-2 border-amber-400', blue: 'bg-blue-50 border-l-2 border-blue-400', orange: 'bg-orange-50 border-l-2 border-orange-400', red: 'bg-red-50 border-l-2 border-red-300' };
 
+            // Owner i\u00e7in gelecek rez say\u0131s\u0131 hesapla
+            const today = new Date(); today.setHours(0,0,0,0);
+            const allReservations = this.reservations || [];
+
             el.innerHTML = sorted.map((apt, i) => {
                 const detail = this._aptMonthlyDetail[apt.id] || {};
                 const months = Object.keys(detail).sort();
+
+                // Bu dairenin gelecek rez say\u0131s\u0131
+                const futureResForApt = allReservations.filter(r => r.apartmentId === apt.id && new Date(r.checkIn) >= today);
+                const futureResCount = futureResForApt.length;
 
                 let monthRows = '';
                 if (months.length > 0) {
@@ -4772,13 +4784,19 @@
                         if (isOwner) {
                             const ownerVal = d.ownerShare || 0;
                             const deduction = (d.gross || 0) - ownerVal;
-                            return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-gray-100 transition-colors' : '') + '"' + clickAttr + '>' +
-                                '<td class="py-1.5 px-2 text-xs font-medium text-gray-600">' + mName + (isClickable ? ' <i data-lucide="search" class="w-3 h-3 inline text-gray-300"></i>' : '') + '</td>' +
-                                '<td class="py-1.5 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
-                                '<td class="py-1.5 px-2 text-xs text-right">' + d.resCount + ' <span class="text-gray-300">(' + nightsInfo + ')</span></td>' +
-                                '<td class="py-1.5 px-2 text-xs text-right font-medium">\u20ac' + d.gross.toFixed(2) + '</td>' +
-                                '<td class="py-1.5 px-2 text-xs text-right text-red-500">-\u20ac' + deduction.toFixed(2) + '</td>' +
-                                '<td class="py-1.5 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + ownerVal.toFixed(2) + '</td>' +
+                            // Belirgin rez badge'i
+                            const rezBadgeColor = d.sourceColor === 'emerald' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : d.sourceColor === 'amber' ? 'bg-amber-100 text-amber-700 border border-amber-200' : d.sourceColor === 'orange' ? 'bg-orange-100 text-orange-700 border border-orange-200' : 'bg-gray-100 text-gray-600 border border-gray-200';
+                            const rezBadge = isClickable
+                                ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ' + rezBadgeColor + ' cursor-pointer hover:shadow-sm transition-shadow"><i data-lucide="calendar-check" class="w-3 h-3"></i>' + d.resCount + ' rez g\u00f6r\u00fcnt\u00fcle</span>'
+                                : '<span class="text-[10px] text-gray-400">' + d.resCount + ' rez</span>';
+
+                            return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-emerald-50/50 transition-colors' : '') + '"' + clickAttr + '>' +
+                                '<td class="py-2 px-2 text-xs font-medium text-gray-700">' + mName + '</td>' +
+                                '<td class="py-2 px-2">' + rezBadge + '</td>' +
+                                '<td class="py-2 px-2 text-[10px] text-gray-400">' + (d.sourceLabel || '') + adjustInput + '</td>' +
+                                '<td class="py-2 px-2 text-xs text-right font-medium">\u20ac' + d.gross.toFixed(2) + '</td>' +
+                                '<td class="py-2 px-2 text-xs text-right text-red-500">-\u20ac' + deduction.toFixed(2) + '</td>' +
+                                '<td class="py-2 px-2 text-xs text-right font-bold text-emerald-600">\u20ac' + ownerVal.toFixed(2) + '</td>' +
                                 '</tr>';
                         } else {
                             return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-gray-100 transition-colors' : '') + '"' + clickAttr + '>' +
@@ -4802,13 +4820,12 @@
                     const ownerTotal = apt.ownerShare || 0;
                     const totalDeduction = (apt.gross || 0) - ownerTotal;
                     detailHeaders = '<th class="py-1 px-2 text-left">Ay</th>' +
+                        '<th class="py-1 px-2 text-left">Rezervasyonlar</th>' +
                         '<th class="py-1 px-2 text-left">Kaynak</th>' +
-                        '<th class="py-1 px-2 text-right">Rez (Gece)</th>' +
                         '<th class="py-1 px-2 text-right">Br\u00fct</th>' +
                         '<th class="py-1 px-2 text-right">Kesinti</th>' +
                         '<th class="py-1 px-2 text-right">Net</th>';
-                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="2">TOPLAM (12 Ay)</td>' +
-                        '<td class="py-1.5 px-2 text-xs text-right">' + apt.count + '</td>' +
+                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="3">TOPLAM (12 Ay)</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.gross.toFixed(2) + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right text-red-500">-\u20ac' + totalDeduction.toFixed(2) + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + ownerTotal.toFixed(2) + '</td>';
@@ -4832,8 +4849,57 @@
                         '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + apt.lagirio.toFixed(2) + '</td>';
                 }
 
+                // Owner i\u00e7in inline rez \u00f6zeti - accordion a\u00e7\u0131ld\u0131\u011f\u0131nda g\u00f6r\u00fcn\u00fcr
+                let ownerInlineResSection = '';
+                if (isOwner && futureResForApt.length > 0) {
+                    const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
+                    const fmt = d => { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
+                    const upcoming = futureResForApt
+                        .sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn))
+                        .slice(0, 5);
+
+                    ownerInlineResSection = '<div class="mt-3 mb-2">' +
+                        '<div class="flex items-center gap-2 mb-2">' +
+                        '<i data-lucide="calendar-clock" class="w-4 h-4 text-emerald-500"></i>' +
+                        '<span class="text-xs font-bold text-gray-700">Yakla\u015fan Rezervasyonlar</span>' +
+                        '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">' + futureResForApt.length + ' rez</span>' +
+                        '</div>' +
+                        '<div class="space-y-1.5">';
+
+                    upcoming.forEach(function(res) {
+                        const nights = res.nights || Math.max(1, Math.round((new Date(res.checkOut) - new Date(res.checkIn)) / 86400000));
+                        const amount = res.totalPrice ?? res.totalAmount ?? 0;
+                        const currency = res.currency || 'EUR';
+                        const amountEUR = convertEUR(amount, currency);
+                        const platformColor = (res.platform === 'Airbnb') ? 'bg-red-50 text-red-600 border-red-200' : (res.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-600 border-green-200';
+
+                        ownerInlineResSection += '<div class="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-2 hover:shadow-sm transition-shadow">' +
+                            '<div class="flex items-center gap-3">' +
+                            '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ' + platformColor + '">' + (res.platform || '-') + '</span>' +
+                            '<div>' +
+                            '<span class="text-xs font-medium text-gray-700">' + (res.guestName || 'Misafir') + '</span>' +
+                            '<span class="text-[10px] text-gray-400 ml-2">' + fmt(res.checkIn) + ' \u2192 ' + fmt(res.checkOut) + ' (' + nights + 'g)</span>' +
+                            '</div></div>' +
+                            '<span class="text-xs font-bold text-gray-800">\u20ac' + amountEUR.toFixed(2) + '</span>' +
+                            '</div>';
+                    });
+
+                    if (futureResForApt.length > 5) {
+                        ownerInlineResSection += '<button onclick="event.stopPropagation(); Projection.showAllFutureResForApt(\'' + apt.id + '\')" class="w-full text-center py-1.5 text-[11px] text-emerald-600 hover:text-emerald-800 font-medium hover:bg-emerald-50 rounded-lg transition">' +
+                            '+ ' + (futureResForApt.length - 5) + ' rez daha g\u00f6r\u00fcnt\u00fcle</button>';
+                    }
+                    ownerInlineResSection += '</div></div>';
+                } else if (isOwner) {
+                    ownerInlineResSection = '<div class="mt-3 mb-2 text-center py-3 bg-gray-50 rounded-lg">' +
+                        '<i data-lucide="calendar-x" class="w-5 h-5 text-gray-300 mx-auto mb-1"></i>' +
+                        '<p class="text-xs text-gray-400">Hen\u00fcz gelecek rezervasyon yok</p>' +
+                        '<p class="text-[10px] text-gray-300 mt-0.5">Tahminler ge\u00e7mi\u015f verilerden \u00fcretilmektedir</p>' +
+                        '</div>';
+                }
+
                 const detailTable = '<div id="projAptDetail_' + i + '" class="hidden mt-2 mb-1 mx-1">' +
                     '<div class="bg-gray-50 rounded-lg p-3 overflow-x-auto">' +
+                    ownerInlineResSection +
                     '<table class="w-full text-xs">' +
                     '<thead><tr class="text-gray-400 text-[10px] uppercase">' + detailHeaders +
                     '</tr></thead><tbody>' + monthRows +
@@ -4846,12 +4912,17 @@
                     ? 'Br\u00fct \u20ac' + apt.gross.toFixed(2) + ' | Kesinti -\u20ac' + ((apt.gross || 0) - (apt.ownerShare || 0)).toFixed(2)
                     : 'Br\u00fct \u20ac' + apt.gross.toFixed(2) + ' | Gdr \u20ac' + apt.expenses.toFixed(2) + ' | KDV \u20ac' + apt.kdv.toFixed(2) + ' | Plt \u20ac' + apt.platComm.toFixed(2);
 
+                // Owner: gelecek rez badge'\u0131 daire kart\u0131nda
+                const futureResBadge = (isOwner && futureResCount > 0)
+                    ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 ml-2"><i data-lucide="calendar-days" class="w-3 h-3"></i>' + futureResCount + ' gelecek rez</span>'
+                    : '';
+
                 return '<div class="border border-gray-100 rounded-lg overflow-hidden">' +
                     '<div class="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="Projection.toggleAptDetail(' + i + ')">' +
                     '<div class="flex items-center gap-2">' +
                     '<span class="text-xs font-bold text-gray-300 w-5">' + (i+1) + '</span>' +
                     '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="projAptChev_' + i + '"></i>' +
-                    '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + '</p>' +
+                    '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + futureResBadge + '</p>' +
                     '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.months + ' ay | \u20ac' + apt.avgNightly.toFixed(2) + '/g</p></div></div>' +
                     '<div class="text-right">' +
                     '<p class="text-sm font-bold text-emerald-600">\u20ac' + mainValue.toFixed(2) + '</p>' +
@@ -4871,7 +4942,8 @@
         },
 
         showReservationDetail(aptId, month, year) {
-            const monthNamesFull = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+            const isOwner = Auth.currentUser?.role === 'owner';
+            const monthNamesFull = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
             const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
             const apt = Analytics.data?.apartments?.find(a => a.id === aptId);
             const aptCode = apt ? apt.code : aptId;
@@ -4888,18 +4960,18 @@
 
             let sections = [];
             if (hasFuture && !hasPast) {
-                sections.push({ title: 'Mevcut Rezervasyonlar (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: 'Gerçek Veri', badgeColor: 'emerald', note: null });
+                sections.push({ title: 'Mevcut Rezervasyonlar (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: 'Ger\u00e7ek Veri', badgeColor: 'emerald', note: null });
             } else if (!hasFuture && hasPast) {
-                sections.push({ title: 'Geçmiş Yıl Rezervasyonları (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Geçmiş Yıl +5%', badgeColor: 'amber', note: 'Bu ay için ' + year + ' yılında rezervasyon bulunmadığından, ' + (year - 1) + ' yılı verileri %5 artışla kullanılmıştır.' });
+                sections.push({ title: 'Ge\u00e7mi\u015f Y\u0131l Rezervasyonlar\u0131 (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Ge\u00e7mi\u015f Y\u0131l +5%', badgeColor: 'amber', note: 'Bu ay i\u00e7in ' + year + ' y\u0131l\u0131nda rezervasyon bulunmad\u0131\u011f\u0131ndan, ' + (year - 1) + ' y\u0131l\u0131 verileri %5 art\u0131\u015fla kullan\u0131lm\u0131\u015ft\u0131r.' });
             } else if (hasFuture && hasPast) {
                 sections.push({ title: 'Mevcut Rezervasyonlar (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: 'Gelecek', badgeColor: 'emerald', note: null });
-                sections.push({ title: 'Geçmiş Yıl Rezervasyonları (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Geçmiş Yıl', badgeColor: 'amber', note: 'Her iki yılın ortalaması alınarak hesaplanmıştır.' });
+                sections.push({ title: 'Ge\u00e7mi\u015f Y\u0131l Rezervasyonlar\u0131 (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Ge\u00e7mi\u015f Y\u0131l', badgeColor: 'amber', note: 'Her iki y\u0131l\u0131n ortalamas\u0131 al\u0131narak hesaplanm\u0131\u015ft\u0131r.' });
             } else {
                 const chain = this.chainBackward(aptId, month, year);
                 if (chain) {
                     const adjustKey = aptId + '_' + month + '_' + year;
                     const adjustPct = this.chainAdjustments[adjustKey] !== undefined ? this.chainAdjustments[adjustKey] : 0;
-                    sections.push({ title: 'Zincir Kaynak: ' + monthNamesFull[chain.month] + ' ' + chain.year, reservations: chain.reservations, badge: 'Zincir ' + (adjustPct >= 0 ? '+' : '') + adjustPct + '%', badgeColor: 'orange', note: 'Bu ay için doğrudan veri bulunmadığından, en yakın veri olan ' + monthNamesFull[chain.month] + ' ' + chain.year + ' ayı kullanılmıştır.' });
+                    sections.push({ title: 'Zincir Kaynak: ' + monthNamesFull[chain.month] + ' ' + chain.year, reservations: chain.reservations, badge: 'Zincir ' + (adjustPct >= 0 ? '+' : '') + adjustPct + '%', badgeColor: 'orange', note: 'Bu ay i\u00e7in do\u011frudan veri bulunmad\u0131\u011f\u0131ndan, en yak\u0131n veri olan ' + monthNamesFull[chain.month] + ' ' + chain.year + ' ay\u0131 kullan\u0131lm\u0131\u015ft\u0131r.' });
                 }
             }
 
@@ -4909,15 +4981,41 @@
             const borderColorMap = { emerald: 'border-emerald-400', amber: 'border-amber-400', orange: 'border-orange-400', blue: 'border-blue-400' };
             const fmt = d => { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
 
+            // Owner i\u00e7in bu ay\u0131n ownerShare de\u011ferini hesapla
+            let monthOwnerShare = 0;
+            if (isOwner) {
+                const monthKey = year + '-' + String(month + 1).padStart(2, '0');
+                const aptDetail = this._aptMonthlyDetail?.[aptId];
+                if (aptDetail && aptDetail[monthKey]) {
+                    monthOwnerShare = aptDetail[monthKey].ownerShare || 0;
+                }
+            }
+
             let html = '<div id="projResDetailOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">';
             html += '<div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">';
 
             // Header
-            html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl flex justify-between items-center">';
-            html += '<div><h3 class="text-lg font-bold">' + aptCode + ' - ' + monthNamesFull[month] + ' ' + year + '</h3>';
-            html += '<p class="text-emerald-100 text-sm mt-1">Hesaplamaya Dahil Edilen Rezervasyonlar</p></div>';
-            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
-            html += '</div>';
+            if (isOwner) {
+                html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl">';
+                html += '<div class="flex justify-between items-start">';
+                html += '<div><h3 class="text-lg font-bold">' + aptCode + ' \u2014 ' + monthNamesFull[month] + ' ' + year + '</h3>';
+                html += '<p class="text-emerald-100 text-sm mt-1">Rezervasyon Detaylar\u0131</p></div>';
+                html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
+                html += '</div>';
+                if (monthOwnerShare > 0) {
+                    html += '<div class="mt-3 pt-3 border-t border-emerald-500/30 flex items-center gap-4">';
+                    html += '<div><span class="text-emerald-200 text-xs">Bu Aydaki Tahmini Net Kazanc\u0131n\u0131z</span>';
+                    html += '<p class="text-xl font-bold">\u20ac' + monthOwnerShare.toFixed(2) + '</p></div>';
+                    html += '</div>';
+                }
+                html += '</div>';
+            } else {
+                html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl flex justify-between items-center">';
+                html += '<div><h3 class="text-lg font-bold">' + aptCode + ' - ' + monthNamesFull[month] + ' ' + year + '</h3>';
+                html += '<p class="text-emerald-100 text-sm mt-1">Hesaplamaya Dahil Edilen Rezervasyonlar</p></div>';
+                html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
+                html += '</div>';
+            }
 
             html += '<div class="p-5 space-y-6">';
 
@@ -4935,8 +5033,8 @@
                 html += '<div class="overflow-x-auto"><table class="w-full text-xs">';
                 html += '<thead class="bg-gray-50"><tr>';
                 html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Giriş</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Çıkış</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Giri\u015f</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">\u00c7\u0131k\u0131\u015f</th>';
                 html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
                 html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
                 html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
@@ -4982,7 +5080,7 @@
                 html += '<div class="flex gap-3 mt-3 flex-wrap">';
                 html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-emerald-700">\u20ac' + avgNightly.toFixed(2) + '</strong></div>';
                 html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + totalNights + '</strong></div>';
-                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Sayısı:</span> <strong class="text-amber-700">' + section.reservations.length + '</strong></div>';
+                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Say\u0131s\u0131:</span> <strong class="text-amber-700">' + section.reservations.length + '</strong></div>';
                 html += '</div>';
                 html += '</div>';
             });
@@ -4997,6 +5095,76 @@
             html += '</div></div>';
 
             // Remove existing overlay if any
+            document.getElementById('projResDetailOverlay')?.remove();
+            document.body.insertAdjacentHTML('beforeend', html);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        showAllFutureResForApt(aptId) {
+            const apt = Analytics.data?.apartments?.find(a => a.id === aptId);
+            const aptCode = apt ? apt.code : aptId;
+            const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
+            const fmt = d => { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
+            const today = new Date(); today.setHours(0,0,0,0);
+            const allRes = (this.reservations || [])
+                .filter(r => r.apartmentId === aptId && new Date(r.checkIn) >= today)
+                .sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+
+            if (allRes.length === 0) return;
+
+            let totalAmount = 0, totalNights = 0;
+            let html = '<div id="projResDetailOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">';
+            html += '<div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">';
+            html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl flex justify-between items-center">';
+            html += '<div><h3 class="text-lg font-bold">' + aptCode + ' \u2014 T\u00fcm Gelecek Rezervasyonlar</h3>';
+            html += '<p class="text-emerald-100 text-sm mt-1">' + allRes.length + ' rezervasyon</p></div>';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
+            html += '</div>';
+
+            html += '<div class="p-5"><div class="overflow-x-auto"><table class="w-full text-xs">';
+            html += '<thead class="bg-gray-50"><tr>';
+            html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
+            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Giri\u015f</th>';
+            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">\u00c7\u0131k\u0131\u015f</th>';
+            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
+            html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
+            html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
+            html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+            html += '</tr></thead><tbody>';
+
+            allRes.forEach(function(res) {
+                const nights = res.nights || Math.max(1, Math.round((new Date(res.checkOut) - new Date(res.checkIn)) / 86400000));
+                const amount = res.totalPrice ?? res.totalAmount ?? 0;
+                const currency = res.currency || 'EUR';
+                const amountEUR = convertEUR(amount, currency);
+                const perNight = nights > 0 ? amountEUR / nights : 0;
+                totalAmount += amountEUR;
+                totalNights += nights;
+                const platformColor = (res.platform === 'Airbnb') ? 'bg-red-50 text-red-600' : (res.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-600';
+
+                html += '<tr class="border-t border-gray-100 hover:bg-gray-50">';
+                html += '<td class="py-2 px-3 font-medium text-gray-700">' + (res.guestName || '-') + '</td>';
+                html += '<td class="py-2 px-3 text-center text-gray-600">' + fmt(res.checkIn) + '</td>';
+                html += '<td class="py-2 px-3 text-center text-gray-600">' + fmt(res.checkOut) + '</td>';
+                html += '<td class="py-2 px-3 text-center font-semibold">' + nights + '</td>';
+                html += '<td class="py-2 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + platformColor + '">' + (res.platform || '-') + '</span></td>';
+                html += '<td class="py-2 px-3 text-right font-medium">\u20ac' + amountEUR.toFixed(2) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + perNight.toFixed(2) + '</td>';
+                html += '</tr>';
+            });
+
+            const avgNightly = totalNights > 0 ? totalAmount / totalNights : 0;
+            html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
+            html += '<td class="py-2 px-3" colspan="2">TOPLAM</td><td></td>';
+            html += '<td class="py-2 px-3 text-center">' + totalNights + '</td><td></td>';
+            html += '<td class="py-2 px-3 text-right text-emerald-600">\u20ac' + totalAmount.toFixed(2) + '</td>';
+            html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + avgNightly.toFixed(2) + '</td>';
+            html += '</tr></tbody></table></div></div>';
+
+            html += '<div class="p-4 border-t border-gray-100 flex justify-end">';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">Kapat</button>';
+            html += '</div></div></div>';
+
             document.getElementById('projResDetailOverlay')?.remove();
             document.body.insertAdjacentHTML('beforeend', html);
             if (typeof lucide !== 'undefined') lucide.createIcons();
