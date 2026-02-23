@@ -6551,16 +6551,88 @@
             const stats = this.calculateQuickStats();
             const isOwner = Auth.currentUser?.role === 'owner';
 
-            // Admin: Gerçek kâr hesapla (toplam portföy = brüt kazanç - şirket gideri)
+            // Admin: Gerçek kâr hesapla
+            // Rez olan ama şirket gideri girilmeyen aylara ortalama gider yazılır
             let portfolioDisplay = stats.totalPortfolio;
+            let monthlyRealProfit = stats.monthlyRevenue; // default: brüt kazanç (owner için)
+            let prevMonthRealProfit = 0;
             if (!isOwner) {
                 const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
                 const lagirioExps = this.data?.lagirioExpenses || [];
+
+                // Aylık şirket giderlerini hesapla
+                const compExpByMonth = {};
+                lagirioExps.forEach(e => {
+                    const dd = new Date(e.date);
+                    const mk = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0');
+                    if (!compExpByMonth[mk]) compExpByMonth[mk] = 0;
+                    compExpByMonth[mk] += convertEUR(e.amount, e.currency);
+                });
+                const compExpEnteredMonths = Object.keys(compExpByMonth);
+                const avgCompExp = compExpEnteredMonths.length > 0
+                    ? Object.values(compExpByMonth).reduce((s,v) => s+v, 0) / compExpEnteredMonths.length : 0;
+
+                // Rez olan ayları bul
+                const resMonths = new Set();
+                (this.data?.reservations || []).forEach(r => {
+                    const d = new Date(r.checkIn);
+                    resMonths.add(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+                });
+
+                // Toplam şirket gideri: rez olan aylarda gerçek gider veya ortalama
                 let totalCompanyExp = 0;
-                lagirioExps.forEach(e => { totalCompanyExp += convertEUR(e.amount, e.currency); });
+                resMonths.forEach(mk => {
+                    totalCompanyExp += compExpByMonth[mk] != null ? compExpByMonth[mk] : avgCompExp;
+                });
+
                 stats.totalCompanyExpense = totalCompanyExp;
                 stats.realProfit = stats.totalPortfolio - totalCompanyExp;
                 portfolioDisplay = stats.realProfit;
+
+                // Hedef ay gerçek kâr: aylık lagirio - o ayın şirket gideri
+                const targetMk = stats._monthlyTargetYear + '-' + String(stats._monthlyTargetMonth + 1).padStart(2, '0');
+                const targetCompExp = compExpByMonth[targetMk] != null ? compExpByMonth[targetMk] : avgCompExp;
+                monthlyRealProfit = stats.monthlyRevenue - targetCompExp;
+
+                // Önceki ay gerçek kâr: bir önceki rez olan ayı bul
+                const prevDate = new Date(stats._monthlyTargetYear, stats._monthlyTargetMonth - 1, 1);
+                let prevMonth = prevDate.getMonth();
+                let prevYear = prevDate.getFullYear();
+                let foundPrev = false;
+                for (let back = 0; back < 12; back++) {
+                    const pd = new Date(stats._monthlyTargetYear, stats._monthlyTargetMonth - 1 - back, 1);
+                    const pm = pd.getMonth();
+                    const py = pd.getFullYear();
+                    const pmk = py + '-' + String(pm + 1).padStart(2, '0');
+                    if (resMonths.has(pmk)) {
+                        prevMonth = pm;
+                        prevYear = py;
+                        foundPrev = true;
+                        break;
+                    }
+                }
+                if (foundPrev) {
+                    let prevLagirio = 0;
+                    this.data.apartments?.forEach(apartment => {
+                        const prevRes = this.data.reservations?.filter(res => {
+                            const d = new Date(res.checkIn);
+                            return res.apartmentId === apartment.id && d.getMonth() === prevMonth && d.getFullYear() === prevYear;
+                        }) || [];
+                        const prevExp = this.data.expenses?.filter(exp => {
+                            const d = new Date(exp.date);
+                            return exp.apartmentId === apartment.id && d.getMonth() === prevMonth && d.getFullYear() === prevYear;
+                        }) || [];
+                        if (prevRes.length > 0) {
+                            prevLagirio += this.calculateLagirioRevenue(apartment, prevRes, prevExp);
+                        }
+                    });
+                    const prevMk = prevYear + '-' + String(prevMonth + 1).padStart(2, '0');
+                    const prevCompExp = compExpByMonth[prevMk] != null ? compExpByMonth[prevMk] : avgCompExp;
+                    prevMonthRealProfit = prevLagirio - prevCompExp;
+                }
+
+                stats._monthlyRealProfit = monthlyRealProfit;
+                stats._prevMonthRealProfit = prevMonthRealProfit;
             }
 
             // Aylık gelir label'ını güncelle (hangi ay gösteriliyor)
@@ -6571,15 +6643,33 @@
             const isCurrentMonth = shownMonth === now2.getMonth() && shownYear === now2.getFullYear();
             const monthLabel = isCurrentMonth ? 'Bu Ay' : monthNamesShort[shownMonth] + ' ' + shownYear;
 
+            // Admin'de aylık kazanç = gerçek kâr, header'da da gerçek kâr
+            const monthlyDisplay = isOwner ? stats.monthlyRevenue : monthlyRealProfit;
+
+            // Önceki aya göre yüzde fark
+            let monthPctChange = 0;
+            let monthPctText = '';
+            if (!isOwner && prevMonthRealProfit !== 0) {
+                monthPctChange = ((monthlyRealProfit - prevMonthRealProfit) / Math.abs(prevMonthRealProfit)) * 100;
+                monthPctText = (monthPctChange >= 0 ? '+' : '') + monthPctChange.toFixed(1) + '%';
+            } else if (!isOwner && monthlyRealProfit !== 0) {
+                monthPctText = '+∞';
+                monthPctChange = 1;
+            }
+
             // Header stats
             document.getElementById('headerPortfolioValue').textContent = `€${portfolioDisplay.toLocaleString()}`;
-            document.getElementById('headerMonthlyValue').textContent = `€${stats.monthlyRevenue.toLocaleString()}`;
+            document.getElementById('headerMonthlyValue').textContent = `€${monthlyDisplay.toLocaleString()}`;
 
             // KPI Cards
             document.getElementById('totalPortfolioValue').textContent = `€${portfolioDisplay.toLocaleString()}`;
-            document.getElementById('monthlyRevenue').textContent = `€${stats.monthlyRevenue.toLocaleString()}`;
+            document.getElementById('monthlyRevenue').textContent = `€${monthlyDisplay.toLocaleString()}`;
             document.getElementById('activeProperties').textContent = `${stats.activeProperties}/${stats.totalProperties}`;
             document.getElementById('avgOccupancy').textContent = `${stats.avgOccupancy.toFixed(1)}%`;
+
+            // Aylık kazanç kartındaki trend badge + alt metin
+            const monthlyTrendEl = document.getElementById('monthlyTrend');
+            const monthlyChangeEl = document.getElementById('monthlyChange');
 
             if (isOwner) {
                 // Owner modunda KPI etiketlerini değiştir
@@ -6589,6 +6679,8 @@
                 if (headerPortLabel) headerPortLabel.textContent = 'Net Kazanç';
                 const headerMonthLabel = document.getElementById('headerMonthlyLabel');
                 if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? 'Bu Ay Kazanç' : monthLabel;
+                const revenueLabel = document.getElementById('revenueLabel');
+                if (revenueLabel) revenueLabel.textContent = isCurrentMonth ? 'Bu Ay Kazanç' : monthLabel;
 
                 // "En Karlı Sistem" → "Toplam Gider"
                 const systemLabel = document.getElementById('bestSystemLabel');
@@ -6604,6 +6696,28 @@
                 if (headerPortLabel) headerPortLabel.textContent = 'Gerçek Kâr';
                 const headerMonthLabel = document.getElementById('headerMonthlyLabel');
                 if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? 'Bu Ay' : monthLabel;
+                const revenueLabel = document.getElementById('revenueLabel');
+                if (revenueLabel) revenueLabel.textContent = isCurrentMonth ? 'Bu Ay Gerçek Kâr' : monthLabel + ' Gerçek Kâr';
+
+                // Trend badge: önceki aya göre % fark
+                if (monthlyTrendEl && monthPctText) {
+                    monthlyTrendEl.textContent = monthPctText;
+                    monthlyTrendEl.className = monthPctChange > 0
+                        ? 'text-xs text-emerald-600 font-semibold'
+                        : monthPctChange < 0
+                        ? 'text-xs text-red-600 font-semibold'
+                        : 'text-xs text-gray-600 font-semibold';
+                }
+                // Alt metin: önceki ay detayı
+                if (monthlyChangeEl) {
+                    const prevMNShort = monthNamesShort[stats._prevMonthIdx ?? 0];
+                    if (prevMonthRealProfit !== 0) {
+                        monthlyChangeEl.textContent = `vs önceki ay: €${prevMonthRealProfit.toLocaleString()}`;
+                    } else {
+                        monthlyChangeEl.textContent = 'önceki ay verisi yok';
+                    }
+                }
+
                 document.getElementById('bestSystem').textContent = `Sistem ${stats.bestSystem.id}`;
                 document.getElementById('systemProfit').textContent = `€${stats.bestSystem.profit.toLocaleString()}`;
             }
