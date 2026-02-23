@@ -1587,7 +1587,7 @@
                     <div id="projOwnerWaterfall" class="hidden mb-4"></div>
 
                     <!-- Top row: big cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div id="projTopGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
                             <div class="text-sm opacity-80 mb-1">Tahmini Brüt Gelir</div>
                             <div class="text-2xl font-bold" id="projGrossRevenue">€0</div>
@@ -1602,6 +1602,13 @@
                             <div class="text-sm opacity-80 mb-1">Ort. Gecelik Fiyat</div>
                             <div class="text-2xl font-bold" id="projAvgNightly">€0</div>
                             <div class="text-xs opacity-60 mt-1" id="projNightlyDetail">Gelecek rez. ortalaması</div>
+                        </div>
+                        <!-- Admin: Gerçek Kâr kartı -->
+                        <div id="projRealProfitCard" class="admin-only bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-5 text-white hidden">
+                            <div class="text-sm opacity-80 mb-1">Gerçek K\u00e2r (Net)</div>
+                            <div class="text-2xl font-bold" id="projRealProfit">\u20ac0</div>
+                            <div class="text-xs opacity-60 mt-1">\u015eirket Gideri: <span id="projCompanyExpense" class="font-medium">\u20ac0</span>/y\u0131l <span id="projCompanyExpNote"></span></div>
+                            <div class="text-xs opacity-60">K\u00e2r Marj\u0131: <span id="projProfitMargin" class="font-bold">0%</span></div>
                         </div>
                     </div>
                     <!-- Bottom row: kesintiler -->
@@ -1685,6 +1692,73 @@
                         </h3>
                         <div id="projApartmentList" class="space-y-1">
                             <p class="text-sm text-gray-400">Veri bekleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin: K\u00e2rl\u0131l\u0131k Analiz Paneli -->
+                <div id="projAdminProfitPanel" class="admin-only bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                            <i data-lucide="bar-chart-big" class="w-5 h-5 text-indigo-600"></i>
+                            <span>K\u00e2rl\u0131l\u0131k Analizi</span>
+                        </h3>
+                        <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+                            <button onclick="Projection.switchProfitView('monthly')" id="profitViewMonthly" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white shadow text-gray-800">Ay-Ay</button>
+                            <button onclick="Projection.switchProfitView('range')" id="profitViewRange" class="px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800">Aral\u0131k</button>
+                            <button onclick="Projection.switchProfitView('compare')" id="profitViewCompare" class="px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800">D\u00f6nem Kar\u015f\u0131la\u015ft\u0131r</button>
+                        </div>
+                    </div>
+                    <div id="profitRangeSelector" class="hidden mb-4 flex items-center gap-3">
+                        <select id="profitRangeStart" class="text-xs border border-gray-200 rounded-lg px-3 py-2"></select>
+                        <span class="text-gray-400">\u2192</span>
+                        <select id="profitRangeEnd" class="text-xs border border-gray-200 rounded-lg px-3 py-2"></select>
+                        <button onclick="Projection.applyProfitRange()" class="bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-600 transition">Uygula</button>
+                    </div>
+                    <div id="profitCompareSelector" class="hidden mb-4">
+                        <div class="flex gap-4 flex-wrap items-end">
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">D\u00f6nem A (\u00e7oklu se\u00e7im)</label>
+                                <select id="profitCompareA" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <span class="text-lg text-gray-300 self-center">vs</span>
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">D\u00f6nem B (\u00e7oklu se\u00e7im)</label>
+                                <select id="profitCompareB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <button onclick="Projection.applyProfitCompare()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end">Kar\u015f\u0131la\u015ft\u0131r</button>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile \u00e7oklu ay se\u00e7ebilirsiniz. Farkl\u0131 y\u0131llardan aylar kar\u015f\u0131la\u015ft\u0131r\u0131labilir.</p>
+                    </div>
+                    <div id="profitViewContent"></div>
+                </div>
+
+                <!-- Admin: K\u00e2r Trend Grafikleri -->
+                <div id="projAdminTrendPanel" class="admin-only bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
+                        <span>K\u00e2r Trendleri</span>
+                    </h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Ayl\u0131k K\u00e2r Ak\u0131\u015f\u0131</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">Br\u00fct Kazan\u00e7 \u2192 Ger\u00e7ek K\u00e2r d\u00f6n\u00fc\u015f\u00fcm\u00fc</p>
+                            <div id="projProfitTrendChart" style="height:320px"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Daire K\u00e2rl\u0131l\u0131k Trendi (Top 5)</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">En k\u00e2rl\u0131 5 dairenin ayl\u0131k Lagirio kazanc\u0131</p>
+                            <div id="projAptProfitTrendChart" style="height:320px"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">K\u00e2r Marj\u0131 Trendi</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">Ger\u00e7ek K\u00e2r / Br\u00fct Kazan\u00e7 oran\u0131n\u0131n ayl\u0131k de\u011fi\u015fimi</p>
+                            <div id="projProfitMarginChart" style="height:280px"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Doluluk-K\u00e2rl\u0131l\u0131k \u0130li\u015fkisi</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">Rezervasyon yo\u011funlu\u011fu ile k\u00e2r aras\u0131ndaki korelasyon</p>
+                            <div id="projOccupancyProfitChart" style="height:280px"></div>
                         </div>
                     </div>
                 </div>
@@ -4139,7 +4213,7 @@
                 const platCommRatio = hist.platformCommRate[aptId] ?? hist.avgPlatformCommRate;
                 const bankCashRatio = hist.bankRatio[aptId] ?? hist.avgBankRatio;
 
-                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment.code || aptId, systemType: sysType, commission: apartment.lagirioCommission || 0, gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, ownerShare: 0, months: 0, avgNightly: 0, count: 0 };
+                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment.code || aptId, systemType: sysType, commission: apartment.lagirioCommission || 0, gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, ownerShare: 0, months: 0, avgNightly: 0, count: 0, totalNights: 0, nightlyProfit: 0 };
                 if (!aptMonthlyDetail[aptId]) aptMonthlyDetail[aptId] = {};
 
                 months12.forEach(({ month, year, monthKey }) => {
@@ -4223,6 +4297,7 @@
                     aptTotals[aptId].months++;
                     aptTotals[aptId].avgNightly += avgNightly;
                     aptTotals[aptId].count += estimate.count;
+                    aptTotals[aptId].totalNights += (estimate.totalNights || this.OCCUPANCY_DAYS);
 
                     // Daire-ay detayı
                     aptMonthlyDetail[aptId][monthKey] = {
@@ -4248,6 +4323,10 @@
 
                 // Daire ortalamasını düzelt
                 if (aptTotals[aptId].months > 0) aptTotals[aptId].avgNightly = aptTotals[aptId].avgNightly / aptTotals[aptId].months;
+                // Gecelik kâr hesapla
+                if (aptTotals[aptId].totalNights > 0) {
+                    aptTotals[aptId].nightlyProfit = aptTotals[aptId].lagirio / aptTotals[aptId].totalNights;
+                }
             });
 
             // Ay bazlı ortalamaları düzelt
@@ -4255,8 +4334,28 @@
                 if (m.aptCount > 0) m.avgNightly = m.avgNightly / m.aptCount;
             });
 
+            // --- Şirket gideri tahmini ve gerçek kâr ---
+            const avgMonthlyLagirio = totalLagirioNet / 12;
+            const estMonthlyCompanyExp = this.estimateMonthlyCompanyExpense(avgMonthlyLagirio);
+            const totalCompanyExpense = estMonthlyCompanyExp * 12;
+            const realProfit = totalLagirioNet - totalCompanyExpense;
+
+            // monthlyData'ya companyExpense ve realProfit ekle
+            Object.keys(monthlyData).forEach(mk => {
+                monthlyData[mk].companyExpense = estMonthlyCompanyExp;
+                monthlyData[mk].realProfit = monthlyData[mk].lagirio - estMonthlyCompanyExp;
+            });
+
+            // Cache for trend/comparison panels
+            this._lastMonthlyData = monthlyData;
+            this._lastAptMonthlyDetail = aptMonthlyDetail;
+            this._lastAptTotals = aptTotals;
+            this._estMonthlyCompanyExp = estMonthlyCompanyExp;
+            this._totalCompanyExpense = totalCompanyExpense;
+            this._realProfit = realProfit;
+
             // --- 4. UI Güncelle ---
-            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, totalOwnerNet, totalResCount, Object.keys(aptTotals).length);
+            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, totalOwnerNet, totalResCount, Object.keys(aptTotals).length, totalCompanyExpense, realProfit, estMonthlyCompanyExp);
             this.renderMonthlyChart(monthlyData);
             this.renderMonthlyOverview(monthlyData, aptMonthlyDetail);
             this.renderApartmentList(Object.values(aptTotals), aptMonthlyDetail);
@@ -4276,8 +4375,18 @@
             if (tableSubtitle) tableSubtitle.textContent = isOwner ? '(tüm daireleriniz toplam)' : '(tüm daireler toplam)';
             if (!isOwner) {
                 document.getElementById('projResTableSection')?.classList.remove('hidden');
+                // Admin kârlılık panelleri
+                document.getElementById('projAdminProfitPanel')?.classList.remove('hidden');
+                document.getElementById('projAdminTrendPanel')?.classList.remove('hidden');
+                this.switchProfitView(this._profitViewMode || 'monthly');
+                this.renderProfitTrendChart();
+                this.renderAptProfitTrendChart();
+                this.renderProfitMarginTrendChart();
+                this.renderOccupancyProfitChart();
             } else {
                 document.getElementById('projResTableSection')?.classList.add('hidden');
+                document.getElementById('projAdminProfitPanel')?.classList.add('hidden');
+                document.getElementById('projAdminTrendPanel')?.classList.add('hidden');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
@@ -4339,23 +4448,49 @@
         },
 
         // ---- Render Functions ----
-        renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, ownerNet, resCount, aptCount) {
+        renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, ownerNet, resCount, aptCount, companyExpense, realProfit, monthlyCompExp) {
             const isOwner = Auth.currentUser?.role === 'owner';
+            companyExpense = companyExpense || 0;
+            realProfit = realProfit || 0;
+            monthlyCompExp = monthlyCompExp || 0;
 
-            // Üst satır: Brüt, Ana Kazanç, Gecelik
+            // \u00dcst sat\u0131r: Br\u00fct, Ana Kazan\u00e7, Gecelik
             document.getElementById('projGrossRevenue').textContent = '\u20ac' + estGross.toFixed(2);
             document.getElementById('projGrossDetail').textContent = aptCount + ' daire | 12 ay | Karma tahmin';
 
             if (isOwner) {
-                document.getElementById('projMainLabel').textContent = 'Tahmini Net Kazancınız';
+                document.getElementById('projMainLabel').textContent = 'Tahmini Net Kazanc\u0131n\u0131z';
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + ownerNet.toFixed(2);
                 const ownerRatio = estGross > 0 ? Math.round((ownerNet / estGross) * 100) : 0;
-                document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + ownerRatio + '\'i';
+                document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + ownerRatio + '\'i';
             } else {
-                document.getElementById('projMainLabel').textContent = 'Lagirio Net Kazanç';
+                document.getElementById('projMainLabel').textContent = 'Br\u00fct Kazan\u00e7 (Dairelerden)';
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + lagirioNet.toFixed(2);
                 const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
-                document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + lagirioRatio + '\'i';
+                document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
+
+                // Ger\u00e7ek K\u00e2r kart\u0131
+                const rpEl = document.getElementById('projRealProfit');
+                if (rpEl) {
+                    rpEl.textContent = '\u20ac' + realProfit.toFixed(2);
+                    rpEl.className = realProfit >= 0 ? 'text-2xl font-bold' : 'text-2xl font-bold text-red-200';
+                }
+                const ceEl = document.getElementById('projCompanyExpense');
+                if (ceEl) ceEl.textContent = '\u20ac' + companyExpense.toFixed(2);
+                const noteEl = document.getElementById('projCompanyExpNote');
+                if (noteEl) noteEl.textContent = '(\u20ac' + monthlyCompExp.toFixed(0) + '/ay tahmin)';
+                const marginEl = document.getElementById('projProfitMargin');
+                if (marginEl) {
+                    const margin = lagirioNet > 0 ? ((realProfit / lagirioNet) * 100).toFixed(1) : '0.0';
+                    marginEl.textContent = '%' + margin;
+                }
+                // Grid 3\u21924 s\u00fctun
+                const topGrid = document.getElementById('projTopGrid');
+                if (topGrid) {
+                    topGrid.classList.remove('md:grid-cols-3');
+                    topGrid.classList.add('md:grid-cols-4');
+                }
+                document.getElementById('projRealProfitCard')?.classList.remove('hidden');
             }
 
             const avgNightly = estGross > 0 ? estGross / (aptCount * 12 * this.OCCUPANCY_DAYS || 1) : 0;
@@ -4479,6 +4614,658 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
+        // --- Admin: K\u00e2rl\u0131l\u0131k Analizi View Modlar\u0131 ---
+        switchProfitView(mode) {
+            this._profitViewMode = mode;
+            ['monthly','range','compare'].forEach(m => {
+                const btn = document.getElementById('profitView' + m.charAt(0).toUpperCase() + m.slice(1));
+                if (btn) {
+                    btn.className = m === mode
+                        ? 'px-3 py-1.5 text-xs font-medium rounded-md bg-white shadow text-gray-800'
+                        : 'px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800';
+                }
+            });
+            document.getElementById('profitRangeSelector')?.classList.toggle('hidden', mode !== 'range');
+            document.getElementById('profitCompareSelector')?.classList.toggle('hidden', mode !== 'compare');
+
+            if (mode === 'range') this.populateRangeSelectors();
+            if (mode === 'compare') this.populateCompareSelectors();
+            this.renderProfitView();
+        },
+
+        renderProfitView() {
+            const mode = this._profitViewMode || 'monthly';
+            if (mode === 'monthly') this.renderProfitViewMonthly();
+            else if (mode === 'range') this.renderProfitViewRange();
+            else if (mode === 'compare') this.renderProfitViewCompare();
+        },
+
+        renderProfitViewMonthly() {
+            const el = document.getElementById('profitViewContent');
+            if (!el || !this._lastMonthlyData) return;
+            const monthlyData = this._lastMonthlyData;
+            const aptDetail = this._lastAptMonthlyDetail || {};
+            const compExp = this._estMonthlyCompanyExp || 0;
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const sortedKeys = Object.keys(monthlyData).sort();
+
+            let grandLagirio = 0, grandCompExp = 0, grandReal = 0, grandGross = 0, grandExp = 0, grandKdv = 0, grandPlat = 0;
+            sortedKeys.forEach(k => {
+                const d = monthlyData[k];
+                grandLagirio += d.lagirio; grandCompExp += compExp; grandReal += d.realProfit;
+                grandGross += d.gross; grandExp += d.expenses; grandKdv += d.kdv; grandPlat += d.platComm;
+            });
+
+            let html = '<div class="overflow-x-auto"><table class="w-full text-xs border-collapse"><thead><tr class="bg-gray-50 text-gray-500">';
+            html += '<th class="py-2 px-3 text-left font-medium">Ay</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">Daire</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">Rez.</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">Br\u00fct Gelir</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">Daire Gider</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">KDV</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">Plt.Kom</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-blue-600">Br\u00fct Kazan\u00e7</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-amber-600">\u015eirket Gideri</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-indigo-600">Ger\u00e7ek K\u00e2r</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">Marj</th>';
+            html += '</tr></thead><tbody>';
+
+            sortedKeys.forEach((mk, idx) => {
+                const d = monthlyData[mk];
+                const [y, m] = mk.split('-');
+                const mName = monthNames[parseInt(m)-1] + ' ' + y;
+                const realP = d.lagirio - compExp;
+                const margin = d.lagirio > 0 ? ((realP / d.lagirio) * 100).toFixed(1) : '0.0';
+                const realClass = realP >= 0 ? 'text-emerald-600' : 'text-red-600';
+
+                html += '<tr class="border-t border-gray-100 hover:bg-indigo-50/40 cursor-pointer transition-colors" onclick="Projection.toggleProfitMonthDetail(' + idx + ')">';
+                html += '<td class="py-2 px-3 font-medium text-gray-700"><i data-lucide="chevron-right" class="w-3 h-3 inline mr-1 text-gray-400 transition-transform" id="profitMonthChev_' + idx + '"></i>' + mName + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-600">' + d.aptCount + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-600">' + d.count + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-700">\u20ac' + d.gross.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-orange-500">\u20ac' + d.expenses.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-red-500">\u20ac' + d.kdv.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-indigo-400">\u20ac' + d.platComm.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right font-bold text-blue-600">\u20ac' + d.lagirio.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-amber-600">\u20ac' + compExp.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right font-bold ' + realClass + '">\u20ac' + realP.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">%' + margin + '</td>';
+                html += '</tr>';
+
+                // Expandable apt detail
+                html += '<tr id="profitMonthRow_' + idx + '" class="hidden"><td colspan="11" class="p-0">';
+                html += '<div class="bg-indigo-50/30 px-4 py-3 border-t border-indigo-100">';
+                const aptRows = [];
+                Object.entries(aptDetail).forEach(([aptId, months]) => {
+                    const md = months[mk];
+                    if (md && md.lagirio > 0) {
+                        const apt = (Analytics.data?.apartments || []).find(a => a.id === aptId);
+                        const code = apt?.code || aptId;
+                        const nights = md.totalNights || Projection.OCCUPANCY_DAYS;
+                        aptRows.push({ code, lagirio: md.lagirio, gross: md.gross, nights, nightlyProfit: md.lagirio / (nights || 1), resCount: md.resCount || 0, profitPct: md.gross > 0 ? (md.lagirio / md.gross * 100) : 0 });
+                    }
+                });
+                aptRows.sort((a, b) => b.nightlyProfit - a.nightlyProfit);
+
+                if (aptRows.length > 0) {
+                    html += '<table class="w-full text-[11px]"><thead><tr class="text-gray-400">';
+                    html += '<th class="py-1 px-2 text-left">Daire</th>';
+                    html += '<th class="py-1 px-2 text-right">K\u00e2r/Gece</th>';
+                    html += '<th class="py-1 px-2 text-right">Toplam K\u00e2r</th>';
+                    html += '<th class="py-1 px-2 text-right">Br\u00fct</th>';
+                    html += '<th class="py-1 px-2 text-right">Gece</th>';
+                    html += '<th class="py-1 px-2 text-right">Rez.</th>';
+                    html += '<th class="py-1 px-2 text-right">K\u00e2rl\u0131l\u0131k</th>';
+                    html += '</tr></thead><tbody>';
+                    aptRows.forEach(a => {
+                        html += '<tr class="border-t border-gray-100/60">';
+                        html += '<td class="py-1.5 px-2 font-medium text-gray-700">' + a.code + '</td>';
+                        html += '<td class="py-1.5 px-2 text-right font-bold text-emerald-600">\u20ac' + a.nightlyProfit.toFixed(2) + '</td>';
+                        html += '<td class="py-1.5 px-2 text-right text-gray-700">\u20ac' + a.lagirio.toFixed(0) + '</td>';
+                        html += '<td class="py-1.5 px-2 text-right text-gray-500">\u20ac' + a.gross.toFixed(0) + '</td>';
+                        html += '<td class="py-1.5 px-2 text-right text-gray-500">' + a.nights + '</td>';
+                        html += '<td class="py-1.5 px-2 text-right text-gray-500">' + a.resCount + '</td>';
+                        html += '<td class="py-1.5 px-2 text-right text-indigo-600">%' + a.profitPct.toFixed(1) + '</td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p class="text-xs text-gray-400 text-center py-2">Bu ayda daire verisi yok</p>';
+                }
+                html += '</div></td></tr>';
+            });
+
+            // Toplam sat\u0131r\u0131
+            const totalMargin = grandLagirio > 0 ? ((grandReal / grandLagirio) * 100).toFixed(1) : '0.0';
+            const totalRealClass = grandReal >= 0 ? 'text-emerald-600' : 'text-red-600';
+            html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
+            html += '<td class="py-2.5 px-3" colspan="3">TOPLAM (12 Ay)</td>';
+            html += '<td class="py-2.5 px-3 text-right">\u20ac' + grandGross.toFixed(0) + '</td>';
+            html += '<td class="py-2.5 px-3 text-right text-orange-500">\u20ac' + grandExp.toFixed(0) + '</td>';
+            html += '<td class="py-2.5 px-3 text-right text-red-500">\u20ac' + grandKdv.toFixed(0) + '</td>';
+            html += '<td class="py-2.5 px-3 text-right text-indigo-400">\u20ac' + grandPlat.toFixed(0) + '</td>';
+            html += '<td class="py-2.5 px-3 text-right text-blue-600">\u20ac' + grandLagirio.toFixed(0) + '</td>';
+            html += '<td class="py-2.5 px-3 text-right text-amber-600">\u20ac' + grandCompExp.toFixed(0) + '</td>';
+            html += '<td class="py-2.5 px-3 text-right ' + totalRealClass + '">\u20ac' + grandReal.toFixed(0) + '</td>';
+            html += '<td class="py-2.5 px-3 text-right">%' + totalMargin + '</td>';
+            html += '</tr></tbody></table></div>';
+
+            el.innerHTML = html;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        toggleProfitMonthDetail(idx) {
+            const row = document.getElementById('profitMonthRow_' + idx);
+            const chev = document.getElementById('profitMonthChev_' + idx);
+            if (!row) return;
+            const isHidden = row.classList.contains('hidden');
+            row.classList.toggle('hidden');
+            if (chev) chev.style.transform = isHidden ? 'rotate(90deg)' : '';
+        },
+
+        populateRangeSelectors() {
+            const startSel = document.getElementById('profitRangeStart');
+            const endSel = document.getElementById('profitRangeEnd');
+            if (!startSel || !endSel || !this._lastMonthlyData) return;
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const keys = Object.keys(this._lastMonthlyData).sort();
+            const opts = keys.map(k => { const [y,m] = k.split('-'); return '<option value="' + k + '">' + monthNames[parseInt(m)-1] + ' ' + y + '</option>'; }).join('');
+            if (!startSel.options.length) { startSel.innerHTML = opts; endSel.innerHTML = opts; endSel.selectedIndex = keys.length - 1; }
+        },
+
+        applyProfitRange() {
+            this.renderProfitViewRange();
+        },
+
+        renderProfitViewRange() {
+            const el = document.getElementById('profitViewContent');
+            if (!el || !this._lastMonthlyData) return;
+            const monthlyData = this._lastMonthlyData;
+            const aptDetail = this._lastAptMonthlyDetail || {};
+            const aptTotals = this._lastAptTotals || {};
+            const compExp = this._estMonthlyCompanyExp || 0;
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+
+            const startKey = document.getElementById('profitRangeStart')?.value;
+            const endKey = document.getElementById('profitRangeEnd')?.value;
+            const allKeys = Object.keys(monthlyData).sort();
+            const rangeKeys = allKeys.filter(k => (!startKey || k >= startKey) && (!endKey || k <= endKey));
+
+            if (rangeKeys.length === 0) { el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Se\u00e7ilen aral\u0131kta veri yok</p>'; return; }
+
+            // Toplam
+            let totLagirio = 0, totCompExp = 0, totGross = 0;
+            rangeKeys.forEach(k => { totLagirio += monthlyData[k].lagirio; totCompExp += compExp; totGross += monthlyData[k].gross; });
+            const totReal = totLagirio - totCompExp;
+            const margin = totLagirio > 0 ? ((totReal / totLagirio) * 100).toFixed(1) : '0.0';
+
+            const rangeLabel = (function() {
+                const [sy, sm] = rangeKeys[0].split('-');
+                const [ey, em] = rangeKeys[rangeKeys.length-1].split('-');
+                return monthNames[parseInt(sm)-1] + ' ' + sy + ' \u2013 ' + monthNames[parseInt(em)-1] + ' ' + ey;
+            })();
+
+            let html = '<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">';
+            html += '<div class="bg-blue-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">Br\u00fct Kazan\u00e7</p><p class="text-lg font-bold text-blue-600">\u20ac' + totLagirio.toFixed(0) + '</p></div>';
+            html += '<div class="bg-amber-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">\u015eirket Gideri</p><p class="text-lg font-bold text-amber-600">\u20ac' + totCompExp.toFixed(0) + '</p></div>';
+            html += '<div class="bg-' + (totReal >= 0 ? 'emerald' : 'red') + '-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">Ger\u00e7ek K\u00e2r</p><p class="text-lg font-bold ' + (totReal >= 0 ? 'text-emerald-600' : 'text-red-600') + '">\u20ac' + totReal.toFixed(0) + '</p></div>';
+            html += '<div class="bg-indigo-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">K\u00e2r Marj\u0131</p><p class="text-lg font-bold text-indigo-600">%' + margin + '</p></div>';
+            html += '</div>';
+            html += '<p class="text-xs text-gray-400 mb-3">' + rangeLabel + ' | ' + rangeKeys.length + ' ay</p>';
+
+            // Daire baz\u0131nda k\u00e2rl\u0131l\u0131k s\u0131ralamas\u0131
+            const aptData = [];
+            Object.entries(aptDetail).forEach(([aptId, months]) => {
+                let aptLagirio = 0, aptGross = 0, aptNights = 0, aptRes = 0;
+                rangeKeys.forEach(mk => {
+                    const md = months[mk];
+                    if (md) { aptLagirio += md.lagirio; aptGross += md.gross; aptNights += (md.totalNights || Projection.OCCUPANCY_DAYS); aptRes += (md.resCount || 0); }
+                });
+                if (aptLagirio > 0 || aptGross > 0) {
+                    const apt = (Analytics.data?.apartments || []).find(a => a.id === aptId);
+                    aptData.push({ code: apt?.code || aptId, lagirio: aptLagirio, gross: aptGross, nights: aptNights, res: aptRes, nightlyProfit: aptNights > 0 ? aptLagirio / aptNights : 0, profitPct: aptGross > 0 ? (aptLagirio / aptGross * 100) : 0 });
+                }
+            });
+            aptData.sort((a, b) => b.nightlyProfit - a.nightlyProfit);
+
+            html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
+            html += '<th class="py-2 px-3 text-left font-medium text-gray-500">#</th>';
+            html += '<th class="py-2 px-3 text-left font-medium text-gray-500">Daire</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Ort.Gecelik K\u00e2r</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Toplam K\u00e2r</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Br\u00fct</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Gece</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Rez.</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">K\u00e2rl\u0131l\u0131k</th>';
+            html += '</tr></thead><tbody>';
+
+            aptData.forEach((a, i) => {
+                html += '<tr class="border-t border-gray-100 hover:bg-gray-50">';
+                html += '<td class="py-2 px-3 font-bold text-gray-300">' + (i+1) + '</td>';
+                html += '<td class="py-2 px-3 font-medium text-gray-700">' + a.code + '</td>';
+                html += '<td class="py-2 px-3 text-right font-bold text-emerald-600">\u20ac' + a.nightlyProfit.toFixed(2) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-700">\u20ac' + a.lagirio.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + a.gross.toFixed(0) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">' + a.nights + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">' + a.res + '</td>';
+                html += '<td class="py-2 px-3 text-right text-indigo-600 font-medium">%' + a.profitPct.toFixed(1) + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+
+            el.innerHTML = html;
+        },
+
+        populateCompareSelectors() {
+            const selA = document.getElementById('profitCompareA');
+            const selB = document.getElementById('profitCompareB');
+            if (!selA || !selB || !this._lastMonthlyData) return;
+            if (selA.options.length > 0) return; // already populated
+
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const keys = Object.keys(this._lastMonthlyData).sort();
+
+            // Ge\u00e7mi\u015f y\u0131l\u0131n ayn\u0131 aylar\u0131 + mevcut 12 ay
+            const pastKeys = [];
+            keys.forEach(k => {
+                const [y, m] = k.split('-');
+                pastKeys.push((parseInt(y)-1) + '-' + m);
+            });
+            const allKeys = [...pastKeys, ...keys];
+
+            [selA, selB].forEach((sel, si) => {
+                sel.innerHTML = allKeys.map(k => {
+                    const [y, m] = k.split('-');
+                    return '<option value="' + k + '">' + monthNames[parseInt(m)-1] + ' ' + y + '</option>';
+                }).join('');
+                // Default: A = ilk 3 ge\u00e7mi\u015f, B = ilk 3 gelecek
+                if (si === 0) { for (let i = 0; i < Math.min(3, pastKeys.length); i++) sel.options[i].selected = true; }
+                else { for (let i = pastKeys.length; i < Math.min(pastKeys.length + 3, allKeys.length); i++) sel.options[i].selected = true; }
+            });
+        },
+
+        applyProfitCompare() {
+            this.renderProfitViewCompare();
+        },
+
+        getMonthData(monthKey) {
+            // Projeksiyondan veya ge\u00e7mi\u015f Analytics'ten ay verisi
+            if (this._lastMonthlyData && this._lastMonthlyData[monthKey]) return this._lastMonthlyData[monthKey];
+            // Ge\u00e7mi\u015f y\u0131l i\u00e7in Analytics'ten hesapla
+            const [y, m] = monthKey.split('-');
+            const apartments = Analytics.data?.apartments || [];
+            let gross = 0, lagirio = 0, expenses = 0, kdv = 0, platComm = 0, count = 0, aptCount = 0;
+            apartments.forEach(apt => {
+                const monthRes = (Analytics.data?.reservations || []).filter(r => {
+                    const rd = new Date(r.checkIn);
+                    return r.apartmentId === apt.id && rd.getMonth() === parseInt(m)-1 && rd.getFullYear() === parseInt(y);
+                });
+                const monthExp = (Analytics.data?.expenses || []).filter(e => {
+                    const ed = new Date(e.date);
+                    return e.apartmentId === apt.id && ed.getMonth() === parseInt(m)-1 && ed.getFullYear() === parseInt(y);
+                });
+                if (monthRes.length > 0) {
+                    const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
+                    const g = monthRes.reduce((s, r) => s + convertEUR(r.totalAmount || r.totalPrice || 0, r.currency || 'EUR'), 0);
+                    const l = Analytics.calculateLagirioRevenue ? Analytics.calculateLagirioRevenue(apt, monthRes, monthExp) : 0;
+                    const e = monthExp.reduce((s, ex) => s + convertEUR(ex.amount, ex.currency), 0);
+                    gross += g; lagirio += l; expenses += e; count += monthRes.length; aptCount++;
+                }
+            });
+            if (gross === 0 && lagirio === 0) return null;
+            const compExp = this._estMonthlyCompanyExp || 0;
+            return { gross, lagirio, expenses, kdv: 0, platComm: 0, count, aptCount, companyExpense: compExp, realProfit: lagirio - compExp };
+        },
+
+        renderProfitViewCompare() {
+            const el = document.getElementById('profitViewContent');
+            if (!el) return;
+            const selA = document.getElementById('profitCompareA');
+            const selB = document.getElementById('profitCompareB');
+            if (!selA || !selB) return;
+
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const compExp = this._estMonthlyCompanyExp || 0;
+
+            const keysA = Array.from(selA.selectedOptions).map(o => o.value);
+            const keysB = Array.from(selB.selectedOptions).map(o => o.value);
+
+            if (keysA.length === 0 || keysB.length === 0) {
+                el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Her iki d\u00f6nemden de en az bir ay se\u00e7in</p>';
+                return;
+            }
+
+            // Aggregate
+            const aggregate = (keys) => {
+                let tot = { gross: 0, lagirio: 0, expenses: 0, count: 0, months: 0 };
+                keys.forEach(k => {
+                    const d = this.getMonthData(k);
+                    if (d) { tot.gross += d.gross; tot.lagirio += d.lagirio; tot.expenses += d.expenses; tot.count += d.count; tot.months++; }
+                });
+                tot.compExp = compExp * tot.months;
+                tot.realProfit = tot.lagirio - tot.compExp;
+                tot.margin = tot.lagirio > 0 ? ((tot.realProfit / tot.lagirio) * 100) : 0;
+                return tot;
+            };
+
+            const a = aggregate(keysA);
+            const b = aggregate(keysB);
+
+            const labelA = keysA.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }).join(', ');
+            const labelB = keysB.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }).join(', ');
+
+            const diff = (va, vb) => { const d = va - vb; const pct = vb !== 0 ? ((d / Math.abs(vb)) * 100).toFixed(1) : (va > 0 ? '+\u221e' : '0'); return { val: d, pct }; };
+            const arrow = (d) => d > 0 ? '\u2191' : d < 0 ? '\u2193' : '\u2192';
+            const arrowColor = (d) => d > 0 ? 'text-emerald-600' : d < 0 ? 'text-red-600' : 'text-gray-500';
+
+            let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">';
+
+            // D\u00f6nem A
+            html += '<div class="bg-blue-50 border border-blue-200 rounded-xl p-4">';
+            html += '<h4 class="text-sm font-bold text-blue-700 mb-2">D\u00f6nem A: ' + labelA + '</h4>';
+            html += '<div class="space-y-1 text-xs">';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Br\u00fct Kazan\u00e7</span><span class="font-bold text-blue-600">\u20ac' + a.lagirio.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">\u015eirket Gideri</span><span class="text-amber-600">\u20ac' + a.compExp.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between border-t border-blue-200 pt-1"><span class="text-gray-600 font-medium">Ger\u00e7ek K\u00e2r</span><span class="font-bold ' + (a.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">\u20ac' + a.realProfit.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">K\u00e2r Marj\u0131</span><span class="text-indigo-600">%' + a.margin.toFixed(1) + '</span></div>';
+            html += '</div></div>';
+
+            // D\u00f6nem B
+            html += '<div class="bg-purple-50 border border-purple-200 rounded-xl p-4">';
+            html += '<h4 class="text-sm font-bold text-purple-700 mb-2">D\u00f6nem B: ' + labelB + '</h4>';
+            html += '<div class="space-y-1 text-xs">';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Br\u00fct Kazan\u00e7</span><span class="font-bold text-blue-600">\u20ac' + b.lagirio.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">\u015eirket Gideri</span><span class="text-amber-600">\u20ac' + b.compExp.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between border-t border-purple-200 pt-1"><span class="text-gray-600 font-medium">Ger\u00e7ek K\u00e2r</span><span class="font-bold ' + (b.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">\u20ac' + b.realProfit.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">K\u00e2r Marj\u0131</span><span class="text-indigo-600">%' + b.margin.toFixed(1) + '</span></div>';
+            html += '</div></div>';
+            html += '</div>';
+
+            // Fark
+            const dLagirio = diff(a.lagirio, b.lagirio);
+            const dReal = diff(a.realProfit, b.realProfit);
+            const dMargin = { val: a.margin - b.margin };
+
+            html += '<div class="bg-gray-50 rounded-xl p-4 mb-4">';
+            html += '<h4 class="text-xs font-bold text-gray-600 mb-2">FARK (A \u2212 B)</h4>';
+            html += '<div class="grid grid-cols-3 gap-4 text-center">';
+            html += '<div><p class="text-[10px] text-gray-500">Br\u00fct Kazan\u00e7</p><p class="font-bold ' + arrowColor(dLagirio.val) + '">' + arrow(dLagirio.val) + ' \u20ac' + Math.abs(dLagirio.val).toFixed(0) + ' (' + (dLagirio.val >= 0 ? '+' : '') + dLagirio.pct + '%)</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Ger\u00e7ek K\u00e2r</p><p class="font-bold ' + arrowColor(dReal.val) + '">' + arrow(dReal.val) + ' \u20ac' + Math.abs(dReal.val).toFixed(0) + ' (' + (dReal.val >= 0 ? '+' : '') + dReal.pct + '%)</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">K\u00e2r Marj\u0131</p><p class="font-bold ' + arrowColor(dMargin.val) + '">' + arrow(dMargin.val) + ' ' + (dMargin.val >= 0 ? '+' : '') + dMargin.val.toFixed(1) + 'pp</p></div>';
+            html += '</div></div>';
+
+            // Daire baz\u0131nda kar\u015f\u0131la\u015ft\u0131rma
+            const aptDetail = this._lastAptMonthlyDetail || {};
+            const aptCompare = {};
+            const collectAptData = (keys, period) => {
+                Object.entries(aptDetail).forEach(([aptId, months]) => {
+                    keys.forEach(mk => {
+                        const md = months[mk];
+                        if (md) {
+                            if (!aptCompare[aptId]) aptCompare[aptId] = { code: ((Analytics.data?.apartments || []).find(a2 => a2.id === aptId))?.code || aptId, a: 0, b: 0 };
+                            aptCompare[aptId][period] += md.lagirio;
+                        }
+                    });
+                });
+                // Ge\u00e7mi\u015f aylar i\u00e7in Analytics'ten
+                keys.forEach(mk => {
+                    if (aptDetail[Object.keys(aptDetail)[0]] && aptDetail[Object.keys(aptDetail)[0]][mk]) return;
+                    const [y, m] = mk.split('-');
+                    (Analytics.data?.apartments || []).forEach(apt => {
+                        const monthRes = (Analytics.data?.reservations || []).filter(r => {
+                            const rd = new Date(r.checkIn);
+                            return r.apartmentId === apt.id && rd.getMonth() === parseInt(m)-1 && rd.getFullYear() === parseInt(y);
+                        });
+                        const monthExp = (Analytics.data?.expenses || []).filter(e2 => {
+                            const ed = new Date(e2.date);
+                            return e2.apartmentId === apt.id && ed.getMonth() === parseInt(m)-1 && ed.getFullYear() === parseInt(y);
+                        });
+                        if (monthRes.length > 0 && Analytics.calculateLagirioRevenue) {
+                            const l = Analytics.calculateLagirioRevenue(apt, monthRes, monthExp);
+                            if (!aptCompare[apt.id]) aptCompare[apt.id] = { code: apt.code || apt.id, a: 0, b: 0 };
+                            aptCompare[apt.id][period] += l;
+                        }
+                    });
+                });
+            };
+            collectAptData(keysA, 'a');
+            collectAptData(keysB, 'b');
+
+            const aptList = Object.values(aptCompare).sort((x, y2) => (y2.a - y2.b) - (x.a - x.b));
+            if (aptList.length > 0) {
+                html += '<h4 class="text-xs font-bold text-gray-600 mb-2">Daire Baz\u0131nda Kar\u015f\u0131la\u015ft\u0131rma</h4>';
+                html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
+                html += '<th class="py-2 px-3 text-left">Daire</th>';
+                html += '<th class="py-2 px-3 text-right text-blue-600">D\u00f6nem A</th>';
+                html += '<th class="py-2 px-3 text-right text-purple-600">D\u00f6nem B</th>';
+                html += '<th class="py-2 px-3 text-right">Fark</th>';
+                html += '<th class="py-2 px-3 text-right">De\u011fi\u015fim</th>';
+                html += '</tr></thead><tbody>';
+                aptList.forEach(ap => {
+                    const d2 = ap.a - ap.b;
+                    const pct2 = ap.b !== 0 ? ((d2 / Math.abs(ap.b)) * 100).toFixed(1) : (ap.a > 0 ? '+\u221e' : '0');
+                    html += '<tr class="border-t border-gray-100">';
+                    html += '<td class="py-1.5 px-3 font-medium text-gray-700">' + ap.code + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right">\u20ac' + ap.a.toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right">\u20ac' + ap.b.toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right font-medium ' + arrowColor(d2) + '">' + arrow(d2) + ' \u20ac' + Math.abs(d2).toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right ' + arrowColor(d2) + '">' + (d2 >= 0 ? '+' : '') + pct2 + '%</td>';
+                    html += '</tr>';
+                });
+                html += '</tbody></table></div>';
+            }
+
+            el.innerHTML = html;
+        },
+
+        // --- Admin: ECharts Trend Grafikleri ---
+        renderProfitTrendChart() {
+            const container = document.getElementById('projProfitTrendChart');
+            if (!container || !this._lastMonthlyData || typeof echarts === 'undefined') return;
+            const monthlyData = this._lastMonthlyData;
+            const keys = Object.keys(monthlyData).sort();
+            const compExp = this._estMonthlyCompanyExp || 0;
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+
+            if (this._profitTrendChart) this._profitTrendChart.dispose();
+            const chart = echarts.init(container);
+
+            const option = {
+                tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
+                legend: { data: ['Br\u00fct Kazan\u00e7', 'Ger\u00e7ek K\u00e2r', '\u015eirket Gideri'], bottom: 0, textStyle: { fontSize: 10 } },
+                grid: { top: 30, right: 20, bottom: 55, left: 55 },
+                xAxis: { type: 'category', data: keys.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }), axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', axisLabel: { formatter: '\u20ac{value}', fontSize: 10 } },
+                series: [
+                    { name: 'Br\u00fct Kazan\u00e7', type: 'bar', data: keys.map(k => parseFloat(monthlyData[k].lagirio.toFixed(2))), itemStyle: { color: '#93c5fd' }, barWidth: '35%' },
+                    { name: 'Ger\u00e7ek K\u00e2r', type: 'line', data: keys.map(k => parseFloat((monthlyData[k].lagirio - compExp).toFixed(2))), itemStyle: { color: '#6366f1' }, lineStyle: { width: 3, type: 'dashed' }, symbol: 'diamond', symbolSize: 8, markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } },
+                    { name: '\u015eirket Gideri', type: 'line', data: keys.map(k => parseFloat(compExp.toFixed(2))), itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' }
+                ]
+            };
+            chart.setOption(option);
+            this._profitTrendChart = chart;
+            window.addEventListener('resize', () => chart.resize(), { once: true });
+        },
+
+        renderAptProfitTrendChart() {
+            const container = document.getElementById('projAptProfitTrendChart');
+            if (!container || !this._lastAptMonthlyDetail || !this._lastAptTotals || typeof echarts === 'undefined') return;
+            const aptTotals = this._lastAptTotals;
+            const aptDetail = this._lastAptMonthlyDetail;
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const colors = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#3b82f6'];
+
+            const top5 = Object.values(aptTotals).sort((a, b) => b.lagirio - a.lagirio).slice(0, 5);
+            if (top5.length === 0) return;
+            const keys = Object.keys(aptDetail[top5[0]?.id] || {}).sort();
+            if (keys.length === 0) return;
+
+            if (this._aptProfitTrendChart) this._aptProfitTrendChart.dispose();
+            const chart = echarts.init(container);
+
+            const series = top5.map((apt, i) => ({
+                name: apt.code, type: 'line',
+                data: keys.map(k => parseFloat((aptDetail[apt.id]?.[k]?.lagirio || 0).toFixed(2))),
+                itemStyle: { color: colors[i] }, lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 5
+            }));
+
+            const option = {
+                tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
+                legend: { data: top5.map(a => a.code), bottom: 0, textStyle: { fontSize: 10 } },
+                grid: { top: 30, right: 20, bottom: 55, left: 55 },
+                xAxis: { type: 'category', data: keys.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1]; }), axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', axisLabel: { formatter: '\u20ac{value}', fontSize: 10 } },
+                series
+            };
+            chart.setOption(option);
+            this._aptProfitTrendChart = chart;
+            window.addEventListener('resize', () => chart.resize(), { once: true });
+        },
+
+        renderProfitMarginTrendChart() {
+            const container = document.getElementById('projProfitMarginChart');
+            if (!container || !this._lastMonthlyData || typeof echarts === 'undefined') return;
+            const monthlyData = this._lastMonthlyData;
+            const keys = Object.keys(monthlyData).sort();
+            const compExp = this._estMonthlyCompanyExp || 0;
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+
+            if (this._profitMarginChart) this._profitMarginChart.dispose();
+            const chart = echarts.init(container);
+
+            const margins = keys.map(k => {
+                const d = monthlyData[k];
+                return d.lagirio > 0 ? parseFloat(((d.lagirio - compExp) / d.lagirio * 100).toFixed(1)) : 0;
+            });
+
+            const option = {
+                tooltip: { trigger: 'axis', formatter: function(p) { return p[0].name + '<br/>K\u00e2r Marj\u0131: <b>%' + p[0].value + '</b>'; } },
+                grid: { top: 20, right: 20, bottom: 40, left: 50 },
+                xAxis: { type: 'category', data: keys.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }), axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', axisLabel: { formatter: '%{value}', fontSize: 10 }, min: function(v) { return Math.floor(v.min - 5); } },
+                series: [{
+                    type: 'line', data: margins,
+                    areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(99,102,241,0.3)' }, { offset: 1, color: 'rgba(99,102,241,0.02)' }] } },
+                    lineStyle: { color: '#6366f1', width: 3 }, itemStyle: { color: '#6366f1' }, symbol: 'circle', symbolSize: 7,
+                    markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true }
+                }]
+            };
+            chart.setOption(option);
+            this._profitMarginChart = chart;
+            window.addEventListener('resize', () => chart.resize(), { once: true });
+        },
+
+        renderOccupancyProfitChart() {
+            const container = document.getElementById('projOccupancyProfitChart');
+            if (!container || !this._lastMonthlyData || typeof echarts === 'undefined') return;
+            const monthlyData = this._lastMonthlyData;
+            const keys = Object.keys(monthlyData).sort();
+            const compExp = this._estMonthlyCompanyExp || 0;
+            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+
+            if (this._occupancyProfitChart) this._occupancyProfitChart.dispose();
+            const chart = echarts.init(container);
+
+            const data = keys.map(k => {
+                const d = monthlyData[k];
+                const [y,m] = k.split('-');
+                return { value: [d.count, parseFloat((d.lagirio - compExp).toFixed(2))], name: monthNames[parseInt(m)-1] + '\'' + y.slice(2), symbolSize: Math.max(8, Math.sqrt(d.lagirio) * 0.5) };
+            });
+
+            // Linear regression
+            const xArr = data.map(d => d.value[0]);
+            const yArr = data.map(d => d.value[1]);
+            const n = xArr.length;
+            const sumX = xArr.reduce((a,b) => a+b, 0);
+            const sumY = yArr.reduce((a,b) => a+b, 0);
+            const sumXY = xArr.reduce((a,b,i) => a + b * yArr[i], 0);
+            const sumXX = xArr.reduce((a,b) => a + b*b, 0);
+            const slope = n > 1 ? (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX) : 0;
+            const intercept = n > 0 ? (sumY - slope * sumX) / n : 0;
+            const minX = Math.min(...xArr);
+            const maxX = Math.max(...xArr);
+            // Correlation
+            const avgX = sumX / n;
+            const avgY = sumY / n;
+            const covXY = xArr.reduce((a,b,i) => a + (b - avgX) * (yArr[i] - avgY), 0);
+            const stdX = Math.sqrt(xArr.reduce((a,b) => a + (b - avgX) ** 2, 0));
+            const stdY = Math.sqrt(yArr.reduce((a,b) => a + (b - avgY) ** 2, 0));
+            const corr = (stdX > 0 && stdY > 0) ? (covXY / (stdX * stdY)).toFixed(2) : '0';
+
+            const option = {
+                tooltip: { trigger: 'item', formatter: function(p) { return p.name + '<br/>Rez: ' + p.value[0] + '<br/>K\u00e2r: \u20ac' + p.value[1]; } },
+                grid: { top: 30, right: 20, bottom: 40, left: 55 },
+                xAxis: { type: 'value', name: 'Rez. Say\u0131s\u0131', nameLocation: 'center', nameGap: 25, axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', name: 'Ger\u00e7ek K\u00e2r (\u20ac)', nameLocation: 'center', nameGap: 40, axisLabel: { formatter: '\u20ac{value}', fontSize: 10 } },
+                graphic: [{ type: 'text', left: 'center', top: 5, style: { text: 'Korelasyon: r=' + corr, fontSize: 11, fill: '#6366f1', fontWeight: 'bold' } }],
+                series: [
+                    { type: 'scatter', data: data.map(d => ({ value: d.value, name: d.name, symbolSize: d.symbolSize })), itemStyle: { color: '#6366f1' } },
+                    { type: 'line', data: [[minX, slope * minX + intercept], [maxX, slope * maxX + intercept]], lineStyle: { color: '#f59e0b', type: 'dashed', width: 2 }, symbol: 'none', silent: true }
+                ]
+            };
+            chart.setOption(option);
+            this._occupancyProfitChart = chart;
+            window.addEventListener('resize', () => chart.resize(), { once: true });
+        },
+
+        // --- Admin: Şirket gideri tahmini (orantılı ayarlama ile) ---
+        estimateMonthlyCompanyExpense(projectedMonthlyProfit) {
+            const exps = Analytics.data?.lagirioExpenses || [];
+            if (exps.length === 0) return 0;
+            const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
+
+            // Aylık toplama (sadece gider girilen aylar)
+            const monthTotals = {};
+            exps.forEach(e => {
+                const d = new Date(e.date);
+                const mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+                if (!monthTotals[mk]) monthTotals[mk] = 0;
+                monthTotals[mk] += convertEUR(e.amount, e.currency);
+            });
+
+            const expMonths = Object.keys(monthTotals);
+            if (expMonths.length === 0) return 0;
+
+            const baseMonthlyExp = Object.values(monthTotals).reduce((s,v) => s+v, 0) / expMonths.length;
+
+            // Aynı aylar için geçmiş daire kârı (Lagirio kazancı) hesapla
+            let histProfitSum = 0;
+            const apartments = Analytics.data?.apartments || [];
+            expMonths.forEach(mk => {
+                const [y, m] = mk.split('-');
+                let monthProfit = 0;
+                apartments.forEach(apt => {
+                    const monthRes = (Analytics.data?.reservations || []).filter(r => {
+                        const rd = new Date(r.checkIn);
+                        return r.apartmentId === apt.id && rd.getMonth() === parseInt(m)-1 && rd.getFullYear() === parseInt(y);
+                    });
+                    const monthExp = (Analytics.data?.expenses || []).filter(e => {
+                        const ed = new Date(e.date);
+                        return e.apartmentId === apt.id && ed.getMonth() === parseInt(m)-1 && ed.getFullYear() === parseInt(y);
+                    });
+                    if (Analytics.calculateLagirioRevenue) {
+                        monthProfit += Analytics.calculateLagirioRevenue(apt, monthRes, monthExp);
+                    }
+                });
+                histProfitSum += monthProfit;
+            });
+            const baseMonthlyProfit = histProfitSum / expMonths.length;
+
+            // Oran ayarlaması: daire kârı artışına orantılı şirket gideri artırımı
+            // Her 1.5x oran artışında %15, doğrusal interpolasyon
+            if (baseMonthlyProfit > 0 && baseMonthlyExp > 0 && projectedMonthlyProfit > 0) {
+                const histRatio = baseMonthlyProfit / baseMonthlyExp;
+                const projRatio = projectedMonthlyProfit / baseMonthlyExp;
+                const ratioGrowth = projRatio / histRatio;
+                if (ratioGrowth > 1) {
+                    const multiplier = 1 + (ratioGrowth - 1) * 0.3;
+                    return baseMonthlyExp * multiplier;
+                }
+            }
+
+            return baseMonthlyExp;
+        },
+
         renderMonthlyChart(monthlyData) {
             const container = document.getElementById('projMonthlyChart');
             if (!container) return;
@@ -4521,7 +5308,8 @@
                 '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-300 rounded"></span> Toplam Kesinti</span>' +
                 '</div>';
             } else {
-                // Admin: mevcut g\u00f6r\u00fcn\u00fcm
+                // Admin: mevcut g\u00f6r\u00fcn\u00fcm + Ger\u00e7ek K\u00e2r notu
+                const compExp = this._estMonthlyCompanyExp || 0;
                 container.innerHTML = '<div class="flex items-end gap-3 h-56">' + sortedKeys.map(key => {
                     const d = monthlyData[key];
                     const [y, m] = key.split('-');
@@ -4529,11 +5317,13 @@
                     const grossH = maxVal > 0 ? Math.max(8, (d.gross / maxVal) * 190) : 8;
                     const lagirioH = maxVal > 0 ? Math.max(4, (d.lagirio / maxVal) * 190) : 4;
                     const expH = maxVal > 0 ? Math.max(2, (d.expenses / maxVal) * 190) : 2;
+                    const realP = d.lagirio - compExp;
+                    const realClass = realP >= 0 ? 'text-indigo-600' : 'text-red-500';
 
                     return '<div class="flex-1 flex flex-col items-center gap-1">' +
                         '<div class="text-center mb-1">' +
-                        '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + d.lagirio.toFixed(2) + '</span>' +
-                        '<span class="text-[9px] text-gray-400">\u20ac' + d.avgNightly.toFixed(2) + '/g</span></div>' +
+                        '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + d.lagirio.toFixed(0) + '</span>' +
+                        '<span class="text-[9px] ' + realClass + ' font-bold">\u20ac' + realP.toFixed(0) + ' net</span></div>' +
                         '<div class="w-full flex gap-0.5 items-end justify-center" style="height:' + grossH + 'px">' +
                         '<div class="flex-1 bg-emerald-100 rounded-t-sm h-full relative">' +
                         '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + lagirioH + 'px"></div></div>' +
@@ -4544,8 +5334,9 @@
                 }).join('') + '</div>' +
                 '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
                 '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Karma Tahmini Br\u00fct</span>' +
-                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Lagirio Kazanc\u0131</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Br\u00fct Kazan\u00e7</span>' +
                 '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-300 rounded"></span> Standart Gider</span>' +
+                '<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-indigo-500 rounded"></span> Ger\u00e7ek K\u00e2r</span>' +
                 '</div>';
             }
         },
