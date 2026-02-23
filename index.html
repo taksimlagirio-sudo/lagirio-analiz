@@ -1026,7 +1026,7 @@
                     </button>
                     <button onclick="Analytics.switchMainTab('comparison')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="comparison">
                         <i data-lucide="git-compare" class="w-4 h-4"></i>
-                        <span>Karşılaştırma</span>
+                        <span>Genel Karşılaştırma</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('trends')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="trends">
                         <i data-lucide="trending-up" class="w-4 h-4"></i>
@@ -1067,9 +1067,9 @@
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                                 <i data-lucide="line-chart" class="w-5 h-5 text-emerald-600"></i>
-                                <span>Gelir Trendi</span>
+                                <span id="dashboardTrendTitle">Gelir Trendi</span>
                             </h3>
-                            <select id="trendPeriod" class="text-sm px-3 py-1 border border-gray-200 rounded-lg">
+                            <select id="trendPeriod" class="text-sm px-3 py-1 border border-gray-200 rounded-lg" onchange="Analytics.createRevenueTrendChart()">
                                 <option value="daily">Günlük</option>
                                 <option value="weekly">Haftalık</option>
                                 <option value="monthly" selected>Aylık</option>
@@ -1186,12 +1186,12 @@
                 <!-- Advanced Comparison Controls -->
                 <!-- Advanced Comparison Controls -->
                 <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Karşılaştırma Parametreleri</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Genel Karşılaştırma Parametreleri</h3>
                     
                     <!-- Comparison Mode Selection -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-3">Karşılaştırma Modu</label>
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
                             <button onclick="Analytics.setComparisonMode('apartment-apartment')" 
                                     class="comparison-mode-btn active px-4 py-3 bg-white border-2 border-emerald-500 rounded-lg hover:bg-emerald-50 transition text-left">
                                 <div class="font-semibold text-emerald-700">Daire vs Daire</div>
@@ -1210,10 +1210,15 @@
                                 <div class="text-xs text-gray-500 mt-1">Çoklu daire karşılaştır</div>
                             </button>
                             
-                            <button onclick="Analytics.setComparisonMode('system-system')" 
+                            <button onclick="Analytics.setComparisonMode('system-system')"
                                     class="comparison-mode-btn px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-500 transition text-left">
                                 <div class="font-semibold text-gray-700">Sistem vs Sistem</div>
                                 <div class="text-xs text-gray-500 mt-1">Sistem karşılaştır</div>
+                            </button>
+                            <button onclick="Analytics.setComparisonMode('temporal')"
+                                    class="comparison-mode-btn admin-only px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-500 transition text-left">
+                                <div class="font-semibold text-gray-700">Zamansal Karşılaştırma</div>
+                                <div class="text-xs text-gray-500 mt-1">Dönem vs Dönem kârlılık</div>
                             </button>
                         </div>
                     </div>
@@ -1222,8 +1227,25 @@
                     <div id="comparisonPanels">
                         <!-- Will be filled dynamically -->
                     </div>
-                    
-                    <button onclick="Analytics.runAdvancedComparison()" 
+
+                    <!-- Temporal Comparison Controls (admin only) -->
+                    <div id="temporalComparisonControls" class="hidden mt-4">
+                        <div class="flex gap-4 flex-wrap items-end">
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem A (çoklu seçim)</label>
+                                <select id="temporalCompareA" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <span class="text-lg text-gray-300 self-center">vs</span>
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem B (çoklu seçim)</label>
+                                <select id="temporalCompareB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <button onclick="Analytics.runTemporalComparison()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end">Karşılaştır</button>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile çoklu ay seçebilirsiniz. Farklı yıllardan aylar karşılaştırılabilir.</p>
+                    </div>
+
+                    <button id="comparisonRunBtn" onclick="Analytics.runAdvancedComparison()"
                             class="mt-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2 mx-auto">
                         <i data-lucide="git-compare" class="w-5 h-5"></i>
                         <span>Karşılaştır</span>
@@ -1318,6 +1340,38 @@
                     </div>
                 </div>
                 
+                <!-- Admin: Kâr Trend Grafikleri - geçmiş veriden -->
+                <div id="trendProfitChartsPanel" class="admin-only hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="bar-chart-big" class="w-5 h-5 text-indigo-600"></i>
+                            <span>Kâr Trendleri</span>
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Aylık Kâr Akışı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">Brüt Kazanç → Gerçek Kâr dönüşümü</p>
+                                <div id="trendProfitFlowChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Daire Kârlılık Trendi (Top 5)</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">En kârlı 5 dairenin aylık Lagirio kazancı</p>
+                                <div id="trendAptProfitChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Kâr Marjı Trendi</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">Gerçek Kâr / Brüt Kazanç oranının aylık değişimi</p>
+                                <div id="trendProfitMarginChart" style="height:280px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Doluluk-Kârlılık İlişkisi</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">Rezervasyon yoğunluğu ile kâr arasındaki korelasyon</p>
+                                <div id="trendOccupancyProfitChart" style="height:280px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Forecast Section -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
@@ -1706,7 +1760,6 @@
                         <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
                             <button onclick="Projection.switchProfitView('monthly')" id="profitViewMonthly" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white shadow text-gray-800">Ay-Ay</button>
                             <button onclick="Projection.switchProfitView('range')" id="profitViewRange" class="px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800">Aral\u0131k</button>
-                            <button onclick="Projection.switchProfitView('compare')" id="profitViewCompare" class="px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800">D\u00f6nem Kar\u015f\u0131la\u015ft\u0131r</button>
                         </div>
                     </div>
                     <div id="profitRangeSelector" class="hidden mb-4 flex items-center gap-3">
@@ -1715,53 +1768,9 @@
                         <select id="profitRangeEnd" class="text-xs border border-gray-200 rounded-lg px-3 py-2"></select>
                         <button onclick="Projection.applyProfitRange()" class="bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-600 transition">Uygula</button>
                     </div>
-                    <div id="profitCompareSelector" class="hidden mb-4">
-                        <div class="flex gap-4 flex-wrap items-end">
-                            <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">D\u00f6nem A (\u00e7oklu se\u00e7im)</label>
-                                <select id="profitCompareA" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
-                            </div>
-                            <span class="text-lg text-gray-300 self-center">vs</span>
-                            <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">D\u00f6nem B (\u00e7oklu se\u00e7im)</label>
-                                <select id="profitCompareB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
-                            </div>
-                            <button onclick="Projection.applyProfitCompare()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end">Kar\u015f\u0131la\u015ft\u0131r</button>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile \u00e7oklu ay se\u00e7ebilirsiniz. Farkl\u0131 y\u0131llardan aylar kar\u015f\u0131la\u015ft\u0131r\u0131labilir.</p>
-                    </div>
                     <div id="profitViewContent"></div>
                 </div>
 
-                <!-- Admin: K\u00e2r Trend Grafikleri -->
-                <div id="projAdminTrendPanel" class="admin-only bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                        <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
-                        <span>K\u00e2r Trendleri</span>
-                    </h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-600 mb-2">Ayl\u0131k K\u00e2r Ak\u0131\u015f\u0131</h4>
-                            <p class="text-[10px] text-gray-400 mb-2">Br\u00fct Kazan\u00e7 \u2192 Ger\u00e7ek K\u00e2r d\u00f6n\u00fc\u015f\u00fcm\u00fc</p>
-                            <div id="projProfitTrendChart" style="height:320px"></div>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-600 mb-2">Daire K\u00e2rl\u0131l\u0131k Trendi (Top 5)</h4>
-                            <p class="text-[10px] text-gray-400 mb-2">En k\u00e2rl\u0131 5 dairenin ayl\u0131k Lagirio kazanc\u0131</p>
-                            <div id="projAptProfitTrendChart" style="height:320px"></div>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-600 mb-2">K\u00e2r Marj\u0131 Trendi</h4>
-                            <p class="text-[10px] text-gray-400 mb-2">Ger\u00e7ek K\u00e2r / Br\u00fct Kazan\u00e7 oran\u0131n\u0131n ayl\u0131k de\u011fi\u015fimi</p>
-                            <div id="projProfitMarginChart" style="height:280px"></div>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-600 mb-2">Doluluk-K\u00e2rl\u0131l\u0131k \u0130li\u015fkisi</h4>
-                            <p class="text-[10px] text-gray-400 mb-2">Rezervasyon yo\u011funlu\u011fu ile k\u00e2r aras\u0131ndaki korelasyon</p>
-                            <div id="projOccupancyProfitChart" style="height:280px"></div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Detailed Future Reservations Table -->
                 <div id="projResTableSection" class="bg-white rounded-xl shadow-lg p-6 hidden">
@@ -4375,18 +4384,12 @@
             if (tableSubtitle) tableSubtitle.textContent = isOwner ? '(tüm daireleriniz toplam)' : '(tüm daireler toplam)';
             if (!isOwner) {
                 document.getElementById('projResTableSection')?.classList.remove('hidden');
-                // Admin kârlılık panelleri
+                // Admin kârlılık paneli (Ay-Ay + Aralık)
                 document.getElementById('projAdminProfitPanel')?.classList.remove('hidden');
-                document.getElementById('projAdminTrendPanel')?.classList.remove('hidden');
                 this.switchProfitView(this._profitViewMode || 'monthly');
-                this.renderProfitTrendChart();
-                this.renderAptProfitTrendChart();
-                this.renderProfitMarginTrendChart();
-                this.renderOccupancyProfitChart();
             } else {
                 document.getElementById('projResTableSection')?.classList.add('hidden');
                 document.getElementById('projAdminProfitPanel')?.classList.add('hidden');
-                document.getElementById('projAdminTrendPanel')?.classList.add('hidden');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
@@ -4617,7 +4620,7 @@
         // --- Admin: K\u00e2rl\u0131l\u0131k Analizi View Modlar\u0131 ---
         switchProfitView(mode) {
             this._profitViewMode = mode;
-            ['monthly','range','compare'].forEach(m => {
+            ['monthly','range'].forEach(m => {
                 const btn = document.getElementById('profitView' + m.charAt(0).toUpperCase() + m.slice(1));
                 if (btn) {
                     btn.className = m === mode
@@ -4626,10 +4629,8 @@
                 }
             });
             document.getElementById('profitRangeSelector')?.classList.toggle('hidden', mode !== 'range');
-            document.getElementById('profitCompareSelector')?.classList.toggle('hidden', mode !== 'compare');
 
             if (mode === 'range') this.populateRangeSelectors();
-            if (mode === 'compare') this.populateCompareSelectors();
             this.renderProfitView();
         },
 
@@ -4637,7 +4638,6 @@
             const mode = this._profitViewMode || 'monthly';
             if (mode === 'monthly') this.renderProfitViewMonthly();
             else if (mode === 'range') this.renderProfitViewRange();
-            else if (mode === 'compare') this.renderProfitViewCompare();
         },
 
         renderProfitViewMonthly() {
@@ -4856,37 +4856,6 @@
             el.innerHTML = html;
         },
 
-        populateCompareSelectors() {
-            const selA = document.getElementById('profitCompareA');
-            const selB = document.getElementById('profitCompareB');
-            if (!selA || !selB || !this._lastMonthlyData) return;
-            if (selA.options.length > 0) return; // already populated
-
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
-            const keys = Object.keys(this._lastMonthlyData).sort();
-
-            // Ge\u00e7mi\u015f y\u0131l\u0131n ayn\u0131 aylar\u0131 + mevcut 12 ay
-            const pastKeys = [];
-            keys.forEach(k => {
-                const [y, m] = k.split('-');
-                pastKeys.push((parseInt(y)-1) + '-' + m);
-            });
-            const allKeys = [...pastKeys, ...keys];
-
-            [selA, selB].forEach((sel, si) => {
-                sel.innerHTML = allKeys.map(k => {
-                    const [y, m] = k.split('-');
-                    return '<option value="' + k + '">' + monthNames[parseInt(m)-1] + ' ' + y + '</option>';
-                }).join('');
-                // Default: A = ilk 3 ge\u00e7mi\u015f, B = ilk 3 gelecek
-                if (si === 0) { for (let i = 0; i < Math.min(3, pastKeys.length); i++) sel.options[i].selected = true; }
-                else { for (let i = pastKeys.length; i < Math.min(pastKeys.length + 3, allKeys.length); i++) sel.options[i].selected = true; }
-            });
-        },
-
-        applyProfitCompare() {
-            this.renderProfitViewCompare();
-        },
 
         getMonthData(monthKey) {
             // Projeksiyondan veya ge\u00e7mi\u015f Analytics'ten ay verisi
@@ -4917,296 +4886,7 @@
             return { gross, lagirio, expenses, kdv: 0, platComm: 0, count, aptCount, companyExpense: compExp, realProfit: lagirio - compExp };
         },
 
-        renderProfitViewCompare() {
-            const el = document.getElementById('profitViewContent');
-            if (!el) return;
-            const selA = document.getElementById('profitCompareA');
-            const selB = document.getElementById('profitCompareB');
-            if (!selA || !selB) return;
-
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
-            const compExp = this._estMonthlyCompanyExp || 0;
-
-            const keysA = Array.from(selA.selectedOptions).map(o => o.value);
-            const keysB = Array.from(selB.selectedOptions).map(o => o.value);
-
-            if (keysA.length === 0 || keysB.length === 0) {
-                el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Her iki d\u00f6nemden de en az bir ay se\u00e7in</p>';
-                return;
-            }
-
-            // Aggregate
-            const aggregate = (keys) => {
-                let tot = { gross: 0, lagirio: 0, expenses: 0, count: 0, months: 0 };
-                keys.forEach(k => {
-                    const d = this.getMonthData(k);
-                    if (d) { tot.gross += d.gross; tot.lagirio += d.lagirio; tot.expenses += d.expenses; tot.count += d.count; tot.months++; }
-                });
-                tot.compExp = compExp * tot.months;
-                tot.realProfit = tot.lagirio - tot.compExp;
-                tot.margin = tot.lagirio > 0 ? ((tot.realProfit / tot.lagirio) * 100) : 0;
-                return tot;
-            };
-
-            const a = aggregate(keysA);
-            const b = aggregate(keysB);
-
-            const labelA = keysA.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }).join(', ');
-            const labelB = keysB.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }).join(', ');
-
-            const diff = (va, vb) => { const d = va - vb; const pct = vb !== 0 ? ((d / Math.abs(vb)) * 100).toFixed(1) : (va > 0 ? '+\u221e' : '0'); return { val: d, pct }; };
-            const arrow = (d) => d > 0 ? '\u2191' : d < 0 ? '\u2193' : '\u2192';
-            const arrowColor = (d) => d > 0 ? 'text-emerald-600' : d < 0 ? 'text-red-600' : 'text-gray-500';
-
-            let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">';
-
-            // D\u00f6nem A
-            html += '<div class="bg-blue-50 border border-blue-200 rounded-xl p-4">';
-            html += '<h4 class="text-sm font-bold text-blue-700 mb-2">D\u00f6nem A: ' + labelA + '</h4>';
-            html += '<div class="space-y-1 text-xs">';
-            html += '<div class="flex justify-between"><span class="text-gray-500">Br\u00fct Kazan\u00e7</span><span class="font-bold text-blue-600">\u20ac' + a.lagirio.toFixed(0) + '</span></div>';
-            html += '<div class="flex justify-between"><span class="text-gray-500">\u015eirket Gideri</span><span class="text-amber-600">\u20ac' + a.compExp.toFixed(0) + '</span></div>';
-            html += '<div class="flex justify-between border-t border-blue-200 pt-1"><span class="text-gray-600 font-medium">Ger\u00e7ek K\u00e2r</span><span class="font-bold ' + (a.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">\u20ac' + a.realProfit.toFixed(0) + '</span></div>';
-            html += '<div class="flex justify-between"><span class="text-gray-500">K\u00e2r Marj\u0131</span><span class="text-indigo-600">%' + a.margin.toFixed(1) + '</span></div>';
-            html += '</div></div>';
-
-            // D\u00f6nem B
-            html += '<div class="bg-purple-50 border border-purple-200 rounded-xl p-4">';
-            html += '<h4 class="text-sm font-bold text-purple-700 mb-2">D\u00f6nem B: ' + labelB + '</h4>';
-            html += '<div class="space-y-1 text-xs">';
-            html += '<div class="flex justify-between"><span class="text-gray-500">Br\u00fct Kazan\u00e7</span><span class="font-bold text-blue-600">\u20ac' + b.lagirio.toFixed(0) + '</span></div>';
-            html += '<div class="flex justify-between"><span class="text-gray-500">\u015eirket Gideri</span><span class="text-amber-600">\u20ac' + b.compExp.toFixed(0) + '</span></div>';
-            html += '<div class="flex justify-between border-t border-purple-200 pt-1"><span class="text-gray-600 font-medium">Ger\u00e7ek K\u00e2r</span><span class="font-bold ' + (b.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">\u20ac' + b.realProfit.toFixed(0) + '</span></div>';
-            html += '<div class="flex justify-between"><span class="text-gray-500">K\u00e2r Marj\u0131</span><span class="text-indigo-600">%' + b.margin.toFixed(1) + '</span></div>';
-            html += '</div></div>';
-            html += '</div>';
-
-            // Fark
-            const dLagirio = diff(a.lagirio, b.lagirio);
-            const dReal = diff(a.realProfit, b.realProfit);
-            const dMargin = { val: a.margin - b.margin };
-
-            html += '<div class="bg-gray-50 rounded-xl p-4 mb-4">';
-            html += '<h4 class="text-xs font-bold text-gray-600 mb-2">FARK (A \u2212 B)</h4>';
-            html += '<div class="grid grid-cols-3 gap-4 text-center">';
-            html += '<div><p class="text-[10px] text-gray-500">Br\u00fct Kazan\u00e7</p><p class="font-bold ' + arrowColor(dLagirio.val) + '">' + arrow(dLagirio.val) + ' \u20ac' + Math.abs(dLagirio.val).toFixed(0) + ' (' + (dLagirio.val >= 0 ? '+' : '') + dLagirio.pct + '%)</p></div>';
-            html += '<div><p class="text-[10px] text-gray-500">Ger\u00e7ek K\u00e2r</p><p class="font-bold ' + arrowColor(dReal.val) + '">' + arrow(dReal.val) + ' \u20ac' + Math.abs(dReal.val).toFixed(0) + ' (' + (dReal.val >= 0 ? '+' : '') + dReal.pct + '%)</p></div>';
-            html += '<div><p class="text-[10px] text-gray-500">K\u00e2r Marj\u0131</p><p class="font-bold ' + arrowColor(dMargin.val) + '">' + arrow(dMargin.val) + ' ' + (dMargin.val >= 0 ? '+' : '') + dMargin.val.toFixed(1) + 'pp</p></div>';
-            html += '</div></div>';
-
-            // Daire baz\u0131nda kar\u015f\u0131la\u015ft\u0131rma
-            const aptDetail = this._lastAptMonthlyDetail || {};
-            const aptCompare = {};
-            const collectAptData = (keys, period) => {
-                Object.entries(aptDetail).forEach(([aptId, months]) => {
-                    keys.forEach(mk => {
-                        const md = months[mk];
-                        if (md) {
-                            if (!aptCompare[aptId]) aptCompare[aptId] = { code: ((Analytics.data?.apartments || []).find(a2 => a2.id === aptId))?.code || aptId, a: 0, b: 0 };
-                            aptCompare[aptId][period] += md.lagirio;
-                        }
-                    });
-                });
-                // Ge\u00e7mi\u015f aylar i\u00e7in Analytics'ten
-                keys.forEach(mk => {
-                    if (aptDetail[Object.keys(aptDetail)[0]] && aptDetail[Object.keys(aptDetail)[0]][mk]) return;
-                    const [y, m] = mk.split('-');
-                    (Analytics.data?.apartments || []).forEach(apt => {
-                        const monthRes = (Analytics.data?.reservations || []).filter(r => {
-                            const rd = new Date(r.checkIn);
-                            return r.apartmentId === apt.id && rd.getMonth() === parseInt(m)-1 && rd.getFullYear() === parseInt(y);
-                        });
-                        const monthExp = (Analytics.data?.expenses || []).filter(e2 => {
-                            const ed = new Date(e2.date);
-                            return e2.apartmentId === apt.id && ed.getMonth() === parseInt(m)-1 && ed.getFullYear() === parseInt(y);
-                        });
-                        if (monthRes.length > 0 && Analytics.calculateLagirioRevenue) {
-                            const l = Analytics.calculateLagirioRevenue(apt, monthRes, monthExp);
-                            if (!aptCompare[apt.id]) aptCompare[apt.id] = { code: apt.code || apt.id, a: 0, b: 0 };
-                            aptCompare[apt.id][period] += l;
-                        }
-                    });
-                });
-            };
-            collectAptData(keysA, 'a');
-            collectAptData(keysB, 'b');
-
-            const aptList = Object.values(aptCompare).sort((x, y2) => (y2.a - y2.b) - (x.a - x.b));
-            if (aptList.length > 0) {
-                html += '<h4 class="text-xs font-bold text-gray-600 mb-2">Daire Baz\u0131nda Kar\u015f\u0131la\u015ft\u0131rma</h4>';
-                html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
-                html += '<th class="py-2 px-3 text-left">Daire</th>';
-                html += '<th class="py-2 px-3 text-right text-blue-600">D\u00f6nem A</th>';
-                html += '<th class="py-2 px-3 text-right text-purple-600">D\u00f6nem B</th>';
-                html += '<th class="py-2 px-3 text-right">Fark</th>';
-                html += '<th class="py-2 px-3 text-right">De\u011fi\u015fim</th>';
-                html += '</tr></thead><tbody>';
-                aptList.forEach(ap => {
-                    const d2 = ap.a - ap.b;
-                    const pct2 = ap.b !== 0 ? ((d2 / Math.abs(ap.b)) * 100).toFixed(1) : (ap.a > 0 ? '+\u221e' : '0');
-                    html += '<tr class="border-t border-gray-100">';
-                    html += '<td class="py-1.5 px-3 font-medium text-gray-700">' + ap.code + '</td>';
-                    html += '<td class="py-1.5 px-3 text-right">\u20ac' + ap.a.toFixed(0) + '</td>';
-                    html += '<td class="py-1.5 px-3 text-right">\u20ac' + ap.b.toFixed(0) + '</td>';
-                    html += '<td class="py-1.5 px-3 text-right font-medium ' + arrowColor(d2) + '">' + arrow(d2) + ' \u20ac' + Math.abs(d2).toFixed(0) + '</td>';
-                    html += '<td class="py-1.5 px-3 text-right ' + arrowColor(d2) + '">' + (d2 >= 0 ? '+' : '') + pct2 + '%</td>';
-                    html += '</tr>';
-                });
-                html += '</tbody></table></div>';
-            }
-
-            el.innerHTML = html;
-        },
-
-        // --- Admin: ECharts Trend Grafikleri ---
-        renderProfitTrendChart() {
-            const container = document.getElementById('projProfitTrendChart');
-            if (!container || !this._lastMonthlyData || typeof echarts === 'undefined') return;
-            const monthlyData = this._lastMonthlyData;
-            const keys = Object.keys(monthlyData).sort();
-            const compExp = this._estMonthlyCompanyExp || 0;
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
-
-            if (this._profitTrendChart) this._profitTrendChart.dispose();
-            const chart = echarts.init(container);
-
-            const option = {
-                tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
-                legend: { data: ['Br\u00fct Kazan\u00e7', 'Ger\u00e7ek K\u00e2r', '\u015eirket Gideri'], bottom: 0, textStyle: { fontSize: 10 } },
-                grid: { top: 30, right: 20, bottom: 55, left: 55 },
-                xAxis: { type: 'category', data: keys.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }), axisLabel: { fontSize: 10 } },
-                yAxis: { type: 'value', axisLabel: { formatter: '\u20ac{value}', fontSize: 10 } },
-                series: [
-                    { name: 'Br\u00fct Kazan\u00e7', type: 'bar', data: keys.map(k => parseFloat(monthlyData[k].lagirio.toFixed(2))), itemStyle: { color: '#93c5fd' }, barWidth: '35%' },
-                    { name: 'Ger\u00e7ek K\u00e2r', type: 'line', data: keys.map(k => parseFloat((monthlyData[k].lagirio - compExp).toFixed(2))), itemStyle: { color: '#6366f1' }, lineStyle: { width: 3, type: 'dashed' }, symbol: 'diamond', symbolSize: 8, markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } },
-                    { name: '\u015eirket Gideri', type: 'line', data: keys.map(k => parseFloat(compExp.toFixed(2))), itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' }
-                ]
-            };
-            chart.setOption(option);
-            this._profitTrendChart = chart;
-            window.addEventListener('resize', () => chart.resize(), { once: true });
-        },
-
-        renderAptProfitTrendChart() {
-            const container = document.getElementById('projAptProfitTrendChart');
-            if (!container || !this._lastAptMonthlyDetail || !this._lastAptTotals || typeof echarts === 'undefined') return;
-            const aptTotals = this._lastAptTotals;
-            const aptDetail = this._lastAptMonthlyDetail;
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
-            const colors = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#3b82f6'];
-
-            const top5 = Object.values(aptTotals).sort((a, b) => b.lagirio - a.lagirio).slice(0, 5);
-            if (top5.length === 0) return;
-            const keys = Object.keys(aptDetail[top5[0]?.id] || {}).sort();
-            if (keys.length === 0) return;
-
-            if (this._aptProfitTrendChart) this._aptProfitTrendChart.dispose();
-            const chart = echarts.init(container);
-
-            const series = top5.map((apt, i) => ({
-                name: apt.code, type: 'line',
-                data: keys.map(k => parseFloat((aptDetail[apt.id]?.[k]?.lagirio || 0).toFixed(2))),
-                itemStyle: { color: colors[i] }, lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 5
-            }));
-
-            const option = {
-                tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
-                legend: { data: top5.map(a => a.code), bottom: 0, textStyle: { fontSize: 10 } },
-                grid: { top: 30, right: 20, bottom: 55, left: 55 },
-                xAxis: { type: 'category', data: keys.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1]; }), axisLabel: { fontSize: 10 } },
-                yAxis: { type: 'value', axisLabel: { formatter: '\u20ac{value}', fontSize: 10 } },
-                series
-            };
-            chart.setOption(option);
-            this._aptProfitTrendChart = chart;
-            window.addEventListener('resize', () => chart.resize(), { once: true });
-        },
-
-        renderProfitMarginTrendChart() {
-            const container = document.getElementById('projProfitMarginChart');
-            if (!container || !this._lastMonthlyData || typeof echarts === 'undefined') return;
-            const monthlyData = this._lastMonthlyData;
-            const keys = Object.keys(monthlyData).sort();
-            const compExp = this._estMonthlyCompanyExp || 0;
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
-
-            if (this._profitMarginChart) this._profitMarginChart.dispose();
-            const chart = echarts.init(container);
-
-            const margins = keys.map(k => {
-                const d = monthlyData[k];
-                return d.lagirio > 0 ? parseFloat(((d.lagirio - compExp) / d.lagirio * 100).toFixed(1)) : 0;
-            });
-
-            const option = {
-                tooltip: { trigger: 'axis', formatter: function(p) { return p[0].name + '<br/>K\u00e2r Marj\u0131: <b>%' + p[0].value + '</b>'; } },
-                grid: { top: 20, right: 20, bottom: 40, left: 50 },
-                xAxis: { type: 'category', data: keys.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }), axisLabel: { fontSize: 10 } },
-                yAxis: { type: 'value', axisLabel: { formatter: '%{value}', fontSize: 10 }, min: function(v) { return Math.floor(v.min - 5); } },
-                series: [{
-                    type: 'line', data: margins,
-                    areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(99,102,241,0.3)' }, { offset: 1, color: 'rgba(99,102,241,0.02)' }] } },
-                    lineStyle: { color: '#6366f1', width: 3 }, itemStyle: { color: '#6366f1' }, symbol: 'circle', symbolSize: 7,
-                    markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true }
-                }]
-            };
-            chart.setOption(option);
-            this._profitMarginChart = chart;
-            window.addEventListener('resize', () => chart.resize(), { once: true });
-        },
-
-        renderOccupancyProfitChart() {
-            const container = document.getElementById('projOccupancyProfitChart');
-            if (!container || !this._lastMonthlyData || typeof echarts === 'undefined') return;
-            const monthlyData = this._lastMonthlyData;
-            const keys = Object.keys(monthlyData).sort();
-            const compExp = this._estMonthlyCompanyExp || 0;
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
-
-            if (this._occupancyProfitChart) this._occupancyProfitChart.dispose();
-            const chart = echarts.init(container);
-
-            const data = keys.map(k => {
-                const d = monthlyData[k];
-                const [y,m] = k.split('-');
-                return { value: [d.count, parseFloat((d.lagirio - compExp).toFixed(2))], name: monthNames[parseInt(m)-1] + '\'' + y.slice(2), symbolSize: Math.max(8, Math.sqrt(d.lagirio) * 0.5) };
-            });
-
-            // Linear regression
-            const xArr = data.map(d => d.value[0]);
-            const yArr = data.map(d => d.value[1]);
-            const n = xArr.length;
-            const sumX = xArr.reduce((a,b) => a+b, 0);
-            const sumY = yArr.reduce((a,b) => a+b, 0);
-            const sumXY = xArr.reduce((a,b,i) => a + b * yArr[i], 0);
-            const sumXX = xArr.reduce((a,b) => a + b*b, 0);
-            const slope = n > 1 ? (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX) : 0;
-            const intercept = n > 0 ? (sumY - slope * sumX) / n : 0;
-            const minX = Math.min(...xArr);
-            const maxX = Math.max(...xArr);
-            // Correlation
-            const avgX = sumX / n;
-            const avgY = sumY / n;
-            const covXY = xArr.reduce((a,b,i) => a + (b - avgX) * (yArr[i] - avgY), 0);
-            const stdX = Math.sqrt(xArr.reduce((a,b) => a + (b - avgX) ** 2, 0));
-            const stdY = Math.sqrt(yArr.reduce((a,b) => a + (b - avgY) ** 2, 0));
-            const corr = (stdX > 0 && stdY > 0) ? (covXY / (stdX * stdY)).toFixed(2) : '0';
-
-            const option = {
-                tooltip: { trigger: 'item', formatter: function(p) { return p.name + '<br/>Rez: ' + p.value[0] + '<br/>K\u00e2r: \u20ac' + p.value[1]; } },
-                grid: { top: 30, right: 20, bottom: 40, left: 55 },
-                xAxis: { type: 'value', name: 'Rez. Say\u0131s\u0131', nameLocation: 'center', nameGap: 25, axisLabel: { fontSize: 10 } },
-                yAxis: { type: 'value', name: 'Ger\u00e7ek K\u00e2r (\u20ac)', nameLocation: 'center', nameGap: 40, axisLabel: { formatter: '\u20ac{value}', fontSize: 10 } },
-                graphic: [{ type: 'text', left: 'center', top: 5, style: { text: 'Korelasyon: r=' + corr, fontSize: 11, fill: '#6366f1', fontWeight: 'bold' } }],
-                series: [
-                    { type: 'scatter', data: data.map(d => ({ value: d.value, name: d.name, symbolSize: d.symbolSize })), itemStyle: { color: '#6366f1' } },
-                    { type: 'line', data: [[minX, slope * minX + intercept], [maxX, slope * maxX + intercept]], lineStyle: { color: '#f59e0b', type: 'dashed', width: 2 }, symbol: 'none', silent: true }
-                ]
-            };
-            chart.setOption(option);
-            this._occupancyProfitChart = chart;
-            window.addEventListener('resize', () => chart.resize(), { once: true });
-        },
+        // Eski projeksiyon trend grafikleri kaldırıldı — yeni versiyonlar Analytics.createProfitTrendCharts() içinde
 
         // --- Admin: Şirket gideri tahmini (orantılı ayarlama ile) ---
         estimateMonthlyCompanyExpense(projectedMonthlyProfit) {
@@ -8026,93 +7706,75 @@
         createRevenueTrendChart() {
             const container = document.getElementById('revenueTrendChart');
             if (!container) return;
-            
+
             const period = document.getElementById('trendPeriod')?.value || 'monthly';
             const data = this.getRevenueTrendData(period);
-            
+            const isOwner = Auth.currentUser?.role === 'owner';
+
             const chart = echarts.init(container);
             this.charts.revenueTrend = chart;
-            
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                    borderColor: 'transparent',
-                    textStyle: { color: '#fff' },
-                    formatter: params => {
-                        const value = params[0].value;
-                        const label = Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Kazanç';
-                        return `${params[0].name}<br/>
-                                <span style="color:${params[0].color}">●</span> ${label}: €${value.toLocaleString()}`;
-                    }
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    top: '10%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: data.labels,
-                    axisLine: {
-                        lineStyle: { color: '#e5e7eb' }
-                    },
-                    axisLabel: {
-                        color: '#6b7280',
-                        fontSize: 11
-                    }
-                },
-                yAxis: {
-                    type: 'value',
-                    axisLine: {
-                        show: false
-                    },
-                    splitLine: {
-                        lineStyle: { color: '#f3f4f6', type: 'dashed' }
-                    },
-                    axisLabel: {
-                        color: '#6b7280',
-                        formatter: value => `€${(value / 1000).toFixed(0)}k`
-                    }
-                },
-                series: [{
-                    name: 'Kazanç',
-                    type: 'line',
-                    data: data.values,
-                    smooth: true,
-                    symbol: 'circle',
-                    symbolSize: 8,
-                    lineStyle: {
-                        width: 3,
-                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-                            { offset: 0, color: '#10b981' },
-                            { offset: 1, color: '#059669' }
-                        ])
-                    },
-                    itemStyle: {
-                        color: '#10b981',
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    },
-                    areaStyle: {
-                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                            { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
-                            { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
-                        ])
-                    },
-                    emphasis: {
-                        scale: 1.2,
-                        itemStyle: {
-                            shadowBlur: 10,
-                            shadowColor: 'rgba(16, 185, 129, 0.5)'
+
+            if (!isOwner && period === 'monthly') {
+                // Admin aylık: Brüt Kazanç (Lagirio) + Gerçek Kâr (şirket gideri düşülmüş)
+                const profitData = this._getHistoricalProfitData();
+                // Dashboard son 6 ayı gösteriyor, profitData son 12 ay - son 6'sını al
+                const sliceStart = Math.max(0, profitData.labels.length - 6);
+                const labels = profitData.labels.slice(sliceStart);
+                const lagirioVals = profitData.lagirio.slice(sliceStart);
+                const realProfitVals = profitData.realProfit.slice(sliceStart);
+
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        borderColor: 'transparent',
+                        textStyle: { color: '#fff' },
+                        formatter: params => {
+                            let html = params[0].name;
+                            params.forEach(p => { html += `<br/><span style="color:${p.color}">●</span> ${p.seriesName}: €${p.value.toLocaleString()}`; });
+                            return html;
                         }
-                    }
-                }]
-            };
-            
-            chart.setOption(option);
+                    },
+                    legend: { data: ['Brüt Kazanç', 'Gerçek Kâr'], bottom: 0, textStyle: { color: '#6b7280', fontSize: 11 } },
+                    grid: { left: '3%', right: '4%', bottom: '12%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: labels, axisLine: { lineStyle: { color: '#e5e7eb' } }, axisLabel: { color: '#6b7280', fontSize: 11 } },
+                    yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
+                        axisLabel: { color: '#6b7280', formatter: value => `€${(value / 1000).toFixed(0)}k` } },
+                    series: [
+                        { name: 'Brüt Kazanç', type: 'line', data: lagirioVals, smooth: true, symbol: 'circle', symbolSize: 8,
+                          lineStyle: { width: 3, color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]) },
+                          itemStyle: { color: '#10b981', borderColor: '#fff', borderWidth: 2 },
+                          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(16,185,129,0.3)'},{offset:1,color:'rgba(16,185,129,0.05)'}]) } },
+                        { name: 'Gerçek Kâr', type: 'line', data: realProfitVals, smooth: true, symbol: 'diamond', symbolSize: 7,
+                          lineStyle: { width: 2, color: '#6366f1', type: 'dashed' },
+                          itemStyle: { color: '#6366f1', borderColor: '#fff', borderWidth: 2 },
+                          markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } }
+                    ]
+                });
+            } else {
+                // Owner veya admin diğer periyotlar: tek satır grafik
+                const label = isOwner ? 'Net Kazanç' : 'Kazanç';
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        borderColor: 'transparent',
+                        textStyle: { color: '#fff' },
+                        formatter: params => `${params[0].name}<br/><span style="color:${params[0].color}">●</span> ${label}: €${params[0].value.toLocaleString()}`
+                    },
+                    grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: data.labels, axisLine: { lineStyle: { color: '#e5e7eb' } }, axisLabel: { color: '#6b7280', fontSize: 11 } },
+                    yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
+                        axisLabel: { color: '#6b7280', formatter: value => `€${(value / 1000).toFixed(0)}k` } },
+                    series: [{
+                        name: label, type: 'line', data: data.values, smooth: true, symbol: 'circle', symbolSize: 8,
+                        lineStyle: { width: 3, color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]) },
+                        itemStyle: { color: '#10b981', borderColor: '#fff', borderWidth: 2 },
+                        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(16,185,129,0.3)'},{offset:1,color:'rgba(16,185,129,0.05)'}]) },
+                        emphasis: { scale: 1.2, itemStyle: { shadowBlur: 10, shadowColor: 'rgba(16,185,129,0.5)' } }
+                    }]
+                });
+            }
         },
 
         // 16. Platform dağılım grafiği oluşturma
@@ -8240,26 +7902,11 @@
         },
 
         // 18. Sistem analiz grafikleri oluşturma
-        // System analysis charts
         createSystemAnalysisCharts() {
             try {
                 this.createSystemComparisonChart();
-                console.log('✅ System comparison chart OK');
             } catch (e) {
-                console.error('❌ System comparison hatası:', e);
-            }
-            // Diğerleri henüz tamamlanmadı
-            // this.createSystemEfficiencyChart();
-            // this.createSystemRevenueChart();
-        },
-
-        // System analysis charts
-        createSystemAnalysisCharts() {
-            try {
-                this.createSystemComparisonChart();
-                console.log('✅ System comparison chart OK');
-            } catch (e) {
-                console.error('❌ System comparison hatası:', e);
+                console.error('System comparison hatası:', e);
             }
         },
 
@@ -8272,17 +7919,7 @@
             console.log('⚠️ System revenue chart henüz tamamlanmadı');
         },
 
-        createTrendAnalysisCharts() {
-            console.log('⚠️ Trend analysis charts henüz tamamlanmadı');
-        },
-
-        createEfficiencyCharts() {
-            console.log('⚠️ Efficiency charts henüz tamamlanmadı');
-        },
-
-        updateEfficiencyMetrics() {
-            console.log('⚠️ Efficiency metrics henüz tamamlanmadı');
-        },
+        // Stub'lar kaldırıldı — asıl implementasyonlar altta
 
         // 19. Sistem karşılaştırma grafiği oluşturma
         createSystemComparisonChart() {
@@ -9878,8 +9515,13 @@
                 }
             }
 
-            if (tab === 'trends' && !this.charts.revenueTrendAnalysis) {
-                setTimeout(() => this.createTrendAnalysisCharts(), 100);
+            if (tab === 'trends') {
+                if (!this.charts.revenueTrendAnalysis) {
+                    setTimeout(() => this.createTrendAnalysisCharts(), 100);
+                } else if (Auth.currentUser?.role !== 'owner' && !this.charts._trendProfitFlow) {
+                    // Trend grafikleri zaten varsa ama kâr grafikleri henüz oluşturulmadıysa
+                    setTimeout(() => this.createProfitTrendCharts(), 100);
+                }
             }
 
             if (tab === 'efficiency' && !this.charts.costEfficiency) {
@@ -10108,12 +9750,24 @@
                 'apartment-apartment': 'border-emerald-500',
                 'apartment-period': 'border-blue-500',
                 'group-group': 'border-purple-500',
-                'system-system': 'border-orange-500'
+                'system-system': 'border-orange-500',
+                'temporal': 'border-indigo-500'
             };
-            event.target.closest('.comparison-mode-btn').classList.add(colorMap[mode]);
-            
-            // Render appropriate panels
-            this.renderComparisonPanels();
+            event.target.closest('.comparison-mode-btn').classList.add(colorMap[mode] || 'border-gray-500');
+
+            // Temporal mod: özel kontrolleri göster/gizle
+            const temporalCtrl = document.getElementById('temporalComparisonControls');
+            const runBtn = document.getElementById('comparisonRunBtn');
+            if (temporalCtrl) temporalCtrl.classList.toggle('hidden', mode !== 'temporal');
+            if (runBtn) runBtn.classList.toggle('hidden', mode === 'temporal');
+
+            if (mode === 'temporal') {
+                this.populateTemporalSelectors();
+                document.getElementById('comparisonPanels').innerHTML = '';
+            } else {
+                // Render appropriate panels
+                this.renderComparisonPanels();
+            }
         },
 
         // Render comparison panels based on mode
@@ -10140,6 +9794,216 @@
             
             container.innerHTML = html;
             setTimeout(() => lucide.createIcons(), 100);
+        },
+
+        // Zamansal karşılaştırma: selector'ları doldur
+        populateTemporalSelectors() {
+            const selA = document.getElementById('temporalCompareA');
+            const selB = document.getElementById('temporalCompareB');
+            if (!selA || !selB) return;
+            if (selA.options.length > 0) return; // already populated
+
+            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const now = new Date();
+            // Son 24 ay
+            const allKeys = [];
+            for (let i = 23; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+                allKeys.push(mk);
+            }
+
+            [selA, selB].forEach((sel, si) => {
+                sel.innerHTML = allKeys.map(k => {
+                    const [y, m] = k.split('-');
+                    return '<option value="' + k + '">' + monthNames[parseInt(m)-1] + ' ' + y + '</option>';
+                }).join('');
+                // Default: A = 6 ay önce (3 ay), B = son 3 ay
+                if (si === 0) { for (let i = allKeys.length - 6; i < allKeys.length - 3; i++) if (sel.options[i]) sel.options[i].selected = true; }
+                else { for (let i = allKeys.length - 3; i < allKeys.length; i++) if (sel.options[i]) sel.options[i].selected = true; }
+            });
+        },
+
+        // Zamansal karşılaştırma: çalıştır
+        runTemporalComparison() {
+            const selA = document.getElementById('temporalCompareA');
+            const selB = document.getElementById('temporalCompareB');
+            if (!selA || !selB) return;
+
+            const keysA = Array.from(selA.selectedOptions).map(o => o.value);
+            const keysB = Array.from(selB.selectedOptions).map(o => o.value);
+
+            const compResults = document.getElementById('comparisonResults');
+            if (!compResults) return;
+
+            if (keysA.length === 0 || keysB.length === 0) {
+                compResults.classList.remove('hidden');
+                compResults.innerHTML = '<div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4 text-sm text-amber-700">Her iki dönemden de en az bir ay seçin.</div>';
+                return;
+            }
+
+            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
+
+            // Şirket gideri tahmini
+            const lagirioExps = this.data?.lagirioExpenses || [];
+            const expByMonth = {};
+            lagirioExps.forEach(e => {
+                const dd = new Date(e.date);
+                const mk = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0');
+                if (!expByMonth[mk]) expByMonth[mk] = 0;
+                expByMonth[mk] += convertEUR(e.amount, e.currency);
+            });
+            const expMs = Object.keys(expByMonth);
+            const baseCompExp = expMs.length > 0 ? Object.values(expByMonth).reduce((s,v) => s+v, 0) / expMs.length : 0;
+
+            // Ay verisi hesapla
+            const getMonthMetrics = (mk) => {
+                const [y, m] = mk.split('-');
+                let gross = 0, lagirio = 0, expenses = 0, count = 0, aptCount = 0;
+                (this.data?.apartments || []).forEach(apt => {
+                    const monthRes = (this.data?.reservations || []).filter(r => {
+                        const rd = new Date(r.checkIn);
+                        return r.apartmentId === apt.id && rd.getMonth() === parseInt(m)-1 && rd.getFullYear() === parseInt(y);
+                    });
+                    const monthExp = (this.data?.expenses || []).filter(e => {
+                        const ed = new Date(e.date);
+                        return e.apartmentId === apt.id && ed.getMonth() === parseInt(m)-1 && ed.getFullYear() === parseInt(y);
+                    });
+                    if (monthRes.length > 0) {
+                        gross += monthRes.reduce((s, r) => s + convertEUR(r.totalAmount || 0, r.currency || 'EUR'), 0);
+                        lagirio += this.calculateLagirioRevenue ? this.calculateLagirioRevenue(apt, monthRes, monthExp) : 0;
+                        expenses += monthExp.reduce((s, e) => s + convertEUR(e.amount, e.currency), 0);
+                        count += monthRes.length;
+                        aptCount++;
+                    }
+                });
+                return { gross, lagirio, expenses, count, aptCount, compExp: baseCompExp, realProfit: lagirio - baseCompExp };
+            };
+
+            // Aggregate
+            const aggregate = (keys) => {
+                let tot = { gross: 0, lagirio: 0, expenses: 0, count: 0, months: 0, aptCount: 0 };
+                keys.forEach(k => {
+                    const d = getMonthMetrics(k);
+                    tot.gross += d.gross; tot.lagirio += d.lagirio; tot.expenses += d.expenses; tot.count += d.count; tot.months++; tot.aptCount += d.aptCount;
+                });
+                tot.compExp = baseCompExp * tot.months;
+                tot.realProfit = tot.lagirio - tot.compExp;
+                tot.margin = tot.lagirio > 0 ? ((tot.realProfit / tot.lagirio) * 100) : 0;
+                return tot;
+            };
+
+            const a = aggregate(keysA);
+            const b = aggregate(keysB);
+
+            const labelA = keysA.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }).join(', ');
+            const labelB = keysB.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + '\'' + y.slice(2); }).join(', ');
+
+            const diff = (va, vb) => { const d2 = va - vb; const pct = vb !== 0 ? ((d2 / Math.abs(vb)) * 100).toFixed(1) : (va > 0 ? '+∞' : '0'); return { val: d2, pct }; };
+            const arrow = (d2) => d2 > 0 ? '↑' : d2 < 0 ? '↓' : '→';
+            const arrowColor = (d2) => d2 > 0 ? 'text-emerald-600' : d2 < 0 ? 'text-red-600' : 'text-gray-500';
+
+            let html = '<div class="mt-6">';
+            html += '<h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2"><i data-lucide="clock" class="w-5 h-5 text-indigo-600"></i><span>Zamansal Karşılaştırma Sonuçları</span></h3>';
+
+            html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">';
+            // Dönem A
+            html += '<div class="bg-blue-50 border border-blue-200 rounded-xl p-4">';
+            html += '<h4 class="text-sm font-bold text-blue-700 mb-2">Dönem A: ' + labelA + '</h4>';
+            html += '<div class="space-y-1 text-xs">';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Gelir</span><span class="font-medium">€' + a.gross.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Kazanç (Lagirio)</span><span class="font-bold text-blue-600">€' + a.lagirio.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Şirket Gideri</span><span class="text-amber-600">€' + a.compExp.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between border-t border-blue-200 pt-1"><span class="text-gray-600 font-medium">Gerçek Kâr</span><span class="font-bold ' + (a.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">€' + a.realProfit.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Kâr Marjı</span><span class="text-indigo-600">%' + a.margin.toFixed(1) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Rez. Sayısı</span><span>' + a.count + '</span></div>';
+            html += '</div></div>';
+
+            // Dönem B
+            html += '<div class="bg-purple-50 border border-purple-200 rounded-xl p-4">';
+            html += '<h4 class="text-sm font-bold text-purple-700 mb-2">Dönem B: ' + labelB + '</h4>';
+            html += '<div class="space-y-1 text-xs">';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Gelir</span><span class="font-medium">€' + b.gross.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Kazanç (Lagirio)</span><span class="font-bold text-blue-600">€' + b.lagirio.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Şirket Gideri</span><span class="text-amber-600">€' + b.compExp.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between border-t border-purple-200 pt-1"><span class="text-gray-600 font-medium">Gerçek Kâr</span><span class="font-bold ' + (b.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">€' + b.realProfit.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Kâr Marjı</span><span class="text-indigo-600">%' + b.margin.toFixed(1) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Rez. Sayısı</span><span>' + b.count + '</span></div>';
+            html += '</div></div>';
+            html += '</div>';
+
+            // Fark
+            const dLagirio = diff(a.lagirio, b.lagirio);
+            const dReal = diff(a.realProfit, b.realProfit);
+            const dMargin = { val: a.margin - b.margin };
+            const dGross = diff(a.gross, b.gross);
+            const dCount = diff(a.count, b.count);
+
+            html += '<div class="bg-gray-50 rounded-xl p-4 mb-4">';
+            html += '<h4 class="text-xs font-bold text-gray-600 mb-2">FARK (A − B)</h4>';
+            html += '<div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">';
+            html += '<div><p class="text-[10px] text-gray-500">Brüt Gelir</p><p class="font-bold ' + arrowColor(dGross.val) + '">' + arrow(dGross.val) + ' €' + Math.abs(dGross.val).toFixed(0) + '</p><p class="text-[10px] ' + arrowColor(dGross.val) + '">' + (dGross.val >= 0 ? '+' : '') + dGross.pct + '%</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Brüt Kazanç</p><p class="font-bold ' + arrowColor(dLagirio.val) + '">' + arrow(dLagirio.val) + ' €' + Math.abs(dLagirio.val).toFixed(0) + '</p><p class="text-[10px] ' + arrowColor(dLagirio.val) + '">' + (dLagirio.val >= 0 ? '+' : '') + dLagirio.pct + '%</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Gerçek Kâr</p><p class="font-bold ' + arrowColor(dReal.val) + '">' + arrow(dReal.val) + ' €' + Math.abs(dReal.val).toFixed(0) + '</p><p class="text-[10px] ' + arrowColor(dReal.val) + '">' + (dReal.val >= 0 ? '+' : '') + dReal.pct + '%</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Kâr Marjı</p><p class="font-bold ' + arrowColor(dMargin.val) + '">' + arrow(dMargin.val) + ' ' + (dMargin.val >= 0 ? '+' : '') + dMargin.val.toFixed(1) + 'pp</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Rez. Sayısı</p><p class="font-bold ' + arrowColor(dCount.val) + '">' + arrow(dCount.val) + ' ' + Math.abs(dCount.val) + '</p></div>';
+            html += '</div></div>';
+
+            // Daire bazlı karşılaştırma
+            const aptCompare = {};
+            const collectAptPeriodData = (keys, period) => {
+                keys.forEach(mk => {
+                    const [y, m] = mk.split('-');
+                    (this.data?.apartments || []).forEach(apt => {
+                        const monthRes = (this.data?.reservations || []).filter(r => {
+                            const rd = new Date(r.checkIn);
+                            return r.apartmentId === apt.id && rd.getMonth() === parseInt(m)-1 && rd.getFullYear() === parseInt(y);
+                        });
+                        const monthExp = (this.data?.expenses || []).filter(e2 => {
+                            const ed = new Date(e2.date);
+                            return e2.apartmentId === apt.id && ed.getMonth() === parseInt(m)-1 && ed.getFullYear() === parseInt(y);
+                        });
+                        if (monthRes.length > 0 && this.calculateLagirioRevenue) {
+                            const l = this.calculateLagirioRevenue(apt, monthRes, monthExp);
+                            if (!aptCompare[apt.id]) aptCompare[apt.id] = { code: apt.code || apt.id, a: 0, b: 0 };
+                            aptCompare[apt.id][period] += l;
+                        }
+                    });
+                });
+            };
+            collectAptPeriodData(keysA, 'a');
+            collectAptPeriodData(keysB, 'b');
+
+            const aptList = Object.values(aptCompare).sort((x, y2) => (y2.a - y2.b) - (x.a - x.b));
+            if (aptList.length > 0) {
+                html += '<h4 class="text-xs font-bold text-gray-600 mb-2">Daire Bazlı Karşılaştırma (Brüt Kazanç)</h4>';
+                html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
+                html += '<th class="py-2 px-3 text-left">Daire</th>';
+                html += '<th class="py-2 px-3 text-right text-blue-600">Dönem A</th>';
+                html += '<th class="py-2 px-3 text-right text-purple-600">Dönem B</th>';
+                html += '<th class="py-2 px-3 text-right">Fark</th>';
+                html += '<th class="py-2 px-3 text-right">Değişim</th>';
+                html += '</tr></thead><tbody>';
+                aptList.forEach(ap => {
+                    const d2 = ap.a - ap.b;
+                    const pct2 = ap.b !== 0 ? ((d2 / Math.abs(ap.b)) * 100).toFixed(1) : (ap.a > 0 ? '+∞' : '0');
+                    html += '<tr class="border-t border-gray-100">';
+                    html += '<td class="py-1.5 px-3 font-medium text-gray-700">' + ap.code + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right">€' + ap.a.toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right">€' + ap.b.toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right font-medium ' + arrowColor(d2) + '">' + arrow(d2) + ' €' + Math.abs(d2).toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right ' + arrowColor(d2) + '">' + (d2 >= 0 ? '+' : '') + pct2 + '%</td>';
+                    html += '</tr>';
+                });
+                html += '</tbody></table></div>';
+            }
+
+            html += '</div>';
+
+            compResults.classList.remove('hidden');
+            compResults.innerHTML = html;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
         // Render: Daire vs Daire (aynı dönem)
@@ -11117,6 +10981,217 @@
             this.createSeasonalAnalysisChart();
             this.createGrowthAnalysisChart();
             this.updateForecastCards();
+            // Admin: Kâr trend grafikleri
+            if (Auth.currentUser?.role !== 'owner') {
+                this.createProfitTrendCharts();
+            }
+        },
+
+        // Admin kâr trend grafikleri (geçmiş veriden) - trendler sayfasında
+        createProfitTrendCharts() {
+            const panel = document.getElementById('trendProfitChartsPanel');
+            if (panel) panel.classList.remove('hidden');
+            this.createTrendProfitFlowChart();
+            this.createTrendAptProfitChart();
+            this.createTrendProfitMarginChart();
+            this.createTrendOccupancyProfitChart();
+        },
+
+        // Geçmiş veriden aylık Lagirio kazancı + şirket gideri tahmini hesapla
+        _getHistoricalProfitData() {
+            const now = new Date();
+            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const months = [];
+            const result = { keys: [], labels: [], lagirio: [], compExp: [], realProfit: [], margins: [], resCounts: [], aptData: {} };
+
+            // Şirket gideri tahmini
+            const lagirioExps = this.data?.lagirioExpenses || [];
+            const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
+            let totalLagirioExp = 0, expMonthCount = 0;
+            const expByMonth = {};
+            lagirioExps.forEach(e => {
+                const d = new Date(e.date);
+                const mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+                if (!expByMonth[mk]) expByMonth[mk] = 0;
+                expByMonth[mk] += convertEUR(e.amount, e.currency);
+            });
+            const expMonths = Object.keys(expByMonth);
+            const baseCompExp = expMonths.length > 0 ? Object.values(expByMonth).reduce((s,v) => s+v, 0) / expMonths.length : 0;
+
+            for (let i = 11; i >= 0; i--) {
+                const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const mk = targetDate.getFullYear() + '-' + String(targetDate.getMonth()+1).padStart(2,'0');
+                const label = monthNames[targetDate.getMonth()] + '\'' + String(targetDate.getFullYear()).slice(2);
+
+                let monthLagirio = 0;
+                let monthResCount = 0;
+
+                this.data.apartments?.forEach(apartment => {
+                    const monthRes = this.data.reservations?.filter(res => {
+                        const d = new Date(res.checkIn);
+                        return res.apartmentId === apartment.id && d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                    }) || [];
+                    const monthExp = this.data.expenses?.filter(exp => {
+                        const d = new Date(exp.date);
+                        return exp.apartmentId === apartment.id && d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                    }) || [];
+
+                    if (monthRes.length > 0) {
+                        const lagirioVal = this.calculateLagirioRevenue(apartment, monthRes, monthExp);
+                        monthLagirio += lagirioVal;
+                        monthResCount += monthRes.length;
+
+                        // Daire bazlı
+                        if (!result.aptData[apartment.id]) result.aptData[apartment.id] = { code: apartment.code || apartment.id, months: {} };
+                        result.aptData[apartment.id].months[mk] = lagirioVal;
+                    }
+                });
+
+                const realP = monthLagirio - baseCompExp;
+                const margin = monthLagirio > 0 ? ((realP / monthLagirio) * 100) : 0;
+
+                result.keys.push(mk);
+                result.labels.push(label);
+                result.lagirio.push(parseFloat(monthLagirio.toFixed(2)));
+                result.compExp.push(parseFloat(baseCompExp.toFixed(2)));
+                result.realProfit.push(parseFloat(realP.toFixed(2)));
+                result.margins.push(parseFloat(margin.toFixed(1)));
+                result.resCounts.push(monthResCount);
+            }
+            result.baseCompExp = baseCompExp;
+            return result;
+        },
+
+        createTrendProfitFlowChart() {
+            const container = document.getElementById('trendProfitFlowChart');
+            if (!container || typeof echarts === 'undefined') return;
+            const d = this._getHistoricalProfitData();
+            if (d.keys.length === 0) return;
+
+            if (this.charts._trendProfitFlow) this.charts._trendProfitFlow.dispose();
+            const chart = echarts.init(container);
+            this.charts._trendProfitFlow = chart;
+
+            chart.setOption({
+                tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
+                legend: { data: ['Brüt Kazanç', 'Gerçek Kâr', 'Şirket Gideri'], bottom: 0, textStyle: { fontSize: 10 } },
+                grid: { top: 30, right: 20, bottom: 55, left: 55 },
+                xAxis: { type: 'category', data: d.labels, axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', axisLabel: { formatter: '€{value}', fontSize: 10 } },
+                series: [
+                    { name: 'Brüt Kazanç', type: 'bar', data: d.lagirio, itemStyle: { color: '#93c5fd' }, barWidth: '35%' },
+                    { name: 'Gerçek Kâr', type: 'line', data: d.realProfit, itemStyle: { color: '#6366f1' }, lineStyle: { width: 3, type: 'dashed' }, symbol: 'diamond', symbolSize: 8,
+                      markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } },
+                    { name: 'Şirket Gideri', type: 'line', data: d.compExp, itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' }
+                ]
+            });
+            window.addEventListener('resize', () => chart.resize(), { once: true });
+        },
+
+        createTrendAptProfitChart() {
+            const container = document.getElementById('trendAptProfitChart');
+            if (!container || typeof echarts === 'undefined') return;
+            const d = this._getHistoricalProfitData();
+            const colors = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#3b82f6'];
+
+            // Top 5 daire toplam lagirio'ya göre
+            const aptTotals = Object.entries(d.aptData).map(([id, apt]) => ({
+                id, code: apt.code, total: Object.values(apt.months).reduce((s,v) => s+v, 0), months: apt.months
+            })).sort((a,b) => b.total - a.total).slice(0, 5);
+            if (aptTotals.length === 0) return;
+
+            if (this.charts._trendAptProfit) this.charts._trendAptProfit.dispose();
+            const chart = echarts.init(container);
+            this.charts._trendAptProfit = chart;
+
+            const series = aptTotals.map((apt, i) => ({
+                name: apt.code, type: 'line',
+                data: d.keys.map(k => parseFloat((apt.months[k] || 0).toFixed(2))),
+                itemStyle: { color: colors[i] }, lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 5
+            }));
+
+            chart.setOption({
+                tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
+                legend: { data: aptTotals.map(a => a.code), bottom: 0, textStyle: { fontSize: 10 } },
+                grid: { top: 30, right: 20, bottom: 55, left: 55 },
+                xAxis: { type: 'category', data: d.labels, axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', axisLabel: { formatter: '€{value}', fontSize: 10 } },
+                series
+            });
+            window.addEventListener('resize', () => chart.resize(), { once: true });
+        },
+
+        createTrendProfitMarginChart() {
+            const container = document.getElementById('trendProfitMarginChart');
+            if (!container || typeof echarts === 'undefined') return;
+            const d = this._getHistoricalProfitData();
+            if (d.keys.length === 0) return;
+
+            if (this.charts._trendProfitMargin) this.charts._trendProfitMargin.dispose();
+            const chart = echarts.init(container);
+            this.charts._trendProfitMargin = chart;
+
+            chart.setOption({
+                tooltip: { trigger: 'axis', formatter: function(p) { return p[0].name + '<br/>Kâr Marjı: <b>%' + p[0].value + '</b>'; } },
+                grid: { top: 20, right: 20, bottom: 40, left: 50 },
+                xAxis: { type: 'category', data: d.labels, axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', axisLabel: { formatter: '%{value}', fontSize: 10 }, min: function(v) { return Math.floor(v.min - 5); } },
+                series: [{
+                    type: 'line', data: d.margins,
+                    areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(99,102,241,0.3)' }, { offset: 1, color: 'rgba(99,102,241,0.02)' }] } },
+                    lineStyle: { color: '#6366f1', width: 3 }, itemStyle: { color: '#6366f1' }, symbol: 'circle', symbolSize: 7,
+                    markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true }
+                }]
+            });
+            window.addEventListener('resize', () => chart.resize(), { once: true });
+        },
+
+        createTrendOccupancyProfitChart() {
+            const container = document.getElementById('trendOccupancyProfitChart');
+            if (!container || typeof echarts === 'undefined') return;
+            const d = this._getHistoricalProfitData();
+            if (d.keys.length === 0) return;
+
+            if (this.charts._trendOccProfit) this.charts._trendOccProfit.dispose();
+            const chart = echarts.init(container);
+            this.charts._trendOccProfit = chart;
+
+            const scatterData = d.keys.map((k, i) => ({
+                value: [d.resCounts[i], d.realProfit[i]], name: d.labels[i],
+                symbolSize: Math.max(8, Math.sqrt(Math.abs(d.lagirio[i])) * 0.5)
+            }));
+
+            // Linear regression
+            const xArr = scatterData.map(p => p.value[0]);
+            const yArr = scatterData.map(p => p.value[1]);
+            const n = xArr.length;
+            const sumX = xArr.reduce((a,b) => a+b, 0);
+            const sumY = yArr.reduce((a,b) => a+b, 0);
+            const sumXY = xArr.reduce((a,b,i) => a + b * yArr[i], 0);
+            const sumXX = xArr.reduce((a,b) => a + b*b, 0);
+            const slope = n > 1 ? (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX) : 0;
+            const intercept = n > 0 ? (sumY - slope * sumX) / n : 0;
+            const minX = Math.min(...xArr);
+            const maxX = Math.max(...xArr);
+            const avgX = sumX / n;
+            const avgY = sumY / n;
+            const covXY = xArr.reduce((a,b,i) => a + (b - avgX) * (yArr[i] - avgY), 0);
+            const stdX = Math.sqrt(xArr.reduce((a,b) => a + (b - avgX) ** 2, 0));
+            const stdY = Math.sqrt(yArr.reduce((a,b) => a + (b - avgY) ** 2, 0));
+            const corr = (stdX > 0 && stdY > 0) ? (covXY / (stdX * stdY)).toFixed(2) : '0';
+
+            chart.setOption({
+                tooltip: { trigger: 'item', formatter: function(p) { return p.name + '<br/>Rez: ' + p.value[0] + '<br/>Kâr: €' + p.value[1]; } },
+                grid: { top: 30, right: 20, bottom: 40, left: 55 },
+                xAxis: { type: 'value', name: 'Rez. Sayısı', nameLocation: 'center', nameGap: 25, axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', name: 'Gerçek Kâr (€)', nameLocation: 'center', nameGap: 40, axisLabel: { formatter: '€{value}', fontSize: 10 } },
+                graphic: [{ type: 'text', left: 'center', top: 5, style: { text: 'Korelasyon: r=' + corr, fontSize: 11, fill: '#6366f1', fontWeight: 'bold' } }],
+                series: [
+                    { type: 'scatter', data: scatterData.map(p => ({ value: p.value, name: p.name, symbolSize: p.symbolSize })), itemStyle: { color: '#6366f1' } },
+                    { type: 'line', data: [[minX, slope * minX + intercept], [maxX, slope * maxX + intercept]], lineStyle: { color: '#f59e0b', type: 'dashed', width: 2 }, symbol: 'none', silent: true }
+                ]
+            });
+            window.addEventListener('resize', () => chart.resize(), { once: true });
         },
 
         createRevenueTrendAnalysisChart() {
@@ -11132,158 +11207,70 @@
             const titleEl = document.getElementById('revenueTrendTitle');
             if (titleEl) titleEl.textContent = isOwner ? 'Kazanç Trendi' : 'Gelir Trend Analizi';
 
-            // Son 12 aylık veri
-            const data = { months: [], revenues: [], expenses: [], profit: [], grossIncome: [] };
-            const now = new Date();
-
-            for (let i = 11; i >= 0; i--) {
-                const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const monthName = targetDate.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' });
-
-                let monthRevenue = 0;
-                let monthExpenses = 0;
-                let monthGrossIncome = 0;
-
-                this.data.apartments?.forEach(apartment => {
-                    const monthReservations = this.data.reservations?.filter(res => {
-                        const date = new Date(res.checkIn);
-                        return res.apartmentId === apartment.id &&
-                            date.getMonth() === targetDate.getMonth() &&
-                            date.getFullYear() === targetDate.getFullYear();
-                    }) || [];
-
-                    const monthExpensesList = this.data.expenses?.filter(exp => {
-                        const date = new Date(exp.date);
-                        return exp.apartmentId === apartment.id &&
-                            date.getMonth() === targetDate.getMonth() &&
-                            date.getFullYear() === targetDate.getFullYear();
-                    }) || [];
-
-                    monthRevenue += this.getRelevantRevenue(apartment, monthReservations, monthExpensesList);
-                    monthExpenses += monthExpensesList.reduce((sum, exp) =>
-                        sum + this.convertToEUR(exp.amount, exp.currency), 0);
-
-                    if (isOwner) {
-                        monthGrossIncome += monthReservations.reduce((sum, res) =>
-                            sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
-                    }
-                });
-
-                data.months.push(monthName);
-                data.revenues.push(monthRevenue);
-                data.expenses.push(monthExpenses);
-                data.profit.push(monthRevenue - monthExpenses);
-                data.grossIncome.push(monthGrossIncome);
-            }
-
-            let legendData, seriesData;
-
             if (isOwner) {
-                // Owner: Brüt Gelir vs Net Kazanç (gider zaten calculateOwnerShare içinde düşülmüş)
-                legendData = ['Brüt Gelir', 'Net Kazanç'];
-                seriesData = [
-                    {
-                        name: 'Brüt Gelir',
-                        type: 'line',
-                        data: data.grossIncome,
-                        smooth: true,
-                        itemStyle: { color: '#3b82f6' },
-                        areaStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(59, 130, 246, 0.2)' },
-                                { offset: 1, color: 'rgba(59, 130, 246, 0.02)' }
-                            ])
-                        }
-                    },
-                    {
-                        name: 'Net Kazanç',
-                        type: 'bar',
-                        data: data.revenues,
-                        itemStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: '#10b981' },
-                                { offset: 1, color: '#059669' }
-                            ]),
-                            borderRadius: [4, 4, 0, 0]
-                        }
-                    }
-                ];
+                // Owner: Brüt Gelir vs Net Kazanç
+                const data = { months: [], grossIncome: [], netIncome: [] };
+                const now = new Date();
+                for (let i = 11; i >= 0; i--) {
+                    const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const monthName = targetDate.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' });
+                    let monthGross = 0, monthNet = 0;
+                    this.data.apartments?.forEach(apartment => {
+                        const monthRes = this.data.reservations?.filter(res => {
+                            const d = new Date(res.checkIn);
+                            return res.apartmentId === apartment.id && d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                        }) || [];
+                        const monthExp = this.data.expenses?.filter(exp => {
+                            const d = new Date(exp.date);
+                            return exp.apartmentId === apartment.id && d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                        }) || [];
+                        monthGross += monthRes.reduce((sum, res) => sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
+                        monthNet += this.calculateOwnerShare(apartment, monthRes, monthExp);
+                    });
+                    data.months.push(monthName);
+                    data.grossIncome.push(monthGross);
+                    data.netIncome.push(monthNet);
+                }
+                chart.setOption({
+                    tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent' },
+                    legend: { data: ['Brüt Gelir', 'Net Kazanç'], bottom: 0 },
+                    grid: { left: '3%', right: '4%', bottom: '15%', top: '3%', containLabel: true },
+                    xAxis: { type: 'category', data: data.months, axisLabel: { rotate: 45, fontSize: 10 } },
+                    yAxis: { type: 'value', axisLabel: { formatter: value => `€${(value / 1000).toFixed(0)}k` } },
+                    series: [
+                        { name: 'Brüt Gelir', type: 'line', data: data.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
+                          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.2)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } },
+                        { name: 'Net Kazanç', type: 'bar', data: data.netIncome, itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } }
+                    ]
+                });
             } else {
-                // Admin: Gelir, Gider, Net Kâr
-                legendData = ['Gelir', 'Gider', 'Net Kâr'];
-                seriesData = [
-                    {
-                        name: 'Gelir',
-                        type: 'line',
-                        data: data.revenues,
-                        smooth: true,
-                        itemStyle: { color: '#10b981' },
-                        areaStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
-                                { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
-                            ])
+                // Admin: Brüt Kazanç (Lagirio), Şirket Gideri, Gerçek Kâr
+                const d = this._getHistoricalProfitData();
+                chart.setOption({
+                    tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent',
+                        formatter: function(params) {
+                            let html = params[0].axisValue;
+                            params.forEach(p => { html += '<br/><span style="color:' + p.color + '">●</span> ' + p.seriesName + ': €' + p.value.toLocaleString(); });
+                            return html;
                         }
                     },
-                    {
-                        name: 'Gider',
-                        type: 'line',
-                        data: data.expenses,
-                        smooth: true,
-                        itemStyle: { color: '#ef4444' },
-                        areaStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(239, 68, 68, 0.3)' },
-                                { offset: 1, color: 'rgba(239, 68, 68, 0.05)' }
-                            ])
-                        }
-                    },
-                    {
-                        name: 'Net Kâr',
-                        type: 'bar',
-                        data: data.profit,
-                        itemStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: '#3b82f6' },
-                                { offset: 1, color: '#2563eb' }
-                            ])
-                        }
-                    }
-                ];
+                    legend: { data: ['Brüt Kazanç', 'Şirket Gideri', 'Gerçek Kâr'], bottom: 0 },
+                    grid: { left: '3%', right: '4%', bottom: '15%', top: '3%', containLabel: true },
+                    xAxis: { type: 'category', data: d.labels, axisLabel: { rotate: 45, fontSize: 10 } },
+                    yAxis: { type: 'value', axisLabel: { formatter: value => `€${(value / 1000).toFixed(0)}k` } },
+                    series: [
+                        { name: 'Brüt Kazanç', type: 'bar', data: d.lagirio, itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
+                        { name: 'Şirket Gideri', type: 'line', data: d.compExp, smooth: true, itemStyle: { color: '#f59e0b' },
+                          lineStyle: { width: 2, type: 'dashed' }, symbol: 'circle', symbolSize: 5 },
+                        { name: 'Gerçek Kâr', type: 'line', data: d.realProfit, smooth: true, itemStyle: { color: '#6366f1' },
+                          lineStyle: { width: 3 }, symbol: 'diamond', symbolSize: 8,
+                          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(99,102,241,0.2)'},{offset:1,color:'rgba(99,102,241,0.02)'}]) },
+                          markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } }
+                    ]
+                });
             }
-
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                    borderColor: 'transparent'
-                },
-                legend: {
-                    data: legendData,
-                    bottom: 0
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '15%',
-                    top: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: data.months,
-                    axisLabel: { rotate: 45, fontSize: 10 }
-                },
-                yAxis: {
-                    type: 'value',
-                    axisLabel: {
-                        formatter: value => `€${(value / 1000).toFixed(0)}k`
-                    }
-                },
-                series: seriesData
-            };
-
-            chart.setOption(option);
         },
 
         createOccupancyTrendChart() {
