@@ -11047,13 +11047,15 @@
                     }
                 });
 
-                const realP = monthLagirio - baseCompExp;
+                // Şirket gideri: o ay girildiyse gerçek değer, girilmediyse ortalama
+                const monthCompExp = expByMonth[mk] != null ? expByMonth[mk] : baseCompExp;
+                const realP = monthLagirio - monthCompExp;
                 const margin = monthLagirio > 0 ? ((realP / monthLagirio) * 100) : 0;
 
                 result.keys.push(mk);
                 result.labels.push(label);
                 result.lagirio.push(parseFloat(monthLagirio.toFixed(2)));
-                result.compExp.push(parseFloat(baseCompExp.toFixed(2)));
+                result.compExp.push(parseFloat(monthCompExp.toFixed(2)));
                 result.realProfit.push(parseFloat(realP.toFixed(2)));
                 result.margins.push(parseFloat(margin.toFixed(1)));
                 result.resCounts.push(monthResCount);
