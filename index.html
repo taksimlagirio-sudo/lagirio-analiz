@@ -1587,7 +1587,7 @@
                     <div id="projOwnerWaterfall" class="hidden mb-4"></div>
 
                     <!-- Top row: big cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div id="projTopGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
                             <div class="text-sm opacity-80 mb-1">Tahmini Brüt Gelir</div>
                             <div class="text-2xl font-bold" id="projGrossRevenue">€0</div>
@@ -1602,6 +1602,13 @@
                             <div class="text-sm opacity-80 mb-1">Ort. Gecelik Fiyat</div>
                             <div class="text-2xl font-bold" id="projAvgNightly">€0</div>
                             <div class="text-xs opacity-60 mt-1" id="projNightlyDetail">Gelecek rez. ortalaması</div>
+                        </div>
+                        <!-- Admin: Gerçek Kâr kartı -->
+                        <div id="projRealProfitCard" class="admin-only bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-5 text-white hidden">
+                            <div class="text-sm opacity-80 mb-1">Gerçek K\u00e2r (Net)</div>
+                            <div class="text-2xl font-bold" id="projRealProfit">\u20ac0</div>
+                            <div class="text-xs opacity-60 mt-1">\u015eirket Gideri: <span id="projCompanyExpense" class="font-medium">\u20ac0</span>/y\u0131l <span id="projCompanyExpNote"></span></div>
+                            <div class="text-xs opacity-60">K\u00e2r Marj\u0131: <span id="projProfitMargin" class="font-bold">0%</span></div>
                         </div>
                     </div>
                     <!-- Bottom row: kesintiler -->
@@ -1685,6 +1692,73 @@
                         </h3>
                         <div id="projApartmentList" class="space-y-1">
                             <p class="text-sm text-gray-400">Veri bekleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin: K\u00e2rl\u0131l\u0131k Analiz Paneli -->
+                <div id="projAdminProfitPanel" class="admin-only bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                            <i data-lucide="bar-chart-big" class="w-5 h-5 text-indigo-600"></i>
+                            <span>K\u00e2rl\u0131l\u0131k Analizi</span>
+                        </h3>
+                        <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+                            <button onclick="Projection.switchProfitView('monthly')" id="profitViewMonthly" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white shadow text-gray-800">Ay-Ay</button>
+                            <button onclick="Projection.switchProfitView('range')" id="profitViewRange" class="px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800">Aral\u0131k</button>
+                            <button onclick="Projection.switchProfitView('compare')" id="profitViewCompare" class="px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800">D\u00f6nem Kar\u015f\u0131la\u015ft\u0131r</button>
+                        </div>
+                    </div>
+                    <div id="profitRangeSelector" class="hidden mb-4 flex items-center gap-3">
+                        <select id="profitRangeStart" class="text-xs border border-gray-200 rounded-lg px-3 py-2"></select>
+                        <span class="text-gray-400">\u2192</span>
+                        <select id="profitRangeEnd" class="text-xs border border-gray-200 rounded-lg px-3 py-2"></select>
+                        <button onclick="Projection.applyProfitRange()" class="bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-600 transition">Uygula</button>
+                    </div>
+                    <div id="profitCompareSelector" class="hidden mb-4">
+                        <div class="flex gap-4 flex-wrap items-end">
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">D\u00f6nem A (\u00e7oklu se\u00e7im)</label>
+                                <select id="profitCompareA" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <span class="text-lg text-gray-300 self-center">vs</span>
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">D\u00f6nem B (\u00e7oklu se\u00e7im)</label>
+                                <select id="profitCompareB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <button onclick="Projection.applyProfitCompare()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end">Kar\u015f\u0131la\u015ft\u0131r</button>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile \u00e7oklu ay se\u00e7ebilirsiniz. Farkl\u0131 y\u0131llardan aylar kar\u015f\u0131la\u015ft\u0131r\u0131labilir.</p>
+                    </div>
+                    <div id="profitViewContent"></div>
+                </div>
+
+                <!-- Admin: K\u00e2r Trend Grafikleri -->
+                <div id="projAdminTrendPanel" class="admin-only bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
+                        <span>K\u00e2r Trendleri</span>
+                    </h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Ayl\u0131k K\u00e2r Ak\u0131\u015f\u0131</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">Br\u00fct Kazan\u00e7 \u2192 Ger\u00e7ek K\u00e2r d\u00f6n\u00fc\u015f\u00fcm\u00fc</p>
+                            <div id="projProfitTrendChart" style="height:320px"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Daire K\u00e2rl\u0131l\u0131k Trendi (Top 5)</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">En k\u00e2rl\u0131 5 dairenin ayl\u0131k Lagirio kazanc\u0131</p>
+                            <div id="projAptProfitTrendChart" style="height:320px"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">K\u00e2r Marj\u0131 Trendi</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">Ger\u00e7ek K\u00e2r / Br\u00fct Kazan\u00e7 oran\u0131n\u0131n ayl\u0131k de\u011fi\u015fimi</p>
+                            <div id="projProfitMarginChart" style="height:280px"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Doluluk-K\u00e2rl\u0131l\u0131k \u0130li\u015fkisi</h4>
+                            <p class="text-[10px] text-gray-400 mb-2">Rezervasyon yo\u011funlu\u011fu ile k\u00e2r aras\u0131ndaki korelasyon</p>
+                            <div id="projOccupancyProfitChart" style="height:280px"></div>
                         </div>
                     </div>
                 </div>
@@ -4139,7 +4213,7 @@
                 const platCommRatio = hist.platformCommRate[aptId] ?? hist.avgPlatformCommRate;
                 const bankCashRatio = hist.bankRatio[aptId] ?? hist.avgBankRatio;
 
-                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment.code || aptId, systemType: sysType, commission: apartment.lagirioCommission || 0, gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, ownerShare: 0, months: 0, avgNightly: 0, count: 0 };
+                if (!aptTotals[aptId]) aptTotals[aptId] = { id: aptId, code: apartment.code || aptId, systemType: sysType, commission: apartment.lagirioCommission || 0, gross: 0, expenses: 0, kdv: 0, platComm: 0, lagirio: 0, ownerShare: 0, months: 0, avgNightly: 0, count: 0, totalNights: 0, nightlyProfit: 0 };
                 if (!aptMonthlyDetail[aptId]) aptMonthlyDetail[aptId] = {};
 
                 months12.forEach(({ month, year, monthKey }) => {
@@ -4223,6 +4297,7 @@
                     aptTotals[aptId].months++;
                     aptTotals[aptId].avgNightly += avgNightly;
                     aptTotals[aptId].count += estimate.count;
+                    aptTotals[aptId].totalNights += (estimate.totalNights || this.OCCUPANCY_DAYS);
 
                     // Daire-ay detayı
                     aptMonthlyDetail[aptId][monthKey] = {
@@ -4248,6 +4323,10 @@
 
                 // Daire ortalamasını düzelt
                 if (aptTotals[aptId].months > 0) aptTotals[aptId].avgNightly = aptTotals[aptId].avgNightly / aptTotals[aptId].months;
+                // Gecelik kâr hesapla
+                if (aptTotals[aptId].totalNights > 0) {
+                    aptTotals[aptId].nightlyProfit = aptTotals[aptId].lagirio / aptTotals[aptId].totalNights;
+                }
             });
 
             // Ay bazlı ortalamaları düzelt
@@ -4255,8 +4334,28 @@
                 if (m.aptCount > 0) m.avgNightly = m.avgNightly / m.aptCount;
             });
 
+            // --- Şirket gideri tahmini ve gerçek kâr ---
+            const avgMonthlyLagirio = totalLagirioNet / 12;
+            const estMonthlyCompanyExp = this.estimateMonthlyCompanyExpense(avgMonthlyLagirio);
+            const totalCompanyExpense = estMonthlyCompanyExp * 12;
+            const realProfit = totalLagirioNet - totalCompanyExpense;
+
+            // monthlyData'ya companyExpense ve realProfit ekle
+            Object.keys(monthlyData).forEach(mk => {
+                monthlyData[mk].companyExpense = estMonthlyCompanyExp;
+                monthlyData[mk].realProfit = monthlyData[mk].lagirio - estMonthlyCompanyExp;
+            });
+
+            // Cache for trend/comparison panels
+            this._lastMonthlyData = monthlyData;
+            this._lastAptMonthlyDetail = aptMonthlyDetail;
+            this._lastAptTotals = aptTotals;
+            this._estMonthlyCompanyExp = estMonthlyCompanyExp;
+            this._totalCompanyExpense = totalCompanyExpense;
+            this._realProfit = realProfit;
+
             // --- 4. UI Güncelle ---
-            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, totalOwnerNet, totalResCount, Object.keys(aptTotals).length);
+            this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, totalOwnerNet, totalResCount, Object.keys(aptTotals).length, totalCompanyExpense, realProfit, estMonthlyCompanyExp);
             this.renderMonthlyChart(monthlyData);
             this.renderMonthlyOverview(monthlyData, aptMonthlyDetail);
             this.renderApartmentList(Object.values(aptTotals), aptMonthlyDetail);
@@ -4276,8 +4375,18 @@
             if (tableSubtitle) tableSubtitle.textContent = isOwner ? '(tüm daireleriniz toplam)' : '(tüm daireler toplam)';
             if (!isOwner) {
                 document.getElementById('projResTableSection')?.classList.remove('hidden');
+                // Admin kârlılık panelleri
+                document.getElementById('projAdminProfitPanel')?.classList.remove('hidden');
+                document.getElementById('projAdminTrendPanel')?.classList.remove('hidden');
+                this.switchProfitView(this._profitViewMode || 'monthly');
+                this.renderProfitTrendChart();
+                this.renderAptProfitTrendChart();
+                this.renderProfitMarginTrendChart();
+                this.renderOccupancyProfitChart();
             } else {
                 document.getElementById('projResTableSection')?.classList.add('hidden');
+                document.getElementById('projAdminProfitPanel')?.classList.add('hidden');
+                document.getElementById('projAdminTrendPanel')?.classList.add('hidden');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
@@ -4339,23 +4448,49 @@
         },
 
         // ---- Render Functions ----
-        renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, ownerNet, resCount, aptCount) {
+        renderSummaryCards(estGross, estExpenses, estKDV, estPlatComm, lagirioNet, ownerNet, resCount, aptCount, companyExpense, realProfit, monthlyCompExp) {
             const isOwner = Auth.currentUser?.role === 'owner';
+            companyExpense = companyExpense || 0;
+            realProfit = realProfit || 0;
+            monthlyCompExp = monthlyCompExp || 0;
 
-            // Üst satır: Brüt, Ana Kazanç, Gecelik
+            // \u00dcst sat\u0131r: Br\u00fct, Ana Kazan\u00e7, Gecelik
             document.getElementById('projGrossRevenue').textContent = '\u20ac' + estGross.toFixed(2);
             document.getElementById('projGrossDetail').textContent = aptCount + ' daire | 12 ay | Karma tahmin';
 
             if (isOwner) {
-                document.getElementById('projMainLabel').textContent = 'Tahmini Net Kazancınız';
+                document.getElementById('projMainLabel').textContent = 'Tahmini Net Kazanc\u0131n\u0131z';
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + ownerNet.toFixed(2);
                 const ownerRatio = estGross > 0 ? Math.round((ownerNet / estGross) * 100) : 0;
-                document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + ownerRatio + '\'i';
+                document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + ownerRatio + '\'i';
             } else {
-                document.getElementById('projMainLabel').textContent = 'Lagirio Net Kazanç';
+                document.getElementById('projMainLabel').textContent = 'Br\u00fct Kazan\u00e7 (Dairelerden)';
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + lagirioNet.toFixed(2);
                 const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
-                document.getElementById('projLagirioDetail').textContent = 'Brüt gelirin %' + lagirioRatio + '\'i';
+                document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
+
+                // Ger\u00e7ek K\u00e2r kart\u0131
+                const rpEl = document.getElementById('projRealProfit');
+                if (rpEl) {
+                    rpEl.textContent = '\u20ac' + realProfit.toFixed(2);
+                    rpEl.className = realProfit >= 0 ? 'text-2xl font-bold' : 'text-2xl font-bold text-red-200';
+                }
+                const ceEl = document.getElementById('projCompanyExpense');
+                if (ceEl) ceEl.textContent = '\u20ac' + companyExpense.toFixed(2);
+                const noteEl = document.getElementById('projCompanyExpNote');
+                if (noteEl) noteEl.textContent = '(\u20ac' + monthlyCompExp.toFixed(0) + '/ay tahmin)';
+                const marginEl = document.getElementById('projProfitMargin');
+                if (marginEl) {
+                    const margin = lagirioNet > 0 ? ((realProfit / lagirioNet) * 100).toFixed(1) : '0.0';
+                    marginEl.textContent = '%' + margin;
+                }
+                // Grid 3\u21924 s\u00fctun
+                const topGrid = document.getElementById('projTopGrid');
+                if (topGrid) {
+                    topGrid.classList.remove('md:grid-cols-3');
+                    topGrid.classList.add('md:grid-cols-4');
+                }
+                document.getElementById('projRealProfitCard')?.classList.remove('hidden');
             }
 
             const avgNightly = estGross > 0 ? estGross / (aptCount * 12 * this.OCCUPANCY_DAYS || 1) : 0;
@@ -4477,6 +4612,64 @@
 
             wf.innerHTML = html;
             if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        // --- Admin: Şirket gideri tahmini (orantılı ayarlama ile) ---
+        estimateMonthlyCompanyExpense(projectedMonthlyProfit) {
+            const exps = Analytics.data?.lagirioExpenses || [];
+            if (exps.length === 0) return 0;
+            const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
+
+            // Aylık toplama (sadece gider girilen aylar)
+            const monthTotals = {};
+            exps.forEach(e => {
+                const d = new Date(e.date);
+                const mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+                if (!monthTotals[mk]) monthTotals[mk] = 0;
+                monthTotals[mk] += convertEUR(e.amount, e.currency);
+            });
+
+            const expMonths = Object.keys(monthTotals);
+            if (expMonths.length === 0) return 0;
+
+            const baseMonthlyExp = Object.values(monthTotals).reduce((s,v) => s+v, 0) / expMonths.length;
+
+            // Aynı aylar için geçmiş daire kârı (Lagirio kazancı) hesapla
+            let histProfitSum = 0;
+            const apartments = Analytics.data?.apartments || [];
+            expMonths.forEach(mk => {
+                const [y, m] = mk.split('-');
+                let monthProfit = 0;
+                apartments.forEach(apt => {
+                    const monthRes = (Analytics.data?.reservations || []).filter(r => {
+                        const rd = new Date(r.checkIn);
+                        return r.apartmentId === apt.id && rd.getMonth() === parseInt(m)-1 && rd.getFullYear() === parseInt(y);
+                    });
+                    const monthExp = (Analytics.data?.expenses || []).filter(e => {
+                        const ed = new Date(e.date);
+                        return e.apartmentId === apt.id && ed.getMonth() === parseInt(m)-1 && ed.getFullYear() === parseInt(y);
+                    });
+                    if (Analytics.calculateLagirioRevenue) {
+                        monthProfit += Analytics.calculateLagirioRevenue(apt, monthRes, monthExp);
+                    }
+                });
+                histProfitSum += monthProfit;
+            });
+            const baseMonthlyProfit = histProfitSum / expMonths.length;
+
+            // Oran ayarlaması: daire kârı artışına orantılı şirket gideri artırımı
+            // Her 1.5x oran artışında %15, doğrusal interpolasyon
+            if (baseMonthlyProfit > 0 && baseMonthlyExp > 0 && projectedMonthlyProfit > 0) {
+                const histRatio = baseMonthlyProfit / baseMonthlyExp;
+                const projRatio = projectedMonthlyProfit / baseMonthlyExp;
+                const ratioGrowth = projRatio / histRatio;
+                if (ratioGrowth > 1) {
+                    const multiplier = 1 + (ratioGrowth - 1) * 0.3;
+                    return baseMonthlyExp * multiplier;
+                }
+            }
+
+            return baseMonthlyExp;
         },
 
         renderMonthlyChart(monthlyData) {
