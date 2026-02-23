@@ -6551,12 +6551,32 @@
             const stats = this.calculateQuickStats();
             const isOwner = Auth.currentUser?.role === 'owner';
 
+            // Admin: Gerçek kâr hesapla (toplam portföy = brüt kazanç - şirket gideri)
+            let portfolioDisplay = stats.totalPortfolio;
+            if (!isOwner) {
+                const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
+                const lagirioExps = this.data?.lagirioExpenses || [];
+                let totalCompanyExp = 0;
+                lagirioExps.forEach(e => { totalCompanyExp += convertEUR(e.amount, e.currency); });
+                stats.totalCompanyExpense = totalCompanyExp;
+                stats.realProfit = stats.totalPortfolio - totalCompanyExp;
+                portfolioDisplay = stats.realProfit;
+            }
+
+            // Aylık gelir label'ını güncelle (hangi ay gösteriliyor)
+            const monthNamesShort = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const shownMonth = stats._monthlyTargetMonth;
+            const shownYear = stats._monthlyTargetYear;
+            const now2 = new Date();
+            const isCurrentMonth = shownMonth === now2.getMonth() && shownYear === now2.getFullYear();
+            const monthLabel = isCurrentMonth ? 'Bu Ay' : monthNamesShort[shownMonth] + ' ' + shownYear;
+
             // Header stats
-            document.getElementById('headerPortfolioValue').textContent = `€${stats.totalPortfolio.toLocaleString()}`;
+            document.getElementById('headerPortfolioValue').textContent = `€${portfolioDisplay.toLocaleString()}`;
             document.getElementById('headerMonthlyValue').textContent = `€${stats.monthlyRevenue.toLocaleString()}`;
 
             // KPI Cards
-            document.getElementById('totalPortfolioValue').textContent = `€${stats.totalPortfolio.toLocaleString()}`;
+            document.getElementById('totalPortfolioValue').textContent = `€${portfolioDisplay.toLocaleString()}`;
             document.getElementById('monthlyRevenue').textContent = `€${stats.monthlyRevenue.toLocaleString()}`;
             document.getElementById('activeProperties').textContent = `${stats.activeProperties}/${stats.totalProperties}`;
             document.getElementById('avgOccupancy').textContent = `${stats.avgOccupancy.toFixed(1)}%`;
@@ -6568,7 +6588,7 @@
                 const headerPortLabel = document.getElementById('headerPortfolioLabel');
                 if (headerPortLabel) headerPortLabel.textContent = 'Net Kazanç';
                 const headerMonthLabel = document.getElementById('headerMonthlyLabel');
-                if (headerMonthLabel) headerMonthLabel.textContent = 'Bu Ay Kazanç';
+                if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? 'Bu Ay Kazanç' : monthLabel;
 
                 // "En Karlı Sistem" → "Toplam Gider"
                 const systemLabel = document.getElementById('bestSystemLabel');
@@ -6577,6 +6597,13 @@
                 const systemProfitEl = document.getElementById('systemProfit');
                 if (systemProfitEl) systemProfitEl.textContent = `${stats.totalProperties} daire`;
             } else {
+                // Admin: label'ları düzelt
+                const portfolioLabel = document.getElementById('portfolioLabel');
+                if (portfolioLabel) portfolioLabel.textContent = 'Gerçek Kâr';
+                const headerPortLabel = document.getElementById('headerPortfolioLabel');
+                if (headerPortLabel) headerPortLabel.textContent = 'Gerçek Kâr';
+                const headerMonthLabel = document.getElementById('headerMonthlyLabel');
+                if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? 'Bu Ay' : monthLabel;
                 document.getElementById('bestSystem').textContent = `Sistem ${stats.bestSystem.id}`;
                 document.getElementById('systemProfit').textContent = `€${stats.bestSystem.profit.toLocaleString()}`;
             }
@@ -6861,6 +6888,7 @@
             });
             
             // Calculate monthly revenue - tarih filtresine göre
+            // Rez yoksa geriye gidip son rez olan ayı bul
             let targetMonth, targetYear;
             if (this.dateFilter.start || this.dateFilter.end) {
                 const filterDate = this.dateFilter.start || this.dateFilter.end;
@@ -6870,7 +6898,33 @@
                 const now = new Date();
                 targetMonth = now.getMonth();
                 targetYear = now.getFullYear();
+
+                // Mevcut ayda rez var mı kontrol et
+                const hasCurrentMonthRes = this.data.reservations?.some(res => {
+                    const d = new Date(res.checkIn);
+                    return d.getMonth() === targetMonth && d.getFullYear() === targetYear;
+                });
+
+                if (!hasCurrentMonthRes) {
+                    // Geriye gidip son rez olan ayı bul (max 12 ay)
+                    for (let back = 1; back <= 12; back++) {
+                        const prev = new Date(now.getFullYear(), now.getMonth() - back, 1);
+                        const pm = prev.getMonth();
+                        const py = prev.getFullYear();
+                        const hasPrevRes = this.data.reservations?.some(res => {
+                            const d = new Date(res.checkIn);
+                            return d.getMonth() === pm && d.getFullYear() === py;
+                        });
+                        if (hasPrevRes) {
+                            targetMonth = pm;
+                            targetYear = py;
+                            break;
+                        }
+                    }
+                }
             }
+            stats._monthlyTargetMonth = targetMonth;
+            stats._monthlyTargetYear = targetYear;
 
             this.data.apartments?.forEach(apartment => {
                 const monthlyReservations = this.data.reservations?.filter(res => {
@@ -6890,18 +6944,26 @@
                 stats.monthlyRevenue += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
             });
             
-            // Calculate average occupancy
+            // Calculate average occupancy — sadece rez olan ayı baz al
             let totalOccupancy = 0;
             let occupancyCount = 0;
-            
+            const occStart = new Date(targetYear, targetMonth, 1);
+            const occEnd = new Date(targetYear, targetMonth + 1, 0);
+
             this.data.apartments?.forEach(apartment => {
-                const occupancy = this.calculateOccupancyRate(apartment.id);
-                if (occupancy > 0) {
-                    totalOccupancy += occupancy;
-                    occupancyCount++;
+                const hasRes = this.data.reservations?.some(res => {
+                    const d = new Date(res.checkIn);
+                    return res.apartmentId === apartment.id && d.getMonth() === targetMonth && d.getFullYear() === targetYear;
+                });
+                if (hasRes) {
+                    const occupancy = this.calculateOccupancyRate(apartment.id, occStart, occEnd);
+                    if (occupancy > 0) {
+                        totalOccupancy += occupancy;
+                        occupancyCount++;
+                    }
                 }
             });
-            
+
             stats.avgOccupancy = occupancyCount > 0 ? totalOccupancy / occupancyCount : 0;
             
             // Find best performing system
@@ -7717,11 +7779,13 @@
             if (!isOwner && period === 'monthly') {
                 // Admin aylık: Brüt Kazanç (Lagirio) + Gerçek Kâr (şirket gideri düşülmüş)
                 const profitData = this._getHistoricalProfitData();
-                // Dashboard son 6 ayı gösteriyor, profitData son 12 ay - son 6'sını al
-                const sliceStart = Math.max(0, profitData.labels.length - 6);
-                const labels = profitData.labels.slice(sliceStart);
-                const lagirioVals = profitData.lagirio.slice(sliceStart);
-                const realProfitVals = profitData.realProfit.slice(sliceStart);
+                // Sadece rez olan ayları al, son 6 tanesini göster
+                const activeIndices = [];
+                profitData.resCounts.forEach((c, i) => { if (c > 0) activeIndices.push(i); });
+                const showIndices = activeIndices.slice(-6);
+                const labels = showIndices.map(i => profitData.labels[i]);
+                const lagirioVals = showIndices.map(i => profitData.lagirio[i]);
+                const realProfitVals = showIndices.map(i => profitData.realProfit[i]);
 
                 chart.setOption({
                     tooltip: {
@@ -7753,6 +7817,16 @@
                 });
             } else {
                 // Owner veya admin diğer periyotlar: tek satır grafik
+                // Monthly: sadece veri olan ayları göster
+                let filteredLabels = data.labels;
+                let filteredValues = data.values;
+                if (period === 'monthly') {
+                    const activeIdx = [];
+                    data.values.forEach((v, i) => { if (v > 0) activeIdx.push(i); });
+                    const showIdx = activeIdx.slice(-6);
+                    filteredLabels = showIdx.map(i => data.labels[i]);
+                    filteredValues = showIdx.map(i => data.values[i]);
+                }
                 const label = isOwner ? 'Net Kazanç' : 'Kazanç';
                 chart.setOption({
                     tooltip: {
@@ -7763,11 +7837,11 @@
                         formatter: params => `${params[0].name}<br/><span style="color:${params[0].color}">●</span> ${label}: €${params[0].value.toLocaleString()}`
                     },
                     grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
-                    xAxis: { type: 'category', data: data.labels, axisLine: { lineStyle: { color: '#e5e7eb' } }, axisLabel: { color: '#6b7280', fontSize: 11 } },
+                    xAxis: { type: 'category', data: filteredLabels, axisLine: { lineStyle: { color: '#e5e7eb' } }, axisLabel: { color: '#6b7280', fontSize: 11 } },
                     yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
                         axisLabel: { color: '#6b7280', formatter: value => `€${(value / 1000).toFixed(0)}k` } },
                     series: [{
-                        name: label, type: 'line', data: data.values, smooth: true, symbol: 'circle', symbolSize: 8,
+                        name: label, type: 'line', data: filteredValues, smooth: true, symbol: 'circle', symbolSize: 8,
                         lineStyle: { width: 3, color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]) },
                         itemStyle: { color: '#10b981', borderColor: '#fff', borderWidth: 2 },
                         areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(16,185,129,0.3)'},{offset:1,color:'rgba(16,185,129,0.05)'}]) },
@@ -11001,13 +11075,11 @@
         _getHistoricalProfitData() {
             const now = new Date();
             const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-            const months = [];
             const result = { keys: [], labels: [], lagirio: [], compExp: [], realProfit: [], margins: [], resCounts: [], aptData: {} };
 
             // Şirket gideri tahmini
             const lagirioExps = this.data?.lagirioExpenses || [];
             const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
-            let totalLagirioExp = 0, expMonthCount = 0;
             const expByMonth = {};
             lagirioExps.forEach(e => {
                 const d = new Date(e.date);
@@ -11047,8 +11119,11 @@
                     }
                 });
 
-                // Şirket gideri: o ay girildiyse gerçek değer, girilmediyse ortalama
-                const monthCompExp = expByMonth[mk] != null ? expByMonth[mk] : baseCompExp;
+                // Rez olmayan ayda şirket gideri yazılmaz
+                let monthCompExp = 0;
+                if (monthResCount > 0) {
+                    monthCompExp = expByMonth[mk] != null ? expByMonth[mk] : baseCompExp;
+                }
                 const realP = monthLagirio - monthCompExp;
                 const margin = monthLagirio > 0 ? ((realP / monthLagirio) * 100) : 0;
 
