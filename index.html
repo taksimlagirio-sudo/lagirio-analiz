@@ -2355,6 +2355,7 @@
         logout() {
             this.currentUser = null;
             localStorage.removeItem(this.STORAGE_KEY);
+            GoogleDrive.clearToken();
             document.body.classList.remove('owner-mode');
             document.getElementById('appWrapper').classList.remove('active');
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -2566,6 +2567,7 @@
                             });
                             if (r.ok) GoogleDrive.userEmail = (await r.json()).email;
                         } catch(e) {}
+                        GoogleDrive.saveToken(response.access_token);
 
                         // Drive'dan kullanıcıları çek
                         let cfg = GoogleDrive.getConfig();
@@ -2666,6 +2668,7 @@
                                 });
                                 if (r.ok) GoogleDrive.userEmail = (await r.json()).email;
                             } catch(e) {}
+                            GoogleDrive.saveToken(response.access_token);
 
                             // Kullanıcıları senkronize et
                             await this.syncUsersFromDrive(config.fileId);
@@ -2720,9 +2723,39 @@
     // ============================================================
     const GoogleDrive = {
         STORAGE_KEY: 'lagirioDriveConfig',
+        TOKEN_KEY: 'lagirioDriveToken',
         accessToken: null,
         tokenClient: null,
         userEmail: null,
+
+        // ---- Token Persistence (sessionStorage) ----
+        saveToken(token, email) {
+            try {
+                sessionStorage.setItem(this.TOKEN_KEY, JSON.stringify({
+                    token, email: email || this.userEmail || null,
+                    ts: Date.now()
+                }));
+            } catch(e) {}
+        },
+
+        getSavedToken() {
+            try {
+                const saved = JSON.parse(sessionStorage.getItem(this.TOKEN_KEY));
+                if (!saved?.token) return null;
+                // Google access token 1 saat geçerli, 55 dk içinde kabul et
+                if (Date.now() - saved.ts > 55 * 60 * 1000) {
+                    sessionStorage.removeItem(this.TOKEN_KEY);
+                    return null;
+                }
+                return saved;
+            } catch(e) { return null; }
+        },
+
+        clearToken() {
+            sessionStorage.removeItem(this.TOKEN_KEY);
+            this.accessToken = null;
+            this.userEmail = null;
+        },
 
         // ---- Config Management ----
         getConfig() {
@@ -2912,6 +2945,7 @@
                                 this.userEmail = info.email;
                             }
                         } catch(e) {}
+                        this.saveToken(response.access_token);
 
                         this.hideMessage();
                         this.updateUI();
@@ -2929,12 +2963,35 @@
             }
         },
 
-        // Auto-connect on page load (silent - uses prompt: 'none')
-        tryAutoConnect() {
+        // Auto-connect on page load - önce kayıtlı token dene, yoksa sessiz OAuth dene
+        async tryAutoConnect() {
             const config = this.getConfig();
             if (!config.clientId || !config.fileId) return;
 
-            // Show a loading hint on the drive panel
+            // 1) SessionStorage'da geçerli token var mı?
+            const saved = this.getSavedToken();
+            if (saved) {
+                // Token geçerli mi API ile doğrula
+                try {
+                    const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                        headers: { 'Authorization': 'Bearer ' + saved.token }
+                    });
+                    if (r.ok) {
+                        // Token hâlâ geçerli - doğrudan kullan
+                        this.accessToken = saved.token;
+                        this.userEmail = saved.email || (await r.json()).email;
+                        this.updateUI();
+                        if (config.autoLoad !== false) {
+                            this.loadFromDrive(true);
+                        }
+                        return;
+                    }
+                } catch(e) {}
+                // Token geçersiz/süresi dolmuş - temizle
+                this.clearToken();
+            }
+
+            // 2) Kayıtlı token yok veya geçersiz - Google'dan sessiz token iste
             this.showStatus('<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="loader" class="w-4 h-4 animate-spin flex-shrink-0"></i> Otomatik bağlanılıyor...</div>');
 
             try {
@@ -2954,6 +3011,7 @@
                             });
                             if (r.ok) this.userEmail = (await r.json()).email;
                         } catch(e) {}
+                        this.saveToken(response.access_token);
 
                         this.updateUI();
 
@@ -3178,6 +3236,7 @@
                             });
                             if (r.ok) this.userEmail = (await r.json()).email;
                         } catch(e) {}
+                        this.saveToken(response.access_token);
 
                         this.updateUI();
                         this.updateModalUI();
@@ -3381,6 +3440,7 @@
                             });
                             if (r.ok) this.userEmail = (await r.json()).email;
                         } catch(e) {}
+                        this.saveToken(response.access_token);
 
                         if (statusEl) statusEl.textContent = 'Bağlantı kuruldu! Dosya aranıyor...';
 
@@ -11763,14 +11823,19 @@
 
             // Projeksiyon verisi yoksa arka planda hesaplat
             if (!Projection._lastMonthlyData) {
+                // PMS rezervasyonlarını localStorage'dan yükle (init çağrılmamış olabilir)
                 if (!Projection.reservations || Projection.reservations.length === 0) {
                     try {
                         const saved = localStorage.getItem(Projection.STORAGE_KEY);
                         if (saved) Projection.reservations = JSON.parse(saved);
                     } catch(e) {}
                 }
-                if (Projection.reservations && Projection.reservations.length > 0) {
-                    Projection.calculate();
+                // Daire verisi + herhangi bir rezervasyon kaynağı varsa hesapla
+                const hasApartments = Analytics.data?.apartments?.length > 0;
+                const hasPmsRes = Projection.reservations && Projection.reservations.length > 0;
+                const hasAnalyticsRes = Analytics.data?.reservations?.length > 0;
+                if (hasApartments && (hasPmsRes || hasAnalyticsRes)) {
+                    try { Projection.calculate(); } catch(e) { console.warn('Projeksiyon hesaplanamadı:', e); }
                 }
             }
 
