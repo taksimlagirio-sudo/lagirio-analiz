@@ -6517,28 +6517,19 @@
             const compExpDate = document.getElementById('compExpDate');
             if (compExpDate && !compExpDate.value) compExpDate.valueAsDate = new Date();
             
-            // ✅ Grafikleri gecikmeyle çiz
-            setTimeout(() => {
-                console.log('🎨 Grafikler çiziliyor...');
-                this.initializeCharts();
-                
-                // Grafikleri resize et
-                setTimeout(() => {
-                    Object.values(this.charts).forEach(chart => {
-                        if (chart && chart.resize) {
-                            chart.resize();
-                        }
-                    });
-                    console.log('✅ Toplam grafik:', Object.keys(this.charts).length);
-                }, 200);
-                
-                lucide.createIcons();
+            // Grafikleri DOM paint sonrası çiz
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    this.initializeCharts();
 
-                // Owner modunda finansal özet kartını render et
-                if (Auth.currentUser?.role === 'owner') {
-                    this.renderOwnerFinancialSummary();
-                }
-            }, 300);
+                    lucide.createIcons();
+
+                    // Owner modunda finansal özet kartını render et
+                    if (Auth.currentUser?.role === 'owner') {
+                        this.renderOwnerFinancialSummary();
+                    }
+                });
+            });
         },
 
         updateAllMetrics() {
@@ -7921,14 +7912,8 @@
             this.createTrendAnalysisCharts();
             this.createEfficiencyCharts();
             
-            // ✅ Grafikleri zorla resize/refresh et
-            setTimeout(() => {
-                Object.values(this.charts).forEach(chart => {
-                    if (chart && chart.resize) {
-                        chart.resize();
-                    }
-                });
-            }, 100);
+            // Grafikleri zorla resize/refresh et (paint sonrası)
+            requestAnimationFrame(() => this.resizeAllCharts());
         },
 
         // 15. Gelir trend grafiği oluşturma
@@ -9749,35 +9734,55 @@
 
             // Initialize specific tab content if needed
             if (tab === 'analysis') {
-                // Owner modunda varsayılan olarak daire analizini göster
-                if (Auth.currentUser && Auth.currentUser.role === 'owner') {
-                    this.switchAnalysisTab('apartment');
-                } else if (!this.charts.systemComparison) {
-                    setTimeout(() => this.createSystemAnalysisCharts(), 100);
-                }
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        // Owner modunda varsayılan olarak daire analizini göster
+                        if (Auth.currentUser && Auth.currentUser.role === 'owner') {
+                            this.switchAnalysisTab('apartment');
+                        } else if (!this.charts.systemComparison) {
+                            this.createSystemAnalysisCharts();
+                        }
+                        this.resizeAllCharts();
+                    });
+                });
             }
 
             if (tab === 'trends') {
-                if (!this.charts.revenueTrendAnalysis) {
-                    setTimeout(() => this.createTrendAnalysisCharts(), 100);
-                } else {
-                    if (Auth.currentUser?.role !== 'owner' && !this.charts._trendProfitFlow) {
-                        setTimeout(() => this.createProfitTrendCharts(), 100);
-                    }
-                    // Projeksiyon verisi güncellenmiş olabilir, her zaman güncelle
-                    setTimeout(() => this.updateForecastCards(), 100);
-                }
+                // DOM paint tamamlandıktan sonra grafikleri oluştur/resize et
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        if (!this.charts.revenueTrendAnalysis) {
+                            this.createTrendAnalysisCharts();
+                        } else {
+                            if (Auth.currentUser?.role !== 'owner' && !this.charts._trendProfitFlow) {
+                                this.createProfitTrendCharts();
+                            }
+                            this.updateForecastCards();
+                        }
+                        // Tüm trend grafiklerini görünür konteyner boyutlarıyla resize et
+                        this.resizeAllCharts();
+                    });
+                });
             }
 
-            if (tab === 'efficiency' && !this.charts.costEfficiency) {
-                setTimeout(() => this.createEfficiencyCharts(), 100);
+            if (tab === 'efficiency') {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        if (!this.charts.costEfficiency) {
+                            this.createEfficiencyCharts();
+                        }
+                        this.resizeAllCharts();
+                    });
+                });
             }
 
             if (tab === 'projection') {
-                setTimeout(() => {
-                    Projection.init();
-                    if (Projection.reservations.length > 0) Projection.calculate();
-                }, 100);
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        Projection.init();
+                        if (Projection.reservations.length > 0) Projection.calculate();
+                    });
+                });
             }
         },
         
@@ -9806,8 +9811,10 @@
             });
             
             this.currentAnalysisTab = tab;
+            // Görünür hale gelen grafikleri resize et
+            requestAnimationFrame(() => this.resizeAllCharts());
         },
-        
+
         // Populate selectors
         populateSelectors() {
             // Apartment selectors
@@ -9899,9 +9906,9 @@
             this.updateAllMetrics();
             
             // Grafikleri yeniden oluştur
-            setTimeout(() => {
-                this.initializeCharts();
-            }, 100);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => this.initializeCharts());
+            });
             
             this.showToast('Veriler güncellendi', 'success');
         },
@@ -11343,7 +11350,6 @@
                     { name: 'Şirket Gideri', type: 'line', data: d.compExp, itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' }
                 ]
             });
-            window.addEventListener('resize', () => chart.resize(), { once: true });
         },
 
         createTrendAptProfitChart() {
@@ -11376,7 +11382,6 @@
                 yAxis: { type: 'value', axisLabel: { formatter: '€{value}', fontSize: 10 } },
                 series
             });
-            window.addEventListener('resize', () => chart.resize(), { once: true });
         },
 
         createTrendProfitMarginChart() {
@@ -11401,7 +11406,6 @@
                     markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true }
                 }]
             });
-            window.addEventListener('resize', () => chart.resize(), { once: true });
         },
 
         createTrendOccupancyProfitChart() {
@@ -11462,7 +11466,6 @@
                     { type: 'line', data: [[minX, slope * minX + intercept], [maxX, slope * maxX + intercept]], lineStyle: { color: '#f59e0b', type: 'dashed', width: 2 }, symbol: 'none', silent: true }
                 ]
             });
-            window.addEventListener('resize', () => chart.resize(), { once: true });
         },
 
         createRevenueTrendAnalysisChart() {
