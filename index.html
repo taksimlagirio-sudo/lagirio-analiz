@@ -11763,14 +11763,19 @@
 
             // Projeksiyon verisi yoksa arka planda hesaplat
             if (!Projection._lastMonthlyData) {
+                // PMS rezervasyonlarını localStorage'dan yükle (init çağrılmamış olabilir)
                 if (!Projection.reservations || Projection.reservations.length === 0) {
                     try {
                         const saved = localStorage.getItem(Projection.STORAGE_KEY);
                         if (saved) Projection.reservations = JSON.parse(saved);
                     } catch(e) {}
                 }
-                if (Projection.reservations && Projection.reservations.length > 0) {
-                    Projection.calculate();
+                // Daire verisi + herhangi bir rezervasyon kaynağı varsa hesapla
+                const hasApartments = Analytics.data?.apartments?.length > 0;
+                const hasPmsRes = Projection.reservations && Projection.reservations.length > 0;
+                const hasAnalyticsRes = Analytics.data?.reservations?.length > 0;
+                if (hasApartments && (hasPmsRes || hasAnalyticsRes)) {
+                    try { Projection.calculate(); } catch(e) { console.warn('Projeksiyon hesaplanamadı:', e); }
                 }
             }
 
