@@ -1358,7 +1358,7 @@
                             </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-600 mb-2">Doluluk-Kârlılık İlişkisi</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Rezervasyon yoğunluğu ile kâr arasındaki korelasyon</p>
+                                <p class="text-[10px] text-gray-400 mb-2">Ort. doluluk oranı ile daire başına gerçek kâr arasındaki korelasyon</p>
                                 <div id="trendOccupancyProfitChart" style="height:280px"></div>
                             </div>
                         </div>
@@ -11183,7 +11183,7 @@
         _getHistoricalProfitData() {
             const now = new Date();
             const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-            const result = { keys: [], labels: [], lagirio: [], compExp: [], realProfit: [], margins: [], resCounts: [], aptData: {} };
+            const result = { keys: [], labels: [], lagirio: [], compExp: [], realProfit: [], margins: [], resCounts: [], activeAptCounts: [], avgOccupancies: [], aptData: {} };
 
             // Şirket gideri tahmini
             const lagirioExps = this.data?.lagirioExpenses || [];
@@ -11205,6 +11205,10 @@
 
                 let monthLagirio = 0;
                 let monthResCount = 0;
+                let activeAptCount = 0;
+                let totalOccupancy = 0;
+                const mStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+                const mEnd = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
 
                 this.data.apartments?.forEach(apartment => {
                     const monthRes = this.data.reservations?.filter(res => {
@@ -11220,6 +11224,8 @@
                         const lagirioVal = this.calculateLagirioRevenue(apartment, monthRes, monthExp);
                         monthLagirio += lagirioVal;
                         monthResCount += monthRes.length;
+                        activeAptCount++;
+                        totalOccupancy += this.calculateOccupancyRate(apartment.id, mStart, mEnd);
 
                         // Daire bazlı
                         if (!result.aptData[apartment.id]) result.aptData[apartment.id] = { code: apartment.code || apartment.id, months: {} };
@@ -11235,6 +11241,8 @@
                 const realP = monthLagirio - monthCompExp;
                 const margin = monthLagirio > 0 ? ((realP / monthLagirio) * 100) : 0;
 
+                const avgOcc = activeAptCount > 0 ? totalOccupancy / activeAptCount : 0;
+
                 result.keys.push(mk);
                 result.labels.push(label);
                 result.lagirio.push(parseFloat(monthLagirio.toFixed(2)));
@@ -11242,6 +11250,8 @@
                 result.realProfit.push(parseFloat(realP.toFixed(2)));
                 result.margins.push(parseFloat(margin.toFixed(1)));
                 result.resCounts.push(monthResCount);
+                result.activeAptCounts.push(activeAptCount);
+                result.avgOccupancies.push(parseFloat(avgOcc.toFixed(1)));
             }
             result.baseCompExp = baseCompExp;
             return result;
@@ -11341,14 +11351,25 @@
             const chart = echarts.init(container);
             this.charts._trendOccProfit = chart;
 
-            const scatterData = d.keys.map((k, i) => ({
-                value: [d.resCounts[i], d.realProfit[i]], name: d.labels[i],
-                symbolSize: Math.max(8, Math.sqrt(Math.abs(d.lagirio[i])) * 0.5)
-            }));
+            // Sadece en az 1 aktif daire olan aylar
+            // X: ort. doluluk (%), Y: daire başına gerçek kâr (€)
+            const points = [];
+            d.keys.forEach((k, i) => {
+                if (d.activeAptCounts[i] > 0) {
+                    const perAptProfit = d.realProfit[i] / d.activeAptCounts[i];
+                    points.push({
+                        value: [d.avgOccupancies[i], parseFloat(perAptProfit.toFixed(2))],
+                        name: d.labels[i],
+                        aptCount: d.activeAptCounts[i],
+                        symbolSize: Math.max(10, d.activeAptCounts[i] * 3)
+                    });
+                }
+            });
+            if (points.length === 0) return;
 
             // Linear regression
-            const xArr = scatterData.map(p => p.value[0]);
-            const yArr = scatterData.map(p => p.value[1]);
+            const xArr = points.map(p => p.value[0]);
+            const yArr = points.map(p => p.value[1]);
             const n = xArr.length;
             const sumX = xArr.reduce((a,b) => a+b, 0);
             const sumY = yArr.reduce((a,b) => a+b, 0);
@@ -11366,13 +11387,15 @@
             const corr = (stdX > 0 && stdY > 0) ? (covXY / (stdX * stdY)).toFixed(2) : '0';
 
             chart.setOption({
-                tooltip: { trigger: 'item', formatter: function(p) { return p.name + '<br/>Rez: ' + p.value[0] + '<br/>Kâr: €' + p.value[1]; } },
-                grid: { top: 30, right: 20, bottom: 40, left: 55 },
-                xAxis: { type: 'value', name: 'Rez. Sayısı', nameLocation: 'center', nameGap: 25, axisLabel: { fontSize: 10 } },
-                yAxis: { type: 'value', name: 'Gerçek Kâr (€)', nameLocation: 'center', nameGap: 40, axisLabel: { formatter: '€{value}', fontSize: 10 } },
+                tooltip: { trigger: 'item', formatter: function(p) {
+                    return p.name + '<br/>Doluluk: %' + p.value[0] + '<br/>Daire Başı Kâr: €' + p.value[1] + '<br/>Aktif Daire: ' + (p.data.aptCount || '');
+                } },
+                grid: { top: 30, right: 20, bottom: 40, left: 60 },
+                xAxis: { type: 'value', name: 'Ort. Doluluk (%)', nameLocation: 'center', nameGap: 25, axisLabel: { fontSize: 10, formatter: '%{value}' } },
+                yAxis: { type: 'value', name: 'Daire Başı Kâr (€)', nameLocation: 'center', nameGap: 45, axisLabel: { formatter: '€{value}', fontSize: 10 } },
                 graphic: [{ type: 'text', left: 'center', top: 5, style: { text: 'Korelasyon: r=' + corr, fontSize: 11, fill: '#6366f1', fontWeight: 'bold' } }],
                 series: [
-                    { type: 'scatter', data: scatterData.map(p => ({ value: p.value, name: p.name, symbolSize: p.symbolSize })), itemStyle: { color: '#6366f1' } },
+                    { type: 'scatter', data: points.map(p => ({ value: p.value, name: p.name, symbolSize: p.symbolSize, aptCount: p.aptCount })), itemStyle: { color: '#6366f1' } },
                     { type: 'line', data: [[minX, slope * minX + intercept], [maxX, slope * maxX + intercept]], lineStyle: { color: '#f59e0b', type: 'dashed', width: 2 }, symbol: 'none', silent: true }
                 ]
             });
