@@ -9700,9 +9700,12 @@
             if (tab === 'trends') {
                 if (!this.charts.revenueTrendAnalysis) {
                     setTimeout(() => this.createTrendAnalysisCharts(), 100);
-                } else if (Auth.currentUser?.role !== 'owner' && !this.charts._trendProfitFlow) {
-                    // Trend grafikleri zaten varsa ama kâr grafikleri henüz oluşturulmadıysa
-                    setTimeout(() => this.createProfitTrendCharts(), 100);
+                } else {
+                    if (Auth.currentUser?.role !== 'owner' && !this.charts._trendProfitFlow) {
+                        setTimeout(() => this.createProfitTrendCharts(), 100);
+                    }
+                    // Projeksiyon verisi güncellenmiş olabilir, her zaman güncelle
+                    setTimeout(() => this.updateForecastCards(), 100);
                 }
             }
 
@@ -11802,23 +11805,31 @@
                 if (yearlyTarget) yearlyTarget.textContent = `€${yearVal.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
 
                 // Etiketleri güncelle
-                const labels = document.querySelectorAll('#nextMonthForecast, #quarterForecast, #yearlyTarget');
                 const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
                 const [fy, fm] = firstKey.split('-');
+                const profitLabel = isOwner ? 'Net kazanç' : 'Gerçek kâr';
+
+                // Sonraki ay etiketi (mevcut ay = sonraki ay, çünkü ay sonunda veri girilir)
                 const nextLabel = document.querySelector('#nextMonthForecast')?.closest('.bg-indigo-50')?.querySelector('h4');
                 if (nextLabel) nextLabel.textContent = monthNames[parseInt(fm)-1] + ' ' + fy + ' Tahmini';
                 const nextSub = document.querySelector('#nextMonthForecast')?.closest('.bg-indigo-50')?.querySelector('.text-sm');
-                if (nextSub) nextSub.textContent = isOwner ? 'Net kazanç projeksiyon' : 'Gerçek kâr projeksiyon';
+                if (nextSub) nextSub.textContent = profitLabel + ' projeksiyon';
 
+                // 3 aylık etiket: ilk 3 ayın aralığı
+                const thirdKey = keys[Math.min(2, keys.length - 1)];
+                const [ty, tm] = thirdKey.split('-');
                 const q3Label = document.querySelector('#quarterForecast')?.closest('.bg-emerald-50')?.querySelector('h4');
-                if (q3Label) q3Label.textContent = '3 Aylık Projeksiyon';
+                if (q3Label) q3Label.textContent = monthNames[parseInt(fm)-1] + ' – ' + monthNames[parseInt(tm)-1] + ' Projeksiyon';
                 const q3Sub = document.querySelector('#quarterForecast')?.closest('.bg-emerald-50')?.querySelector('.text-sm');
-                if (q3Sub) q3Sub.textContent = isOwner ? 'Net kazanç toplamı' : 'Gerçek kâr toplamı';
+                if (q3Sub) q3Sub.textContent = profitLabel + ' toplamı (3 ay)';
 
+                // 12 aylık etiket
+                const lastKey = keys[keys.length - 1];
+                const [ly, lm] = lastKey.split('-');
                 const yearLabel = document.querySelector('#yearlyTarget')?.closest('.bg-purple-50')?.querySelector('h4');
-                if (yearLabel) yearLabel.textContent = '12 Aylık Projeksiyon';
+                if (yearLabel) yearLabel.textContent = monthNames[parseInt(fm)-1] + ' ' + fy + ' – ' + monthNames[parseInt(lm)-1] + ' ' + ly;
                 const yearSub = document.querySelector('#yearlyTarget')?.closest('.bg-purple-50')?.querySelector('.text-sm');
-                if (yearSub) yearSub.textContent = isOwner ? '12 ay net kazanç' : '12 ay gerçek kâr';
+                if (yearSub) yearSub.textContent = profitLabel + ' toplamı (12 ay)';
 
                 return;
             }
