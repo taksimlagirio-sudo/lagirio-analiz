@@ -217,8 +217,7 @@
         body.owner-mode [data-analysis="owner"],
         body.owner-mode #system-analysis,
         body.owner-mode #owner-analysis,
-        body.owner-mode #topPerformersSection,
-        body.owner-mode #systemPerformanceGrid {
+        body.owner-mode #topPerformersSection {
             display: none !important;
         }
         body.owner-mode .owner-readonly {
@@ -1091,12 +1090,6 @@
                     </div>
                 </div>
 
-                <!-- System Performance Grid -->
-                <div id="systemPerformanceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <!-- System cards will be dynamically generated -->
-                    <div id="systemPerformanceCards"></div>
-                </div>
-                
                 <!-- Platform Distribution -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -8005,13 +7998,14 @@
                             shadowColor: 'rgba(0, 0, 0, 0.3)'
                         }
                     },
-                    data: data.platforms.map((platform, index) => ({
-                        value: data.counts[index],
-                        name: platform,
-                        itemStyle: {
-                            color: this.getPlatformColor(platform)
-                        }
-                    }))
+                    data: data.platforms.map((platform, index) => {
+                        const palette = ['#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16'];
+                        return {
+                            value: data.counts[index],
+                            name: platform,
+                            itemStyle: { color: palette[index % palette.length] }
+                        };
+                    })
                 }]
             };
             
