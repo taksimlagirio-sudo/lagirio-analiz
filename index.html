@@ -1108,29 +1108,7 @@
                         <div class="chart-container-sm" id="paymentMethodChart"></div>
                     </div>
                 </div>
-                
-                <!-- Recent Activity & Alerts -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                            <i data-lucide="activity" class="w-5 h-5 text-purple-600"></i>
-                            <span>Son Aktiviteler</span>
-                        </h3>
-                        <div class="space-y-3" id="recentActivity">
-                            <!-- Dynamic content -->
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                            <i data-lucide="alert-triangle" class="w-5 h-5 text-orange-600"></i>
-                            <span>Önemli Uyarılar</span>
-                        </h3>
-                        <div class="space-y-3" id="importantAlerts">
-                            <!-- Dynamic content -->
-                        </div>
-                    </div>
-                </div>
+
             </div>
             
             <!-- Analysis Tab Content -->
@@ -6538,8 +6516,6 @@
             this.updatePerformanceMetrics();
             // this.updateTopPerformers(); // ← YORUMA AL (performanceMetrics içinde zaten var)
             this.updateSystemCards();
-            this.updateRecentActivity();
-            this.updateAlerts();
             this.updateEfficiencyMetrics();
 
             // Owner modunda finansal özet güncelle
@@ -8730,135 +8706,6 @@
             }
             
             return systems;
-        },
-        
-        // Update recent activity
-        updateRecentActivity() {
-            const container = document.getElementById('recentActivity');
-            if (!container) return;
-            
-            const recentReservations = [...this.filteredData.reservations]
-                .sort((a, b) => new Date(b.checkIn) - new Date(a.checkIn))
-                .slice(0, 5);
-            
-            container.innerHTML = recentReservations.map(res => {
-                const apartment = this.data.apartments?.find(a => a.id === res.apartmentId);
-                const amount = this.convertToEUR(res.totalAmount, res.currency || 'EUR');
-                const checkIn = new Date(res.checkIn).toLocaleDateString('tr-TR');
-                const icon = this.getPlatformIcon(res.platform);
-                
-                return `
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 ${this.getPlatformColor(res.platform)} rounded-full flex items-center justify-center text-white">
-                                <i data-lucide="${icon}" class="w-4 h-4"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-800">${apartment?.code || 'Bilinmeyen'}</p>
-                                <p class="text-xs text-gray-500">${res.guestName} • ${checkIn}</p>
-                            </div>
-                        </div>
-                        <p class="font-semibold text-emerald-600">€${amount.toFixed(0)}</p>
-                    </div>
-                `;
-            }).join('');
-            
-            if (recentReservations.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">Henüz rezervasyon bulunmuyor</p>';
-            }
-            
-            // Re-create icons
-            setTimeout(() => lucide.createIcons(), 100);
-        },
-        
-        // Update alerts
-        updateAlerts() {
-            const container = document.getElementById('importantAlerts');
-            if (!container) return;
-            
-            const alerts = this.generateAlerts();
-            
-            container.innerHTML = alerts.slice(0, 5).map(alert => `
-                <div class="flex items-start space-x-3 p-3 ${alert.bgColor} rounded-lg">
-                    <div class="flex-shrink-0">
-                        <i data-lucide="${alert.icon}" class="w-5 h-5 ${alert.color}"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-medium text-gray-800">${alert.title}</p>
-                        <p class="text-xs text-gray-600 mt-1">${alert.message}</p>
-                    </div>
-                </div>
-            `).join('');
-            
-            if (alerts.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">Önemli uyarı bulunmuyor</p>';
-            }
-            
-            // Re-create icons
-            setTimeout(() => lucide.createIcons(), 100);
-        },
-        
-        // Generate alerts
-        generateAlerts() {
-            const alerts = [];
-            const lowOccupancyThreshold = this.settings.lowOccupancyThreshold;
-            const highExpenseThreshold = this.settings.highExpenseThreshold;
-            
-            // Check low occupancy apartments
-            this.data.apartments?.forEach(apartment => {
-                const occupancy = this.calculateOccupancyRate(apartment.id);
-                if (occupancy < lowOccupancyThreshold && occupancy > 0) {
-                    alerts.push({
-                        type: 'warning',
-                        icon: 'alert-triangle',
-                        color: 'text-orange-600',
-                        bgColor: 'bg-orange-50',
-                        title: `Düşük Doluluk - ${apartment.code}`,
-                        message: `Doluluk oranı %${occupancy.toFixed(1)} (Eşik: %${lowOccupancyThreshold})`,
-                        priority: 2
-                    });
-                }
-                
-                // Check high expenses
-                const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
-                expenses.forEach(expense => {
-                    const amount = this.convertToEUR(expense.amount, expense.currency);
-                    if (amount > highExpenseThreshold) {
-                        alerts.push({
-                            type: 'error',
-                            icon: 'alert-circle',
-                            color: 'text-red-600',
-                            bgColor: 'bg-red-50',
-                            title: `Yüksek Gider - ${apartment.code}`,
-                            message: `${expense.category}: €${amount.toFixed(2)}`,
-                            priority: 1
-                        });
-                    }
-                });
-            });
-            
-            // Check apartments with no reservations
-            const apartmentsWithNoReservations = this.data.apartments?.filter(apartment => {
-                const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
-                return reservations.length === 0;
-            }) || [];
-            
-            if (apartmentsWithNoReservations.length > 0) {
-                alerts.push({
-                    type: 'info',
-                    icon: 'info',
-                    color: 'text-blue-600',
-                    bgColor: 'bg-blue-50',
-                    title: 'Rezervasyon Yok',
-                    message: `${apartmentsWithNoReservations.length} dairede rezervasyon bulunmuyor`,
-                    priority: 3
-                });
-            }
-            
-            // Sort by priority
-            alerts.sort((a, b) => a.priority - b.priority);
-            
-            return alerts;
         },
         
         // Generate notifications
