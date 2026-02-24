@@ -11758,7 +11758,19 @@
         updateForecastCards() {
             const isOwner = Auth.currentUser?.role === 'owner';
 
-            // Projeksiyon verisi varsa oradan al
+            // Projeksiyon verisi yoksa arka planda hesaplat
+            if (!Projection._lastMonthlyData) {
+                if (!Projection.reservations || Projection.reservations.length === 0) {
+                    try {
+                        const saved = localStorage.getItem(Projection.STORAGE_KEY);
+                        if (saved) Projection.reservations = JSON.parse(saved);
+                    } catch(e) {}
+                }
+                if (Projection.reservations && Projection.reservations.length > 0) {
+                    Projection.calculate();
+                }
+            }
+
             const projData = Projection?._lastMonthlyData;
             if (projData && Object.keys(projData).length > 0) {
                 const keys = Object.keys(projData).sort();
@@ -11823,7 +11835,7 @@
             [nextMonthForecast, quarterForecast, yearlyTarget].forEach(el => {
                 if (!el) return;
                 const sub = el.closest('[class*="bg-"]')?.querySelector('.text-sm');
-                if (sub) sub.textContent = 'Projeksiyon sayfasını ziyaret edin';
+                if (sub) sub.textContent = 'Rezervasyon verisi bulunamadı';
             });
         },
 
