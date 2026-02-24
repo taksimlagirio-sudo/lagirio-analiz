@@ -11756,44 +11756,75 @@
         },
 
         updateForecastCards() {
-            // Basit tahmin: son 3 ayın ortalaması
-            const revenues = [];
-            const now = new Date();
+            const isOwner = Auth.currentUser?.role === 'owner';
 
-            for (let i = 2; i >= 0; i--) {
-                const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                let monthRevenue = 0;
+            // Projeksiyon verisi varsa oradan al
+            const projData = Projection?._lastMonthlyData;
+            if (projData && Object.keys(projData).length > 0) {
+                const keys = Object.keys(projData).sort();
+                const compExp = Projection._estMonthlyCompanyExp || 0;
 
-                this.data.apartments?.forEach(apartment => {
-                    const monthReservations = this.data.reservations?.filter(res => {
-                        const date = new Date(res.checkIn);
-                        return res.apartmentId === apartment.id &&
-                            date.getMonth() === targetDate.getMonth() &&
-                            date.getFullYear() === targetDate.getFullYear();
-                    }) || [];
+                // Sonraki ay: ilk ayın verisi
+                const firstKey = keys[0];
+                const firstMonth = projData[firstKey];
+                const nextMonthVal = isOwner ? firstMonth.ownerShare : (firstMonth.lagirio - compExp);
 
-                    const monthExpenses = this.data.expenses?.filter(exp => {
-                        const date = new Date(exp.date);
-                        return exp.apartmentId === apartment.id &&
-                            date.getMonth() === targetDate.getMonth() &&
-                            date.getFullYear() === targetDate.getFullYear();
-                    }) || [];
-
-                    monthRevenue += this.getRelevantRevenue(apartment, monthReservations, monthExpenses);
+                // 3 aylık: ilk 3 ay toplamı
+                let q3Val = 0;
+                keys.slice(0, 3).forEach(k => {
+                    q3Val += isOwner ? projData[k].ownerShare : (projData[k].lagirio - compExp);
                 });
 
-                revenues.push(monthRevenue);
+                // 12 aylık (yıllık): tüm aylar toplamı
+                let yearVal = 0;
+                keys.forEach(k => {
+                    yearVal += isOwner ? projData[k].ownerShare : (projData[k].lagirio - compExp);
+                });
+
+                const nextMonthForecast = document.getElementById('nextMonthForecast');
+                const quarterForecast = document.getElementById('quarterForecast');
+                const yearlyTarget = document.getElementById('yearlyTarget');
+
+                if (nextMonthForecast) nextMonthForecast.textContent = `€${nextMonthVal.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+                if (quarterForecast) quarterForecast.textContent = `€${q3Val.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+                if (yearlyTarget) yearlyTarget.textContent = `€${yearVal.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+
+                // Etiketleri güncelle
+                const labels = document.querySelectorAll('#nextMonthForecast, #quarterForecast, #yearlyTarget');
+                const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+                const [fy, fm] = firstKey.split('-');
+                const nextLabel = document.querySelector('#nextMonthForecast')?.closest('.bg-indigo-50')?.querySelector('h4');
+                if (nextLabel) nextLabel.textContent = monthNames[parseInt(fm)-1] + ' ' + fy + ' Tahmini';
+                const nextSub = document.querySelector('#nextMonthForecast')?.closest('.bg-indigo-50')?.querySelector('.text-sm');
+                if (nextSub) nextSub.textContent = isOwner ? 'Net kazanç projeksiyon' : 'Gerçek kâr projeksiyon';
+
+                const q3Label = document.querySelector('#quarterForecast')?.closest('.bg-emerald-50')?.querySelector('h4');
+                if (q3Label) q3Label.textContent = '3 Aylık Projeksiyon';
+                const q3Sub = document.querySelector('#quarterForecast')?.closest('.bg-emerald-50')?.querySelector('.text-sm');
+                if (q3Sub) q3Sub.textContent = isOwner ? 'Net kazanç toplamı' : 'Gerçek kâr toplamı';
+
+                const yearLabel = document.querySelector('#yearlyTarget')?.closest('.bg-purple-50')?.querySelector('h4');
+                if (yearLabel) yearLabel.textContent = '12 Aylık Projeksiyon';
+                const yearSub = document.querySelector('#yearlyTarget')?.closest('.bg-purple-50')?.querySelector('.text-sm');
+                if (yearSub) yearSub.textContent = isOwner ? '12 ay net kazanç' : '12 ay gerçek kâr';
+
+                return;
             }
 
-            const avgRevenue = revenues.reduce((a, b) => a + b, 0) / revenues.length;
-
+            // Projeksiyon verisi yoksa bilgilendirme göster
             const nextMonthForecast = document.getElementById('nextMonthForecast');
             const quarterForecast = document.getElementById('quarterForecast');
             const yearlyTarget = document.getElementById('yearlyTarget');
 
-            if (nextMonthForecast) nextMonthForecast.textContent = `€${avgRevenue.toFixed(2)}`;
-            if (quarterForecast) quarterForecast.textContent = `€${(avgRevenue * 3).toFixed(2)}`;
-            if (yearlyTarget) yearlyTarget.textContent = `€${(avgRevenue * 12).toFixed(2)}`;
+            if (nextMonthForecast) nextMonthForecast.textContent = '—';
+            if (quarterForecast) quarterForecast.textContent = '—';
+            if (yearlyTarget) yearlyTarget.textContent = '—';
+
+            [nextMonthForecast, quarterForecast, yearlyTarget].forEach(el => {
+                if (!el) return;
+                const sub = el.closest('[class*="bg-"]')?.querySelector('.text-sm');
+                if (sub) sub.textContent = 'Projeksiyon sayfasını ziyaret edin';
+            });
         },
 
         // ==================== EFFICIENCY CHARTS ====================
