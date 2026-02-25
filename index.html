@@ -11100,7 +11100,7 @@
         _getHistoricalProfitData() {
             const now = new Date();
             const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-            const result = { keys: [], labels: [], lagirio: [], compExp: [], realProfit: [], margins: [], resCounts: [], activeAptCounts: [], avgOccupancies: [], aptData: {} };
+            const result = { keys: [], labels: [], lagirio: [], grossIncome: [], compExp: [], realProfit: [], margins: [], resCounts: [], activeAptCounts: [], avgOccupancies: [], aptData: {} };
 
             // Şirket gideri tahmini
             const lagirioExps = this.data?.lagirioExpenses || [];
@@ -11121,6 +11121,7 @@
                 const label = monthNames[targetDate.getMonth()] + '\'' + String(targetDate.getFullYear()).slice(2);
 
                 let monthLagirio = 0;
+                let monthGrossIncome = 0;
                 let monthResCount = 0;
                 let activeAptCount = 0;
                 let totalOccupancy = 0;
@@ -11136,6 +11137,8 @@
                         const d = new Date(exp.date);
                         return exp.apartmentId === apartment.id && d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
                     }) || [];
+
+                    monthGrossIncome += monthRes.reduce((sum, res) => sum + convertEUR(res.totalAmount, res.currency || 'EUR'), 0);
 
                     if (monthRes.length > 0) {
                         const lagirioVal = this.calculateLagirioRevenue(apartment, monthRes, monthExp);
@@ -11163,6 +11166,7 @@
                 result.keys.push(mk);
                 result.labels.push(label);
                 result.lagirio.push(parseFloat(monthLagirio.toFixed(2)));
+                result.grossIncome.push(parseFloat(monthGrossIncome.toFixed(2)));
                 result.compExp.push(parseFloat(monthCompExp.toFixed(2)));
                 result.realProfit.push(parseFloat(realP.toFixed(2)));
                 result.margins.push(parseFloat(margin.toFixed(1)));
@@ -11366,7 +11370,7 @@
                     ]
                 });
             } else {
-                // Admin: Brüt Kazanç (Lagirio), Şirket Gideri, Gerçek Kâr
+                // Admin: Brüt Gelir, Brüt Kazanç (Lagirio), Şirket Gideri, Gerçek Kâr
                 const d = this._getHistoricalProfitData();
                 chart.setOption({
                     tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent',
@@ -11376,11 +11380,14 @@
                             return html;
                         }
                     },
-                    legend: { data: ['Brüt Kazanç', 'Şirket Gideri', 'Gerçek Kâr'], bottom: 0 },
+                    legend: { data: ['Brüt Gelir', 'Brüt Kazanç', 'Şirket Gideri', 'Gerçek Kâr'], bottom: 0 },
                     grid: { left: '3%', right: '4%', bottom: '15%', top: '3%', containLabel: true },
                     xAxis: { type: 'category', data: d.labels, axisLabel: { rotate: 45, fontSize: 10 } },
                     yAxis: { type: 'value', axisLabel: { formatter: value => `€${(value / 1000).toFixed(0)}k` } },
                     series: [
+                        { name: 'Brüt Gelir', type: 'line', data: d.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
+                          lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6,
+                          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.15)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } },
                         { name: 'Brüt Kazanç', type: 'bar', data: d.lagirio, itemStyle: {
                             color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
                         { name: 'Şirket Gideri', type: 'line', data: d.compExp, smooth: true, itemStyle: { color: '#f59e0b' },
