@@ -4994,9 +4994,10 @@
             if (isOwner) {
                 // Owner: ECharts — Net Kazanç (bar) + Brüt Gelir (line), tıklanabilir
                 container.innerHTML = '';
-                if (this.charts._projOwnerMonthly) this.charts._projOwnerMonthly.dispose();
+                if (!this._charts) this._charts = {};
+                if (this._charts._projOwnerMonthly) this._charts._projOwnerMonthly.dispose();
                 const chart = echarts.init(container);
-                this.charts._projOwnerMonthly = chart;
+                this._charts._projOwnerMonthly = chart;
 
                 const labels = sortedKeys.map(k => { const [y, m] = k.split('-'); return monthNames[parseInt(m)-1] + ' ' + y.slice(2); });
                 const netData = sortedKeys.map(k => parseFloat((monthlyData[k].ownerShare || 0).toFixed(2)));
