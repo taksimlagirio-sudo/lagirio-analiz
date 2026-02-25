@@ -4205,35 +4205,17 @@
         },
 
         calculate() {
-            // Debug: calculate çağrı kaynağını logla
-            const _calcDebug = [];
-            try { throw new Error(); } catch(e) {
-                const stack = (e.stack || '').split('\n').slice(1, 4).map(s => s.trim()).join(' < ');
-                _calcDebug.push('from: ' + stack.substring(0, 200));
-            }
-
             const today = new Date(); today.setHours(0,0,0,0);
             const defaultAdjust = parseFloat(document.getElementById('projDefaultAdjust')?.value) || 0;
 
             // Daire verisi yoksa çık
             const apartments = Analytics.data?.apartments || [];
-            _calcDebug.push('daireler=' + apartments.length);
-            _calcDebug.push('pmsRez=' + (this.reservations?.length || 0));
-            _calcDebug.push('analyticsRez=' + (Analytics.data?.reservations?.length || 0));
-
             if (apartments.length === 0) {
-                _calcDebug.push('ÇIKIŞ: daire yok');
-                console.warn('[Projeksiyon Debug]', _calcDebug.join(' | '));
                 document.getElementById('projSummaryCards')?.classList.add('hidden');
                 document.getElementById('projMonthlySection')?.classList.add('hidden');
                 document.getElementById('projResTableSection')?.classList.add('hidden');
-                // Debug paneline yaz
-                let dbg = document.getElementById('projCalcDebug');
-                if (!dbg) { dbg = document.createElement('div'); dbg.id = 'projCalcDebug'; dbg.className = 'text-[10px] bg-red-50 text-red-600 rounded px-3 py-1.5 mb-2 font-mono'; const psc = document.getElementById('projSummaryCards'); if (psc) psc.parentNode.insertBefore(dbg, psc); }
-                if (dbg) dbg.innerHTML = _calcDebug.join(' · ');
                 return;
             }
-            console.log('[Projeksiyon Debug]', _calcDebug.join(' | '));
 
             // --- 1. 12 aylık periyot oluştur ---
             const now = new Date();
@@ -4998,134 +4980,75 @@
 
         renderMonthlyChart(monthlyData) {
             const container = document.getElementById('projMonthlyChart');
-            // Debug panel: chart container'ın hemen üstüne durum bilgisi yaz
-            let debugEl = document.getElementById('projChartDebug');
-            if (!debugEl) {
-                debugEl = document.createElement('div');
-                debugEl.id = 'projChartDebug';
-                debugEl.className = 'text-[10px] bg-gray-100 text-gray-600 rounded px-3 py-1.5 mb-2 font-mono';
-                container?.parentNode?.insertBefore(debugEl, container);
-            }
-            const debugLog = [];
-            const debugWrite = function() { if (debugEl) debugEl.innerHTML = debugLog.join(' · '); };
-
-            if (!container) { debugLog.push('HATA: container yok'); debugWrite(); return; }
-
+            if (!container) return;
             const isOwner = Auth.currentUser?.role === 'owner';
-            debugLog.push('rol=' + (isOwner ? 'owner' : 'admin'));
-
             const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
             const sortedKeys = Object.keys(monthlyData).sort();
-            debugLog.push('aylar=' + sortedKeys.length);
 
             if (sortedKeys.length === 0) {
-                debugLog.push('VERİ YOK');
-                debugWrite();
                 container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">Veri yok</p>';
                 return;
             }
 
             const maxVal = Math.max(...sortedKeys.map(k => monthlyData[k].gross));
-            debugLog.push('maxGross=' + maxVal.toFixed(0));
-
-            // Container boyut bilgisi
-            const rect = container.getBoundingClientRect();
-            debugLog.push('boyut=' + Math.round(rect.width) + 'x' + Math.round(rect.height));
-            debugLog.push('display=' + getComputedStyle(container).display);
-
-            // Parent görünürlük
-            const section = document.getElementById('projMonthlySection');
-            if (section) {
-                debugLog.push('section.hidden=' + section.classList.contains('hidden'));
-                debugLog.push('section.display=' + getComputedStyle(section).display);
-            }
-            const tabContent = document.getElementById('projection-content');
-            if (tabContent) {
-                debugLog.push('tab.active=' + tabContent.classList.contains('active'));
-                debugLog.push('tab.display=' + getComputedStyle(tabContent).display);
-            }
 
             if (isOwner) {
-                try {
-                    debugLog.push('echarts=' + (typeof echarts));
-
-                    // Owner: ECharts — Net Kazanç (bar) + Brüt Gelir (line), tıklanabilir
-                    container.innerHTML = '';
-                    if (!this._charts) this._charts = {};
-                    if (this._charts._projOwnerMonthly) {
-                        try { this._charts._projOwnerMonthly.dispose(); } catch(e) {}
-                    }
-
-                    const chart = echarts.init(container);
-                    this._charts._projOwnerMonthly = chart;
-                    debugLog.push('chart.init=OK');
-
-                    const labels = sortedKeys.map(k => { const [y, m] = k.split('-'); return monthNames[parseInt(m)-1] + ' ' + y.slice(2); });
-                    const netData = sortedKeys.map(k => parseFloat((monthlyData[k].ownerShare || 0).toFixed(2)));
-                    const grossData = sortedKeys.map(k => parseFloat(monthlyData[k].gross.toFixed(2)));
-                    const avgNightlyData = sortedKeys.map(k => parseFloat(monthlyData[k].avgNightly.toFixed(2)));
-                    const countData = sortedKeys.map(k => monthlyData[k].count);
-
-                    debugLog.push('data=[' + netData.slice(0, 3).join(',') + '...]');
-                    debugLog.push('gross=[' + grossData.slice(0, 3).join(',') + '...]');
-
-                    chart.setOption({
-                        tooltip: {
-                            trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.85)', borderColor: 'transparent', textStyle: { fontSize: 12 },
-                            formatter: function(params) {
-                                const idx = params[0].dataIndex;
-                                let html = '<div style="font-weight:600;margin-bottom:6px">' + params[0].axisValue + '</div>';
-                                params.forEach(function(p) { html += '<div style="display:flex;align-items:center;gap:6px;margin:3px 0"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + p.color + '"></span>' + p.seriesName + ': <strong>€' + p.value.toLocaleString() + '</strong></div>'; });
-                                html += '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.15);font-size:11px;color:#aaa">' + countData[idx] + ' rez · €' + avgNightlyData[idx].toFixed(2) + '/gece</div>';
-                                html += '<div style="font-size:10px;color:#6ee7b7;margin-top:2px">Detay için tıklayın</div>';
-                                return html;
-                            }
-                        },
-                        legend: { data: ['Net Kazancınız', 'Brüt Gelir'], bottom: 0, textStyle: { fontSize: 11 } },
-                        grid: { left: '2%', right: '3%', bottom: '15%', top: '8%', containLabel: true },
-                        xAxis: { type: 'category', data: labels, axisLabel: { rotate: 45, fontSize: 10 }, axisTick: { alignWithLabel: true } },
-                        yAxis: { type: 'value', axisLabel: { formatter: function(v) { return '€' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v); }, fontSize: 10 }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
-                        series: [
-                            {
-                                name: 'Net Kazancınız', type: 'bar', data: netData, barWidth: '45%',
-                                itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [6,6,0,0] },
-                                label: { show: true, position: 'top', formatter: function(p) { return '€' + p.value.toLocaleString(); }, fontSize: 9, color: '#059669', fontWeight: 'bold' }
-                            },
-                            {
-                                name: 'Brüt Gelir', type: 'line', data: grossData, smooth: true,
-                                itemStyle: { color: '#3b82f6' }, lineStyle: { width: 2.5 }, symbol: 'circle', symbolSize: 7,
-                                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.12)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) }
-                            }
-                        ]
-                    });
-                    debugLog.push('setOption=OK');
-
-                    // Container boyut güncelleme (hidden → visible geçişinde gerekebilir)
-                    const chartRef = chart;
-                    setTimeout(function() {
-                        chartRef.resize();
-                        const r2 = container.getBoundingClientRect();
-                        debugLog.push('resize.sonra=' + Math.round(r2.width) + 'x' + Math.round(r2.height));
-                        debugWrite();
-                    }, 100);
-
-                    // Tıklama: ay detay modalını aç
-                    const self = this;
-                    chart.on('click', function(params) {
-                        if (params.dataIndex !== undefined) {
-                            const mk = sortedKeys[params.dataIndex];
-                            self.showOwnerMonthDetail(mk);
-                        }
-                    });
-
-                    debugLog.push('render=TAMAM');
-                } catch(err) {
-                    debugLog.push('HATA: ' + err.message);
-                    container.innerHTML = '<div class="text-red-500 text-sm p-4 bg-red-50 rounded-lg">' +
-                        '<strong>Grafik Hatası:</strong> ' + err.message +
-                        '<pre class="mt-2 text-[10px] text-red-400 overflow-auto">' + err.stack + '</pre></div>';
+                // Owner: ECharts — Net Kazanç (bar) + Brüt Gelir (line), tıklanabilir
+                container.innerHTML = '';
+                if (!this._charts) this._charts = {};
+                if (this._charts._projOwnerMonthly) {
+                    try { this._charts._projOwnerMonthly.dispose(); } catch(e) {}
                 }
-                debugWrite();
+                const chart = echarts.init(container);
+                this._charts._projOwnerMonthly = chart;
+
+                const labels = sortedKeys.map(k => { const [y, m] = k.split('-'); return monthNames[parseInt(m)-1] + ' ' + y.slice(2); });
+                const netData = sortedKeys.map(k => parseFloat((monthlyData[k].ownerShare || 0).toFixed(2)));
+                const grossData = sortedKeys.map(k => parseFloat(monthlyData[k].gross.toFixed(2)));
+                const avgNightlyData = sortedKeys.map(k => parseFloat(monthlyData[k].avgNightly.toFixed(2)));
+                const countData = sortedKeys.map(k => monthlyData[k].count);
+
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.85)', borderColor: 'transparent', textStyle: { fontSize: 12 },
+                        formatter: function(params) {
+                            const idx = params[0].dataIndex;
+                            let html = '<div style="font-weight:600;margin-bottom:6px">' + params[0].axisValue + '</div>';
+                            params.forEach(function(p) { html += '<div style="display:flex;align-items:center;gap:6px;margin:3px 0"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + p.color + '"></span>' + p.seriesName + ': <strong>€' + p.value.toLocaleString() + '</strong></div>'; });
+                            html += '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.15);font-size:11px;color:#aaa">' + countData[idx] + ' rez · €' + avgNightlyData[idx].toFixed(2) + '/gece</div>';
+                            html += '<div style="font-size:10px;color:#6ee7b7;margin-top:2px">Detay için tıklayın</div>';
+                            return html;
+                        }
+                    },
+                    legend: { data: ['Net Kazancınız', 'Brüt Gelir'], bottom: 0, textStyle: { fontSize: 11 } },
+                    grid: { left: '2%', right: '3%', bottom: '15%', top: '8%', containLabel: true },
+                    xAxis: { type: 'category', data: labels, axisLabel: { rotate: 45, fontSize: 10 }, axisTick: { alignWithLabel: true } },
+                    yAxis: { type: 'value', axisLabel: { formatter: function(v) { return '€' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v); }, fontSize: 10 }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+                    series: [
+                        {
+                            name: 'Net Kazancınız', type: 'bar', data: netData, barWidth: '45%',
+                            itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [6,6,0,0] },
+                            label: { show: true, position: 'top', formatter: function(p) { return '€' + p.value.toLocaleString(); }, fontSize: 9, color: '#059669', fontWeight: 'bold' }
+                        },
+                        {
+                            name: 'Brüt Gelir', type: 'line', data: grossData, smooth: true,
+                            itemStyle: { color: '#3b82f6' }, lineStyle: { width: 2.5 }, symbol: 'circle', symbolSize: 7,
+                            areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.12)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) }
+                        }
+                    ]
+                });
+
+                // Container boyut güncelleme (hidden → visible geçişinde gerekebilir)
+                setTimeout(function() { chart.resize(); }, 100);
+
+                // Tıklama: ay detay modalını aç
+                const self = this;
+                chart.on('click', function(params) {
+                    if (params.dataIndex !== undefined) {
+                        const mk = sortedKeys[params.dataIndex];
+                        self.showOwnerMonthDetail(mk);
+                    }
+                });
             } else {
                 // Admin: mevcut g\u00f6r\u00fcn\u00fcm + Ger\u00e7ek K\u00e2r notu
                 const compExp = this._estMonthlyCompanyExp || 0;
@@ -10277,25 +10200,6 @@
                         const hasPmsRes = Projection.reservations && Projection.reservations.length > 0;
                         const hasAnalyticsRes = Analytics.data?.reservations?.length > 0;
                         const hasApartments = Analytics.data?.apartments?.length > 0;
-
-                        // Debug: tab switch durum bilgisi
-                        let tdbg = document.getElementById('projTabDebug');
-                        if (!tdbg) {
-                            tdbg = document.createElement('div');
-                            tdbg.id = 'projTabDebug';
-                            tdbg.className = 'text-[10px] bg-blue-50 text-blue-600 rounded px-3 py-1.5 mb-2 font-mono';
-                            const pc = document.getElementById('projection-content');
-                            if (pc) pc.insertBefore(tdbg, pc.firstChild);
-                        }
-                        const tabInfo = [
-                            'pmsRez=' + (Projection.reservations?.length || 0),
-                            'analyticsRez=' + (Analytics.data?.reservations?.length || 0),
-                            'daireler=' + (Analytics.data?.apartments?.length || 0),
-                            'hesapla=' + (hasApartments && (hasPmsRes || hasAnalyticsRes) ? 'EVET' : 'HAYIR'),
-                            'tabActive=' + (document.getElementById('projection-content')?.classList.contains('active') || false),
-                            'sectionHidden=' + (document.getElementById('projMonthlySection')?.classList.contains('hidden') || '?')
-                        ];
-                        if (tdbg) tdbg.innerHTML = 'Tab Switch: ' + tabInfo.join(' · ');
 
                         if (hasApartments && (hasPmsRes || hasAnalyticsRes)) {
                             Projection.calculate();
