@@ -5737,17 +5737,18 @@
                 }
                 html += '</div>';
 
-                // Sağ taraf: toplamlar
-                html += '<div class="flex items-center gap-3 text-xs">';
-                if (md.futureRes.length > 0) {
-                    html += '<span class="text-emerald-600 font-bold">\u20ac' + md.fTotal.toFixed(0) + '</span>';
+                // Sağ taraf: ort. gecelik ücret karşılaştırması
+                var fAvgNightly = md.fNights > 0 ? md.fTotal / md.fNights : 0;
+                var pAvgNightly = md.pNights > 0 ? md.pTotal / md.pNights : 0;
+                html += '<div class="flex items-center gap-2 text-xs">';
+                if (fAvgNightly > 0) {
+                    html += '<span class="text-emerald-600 font-bold">\u20ac' + fAvgNightly.toFixed(0) + '/g</span>';
                 }
-                if (md.pastRes.length > 0) {
-                    html += '<span class="text-amber-500">\u20ac' + md.pTotal.toFixed(0) + '</span>';
+                if (pAvgNightly > 0) {
+                    html += '<span class="text-amber-500">\u20ac' + pAvgNightly.toFixed(0) + '/g</span>';
                 }
-                // Yıllık değişim
-                if (md.fTotal > 0 && md.pTotal > 0) {
-                    var change = ((md.fTotal - md.pTotal) / md.pTotal * 100);
+                if (fAvgNightly > 0 && pAvgNightly > 0) {
+                    var change = ((fAvgNightly - pAvgNightly) / pAvgNightly * 100);
                     var changeClass = change >= 0 ? 'text-emerald-600' : 'text-red-500';
                     html += '<span class="text-[10px] font-bold ' + changeClass + '">' + (change >= 0 ? '\u2191' : '\u2193') + Math.abs(change).toFixed(0) + '%</span>';
                 }
@@ -10193,7 +10194,17 @@
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         Projection.init();
-                        if (Projection.reservations.length > 0) Projection.calculate();
+                        // PMS veya Analytics rez varsa hesapla (sadece PMS'e bağımlı değil)
+                        const hasPmsRes = Projection.reservations && Projection.reservations.length > 0;
+                        const hasAnalyticsRes = Analytics.data?.reservations?.length > 0;
+                        const hasApartments = Analytics.data?.apartments?.length > 0;
+                        if (hasApartments && (hasPmsRes || hasAnalyticsRes)) {
+                            Projection.calculate();
+                        }
+                        // Hidden container'da render edilmiş ECharts varsa resize
+                        if (Projection._charts) {
+                            Object.values(Projection._charts).forEach(c => { try { c.resize(); } catch(e) {} });
+                        }
                     });
                 });
             }
