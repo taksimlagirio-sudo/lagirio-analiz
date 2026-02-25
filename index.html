@@ -5403,8 +5403,8 @@
             });
             var futureAvgNightly = futureNights > 0 ? futureTotal / futureNights : 0;
 
-            // Yıllık değişim
-            var yoyChange = pastTotal > 0 && futureTotal > 0 ? (((futureTotal - pastTotal) / pastTotal) * 100) : null;
+            // Yıllık değişim (ortalama gecelik ücret bazında)
+            var yoyChange = pastAvgNightly > 0 && futureAvgNightly > 0 ? (((futureAvgNightly - pastAvgNightly) / pastAvgNightly) * 100) : null;
 
             // Modal HTML
             var html = '<div id="projResDetailOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">';
@@ -5493,7 +5493,7 @@
                 var changeClass = yoyChange >= 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-red-600 bg-red-50 border-red-200';
                 var arrow = yoyChange >= 0 ? '\u2191' : '\u2193';
                 html += '<div class="border ' + changeClass + ' rounded-lg p-3 flex items-center justify-between">';
-                html += '<span class="text-xs text-gray-600">Ge\u00e7en y\u0131la g\u00f6re de\u011fi\u015fim</span>';
+                html += '<span class="text-xs text-gray-600">Ort. gecelik \u00fccret de\u011fi\u015fimi <span class="text-gray-400">(\u20ac' + pastAvgNightly.toFixed(0) + ' \u2192 \u20ac' + futureAvgNightly.toFixed(0) + ')</span></span>';
                 html += '<span class="text-sm font-bold">' + arrow + ' %' + Math.abs(yoyChange).toFixed(1) + '</span>';
                 html += '</div>';
             }
