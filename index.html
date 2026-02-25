@@ -1708,12 +1708,12 @@
                         <div id="projMonthlyOverview"></div>
                     </div>
 
-                    <!-- Per-apartment accordion -->
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                            <i data-lucide="building-2" class="w-5 h-5 text-blue-600"></i>
-                            <span>Daire Bazlı Tahmin</span>
-                            <span class="text-xs text-gray-400 ml-2">(tıklayarak aylık detay görün)</span>
+                    <!-- Per-apartment accordion / Owner future reservations -->
+                    <div class="bg-white rounded-xl shadow-lg p-6" id="projApartmentSection">
+                        <h3 id="projAptSectionHeader" class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="building-2" class="w-5 h-5 text-blue-600" id="projAptSectionIcon"></i>
+                            <span id="projAptSectionTitle">Daire Bazlı Tahmin</span>
+                            <span class="text-xs text-gray-400 ml-2" id="projAptSectionSubtitle">(tıklayarak aylık detay görün)</span>
                         </h3>
                         <div id="projApartmentList" class="space-y-1">
                             <p class="text-sm text-gray-400">Veri bekleniyor...</p>
@@ -4992,32 +4992,56 @@
             const maxVal = Math.max(...sortedKeys.map(k => monthlyData[k].gross));
 
             if (isOwner) {
-                // Owner: Br\u00fct Gelir (a\u00e7\u0131k ye\u015fil bar) + Net Kazan\u00e7 (\u00fcst\u00fcnde koyu ye\u015fil) + Kesintiler (k\u0131rm\u0131z\u0131 \u00e7izgi)
-                container.innerHTML = '<div class="flex items-end gap-3 h-56">' + sortedKeys.map(key => {
-                    const d = monthlyData[key];
-                    const [y, m] = key.split('-');
-                    const label = monthNames[parseInt(m)-1] + ' ' + y.slice(2);
-                    const grossH = maxVal > 0 ? Math.max(8, (d.gross / maxVal) * 190) : 8;
-                    const ownerH = maxVal > 0 ? Math.max(4, (d.ownerShare / maxVal) * 190) : 4;
-                    const deductions = d.gross - d.ownerShare;
+                // Owner: ECharts — Net Kazanç (bar) + Brüt Gelir (line), tıklanabilir
+                container.innerHTML = '';
+                if (this.charts._projOwnerMonthly) this.charts._projOwnerMonthly.dispose();
+                const chart = echarts.init(container);
+                this.charts._projOwnerMonthly = chart;
 
-                    return '<div class="flex-1 flex flex-col items-center gap-1">' +
-                        '<div class="text-center mb-1">' +
-                        '<span class="text-[10px] font-bold text-emerald-600 block">\u20ac' + d.ownerShare.toFixed(0) + '</span>' +
-                        '<span class="text-[9px] text-gray-400">\u20ac' + d.avgNightly.toFixed(2) + '/g</span></div>' +
-                        '<div class="w-full flex gap-0.5 items-end justify-center" style="height:' + grossH + 'px">' +
-                        '<div class="flex-1 bg-emerald-100 rounded-t-sm h-full relative">' +
-                        '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + ownerH + 'px"></div></div>' +
-                        '<div class="w-2 bg-red-300 rounded-t-sm" style="height:' + Math.max(2, grossH - ownerH) + 'px"></div></div>' +
-                        '<span class="text-[10px] text-gray-600 whitespace-nowrap font-medium">' + label + '</span>' +
-                        '<span class="text-[9px] text-gray-400">' + d.count + ' rez.</span>' +
-                        '</div>';
-                }).join('') + '</div>' +
-                '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
-                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Tahmini Br\u00fct</span>' +
-                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Net Kazanc\u0131n\u0131z</span>' +
-                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-300 rounded"></span> Toplam Kesinti</span>' +
-                '</div>';
+                const labels = sortedKeys.map(k => { const [y, m] = k.split('-'); return monthNames[parseInt(m)-1] + ' ' + y.slice(2); });
+                const netData = sortedKeys.map(k => parseFloat((monthlyData[k].ownerShare || 0).toFixed(2)));
+                const grossData = sortedKeys.map(k => parseFloat(monthlyData[k].gross.toFixed(2)));
+                const avgNightlyData = sortedKeys.map(k => parseFloat(monthlyData[k].avgNightly.toFixed(2)));
+                const countData = sortedKeys.map(k => monthlyData[k].count);
+
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.85)', borderColor: 'transparent', textStyle: { fontSize: 12 },
+                        formatter: function(params) {
+                            const idx = params[0].dataIndex;
+                            let html = '<div style="font-weight:600;margin-bottom:6px">' + params[0].axisValue + '</div>';
+                            params.forEach(function(p) { html += '<div style="display:flex;align-items:center;gap:6px;margin:3px 0"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + p.color + '"></span>' + p.seriesName + ': <strong>€' + p.value.toLocaleString() + '</strong></div>'; });
+                            html += '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.15);font-size:11px;color:#aaa">' + countData[idx] + ' rez · €' + avgNightlyData[idx].toFixed(2) + '/gece</div>';
+                            html += '<div style="font-size:10px;color:#6ee7b7;margin-top:2px">Detay için tıklayın</div>';
+                            return html;
+                        }
+                    },
+                    legend: { data: ['Net Kazancınız', 'Brüt Gelir'], bottom: 0, textStyle: { fontSize: 11 } },
+                    grid: { left: '2%', right: '3%', bottom: '15%', top: '8%', containLabel: true },
+                    xAxis: { type: 'category', data: labels, axisLabel: { rotate: 45, fontSize: 10 }, axisTick: { alignWithLabel: true } },
+                    yAxis: { type: 'value', axisLabel: { formatter: function(v) { return '€' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v); }, fontSize: 10 }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+                    series: [
+                        {
+                            name: 'Net Kazancınız', type: 'bar', data: netData, barWidth: '45%',
+                            itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [6,6,0,0] },
+                            label: { show: true, position: 'top', formatter: function(p) { return '€' + p.value.toLocaleString(); }, fontSize: 9, color: '#059669', fontWeight: 'bold' }
+                        },
+                        {
+                            name: 'Brüt Gelir', type: 'line', data: grossData, smooth: true,
+                            itemStyle: { color: '#3b82f6' }, lineStyle: { width: 2.5 }, symbol: 'circle', symbolSize: 7,
+                            areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.12)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) }
+                        }
+                    ]
+                });
+
+                // Tıklama: ay detay modalını aç
+                const self = this;
+                chart.on('click', function(params) {
+                    if (params.dataIndex !== undefined) {
+                        const mk = sortedKeys[params.dataIndex];
+                        self.showOwnerMonthDetail(mk);
+                    }
+                });
             } else {
                 // Admin: mevcut g\u00f6r\u00fcn\u00fcm + Ger\u00e7ek K\u00e2r notu
                 const compExp = this._estMonthlyCompanyExp || 0;
@@ -5072,16 +5096,16 @@
                 grandPlat += d.platComm; grandLagirio += d.lagirio; grandOwner += (d.ownerShare || 0); grandCount += d.count;
             });
 
+            if (isOwner) {
+                // Owner: 12 aylık kart grid
+                this.renderOwnerMonthlyCards(container, monthlyData, aptMonthlyDetail, sortedKeys, monthNames);
+                return;
+            }
+
             let html = '<div class="overflow-x-auto"><table class="w-full text-xs border-collapse"><thead><tr class="bg-gray-50 text-gray-500">';
 
-            if (isOwner) {
-                // Owner: sadele\u015ftirilmi\u015f s\u00fctunlar
-                html += '<th class="py-2 px-3 text-left font-medium">Ay</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Rez.</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Ort. Gecelik</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Br\u00fct Gelir</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Kesintiler</th>' +
-                    '<th class="py-2 px-3 text-right font-medium text-emerald-700">Net Kazanc\u0131n\u0131z</th>';
+            if (false) {
+                // (eski owner tablo kodu — artık kullanılmıyor)
             } else {
                 // Admin: t\u00fcm s\u00fctunlar
                 html += '<th class="py-2 px-3 text-left font-medium">Ay</th>' +
@@ -5245,14 +5269,462 @@
             if (chev) chev.style.transform = isHidden ? 'rotate(90deg)' : '';
         },
 
+        // ========= OWNER: 12 Aylık Kart Grid =========
+        renderOwnerMonthlyCards(container, monthlyData, aptMonthlyDetail, sortedKeys, monthNames) {
+            const maxNet = Math.max(...sortedKeys.map(k => monthlyData[k].ownerShare || 0));
+
+            let html = '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">';
+
+            sortedKeys.forEach(mk => {
+                const d = monthlyData[mk];
+                const [y, m] = mk.split('-');
+                const mName = monthNames[parseInt(m) - 1] + ' ' + y;
+                const ownerVal = d.ownerShare || 0;
+                const deductions = d.gross - ownerVal;
+                const netRatio = maxNet > 0 ? (ownerVal / maxNet) : 0;
+
+                // Daire badge'leri
+                let aptBadges = '';
+                if (aptMonthlyDetail) {
+                    const apartments = window.Analytics?.data?.apartments || [];
+                    Object.entries(aptMonthlyDetail).forEach(function(entry) {
+                        const aptId = entry[0], months = entry[1];
+                        const md = months[mk];
+                        if (md && (md.gross > 0 || md.resCount > 0)) {
+                            const apt = apartments.find(function(a) { return a.id === aptId; });
+                            const code = apt ? apt.code : aptId;
+                            aptBadges += '<span class="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-medium">' + code + '</span>';
+                        }
+                    });
+                }
+
+                // Renk yoğunluğu: en yüksek kazançlı ay daha belirgin
+                const borderClass = netRatio > 0.85 ? 'border-emerald-300 bg-emerald-50/30' : netRatio > 0.5 ? 'border-emerald-200' : 'border-gray-100';
+                const barWidth = Math.max(8, netRatio * 100);
+
+                html += '<div class="border ' + borderClass + ' rounded-xl p-3.5 cursor-pointer hover:shadow-md hover:border-emerald-300 transition-all group" onclick="Projection.showOwnerMonthDetail(\'' + mk + '\')">';
+                html += '<div class="flex items-center justify-between mb-2">';
+                html += '<span class="text-xs font-semibold text-gray-700">' + mName + '</span>';
+                html += '<span class="text-[10px] text-gray-400 group-hover:text-emerald-500 transition-colors"><i data-lucide="arrow-right" class="w-3 h-3 inline"></i></span>';
+                html += '</div>';
+
+                // Net kazanç — büyük
+                html += '<div class="text-lg font-bold text-emerald-600 mb-1">€' + ownerVal.toFixed(0) + '</div>';
+
+                // Progress bar
+                html += '<div class="w-full bg-gray-100 rounded-full h-1.5 mb-2"><div class="bg-emerald-400 h-1.5 rounded-full transition-all" style="width:' + barWidth + '%"></div></div>';
+
+                // Brüt ve kesinti
+                html += '<div class="flex justify-between text-[10px] mb-2">';
+                html += '<span class="text-gray-500">Brüt €' + d.gross.toFixed(0) + '</span>';
+                html += '<span class="text-red-400">-€' + deductions.toFixed(0) + '</span>';
+                html += '</div>';
+
+                // Rez ve gecelik
+                html += '<div class="text-[10px] text-gray-400 mb-1.5">' + d.count + ' rez · €' + d.avgNightly.toFixed(0) + '/gece</div>';
+
+                // Daire badge'leri
+                if (aptBadges) {
+                    html += '<div class="flex flex-wrap gap-1">' + aptBadges + '</div>';
+                }
+
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            // Grand total kartı
+            let grandGross = 0, grandOwner = 0, grandCount = 0;
+            sortedKeys.forEach(function(k) { grandGross += monthlyData[k].gross; grandOwner += (monthlyData[k].ownerShare || 0); grandCount += monthlyData[k].count; });
+            const grandDeductions = grandGross - grandOwner;
+            const grandRatio = grandGross > 0 ? ((grandOwner / grandGross) * 100).toFixed(1) : '0.0';
+
+            html += '<div class="mt-4 bg-gradient-to-r from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">';
+            html += '<div class="flex items-center gap-3"><i data-lucide="calendar-check-2" class="w-5 h-5 text-emerald-600"></i><span class="text-sm font-semibold text-gray-700">12 Aylık Toplam</span></div>';
+            html += '<div class="flex items-center gap-6 text-sm">';
+            html += '<div><span class="text-gray-500">Brüt</span> <strong class="text-gray-700">€' + grandGross.toFixed(0) + '</strong></div>';
+            html += '<div><span class="text-red-400">Kesinti</span> <strong class="text-red-500">-€' + grandDeductions.toFixed(0) + '</strong></div>';
+            html += '<div><span class="text-emerald-600">Net</span> <strong class="text-emerald-700 text-base">€' + grandOwner.toFixed(0) + '</strong> <span class="text-[10px] text-gray-400">%' + grandRatio + '</span></div>';
+            html += '<div><span class="text-gray-400">' + grandCount + ' rez</span></div>';
+            html += '</div></div>';
+
+            container.innerHTML = html;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        // ========= OWNER: Ay Detay Modal (tabbed) =========
+        showOwnerMonthDetail(monthKey) {
+            const monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
+            const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : function(a) { return a; };
+            const fmt = function(d) { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
+            const [year, month] = monthKey.split('-');
+            const y = parseInt(year), m = parseInt(month) - 1;
+            const mName = monthNames[m] + ' ' + year;
+
+            // Aylık toplam veriler
+            const monthlyData = this._lastMonthlyData || {};
+            const md = monthlyData[monthKey] || {};
+            const ownerVal = md.ownerShare || 0;
+            const deductions = (md.gross || 0) - ownerVal;
+
+            // Daire bazlı detay
+            const aptMonthlyDetail = this._aptMonthlyDetail || {};
+            const apartments = window.Analytics?.data?.apartments || [];
+            const aptRows = [];
+            Object.entries(aptMonthlyDetail).forEach(function(entry) {
+                var aptId = entry[0], months = entry[1];
+                var amd = months[monthKey];
+                if (amd && (amd.gross > 0 || amd.resCount > 0)) {
+                    var apt = apartments.find(function(a) { return a.id === aptId; });
+                    aptRows.push({ id: aptId, code: apt ? apt.code : aptId, ownerShare: amd.ownerShare || 0, gross: amd.gross || 0, resCount: amd.resCount || 0, avgNightly: amd.avgNightly || 0 });
+                }
+            });
+            aptRows.sort(function(a, b) { return b.ownerShare - a.ownerShare; });
+            const maxAptOwner = aptRows.length > 0 ? Math.max(...aptRows.map(function(a) { return a.ownerShare; })) : 0;
+
+            // Gelecek ve geçmiş rezervasyonlar
+            var futureRes = [], pastRes = [];
+            apartments.forEach(function(apt) {
+                var fr = Projection.getPmsResForMonth(apt.id, m, y).concat(Projection.getAnalyticsResForMonth(apt.id, m, y));
+                fr.forEach(function(r) { r._aptCode = apt.code; });
+                futureRes = futureRes.concat(fr);
+                var pr = Projection.getPmsResForMonth(apt.id, m, y - 1).concat(Projection.getAnalyticsResForMonth(apt.id, m, y - 1));
+                pr.forEach(function(r) { r._aptCode = apt.code; });
+                pastRes = pastRes.concat(pr);
+            });
+
+            // Geçmiş yıl istatistikleri
+            var pastTotal = 0, pastNights = 0;
+            pastRes.forEach(function(r) {
+                var nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
+                pastTotal += convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
+                pastNights += nights;
+            });
+            var pastAvgNightly = pastNights > 0 ? pastTotal / pastNights : 0;
+            var futureTotal = 0, futureNights = 0;
+            futureRes.forEach(function(r) {
+                var nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
+                futureTotal += convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
+                futureNights += nights;
+            });
+            var futureAvgNightly = futureNights > 0 ? futureTotal / futureNights : 0;
+
+            // Yıllık değişim
+            var yoyChange = pastTotal > 0 && futureTotal > 0 ? (((futureTotal - pastTotal) / pastTotal) * 100) : null;
+
+            // Modal HTML
+            var html = '<div id="projResDetailOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">';
+            html += '<div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">';
+
+            // Header
+            html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl">';
+            html += '<div class="flex justify-between items-start">';
+            html += '<div><h3 class="text-lg font-bold">' + mName + '</h3>';
+            html += '<p class="text-emerald-200 text-sm mt-0.5">Projeksiyon Detay\u0131</p></div>';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
+            html += '</div>';
+            html += '<div class="mt-3 pt-3 border-t border-emerald-500/30">';
+            html += '<div class="text-emerald-200 text-xs">Tahmini Net Kazanc\u0131n\u0131z</div>';
+            html += '<div class="text-2xl font-bold">\u20ac' + ownerVal.toFixed(0) + '</div></div></div>';
+
+            // Tabs
+            html += '<div class="border-b border-gray-200 flex">';
+            html += '<button class="ownerMonthTab flex-1 py-3 text-sm font-medium text-emerald-600 border-b-2 border-emerald-500" data-tab="summary" onclick="Projection._switchOwnerMonthTab(\'summary\')">Özet</button>';
+            html += '<button class="ownerMonthTab flex-1 py-3 text-sm font-medium text-gray-400 hover:text-gray-600 border-b-2 border-transparent" data-tab="future" onclick="Projection._switchOwnerMonthTab(\'future\')">';
+            html += 'Gelecek Rez. <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full ml-1">' + futureRes.length + '</span></button>';
+            html += '<button class="ownerMonthTab flex-1 py-3 text-sm font-medium text-gray-400 hover:text-gray-600 border-b-2 border-transparent" data-tab="past" onclick="Projection._switchOwnerMonthTab(\'past\')">';
+            html += 'Ge\u00e7mi\u015f Y\u0131l <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full ml-1">' + pastRes.length + '</span></button>';
+            html += '</div>';
+
+            // === Tab 1: Özet ===
+            html += '<div id="ownerMonthPane_summary" class="p-5">';
+
+            // KPI kartları
+            html += '<div class="grid grid-cols-3 gap-3 mb-5">';
+            html += '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-[10px] text-blue-500 font-medium mb-1">Br\u00fct Gelir</div><div class="text-base font-bold text-blue-700">\u20ac' + (md.gross || 0).toFixed(0) + '</div></div>';
+            html += '<div class="bg-red-50 rounded-lg p-3 text-center"><div class="text-[10px] text-red-500 font-medium mb-1">Kesintiler</div><div class="text-base font-bold text-red-600">-\u20ac' + deductions.toFixed(0) + '</div></div>';
+            html += '<div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-[10px] text-purple-500 font-medium mb-1">Ort. Gecelik</div><div class="text-base font-bold text-purple-700">\u20ac' + (md.avgNightly || 0).toFixed(0) + '</div></div>';
+            html += '</div>';
+
+            // Daire dağılımı
+            if (aptRows.length > 0) {
+                html += '<h4 class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">Daire Bazl\u0131 Da\u011f\u0131l\u0131m</h4>';
+                html += '<div class="space-y-2.5 mb-4">';
+                aptRows.forEach(function(a) {
+                    var barW = maxAptOwner > 0 ? Math.max(5, (a.ownerShare / maxAptOwner) * 100) : 5;
+                    html += '<div>';
+                    html += '<div class="flex items-center justify-between mb-1">';
+                    html += '<span class="text-xs font-semibold text-gray-700">' + a.code + '</span>';
+                    html += '<div class="flex items-center gap-3 text-[11px]">';
+                    html += '<span class="text-gray-400">' + a.resCount + ' rez</span>';
+                    html += '<span class="text-gray-400">\u20ac' + a.avgNightly.toFixed(0) + '/g</span>';
+                    html += '<span class="font-bold text-emerald-600">\u20ac' + a.ownerShare.toFixed(0) + '</span>';
+                    html += '</div></div>';
+                    html += '<div class="w-full bg-gray-100 rounded-full h-2"><div class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-2 rounded-full" style="width:' + barW + '%"></div></div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            // Yıllık karşılaştırma mini
+            if (yoyChange !== null) {
+                var changeClass = yoyChange >= 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-red-600 bg-red-50 border-red-200';
+                var arrow = yoyChange >= 0 ? '\u2191' : '\u2193';
+                html += '<div class="border ' + changeClass + ' rounded-lg p-3 flex items-center justify-between">';
+                html += '<span class="text-xs text-gray-600">Ge\u00e7en y\u0131la g\u00f6re de\u011fi\u015fim</span>';
+                html += '<span class="text-sm font-bold">' + arrow + ' %' + Math.abs(yoyChange).toFixed(1) + '</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // === Tab 2: Gelecek Rezervasyonlar ===
+            html += '<div id="ownerMonthPane_future" class="p-5 hidden">';
+            if (futureRes.length > 0) {
+                html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Daire</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Tarih</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+                html += '</tr></thead><tbody>';
+                futureRes.forEach(function(res) {
+                    var nights = res.nights || Math.max(1, Math.round((new Date(res.checkOut) - new Date(res.checkIn)) / 86400000));
+                    var amount = convertEUR(res.totalPrice ?? res.totalAmount ?? 0, res.currency || 'EUR');
+                    var perNight = nights > 0 ? amount / nights : 0;
+                    var platformColor = (res.platform === 'Airbnb') ? 'bg-red-50 text-red-600' : (res.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-600';
+                    html += '<tr class="border-t border-gray-100 hover:bg-gray-50">';
+                    html += '<td class="py-2 px-3 font-medium text-gray-600">' + (res._aptCode || '-') + '</td>';
+                    html += '<td class="py-2 px-3 text-gray-700">' + (res.guestName || '-') + '</td>';
+                    html += '<td class="py-2 px-3 text-center text-gray-600 text-[11px]">' + fmt(res.checkIn) + ' \u2192 ' + fmt(res.checkOut) + '</td>';
+                    html += '<td class="py-2 px-3 text-center font-semibold">' + nights + '</td>';
+                    html += '<td class="py-2 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + platformColor + '">' + (res.platform || '-') + '</span></td>';
+                    html += '<td class="py-2 px-3 text-right font-medium">\u20ac' + amount.toFixed(2) + '</td>';
+                    html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + perNight.toFixed(2) + '</td>';
+                    html += '</tr>';
+                });
+                html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
+                html += '<td class="py-2 px-3" colspan="3">TOPLAM</td>';
+                html += '<td class="py-2 px-3 text-center">' + futureNights + '</td><td></td>';
+                html += '<td class="py-2 px-3 text-right text-emerald-600">\u20ac' + futureTotal.toFixed(2) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + futureAvgNightly.toFixed(2) + '</td>';
+                html += '</tr></tbody></table></div>';
+                html += '<div class="flex gap-3 mt-3">';
+                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-emerald-700">\u20ac' + futureAvgNightly.toFixed(2) + '</strong></div>';
+                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + futureNights + '</strong></div>';
+                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Say\u0131s\u0131:</span> <strong class="text-amber-700">' + futureRes.length + '</strong></div>';
+                html += '</div>';
+            } else {
+                html += '<div class="text-center py-8"><i data-lucide="calendar-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>';
+                html += '<p class="text-sm text-gray-400">Bu ay i\u00e7in hen\u00fcz gelecek rezervasyon yok</p>';
+                html += '<p class="text-xs text-gray-300 mt-1">Tahminler ge\u00e7mi\u015f verilerden \u00fcretilmi\u015ftir</p></div>';
+            }
+            html += '</div>';
+
+            // === Tab 3: Geçmiş Yıl ===
+            html += '<div id="ownerMonthPane_past" class="p-5 hidden">';
+            if (pastRes.length > 0) {
+                html += '<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-center justify-between">';
+                html += '<span class="text-xs text-amber-700">' + monthNames[m] + ' ' + (y - 1) + ' verileri</span>';
+                html += '<span class="text-sm font-bold text-amber-700">' + pastRes.length + ' rezervasyon</span>';
+                html += '</div>';
+                html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Daire</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Tarih</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+                html += '</tr></thead><tbody>';
+                pastRes.forEach(function(res) {
+                    var nights = res.nights || Math.max(1, Math.round((new Date(res.checkOut) - new Date(res.checkIn)) / 86400000));
+                    var amount = convertEUR(res.totalPrice ?? res.totalAmount ?? 0, res.currency || 'EUR');
+                    var perNight = nights > 0 ? amount / nights : 0;
+                    var platformColor = (res.platform === 'Airbnb') ? 'bg-red-50 text-red-600' : (res.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-600';
+                    html += '<tr class="border-t border-gray-100 hover:bg-gray-50">';
+                    html += '<td class="py-2 px-3 font-medium text-gray-600">' + (res._aptCode || '-') + '</td>';
+                    html += '<td class="py-2 px-3 text-gray-700">' + (res.guestName || '-') + '</td>';
+                    html += '<td class="py-2 px-3 text-center text-gray-600 text-[11px]">' + fmt(res.checkIn) + ' \u2192 ' + fmt(res.checkOut) + '</td>';
+                    html += '<td class="py-2 px-3 text-center font-semibold">' + nights + '</td>';
+                    html += '<td class="py-2 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + platformColor + '">' + (res.platform || '-') + '</span></td>';
+                    html += '<td class="py-2 px-3 text-right font-medium">\u20ac' + amount.toFixed(2) + '</td>';
+                    html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + perNight.toFixed(2) + '</td>';
+                    html += '</tr>';
+                });
+                html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
+                html += '<td class="py-2 px-3" colspan="3">TOPLAM</td>';
+                html += '<td class="py-2 px-3 text-center">' + pastNights + '</td><td></td>';
+                html += '<td class="py-2 px-3 text-right text-amber-600">\u20ac' + pastTotal.toFixed(2) + '</td>';
+                html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + pastAvgNightly.toFixed(2) + '</td>';
+                html += '</tr></tbody></table></div>';
+                html += '<div class="flex gap-3 mt-3">';
+                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-amber-700">\u20ac' + pastAvgNightly.toFixed(2) + '</strong></div>';
+                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + pastNights + '</strong></div>';
+                html += '<div class="bg-gray-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Say\u0131s\u0131:</span> <strong class="text-gray-700">' + pastRes.length + '</strong></div>';
+                html += '</div>';
+            } else {
+                html += '<div class="text-center py-8"><i data-lucide="archive-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>';
+                html += '<p class="text-sm text-gray-400">Ge\u00e7mi\u015f y\u0131l i\u00e7in bu ayda veri bulunamad\u0131</p>';
+                html += '<p class="text-xs text-gray-300 mt-1">' + monthNames[m] + ' ' + (y - 1) + ' verisi yok</p></div>';
+            }
+            html += '</div>';
+
+            // Footer
+            html += '<div class="p-4 border-t border-gray-100 flex justify-end">';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">Kapat</button>';
+            html += '</div></div></div>';
+
+            document.getElementById('projResDetailOverlay')?.remove();
+            document.body.insertAdjacentHTML('beforeend', html);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        _switchOwnerMonthTab(tabName) {
+            document.querySelectorAll('.ownerMonthTab').forEach(function(btn) {
+                var isActive = btn.dataset.tab === tabName;
+                btn.className = 'ownerMonthTab flex-1 py-3 text-sm font-medium ' + (isActive ? 'text-emerald-600 border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-600 border-b-2 border-transparent');
+            });
+            ['summary', 'future', 'past'].forEach(function(t) {
+                var pane = document.getElementById('ownerMonthPane_' + t);
+                if (pane) pane.classList.toggle('hidden', t !== tabName);
+            });
+        },
+
+        // ========= OWNER: Gelecek Rezervasyonlar Paneli (ay bazında gruplanmış) =========
+        renderOwnerFutureReservations(el) {
+            const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : function(a) { return a; };
+            const fmt = function(d) { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
+            const monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
+            const today = new Date(); today.setHours(0,0,0,0);
+            const apartments = window.Analytics?.data?.apartments || [];
+            const allRes = (this.reservations || []).filter(function(r) { return new Date(r.checkIn) >= today; });
+
+            // Daire kodlarını ekle
+            allRes.forEach(function(r) {
+                var apt = apartments.find(function(a) { return a.id === r.apartmentId; });
+                r._aptCode = apt ? apt.code : r.apartmentId;
+            });
+            allRes.sort(function(a, b) { return new Date(a.checkIn) - new Date(b.checkIn); });
+
+            if (allRes.length === 0) {
+                el.innerHTML = '<div class="text-center py-6"><i data-lucide="calendar-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>' +
+                    '<p class="text-sm text-gray-400">Hen\u00fcz gelecek rezervasyon yok</p></div>';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+
+            // Ay bazında grupla
+            var grouped = {};
+            allRes.forEach(function(r) {
+                var d = new Date(r.checkIn);
+                var mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                if (!grouped[mk]) grouped[mk] = [];
+                grouped[mk].push(r);
+            });
+            var sortedMonths = Object.keys(grouped).sort();
+
+            // Daire filtresi
+            var aptCodes = [...new Set(allRes.map(function(r) { return r._aptCode; }))].sort();
+            var html = '<div class="flex items-center justify-between mb-4">';
+            html += '<div class="text-sm text-gray-500">' + allRes.length + ' rezervasyon · ' + aptCodes.length + ' daire</div>';
+            if (aptCodes.length > 1) {
+                html += '<select id="ownerFutureResFilter" onchange="Projection._filterOwnerFutureRes(this.value)" class="text-xs border border-gray-200 rounded-lg px-3 py-1.5">';
+                html += '<option value="all">T\u00fcm Daireler</option>';
+                aptCodes.forEach(function(c) { html += '<option value="' + c + '">' + c + '</option>'; });
+                html += '</select>';
+            }
+            html += '</div>';
+
+            html += '<div id="ownerFutureResContent" class="space-y-3">';
+
+            sortedMonths.forEach(function(mk, idx) {
+                var res = grouped[mk];
+                var [y, m] = mk.split('-');
+                var mName = monthNames[parseInt(m) - 1] + ' ' + y;
+                var monthTotal = 0, monthNights = 0;
+                res.forEach(function(r) {
+                    var nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
+                    monthTotal += convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
+                    monthNights += nights;
+                });
+
+                html += '<div class="border border-gray-100 rounded-lg overflow-hidden" data-owner-future-month="' + mk + '">';
+
+                // Ay başlığı
+                html += '<div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onclick="Projection._toggleOwnerFutureMonth(\'' + mk + '\')">';
+                html += '<div class="flex items-center gap-2">';
+                html += '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="ownerFutureChev_' + mk + '"' + (idx === 0 ? ' style="transform:rotate(90deg)"' : '') + '></i>';
+                html += '<span class="text-sm font-semibold text-gray-700">' + mName + '</span>';
+                html += '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">' + res.length + ' rez</span>';
+                html += '</div>';
+                html += '<div class="flex items-center gap-4 text-xs">';
+                html += '<span class="text-gray-400">' + monthNights + ' gece</span>';
+                html += '<span class="font-bold text-gray-700">\u20ac' + monthTotal.toFixed(0) + '</span>';
+                html += '</div></div>';
+
+                // Rezervasyon listesi
+                html += '<div id="ownerFutureBody_' + mk + '" class="' + (idx === 0 ? '' : 'hidden') + '">';
+                html += '<div class="divide-y divide-gray-50">';
+                res.forEach(function(r) {
+                    var nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
+                    var amount = convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
+                    var perNight = nights > 0 ? amount / nights : 0;
+                    var platformColor = (r.platform === 'Airbnb') ? 'bg-red-50 text-red-600 border-red-200' : (r.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-600 border-green-200';
+
+                    html += '<div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors" data-apt-code="' + (r._aptCode || '') + '">';
+                    html += '<div class="flex items-center gap-3">';
+                    html += '<span class="text-[10px] font-bold text-gray-400 w-8">' + (r._aptCode || '-') + '</span>';
+                    html += '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ' + platformColor + '">' + (r.platform || '-') + '</span>';
+                    html += '<div><span class="text-xs font-medium text-gray-700">' + (r.guestName || 'Misafir') + '</span>';
+                    html += '<span class="text-[10px] text-gray-400 ml-2">' + fmt(r.checkIn) + ' \u2192 ' + fmt(r.checkOut) + ' (' + nights + 'g)</span></div>';
+                    html += '</div>';
+                    html += '<div class="text-right"><span class="text-xs font-bold text-gray-800">\u20ac' + amount.toFixed(0) + '</span>';
+                    html += '<span class="text-[10px] text-gray-400 ml-1">\u20ac' + perNight.toFixed(0) + '/g</span></div>';
+                    html += '</div>';
+                });
+                html += '</div></div></div>';
+            });
+
+            html += '</div>';
+            el.innerHTML = html;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        _toggleOwnerFutureMonth(mk) {
+            var body = document.getElementById('ownerFutureBody_' + mk);
+            var chev = document.getElementById('ownerFutureChev_' + mk);
+            if (!body) return;
+            var isHidden = body.classList.contains('hidden');
+            body.classList.toggle('hidden');
+            if (chev) chev.style.transform = isHidden ? 'rotate(90deg)' : '';
+        },
+
+        _filterOwnerFutureRes(aptCode) {
+            var items = document.querySelectorAll('#ownerFutureResContent [data-apt-code]');
+            items.forEach(function(el) {
+                el.style.display = (aptCode === 'all' || el.dataset.aptCode === aptCode) ? '' : 'none';
+            });
+        },
+
         renderApartmentList(results, aptMonthlyDetail) {
             const el = document.getElementById('projApartmentList');
             if (!el) return;
             const isOwner = Auth.currentUser?.role === 'owner';
             this._aptMonthlyDetail = aptMonthlyDetail || {};
-            const sorted = isOwner
-                ? results.sort((a, b) => (b.ownerShare || 0) - (a.ownerShare || 0))
-                : results.sort((a, b) => b.lagirio - a.lagirio);
+
+            if (isOwner) {
+                // Owner: Daire accordion yerine ay bazlı gelecek rez paneli
+                const titleEl = document.getElementById('projAptSectionTitle');
+                const subtitleEl = document.getElementById('projAptSectionSubtitle');
+                if (titleEl) titleEl.textContent = 'Gelecek Rezervasyonlar';
+                if (subtitleEl) subtitleEl.textContent = '(ay bazında gruplanmış)';
+                this.renderOwnerFutureReservations(el);
+                return;
+            }
+
+            const sorted = results.sort((a, b) => b.lagirio - a.lagirio);
             const sysNames = { '1': 'S1 Net', '2': 'S2 Br\u00fct', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
             const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
             const sourceColorMap = { emerald: 'bg-emerald-50 border-l-2 border-emerald-400', amber: 'bg-amber-50 border-l-2 border-amber-400', blue: 'bg-blue-50 border-l-2 border-blue-400', orange: 'bg-orange-50 border-l-2 border-orange-400', red: 'bg-red-50 border-l-2 border-red-300' };
