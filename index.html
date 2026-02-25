@@ -4395,6 +4395,10 @@
             this._realProfit = realProfit;
 
             // --- 4. UI Güncelle ---
+            // Önce container'ları görünür yap (ECharts boyut hesabı için şart)
+            document.getElementById('projSummaryCards')?.classList.remove('hidden');
+            document.getElementById('projMonthlySection')?.classList.remove('hidden');
+
             this.renderSummaryCards(totalEstGross, totalEstExpenses, totalEstKDV, totalEstPlatComm, totalLagirioNet, totalOwnerNet, totalResCount, Object.keys(aptTotals).length, totalCompanyExpense, realProfit, estMonthlyCompanyExp);
             this.renderMonthlyChart(monthlyData);
             this.renderMonthlyOverview(monthlyData, aptMonthlyDetail);
@@ -4402,9 +4406,6 @@
             this.renderTable();
             const futureRes = this.reservations.filter(r => new Date(r.checkIn) >= today);
             this.renderPlatformFilter(futureRes);
-
-            document.getElementById('projSummaryCards')?.classList.remove('hidden');
-            document.getElementById('projMonthlySection')?.classList.remove('hidden');
             // Owner heading güncellemeleri
             const isOwner = Auth.currentUser?.role === 'owner';
             const chartTitle = document.getElementById('projChartTitle');
@@ -5608,139 +5609,180 @@
             });
         },
 
-        // ========= OWNER: Gelecek Rezervasyonlar Paneli (ay bazında gruplanmış) =========
+        // ========= OWNER: Ay Bazlı Rezervasyon Paneli (gelecek + geçmiş yıl) =========
         renderOwnerFutureReservations(el) {
-            const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : function(a) { return a; };
-            const fmt = function(d) { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
-            const monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
-            const today = new Date(); today.setHours(0,0,0,0);
-            const apartments = window.Analytics?.data?.apartments || [];
-            const ownerAptIds = apartments.map(function(a) { return a.id; });
-            const ownerAptCodes = apartments.map(function(a) { return a.code; });
+            var self = this;
+            var convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : function(a) { return a; };
+            var fmt = function(d) { var dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
+            var monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
+            var apartments = window.Analytics?.data?.apartments || [];
 
-            // PMS mapping: pmsId → analyticsId
-            const mapping = this.loadMapping ? this.loadMapping() : {};
-
-            // PMS rezervasyonlarını owner'ın dairelerine göre filtrele
-            var pmsRes = (this.reservations || []).filter(function(r) {
-                if (new Date(r.checkIn) < today) return false;
-                // Doğrudan ID eşleşmesi
-                if (ownerAptIds.indexOf(r.apartmentId) !== -1) return true;
-                // Kod eşleşmesi
-                if (ownerAptCodes.indexOf(r.apartmentId) !== -1) return true;
-                // Mapping eşleşmesi
-                var mappedId = mapping[r.apartmentId];
-                if (mappedId && ownerAptIds.indexOf(mappedId) !== -1) return true;
-                return false;
-            });
-
-            // Analytics gelecek rezervasyonlarını da dahil et
-            var analyticsRes = (Analytics.data?.reservations || []).filter(function(r) {
-                return new Date(r.checkIn) >= today && ownerAptIds.indexOf(r.apartmentId) !== -1;
-            });
-
-            // Birleştir ve tekrar çıkar (aynı misafir+tarih tekrarını engelle)
-            var seen = {};
-            var allRes = [];
-            pmsRes.forEach(function(r) {
-                var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
-                if (!seen[key]) { seen[key] = true; allRes.push(r); }
-            });
-            analyticsRes.forEach(function(r) {
-                var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
-                if (!seen[key]) { seen[key] = true; allRes.push(r); }
-            });
-
-            // Daire kodlarını ekle
-            allRes.forEach(function(r) {
-                var apt = apartments.find(function(a) { return a.id === r.apartmentId; });
-                if (!apt) {
-                    // PMS mapping üzerinden bul
-                    var mappedId = mapping[r.apartmentId];
-                    if (mappedId) apt = apartments.find(function(a) { return a.id === mappedId; });
-                }
-                if (!apt) apt = apartments.find(function(a) { return a.code === r.apartmentId; });
-                r._aptCode = apt ? apt.code : r.apartmentId;
-            });
-            allRes.sort(function(a, b) { return new Date(a.checkIn) - new Date(b.checkIn); });
-
-            if (allRes.length === 0) {
-                el.innerHTML = '<div class="text-center py-6"><i data-lucide="calendar-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>' +
-                    '<p class="text-sm text-gray-400">Hen\u00fcz gelecek rezervasyon yok</p></div>';
-                if (typeof lucide !== 'undefined') lucide.createIcons();
+            if (apartments.length === 0) {
+                el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Daire verisi yok</p>';
                 return;
             }
 
-            // Ay bazında grupla
-            var grouped = {};
-            allRes.forEach(function(r) {
-                var d = new Date(r.checkIn);
-                var mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-                if (!grouped[mk]) grouped[mk] = [];
-                grouped[mk].push(r);
-            });
-            var sortedMonths = Object.keys(grouped).sort();
-
-            // Daire filtresi
-            var aptCodes = [...new Set(allRes.map(function(r) { return r._aptCode; }))].sort();
-            var html = '<div class="flex items-center justify-between mb-4">';
-            html += '<div class="text-sm text-gray-500">' + allRes.length + ' rezervasyon · ' + aptCodes.length + ' daire</div>';
-            if (aptCodes.length > 1) {
-                html += '<select id="ownerFutureResFilter" onchange="Projection._filterOwnerFutureRes(this.value)" class="text-xs border border-gray-200 rounded-lg px-3 py-1.5">';
-                html += '<option value="all">T\u00fcm Daireler</option>';
-                aptCodes.forEach(function(c) { html += '<option value="' + c + '">' + c + '</option>'; });
-                html += '</select>';
+            // 12 aylık periyot oluştur
+            var now = new Date();
+            var startMonth = now.getMonth();
+            var startYear = now.getFullYear();
+            var months12 = [];
+            for (var i = 0; i < 12; i++) {
+                var mm = startMonth + i, yy = startYear;
+                if (mm >= 12) { mm -= 12; yy++; }
+                months12.push({ month: mm, year: yy, monthKey: yy + '-' + String(mm + 1).padStart(2, '0') });
             }
+
+            // Her ay için gelecek + geçmiş rez topla (dedup ile)
+            var monthsData = [];
+            months12.forEach(function(mp) {
+                var futureRes = [], pastRes = [];
+                var seenF = {}, seenP = {};
+                apartments.forEach(function(apt) {
+                    // Gelecek (bu yıl): PMS + Analytics
+                    var fr = self.getPmsResForMonth(apt.id, mp.month, mp.year)
+                        .concat(self.getAnalyticsResForMonth(apt.id, mp.month, mp.year));
+                    fr.forEach(function(r) {
+                        r._aptCode = apt.code;
+                        var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
+                        if (!seenF[key]) { seenF[key] = true; futureRes.push(r); }
+                    });
+                    // Geçmiş yıl (aynı ay, bir önceki yıl)
+                    var pr = self.getPmsResForMonth(apt.id, mp.month, mp.year - 1)
+                        .concat(self.getAnalyticsResForMonth(apt.id, mp.month, mp.year - 1));
+                    pr.forEach(function(r) {
+                        r._aptCode = apt.code;
+                        var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
+                        if (!seenP[key]) { seenP[key] = true; pastRes.push(r); }
+                    });
+                });
+                futureRes.sort(function(a, b) { return new Date(a.checkIn) - new Date(b.checkIn); });
+                pastRes.sort(function(a, b) { return new Date(a.checkIn) - new Date(b.checkIn); });
+
+                // Toplamlar
+                var fTotal = 0, fNights = 0, pTotal = 0, pNights = 0;
+                futureRes.forEach(function(r) {
+                    var n = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
+                    fTotal += convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
+                    fNights += n;
+                });
+                pastRes.forEach(function(r) {
+                    var n = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
+                    pTotal += convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
+                    pNights += n;
+                });
+
+                monthsData.push({
+                    mk: mp.monthKey, month: mp.month, year: mp.year,
+                    mName: monthNames[mp.month] + ' ' + mp.year,
+                    futureRes: futureRes, pastRes: pastRes,
+                    fTotal: fTotal, fNights: fNights, pTotal: pTotal, pNights: pNights
+                });
+            });
+
+            // Toplam rez sayısı
+            var totalFuture = 0, totalPast = 0;
+            monthsData.forEach(function(md) { totalFuture += md.futureRes.length; totalPast += md.pastRes.length; });
+
+            var html = '<div class="flex items-center justify-between mb-4">';
+            html += '<div class="text-sm text-gray-500">';
+            html += '<span class="text-emerald-600 font-semibold">' + totalFuture + '</span> gelecek';
+            html += ' · <span class="text-amber-600 font-semibold">' + totalPast + '</span> ge\u00e7mi\u015f y\u0131l';
+            html += ' · ' + apartments.length + ' daire · 12 ay</div>';
             html += '</div>';
 
-            html += '<div id="ownerFutureResContent" class="space-y-3">';
+            html += '<div class="space-y-2">';
 
-            sortedMonths.forEach(function(mk, idx) {
-                var res = grouped[mk];
-                var [y, m] = mk.split('-');
-                var mName = monthNames[parseInt(m) - 1] + ' ' + y;
-                var monthTotal = 0, monthNights = 0;
-                res.forEach(function(r) {
-                    var nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
-                    monthTotal += convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
-                    monthNights += nights;
-                });
+            // Rez satır render helper
+            function renderResRow(r, isCompact) {
+                var nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
+                var amount = convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
+                var perNight = nights > 0 ? amount / nights : 0;
+                var platformColor = (r.platform === 'Airbnb') ? 'bg-red-50 text-red-600' : (r.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-600';
+                var s = '<div class="flex items-center justify-between px-3 py-1.5 hover:bg-gray-50">';
+                s += '<div class="flex items-center gap-2 min-w-0">';
+                if (apartments.length > 1) s += '<span class="text-[10px] font-bold text-gray-400 shrink-0">' + (r._aptCode || '-') + '</span>';
+                s += '<span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold ' + platformColor + ' shrink-0">' + (r.platform || '-') + '</span>';
+                s += '<span class="text-[11px] text-gray-700 truncate">' + (r.guestName || 'Misafir') + '</span>';
+                s += '<span class="text-[10px] text-gray-400 shrink-0">' + fmt(r.checkIn) + '\u2192' + fmt(r.checkOut) + '</span>';
+                s += '</div>';
+                s += '<div class="text-right shrink-0 ml-2"><span class="text-[11px] font-bold text-gray-800">\u20ac' + amount.toFixed(0) + '</span>';
+                s += '<span class="text-[9px] text-gray-400 ml-1">' + nights + 'g</span></div>';
+                s += '</div>';
+                return s;
+            }
 
-                html += '<div class="border border-gray-100 rounded-lg overflow-hidden" data-owner-future-month="' + mk + '">';
+            monthsData.forEach(function(md, idx) {
+                var hasData = md.futureRes.length > 0 || md.pastRes.length > 0;
+                var borderColor = md.futureRes.length > 0 ? 'border-emerald-200' : md.pastRes.length > 0 ? 'border-gray-200' : 'border-gray-100';
+
+                html += '<div class="border ' + borderColor + ' rounded-lg overflow-hidden">';
 
                 // Ay başlığı
-                html += '<div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onclick="Projection._toggleOwnerFutureMonth(\'' + mk + '\')">';
+                html += '<div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onclick="Projection._toggleOwnerMonthRes(\'' + md.mk + '\')">';
                 html += '<div class="flex items-center gap-2">';
-                html += '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="ownerFutureChev_' + mk + '"' + (idx === 0 ? ' style="transform:rotate(90deg)"' : '') + '></i>';
-                html += '<span class="text-sm font-semibold text-gray-700">' + mName + '</span>';
-                html += '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">' + res.length + ' rez</span>';
+                html += '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="ownerResChev_' + md.mk + '"' + (idx === 0 && hasData ? ' style="transform:rotate(90deg)"' : '') + '></i>';
+                html += '<span class="text-sm font-semibold text-gray-700">' + md.mName + '</span>';
+                if (md.futureRes.length > 0) {
+                    html += '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">' + md.futureRes.length + ' rez</span>';
+                }
+                if (md.pastRes.length > 0) {
+                    html += '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold">' + md.pastRes.length + ' ge\u00e7mi\u015f</span>';
+                }
+                if (!hasData) {
+                    html += '<span class="text-[10px] text-gray-300">veri yok</span>';
+                }
                 html += '</div>';
-                html += '<div class="flex items-center gap-4 text-xs">';
-                html += '<span class="text-gray-400">' + monthNights + ' gece</span>';
-                html += '<span class="font-bold text-gray-700">\u20ac' + monthTotal.toFixed(0) + '</span>';
+
+                // Sağ taraf: toplamlar
+                html += '<div class="flex items-center gap-3 text-xs">';
+                if (md.futureRes.length > 0) {
+                    html += '<span class="text-emerald-600 font-bold">\u20ac' + md.fTotal.toFixed(0) + '</span>';
+                }
+                if (md.pastRes.length > 0) {
+                    html += '<span class="text-amber-500">\u20ac' + md.pTotal.toFixed(0) + '</span>';
+                }
+                // Yıllık değişim
+                if (md.fTotal > 0 && md.pTotal > 0) {
+                    var change = ((md.fTotal - md.pTotal) / md.pTotal * 100);
+                    var changeClass = change >= 0 ? 'text-emerald-600' : 'text-red-500';
+                    html += '<span class="text-[10px] font-bold ' + changeClass + '">' + (change >= 0 ? '\u2191' : '\u2193') + Math.abs(change).toFixed(0) + '%</span>';
+                }
                 html += '</div></div>';
 
-                // Rezervasyon listesi
-                html += '<div id="ownerFutureBody_' + mk + '" class="' + (idx === 0 ? '' : 'hidden') + '">';
-                html += '<div class="divide-y divide-gray-50">';
-                res.forEach(function(r) {
-                    var nights = r.nights || Math.max(1, Math.round((new Date(r.checkOut) - new Date(r.checkIn)) / 86400000));
-                    var amount = convertEUR(r.totalPrice ?? r.totalAmount ?? 0, r.currency || 'EUR');
-                    var perNight = nights > 0 ? amount / nights : 0;
-                    var platformColor = (r.platform === 'Airbnb') ? 'bg-red-50 text-red-600 border-red-200' : (r.platform === 'Booking.com') ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-600 border-green-200';
+                // İçerik
+                html += '<div id="ownerResBody_' + md.mk + '" class="' + (idx === 0 && hasData ? '' : 'hidden') + '">';
 
-                    html += '<div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors" data-apt-code="' + (r._aptCode || '') + '">';
-                    html += '<div class="flex items-center gap-3">';
-                    html += '<span class="text-[10px] font-bold text-gray-400 w-8">' + (r._aptCode || '-') + '</span>';
-                    html += '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ' + platformColor + '">' + (r.platform || '-') + '</span>';
-                    html += '<div><span class="text-xs font-medium text-gray-700">' + (r.guestName || 'Misafir') + '</span>';
-                    html += '<span class="text-[10px] text-gray-400 ml-2">' + fmt(r.checkIn) + ' \u2192 ' + fmt(r.checkOut) + ' (' + nights + 'g)</span></div>';
+                // Gelecek rezervasyonlar
+                if (md.futureRes.length > 0) {
+                    html += '<div class="border-l-2 border-emerald-300 ml-3">';
+                    html += '<div class="px-3 py-1.5 text-[10px] font-bold text-emerald-600 uppercase tracking-wide bg-emerald-50/50">';
+                    html += 'Mevcut / Gelecek Rezervasyonlar (' + md.futureRes.length + ')';
+                    html += ' \u2014 ' + md.fNights + ' gece \u2014 \u20ac' + md.fTotal.toFixed(0);
                     html += '</div>';
-                    html += '<div class="text-right"><span class="text-xs font-bold text-gray-800">\u20ac' + amount.toFixed(0) + '</span>';
-                    html += '<span class="text-[10px] text-gray-400 ml-1">\u20ac' + perNight.toFixed(0) + '/g</span></div>';
+                    html += '<div class="divide-y divide-gray-50">';
+                    md.futureRes.forEach(function(r) { html += renderResRow(r); });
+                    html += '</div></div>';
+                }
+
+                // Geçmiş yıl
+                if (md.pastRes.length > 0) {
+                    html += '<div class="border-l-2 border-amber-300 ml-3">';
+                    html += '<div class="px-3 py-1.5 text-[10px] font-bold text-amber-600 uppercase tracking-wide bg-amber-50/50">';
+                    html += 'Ge\u00e7mi\u015f Y\u0131l \u2014 ' + monthNames[md.month] + ' ' + (md.year - 1);
+                    html += ' (' + md.pastRes.length + ')';
+                    html += ' \u2014 ' + md.pNights + ' gece \u2014 \u20ac' + md.pTotal.toFixed(0);
                     html += '</div>';
-                });
-                html += '</div></div></div>';
+                    html += '<div class="divide-y divide-gray-50">';
+                    md.pastRes.forEach(function(r) { html += renderResRow(r); });
+                    html += '</div></div>';
+                }
+
+                if (!hasData) {
+                    html += '<div class="px-4 py-3 text-xs text-gray-400 text-center">Bu ay i\u00e7in rezervasyon verisi yok</div>';
+                }
+
+                html += '</div></div>';
             });
 
             html += '</div>';
@@ -5748,20 +5790,13 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
-        _toggleOwnerFutureMonth(mk) {
-            var body = document.getElementById('ownerFutureBody_' + mk);
-            var chev = document.getElementById('ownerFutureChev_' + mk);
+        _toggleOwnerMonthRes(mk) {
+            var body = document.getElementById('ownerResBody_' + mk);
+            var chev = document.getElementById('ownerResChev_' + mk);
             if (!body) return;
             var isHidden = body.classList.contains('hidden');
             body.classList.toggle('hidden');
             if (chev) chev.style.transform = isHidden ? 'rotate(90deg)' : '';
-        },
-
-        _filterOwnerFutureRes(aptCode) {
-            var items = document.querySelectorAll('#ownerFutureResContent [data-apt-code]');
-            items.forEach(function(el) {
-                el.style.display = (aptCode === 'all' || el.dataset.aptCode === aptCode) ? '' : 'none';
-            });
         },
 
         renderApartmentList(results, aptMonthlyDetail) {
@@ -5771,11 +5806,11 @@
             this._aptMonthlyDetail = aptMonthlyDetail || {};
 
             if (isOwner) {
-                // Owner: Daire accordion yerine ay bazlı gelecek rez paneli
+                // Owner: Daire accordion yerine ay bazlı rez paneli (gelecek + geçmiş yıl)
                 const titleEl = document.getElementById('projAptSectionTitle');
                 const subtitleEl = document.getElementById('projAptSectionSubtitle');
-                if (titleEl) titleEl.textContent = 'Gelecek Rezervasyonlar';
-                if (subtitleEl) subtitleEl.textContent = '(ay bazında gruplanmış)';
+                if (titleEl) titleEl.textContent = 'Rezervasyonlar';
+                if (subtitleEl) subtitleEl.textContent = '(12 ay \u2014 gelecek + ge\u00e7mi\u015f y\u0131l kar\u015f\u0131la\u015ft\u0131rmal\u0131)';
                 this.renderOwnerFutureReservations(el);
                 return;
             }
