@@ -5036,6 +5036,9 @@
                     ]
                 });
 
+                // Container boyut güncelleme (hidden → visible geçişinde gerekebilir)
+                setTimeout(function() { chart.resize(); }, 50);
+
                 // Tıklama: ay detay modalını aç
                 const self = this;
                 chart.on('click', function(params) {
@@ -5165,7 +5168,7 @@
                     Object.entries(aptMonthlyDetail).forEach(([aptId, months]) => {
                         const md = months[mk];
                         if (md && (md.gross > 0 || md.lagirio > 0 || md.resCount > 0)) {
-                            const apartments = (window.Analytics?.data?.apartments || []);
+                            const apartments = (Analytics?.data?.apartments || []);
                             const apt = apartments.find(a => a.id === aptId);
                             const code = apt?.code || aptId;
                             aptRows.push({ code, ...md });
@@ -5351,7 +5354,7 @@
 
             // Daire bazlı detay
             const aptMonthlyDetail = this._aptMonthlyDetail || {};
-            const apartments = window.Analytics?.data?.apartments || [];
+            const apartments = Analytics?.data?.apartments || [];
             const aptRows = [];
             Object.entries(aptMonthlyDetail).forEach(function(entry) {
                 var aptId = entry[0], months = entry[1];
@@ -5615,7 +5618,7 @@
             var convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : function(a) { return a; };
             var fmt = function(d) { var dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
             var monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
-            var apartments = window.Analytics?.data?.apartments || [];
+            var apartments = Analytics?.data?.apartments || [];
 
             if (apartments.length === 0) {
                 el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Daire verisi yok</p>';
