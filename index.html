@@ -5284,21 +5284,6 @@
                 const deductions = d.gross - ownerVal;
                 const netRatio = maxNet > 0 ? (ownerVal / maxNet) : 0;
 
-                // Daire badge'leri
-                let aptBadges = '';
-                if (aptMonthlyDetail) {
-                    const apartments = window.Analytics?.data?.apartments || [];
-                    Object.entries(aptMonthlyDetail).forEach(function(entry) {
-                        const aptId = entry[0], months = entry[1];
-                        const md = months[mk];
-                        if (md && (md.gross > 0 || md.resCount > 0)) {
-                            const apt = apartments.find(function(a) { return a.id === aptId; });
-                            const code = apt ? apt.code : aptId;
-                            aptBadges += '<span class="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-medium">' + code + '</span>';
-                        }
-                    });
-                }
-
                 // Renk yoğunluğu: en yüksek kazançlı ay daha belirgin
                 const borderClass = netRatio > 0.85 ? 'border-emerald-300 bg-emerald-50/30' : netRatio > 0.5 ? 'border-emerald-200' : 'border-gray-100';
                 const barWidth = Math.max(8, netRatio * 100);
@@ -5323,11 +5308,6 @@
 
                 // Rez ve gecelik
                 html += '<div class="text-[10px] text-gray-400 mb-1.5">' + d.count + ' rez · €' + d.avgNightly.toFixed(0) + '/gece</div>';
-
-                // Daire badge'leri
-                if (aptBadges) {
-                    html += '<div class="flex flex-wrap gap-1">' + aptBadges + '</div>';
-                }
 
                 html += '</div>';
             });
@@ -5383,15 +5363,22 @@
             aptRows.sort(function(a, b) { return b.ownerShare - a.ownerShare; });
             const maxAptOwner = aptRows.length > 0 ? Math.max(...aptRows.map(function(a) { return a.ownerShare; })) : 0;
 
-            // Gelecek ve geçmiş rezervasyonlar
+            // Gelecek ve geçmiş rezervasyonlar (dedup ile)
             var futureRes = [], pastRes = [];
+            var seenFuture = {}, seenPast = {};
             apartments.forEach(function(apt) {
                 var fr = Projection.getPmsResForMonth(apt.id, m, y).concat(Projection.getAnalyticsResForMonth(apt.id, m, y));
-                fr.forEach(function(r) { r._aptCode = apt.code; });
-                futureRes = futureRes.concat(fr);
+                fr.forEach(function(r) {
+                    r._aptCode = apt.code;
+                    var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
+                    if (!seenFuture[key]) { seenFuture[key] = true; futureRes.push(r); }
+                });
                 var pr = Projection.getPmsResForMonth(apt.id, m, y - 1).concat(Projection.getAnalyticsResForMonth(apt.id, m, y - 1));
-                pr.forEach(function(r) { r._aptCode = apt.code; });
-                pastRes = pastRes.concat(pr);
+                pr.forEach(function(r) {
+                    r._aptCode = apt.code;
+                    var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
+                    if (!seenPast[key]) { seenPast[key] = true; pastRes.push(r); }
+                });
             });
 
             // Geçmiş yıl istatistikleri
@@ -5441,11 +5428,39 @@
             html += '<div id="ownerMonthPane_summary" class="p-5">';
 
             // KPI kartları
-            html += '<div class="grid grid-cols-3 gap-3 mb-5">';
+            html += '<div class="grid grid-cols-3 gap-3 mb-4">';
             html += '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-[10px] text-blue-500 font-medium mb-1">Br\u00fct Gelir</div><div class="text-base font-bold text-blue-700">\u20ac' + (md.gross || 0).toFixed(0) + '</div></div>';
-            html += '<div class="bg-red-50 rounded-lg p-3 text-center"><div class="text-[10px] text-red-500 font-medium mb-1">Kesintiler</div><div class="text-base font-bold text-red-600">-\u20ac' + deductions.toFixed(0) + '</div></div>';
+            html += '<div class="bg-emerald-50 rounded-lg p-3 text-center"><div class="text-[10px] text-emerald-500 font-medium mb-1">Net Kazanc\u0131n\u0131z</div><div class="text-base font-bold text-emerald-700">\u20ac' + ownerVal.toFixed(0) + '</div></div>';
             html += '<div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-[10px] text-purple-500 font-medium mb-1">Ort. Gecelik</div><div class="text-base font-bold text-purple-700">\u20ac' + (md.avgNightly || 0).toFixed(0) + '</div></div>';
             html += '</div>';
+
+            // Kesinti detayları
+            var mdPlatComm = md.platComm || 0;
+            var mdLagirioComm = md.lagirio || 0;
+            var mdKdv = md.kdv || 0;
+            var mdExpenses = md.expenses || 0;
+            html += '<div class="bg-gray-50 rounded-xl p-4 mb-5">';
+            html += '<h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-3">Kesinti Detay\u0131</h4>';
+            html += '<div class="space-y-2">';
+            var deductionItems = [
+                { label: 'Platform Komisyonu', value: mdPlatComm, color: 'text-orange-600', bg: 'bg-orange-400' },
+                { label: 'Lagirio Komisyonu', value: mdLagirioComm, color: 'text-indigo-600', bg: 'bg-indigo-400' },
+                { label: 'KDV / Vergiler', value: mdKdv, color: 'text-red-600', bg: 'bg-red-400' },
+                { label: 'Giderler', value: mdExpenses, color: 'text-amber-600', bg: 'bg-amber-400' }
+            ];
+            var maxDeduction = Math.max(mdPlatComm, mdLagirioComm, mdKdv, mdExpenses, 1);
+            deductionItems.forEach(function(item) {
+                var barW = maxDeduction > 0 ? Math.max(3, (item.value / maxDeduction) * 100) : 3;
+                html += '<div class="flex items-center gap-3">';
+                html += '<div class="w-32 text-[11px] font-medium text-gray-600">' + item.label + '</div>';
+                html += '<div class="flex-1 bg-gray-200 rounded-full h-2"><div class="' + item.bg + ' h-2 rounded-full" style="width:' + barW.toFixed(1) + '%"></div></div>';
+                html += '<div class="w-16 text-right text-[11px] font-bold ' + item.color + '">-\u20ac' + item.value.toFixed(0) + '</div>';
+                html += '</div>';
+            });
+            html += '<div class="border-t border-gray-200 mt-2 pt-2 flex justify-between">';
+            html += '<span class="text-[11px] font-bold text-gray-600">Toplam Kesinti</span>';
+            html += '<span class="text-[11px] font-bold text-red-600">-\u20ac' + deductions.toFixed(0) + '</span>';
+            html += '</div></div></div>';
 
             // Daire dağılımı
             if (aptRows.length > 0) {
@@ -5600,11 +5615,51 @@
             const monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
             const today = new Date(); today.setHours(0,0,0,0);
             const apartments = window.Analytics?.data?.apartments || [];
-            const allRes = (this.reservations || []).filter(function(r) { return new Date(r.checkIn) >= today; });
+            const ownerAptIds = apartments.map(function(a) { return a.id; });
+            const ownerAptCodes = apartments.map(function(a) { return a.code; });
+
+            // PMS mapping: pmsId → analyticsId
+            const mapping = this.loadMapping ? this.loadMapping() : {};
+
+            // PMS rezervasyonlarını owner'ın dairelerine göre filtrele
+            var pmsRes = (this.reservations || []).filter(function(r) {
+                if (new Date(r.checkIn) < today) return false;
+                // Doğrudan ID eşleşmesi
+                if (ownerAptIds.indexOf(r.apartmentId) !== -1) return true;
+                // Kod eşleşmesi
+                if (ownerAptCodes.indexOf(r.apartmentId) !== -1) return true;
+                // Mapping eşleşmesi
+                var mappedId = mapping[r.apartmentId];
+                if (mappedId && ownerAptIds.indexOf(mappedId) !== -1) return true;
+                return false;
+            });
+
+            // Analytics gelecek rezervasyonlarını da dahil et
+            var analyticsRes = (Analytics.data?.reservations || []).filter(function(r) {
+                return new Date(r.checkIn) >= today && ownerAptIds.indexOf(r.apartmentId) !== -1;
+            });
+
+            // Birleştir ve tekrar çıkar (aynı misafir+tarih tekrarını engelle)
+            var seen = {};
+            var allRes = [];
+            pmsRes.forEach(function(r) {
+                var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
+                if (!seen[key]) { seen[key] = true; allRes.push(r); }
+            });
+            analyticsRes.forEach(function(r) {
+                var key = (r.guestName || '') + '_' + r.checkIn + '_' + r.checkOut;
+                if (!seen[key]) { seen[key] = true; allRes.push(r); }
+            });
 
             // Daire kodlarını ekle
             allRes.forEach(function(r) {
                 var apt = apartments.find(function(a) { return a.id === r.apartmentId; });
+                if (!apt) {
+                    // PMS mapping üzerinden bul
+                    var mappedId = mapping[r.apartmentId];
+                    if (mappedId) apt = apartments.find(function(a) { return a.id === mappedId; });
+                }
+                if (!apt) apt = apartments.find(function(a) { return a.code === r.apartmentId; });
                 r._aptCode = apt ? apt.code : r.apartmentId;
             });
             allRes.sort(function(a, b) { return new Date(a.checkIn) - new Date(b.checkIn); });
