@@ -2451,11 +2451,19 @@
                 document.body.classList.add('owner-mode');
                 document.getElementById('uploadSection')?.classList.add('hidden');
                 document.getElementById('ownerWelcome')?.classList.remove('hidden');
-                // Drive config yoksa setup ekranını göster
+
                 const driveConfig = GoogleDrive.getConfig();
                 if (!driveConfig.clientId) {
+                    // Drive config yok → setup ekranını göster
                     document.getElementById('ownerDriveSetup')?.classList.remove('hidden');
                     document.getElementById('ownerLoadingIndicator')?.classList.add('hidden');
+                } else if (GoogleDrive.accessToken && driveConfig.fileId) {
+                    // Token zaten var (preLoginDriveSync'den) → direkt veri çek
+                    document.getElementById('ownerDriveSetup')?.classList.add('hidden');
+                    document.getElementById('ownerLoadingIndicator')?.classList.remove('hidden');
+                    GoogleDrive.updateHeaderUI('connected');
+                    GoogleDrive.loadFromDrive(false);
+                    return; // tryAutoConnect'e gerek yok
                 } else {
                     document.getElementById('ownerDriveSetup')?.classList.add('hidden');
                     document.getElementById('ownerLoadingIndicator')?.classList.remove('hidden');
@@ -2672,10 +2680,16 @@
                 return;
             }
 
-            // Önce sessionStorage'daki token'ı kontrol et
+            // Kullanıcılar daha önce senkronize edilmiş mi?
+            const cachedUsers = JSON.parse(localStorage.getItem(this.USERS_STORAGE_KEY) || '[]');
+            const hasCachedUsers = cachedUsers.length > 0;
+
+            // SessionStorage'da geçerli token var mı?
             const savedToken = GoogleDrive.getSavedToken();
             if (savedToken) {
-                this.updateLoginDriveUI('connecting');
+                // Token var — hızlıca doğrula (cached users varsa spinner gösterme)
+                if (!hasCachedUsers) this.updateLoginDriveUI('connecting');
+                else this.updateLoginDriveUI('connected');
                 (async () => {
                     try {
                         const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -2691,33 +2705,56 @@
                         }
                     } catch(e) {}
                     GoogleDrive.clearToken();
-                    this._trySilentPreLogin(config);
+                    // Token geçersiz — cached users varsa "kurulu" kalır, arka planda sessiz dene
+                    if (hasCachedUsers) {
+                        this._trySilentPreLogin(config, true);
+                    } else {
+                        this._trySilentPreLogin(config, false);
+                    }
                 })();
                 return;
             }
 
-            // Kayıtlı token yok → sessiz OAuth dene
-            this.updateLoginDriveUI('connecting');
-            const tryConnect = () => {
-                if (typeof google === 'undefined' || !google.accounts) {
-                    setTimeout(tryConnect, 500);
-                    return;
-                }
-                this._trySilentPreLogin(config);
-            };
-            setTimeout(tryConnect, 300);
+            // Token yok
+            if (hasCachedUsers) {
+                // Kullanıcılar zaten var = daha önce bağlanmış, "kurulu" göster
+                this.updateLoginDriveUI('connected');
+                // Arka planda sessiz sync dene (UI'ı bloklamadan)
+                const tryConnect = () => {
+                    if (typeof google === 'undefined' || !google.accounts) {
+                        setTimeout(tryConnect, 500);
+                        return;
+                    }
+                    this._trySilentPreLogin(config, true);
+                };
+                setTimeout(tryConnect, 300);
+            } else {
+                // Kullanıcı yok = ilk kurulum veya temiz cihaz → form göster
+                this.updateLoginDriveUI('form');
+            }
         },
 
         // Sessiz pre-login bağlantı denemesi (dahili)
-        _trySilentPreLogin(config) {
+        // background=true ise UI'ı bozmaz (zaten "kurulu" gösteriyoruz)
+        _trySilentPreLogin(config, background) {
+            let responded = false;
+            // prompt:'' callback gelmeyebilir → 5 sn timeout
+            const timeout = setTimeout(() => {
+                if (!responded && !background) {
+                    this.updateLoginDriveUI('form');
+                }
+            }, 5000);
+
             try {
                 GoogleDrive.tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: config.clientId,
                     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
                     callback: async (response) => {
+                        responded = true;
+                        clearTimeout(timeout);
+
                         if (response.error) {
-                            // Sessiz bağlantı başarısız → form göster (oturum dolmuş mesajıyla)
-                            this.updateLoginDriveUI('form');
+                            if (!background) this.updateLoginDriveUI('form');
                             return;
                         }
 
@@ -2742,7 +2779,9 @@
                 });
                 GoogleDrive.tokenClient.requestAccessToken({ prompt: '' });
             } catch(e) {
-                this.updateLoginDriveUI('form');
+                responded = true;
+                clearTimeout(timeout);
+                if (!background) this.updateLoginDriveUI('form');
             }
         }
     };
@@ -3058,11 +3097,23 @@
             // 2) Kayıtlı token yok veya geçersiz - Google'dan sessiz token iste
             this.showStatus('<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="loader" class="w-4 h-4 animate-spin flex-shrink-0"></i> Otomatik bağlanılıyor...</div>');
 
+            let responded = false;
+            // prompt:'' callback gelmeyebilir → 5 sn timeout
+            const silentTimeout = setTimeout(() => {
+                if (!responded) {
+                    this.updateUI();
+                    this.updateHeaderUI('warning');
+                }
+            }, 5000);
+
             try {
                 this.tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: config.clientId,
                     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
                     callback: async (response) => {
+                        responded = true;
+                        clearTimeout(silentTimeout);
+
                         if (response.error) {
                             this.updateUI();
                             this.updateHeaderUI('warning');
@@ -3091,6 +3142,8 @@
                 // Try silent first, falls back to prompt
                 this.tokenClient.requestAccessToken({ prompt: '' });
             } catch(e) {
+                responded = true;
+                clearTimeout(silentTimeout);
                 this.updateUI();
                 this.updateHeaderUI('warning');
             }
@@ -3162,9 +3215,16 @@
 
         // Header Drive buton aksiyonu
         headerDriveAction() {
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
             if (this.accessToken && this.getConfig().fileId) {
-                // Bağlı ve dosya var → kaydet
-                this.saveToDrive();
+                if (isOwner) {
+                    // Owner → sadece Drive'dan veri çek
+                    this.loadFromDrive(false);
+                } else {
+                    // Admin → Drive'a kaydet
+                    this.saveToDrive();
+                }
             } else if (this.getConfig().clientId && !this.accessToken) {
                 // Client ID var ama bağlı değil → bağlanmayı dene
                 this.updateHeaderUI('connecting');
@@ -3289,9 +3349,12 @@
                 else state = 'none';
             }
 
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
             if (state === 'connected') {
                 dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-emerald-900';
-                if (btn) btn.title = 'Drive bağlı' + (this.userEmail ? ' (' + this.userEmail + ')' : '') + ' — Kaydetmek için tıklayın';
+                const action = isOwner ? 'Yenilemek için tıklayın' : 'Kaydetmek için tıklayın';
+                if (btn) btn.title = 'Drive bağlı' + (this.userEmail ? ' (' + this.userEmail + ')' : '') + ' — ' + action;
             } else if (state === 'partial') {
                 dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-blue-400 border-2 border-emerald-900';
                 if (btn) btn.title = 'Drive bağlı — Dosya seçilmedi';
