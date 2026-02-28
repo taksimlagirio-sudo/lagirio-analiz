@@ -4272,7 +4272,13 @@
                     // --- KDV ---
                     let estKDV = 0;
                     const bankAmount = estMonthlyGross * bankCashRatio;
-                    if (taxRate > 0) {
+                    if (sysType === '2') {
+                        // Sistem 2: iade edilen tutarın %20 KDV'si
+                        const bankPlatComm2 = bankAmount * platCommRatio;
+                        const lagirioComm2 = bankAmount * ((apartment.lagirioCommission || 0) / 100);
+                        const toBeReturned2 = estExpenses + bankPlatComm2 + lagirioComm2;
+                        estKDV = toBeReturned2 * 0.20;
+                    } else if (taxRate > 0) {
                         if (kdvSystems.has(sysType)) {
                             estKDV = bankAmount * (taxRate / 100) / (1 + taxRate / 100);
                         } else if (kdvBookingOnlySystems.has(sysType)) {
