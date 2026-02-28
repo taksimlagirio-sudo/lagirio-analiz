@@ -2450,9 +2450,58 @@
             if (this.currentUser && this.currentUser.role === 'owner') {
                 document.body.classList.add('owner-mode');
                 document.getElementById('uploadSection')?.classList.add('hidden');
-                document.getElementById('ownerWelcome')?.classList.remove('hidden');
 
                 const driveConfig = GoogleDrive.getConfig();
+
+                // 1) Cache'de veri var mı? (Daha önce Drive'dan çekilmiş)
+                let hasCachedData = false;
+                try {
+                    const savedData = localStorage.getItem('lagirioAnalyticsData');
+                    if (savedData) {
+                        const parsed = JSON.parse(savedData);
+                        if (parsed && (parsed.apartments?.length || parsed.reservations?.length)) {
+                            hasCachedData = true;
+                            // Cache'den yükle → direkt dashboard'a geç
+                            Analytics.data = parsed;
+                            // Owner filtresi uygula
+                            if (this.currentUser.apartmentIds) {
+                                Analytics.applyOwnerFilter(this.currentUser.apartmentIds);
+                            }
+                            Analytics.filteredData = Analytics.data;
+                            Analytics.init();
+                            Analytics.processData();
+                            // Owner welcome'u gösterme, dashboard'u göster
+                            document.getElementById('ownerWelcome')?.classList.add('hidden');
+                            document.getElementById('mainDashboard')?.classList.remove('hidden');
+                        }
+                    }
+                } catch(e) {}
+
+                if (hasCachedData) {
+                    // Cache'den yüklendi — arka planda Drive sync dene (popup AÇMADAN)
+                    GoogleDrive.updateUI();
+                    GoogleDrive.updateHeaderUI();
+                    if (GoogleDrive.accessToken && driveConfig.fileId) {
+                        // Token zaten var → sessiz sync
+                        GoogleDrive.updateHeaderUI('connected');
+                        GoogleDrive.loadFromDrive(true);
+                    } else {
+                        // Token yok → arka planda sessiz dene, popup açma
+                        const tryAuto = () => {
+                            if (typeof google !== 'undefined' && google.accounts) {
+                                GoogleDrive.tryAutoConnect();
+                            } else {
+                                setTimeout(tryAuto, 500);
+                            }
+                        };
+                        setTimeout(tryAuto, 300);
+                    }
+                    return;
+                }
+
+                // Cache yok — owner welcome ekranını göster
+                document.getElementById('ownerWelcome')?.classList.remove('hidden');
+
                 if (!driveConfig.clientId) {
                     // Drive config yok → setup ekranını göster
                     document.getElementById('ownerDriveSetup')?.classList.remove('hidden');
@@ -2463,7 +2512,7 @@
                     document.getElementById('ownerLoadingIndicator')?.classList.remove('hidden');
                     GoogleDrive.updateHeaderUI('connected');
                     GoogleDrive.loadFromDrive(false);
-                    return; // tryAutoConnect'e gerek yok
+                    return;
                 } else {
                     document.getElementById('ownerDriveSetup')?.classList.add('hidden');
                     document.getElementById('ownerLoadingIndicator')?.classList.remove('hidden');
@@ -2533,7 +2582,13 @@
             if (state === 'connected') {
                 connectedEl.classList.remove('hidden');
                 const textEl = document.getElementById('loginDriveConnectedText');
-                if (textEl) textEl.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Drive bağlantısı aktif' + (email ? ' (' + email + ')' : '');
+                if (textEl) {
+                    if (email) {
+                        textEl.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Drive bağlantısı aktif (' + email + ')';
+                    } else {
+                        textEl.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Drive yapılandırması hazır';
+                    }
+                }
             } else if (state === 'connecting') {
                 connectingEl.classList.remove('hidden');
             } else {
@@ -3098,12 +3153,29 @@
             this.showStatus('<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="loader" class="w-4 h-4 animate-spin flex-shrink-0"></i> Otomatik bağlanılıyor...</div>');
 
             let responded = false;
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
+            // Sessiz token başarısız olduğunda (timeout veya hata)
+            const handleSilentFail = () => {
+                this.updateUI();
+                this.updateHeaderUI('warning');
+                // Owner welcome ekranında spinner varsa → bağlantı butonuna dönüştür
+                if (isOwner) {
+                    const loadingEl = document.getElementById('ownerLoadingIndicator');
+                    const setupEl = document.getElementById('ownerDriveSetup');
+                    const msgEl = document.getElementById('ownerWelcomeMsg');
+                    if (loadingEl) loadingEl.classList.add('hidden');
+                    if (setupEl) setupEl.classList.remove('hidden');
+                    if (msgEl) msgEl.textContent = 'Drive oturumu sona erdi. Tekrar bağlanın.';
+                    // Client ID zaten kayıtlı — input'a doldur
+                    const clientInput = document.getElementById('ownerClientId');
+                    if (clientInput) clientInput.value = config.clientId;
+                }
+            };
+
             // prompt:'' callback gelmeyebilir → 5 sn timeout
             const silentTimeout = setTimeout(() => {
-                if (!responded) {
-                    this.updateUI();
-                    this.updateHeaderUI('warning');
-                }
+                if (!responded) handleSilentFail();
             }, 5000);
 
             try {
@@ -3115,8 +3187,7 @@
                         clearTimeout(silentTimeout);
 
                         if (response.error) {
-                            this.updateUI();
-                            this.updateHeaderUI('warning');
+                            handleSilentFail();
                             return;
                         }
                         this.accessToken = response.access_token;
@@ -3144,8 +3215,7 @@
             } catch(e) {
                 responded = true;
                 clearTimeout(silentTimeout);
-                this.updateUI();
-                this.updateHeaderUI('warning');
+                handleSilentFail();
             }
         },
 
