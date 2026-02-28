@@ -7902,8 +7902,8 @@
                     const afterDeductions3 = bankIncome - totalExpenses - kdv3 - bankCommission;
                     const lagirioComm3 = afterDeductions3 * (apartment.lagirioCommission / 100);
                     const afterLagirio3 = afterDeductions3 - lagirioComm3;
-                    const incomeTax3 = afterLagirio3 * (apartment.incomeTaxRate / 100);
-                    const bankOwner3 = afterLagirio3 - incomeTax3;
+                    // Gelir vergisi düşülmez - devletin sahipten alacağı vergi, kazandırılan tutara dahil
+                    const bankOwner3 = afterLagirio3;
                     
                     const cashAfter3 = cashIncome - cashCommission;
                     const cashLagirioComm3 = cashAfter3 * (apartment.lagirioCommission / 100);
@@ -7920,8 +7920,8 @@
                     const afterPlatform4 = bankIncome - bankCommission;
                     const lagirioComm4 = afterPlatform4 * (apartment.lagirioCommission / 100);
                     const afterLagirio4 = afterPlatform4 - lagirioComm4 - totalExpenses - kdv4;
-                    const incomeTax4 = afterLagirio4 * (apartment.incomeTaxRate / 100);
-                    const bankOwner4 = afterLagirio4 - incomeTax4;
+                    // Gelir vergisi düşülmez - devletin sahipten alacağı vergi, kazandırılan tutara dahil
+                    const bankOwner4 = afterLagirio4;
                     
                     const cashAfter4 = cashIncome - cashCommission;
                     const cashLagirioComm4 = cashAfter4 * (apartment.lagirioCommission / 100);
@@ -7938,8 +7938,8 @@
                         return sum + amountInEur * (apartment.taxRate / 100) / (1 + apartment.taxRate / 100);
                     }, 0);
                     const afterAllDeductions5 = afterPlatform5 - lagirioComm5 - totalExpenses - kdv5;
-                    const stopaj5 = afterAllDeductions5 * (apartment.stopajRate / 100);
-                    const bankOwner5 = afterAllDeductions5 - stopaj5;
+                    // Stopaj düşülmez - devletin sahipten alacağı vergi, kazandırılan tutara dahil
+                    const bankOwner5 = afterAllDeductions5;
                     
                     const cashAfter5 = cashIncome - cashCommission;
                     const cashLagirioComm5 = cashAfter5 * (apartment.lagirioCommission / 100);
@@ -7978,8 +7978,8 @@
                     const bookingLagirioComm7 = bookingAfterPlatform7 * (apartment.lagirioCommission / 100);
                     const afterLagirio7 = bookingAfterPlatform7 - bookingLagirioComm7;
                     const afterExpenses7 = afterLagirio7 - totalExpenses - bookingKDV7;
-                    const bookingIncomeTax7 = afterExpenses7 * (apartment.incomeTaxRate / 100);
-                    const bookingBankOwner7 = afterExpenses7 - bookingIncomeTax7;
+                    // Gelir vergisi düşülmez - devletin sahipten alacağı vergi, kazandırılan tutara dahil
+                    const bookingBankOwner7 = afterExpenses7;
                     
                     // Booking/Direct Nakit
                     const bookingCash7 = otherRes7.filter(r => r.paymentMethod === 'Nakit');
@@ -8014,8 +8014,8 @@
                     const afterKDV9 = afterPlatform9 - kdv9;
                     const lagirioComm9 = afterKDV9 > 0 ? afterKDV9 * (apartment.lagirioCommission / 100) : 0;
                     const afterLagirio9 = afterKDV9 - lagirioComm9 - totalExpenses;
-                    const stopaj9 = afterLagirio9 > 0 ? afterLagirio9 * ((apartment.stopajRate || 0) / 100) : 0;
-                    const bankOwner9 = afterLagirio9 - stopaj9;
+                    // Stopaj düşülmez - devletin sahipten alacağı vergi, kazandırılan tutara dahil
+                    const bankOwner9 = afterLagirio9;
 
                     const cashAfter9 = cashIncome - cashCommission;
                     const cashLagirioComm9 = cashAfter9 > 0 ? cashAfter9 * (apartment.lagirioCommission / 100) : 0;
