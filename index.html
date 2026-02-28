@@ -8058,6 +8058,13 @@
                         return sum + amt * (apartment.taxRate / 100) / (1 + apartment.taxRate / 100);
                     }, 0);
                     break;
+                case '2': {
+                    // Sistem 2: iade edilen tutarın %20 KDV'si
+                    const lagirioComm2d = bankIncome * (apartment.lagirioCommission / 100);
+                    const toBeReturned2d = totalExpenses + bankCommission + lagirioComm2d;
+                    totalKDV = toBeReturned2d * 0.20;
+                    break;
+                }
                 case '7':
                     const bookingDirect = reservations.filter(r => r.platform !== 'Airbnb');
                     const bookingBank = bookingDirect.filter(r => r.paymentMethod !== 'Nakit');
