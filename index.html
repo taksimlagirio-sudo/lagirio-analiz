@@ -3162,9 +3162,16 @@
 
         // Header Drive buton aksiyonu
         headerDriveAction() {
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
             if (this.accessToken && this.getConfig().fileId) {
-                // Bağlı ve dosya var → kaydet
-                this.saveToDrive();
+                if (isOwner) {
+                    // Owner → sadece Drive'dan veri çek
+                    this.loadFromDrive(false);
+                } else {
+                    // Admin → Drive'a kaydet
+                    this.saveToDrive();
+                }
             } else if (this.getConfig().clientId && !this.accessToken) {
                 // Client ID var ama bağlı değil → bağlanmayı dene
                 this.updateHeaderUI('connecting');
@@ -3289,9 +3296,12 @@
                 else state = 'none';
             }
 
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
             if (state === 'connected') {
                 dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-emerald-900';
-                if (btn) btn.title = 'Drive bağlı' + (this.userEmail ? ' (' + this.userEmail + ')' : '') + ' — Kaydetmek için tıklayın';
+                const action = isOwner ? 'Yenilemek için tıklayın' : 'Kaydetmek için tıklayın';
+                if (btn) btn.title = 'Drive bağlı' + (this.userEmail ? ' (' + this.userEmail + ')' : '') + ' — ' + action;
             } else if (state === 'partial') {
                 dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-blue-400 border-2 border-emerald-900';
                 if (btn) btn.title = 'Drive bağlı — Dosya seçilmedi';
