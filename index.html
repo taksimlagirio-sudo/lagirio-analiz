@@ -427,10 +427,10 @@
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full mb-4 shadow-lg">
                     <i data-lucide="upload-cloud" class="w-10 h-10 text-white"></i>
                 </div>
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent mb-2">
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent mb-2" data-i18n="dm.upload.title">
                     Veri Yükleme Merkezi
                 </h2>
-                <p class="text-gray-500">Verilerinizi yükleyerek güçlü analizlere başlayın</p>
+                <p class="text-gray-500" data-i18n="dm.upload.desc">Verilerinizi yükleyerek güçlü analizlere başlayın</p>
             </div>
 
             <!-- Upload Tabs -->
@@ -449,18 +449,18 @@
                 <div id="uploadArea" class="border-2 border-dashed border-emerald-300 rounded-xl py-12 px-6 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all cursor-pointer group">
                     <div class="text-center">
                         <i data-lucide="folder-open" class="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">JSON Dosya Seçin veya Sürükleyin</h3>
-                        <p class="text-sm text-gray-500 mb-4">Daire, rezervasyon ve gider verilerini içeren JSON dosyası</p>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2" data-i18n="upload.json.title">JSON Dosya Seçin veya Sürükleyin</h3>
+                        <p class="text-sm text-gray-500 mb-4" data-i18n="upload.json.desc">Daire, rezervasyon ve gider verilerini içeren JSON dosyası</p>
                         <input type="file" id="fileInput" accept=".json" class="hidden">
 
                         <div class="flex items-center justify-center space-x-4 mt-6">
                             <button class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2">
                                 <i data-lucide="upload" class="w-4 h-4"></i>
-                                <span>Dosya Seç</span>
+                                <span data-i18n="btn.choose.file">Dosya Seç</span>
                             </button>
                             <button onclick="Analytics.loadSampleData()" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-orange-700 transition shadow-lg flex items-center space-x-2">
                                 <i data-lucide="database" class="w-4 h-4"></i>
-                                <span>Örnek Veri</span>
+                                <span data-i18n="btn.sample.data">Örnek Veri</span>
                             </button>
                         </div>
                     </div>
@@ -473,8 +473,8 @@
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                         <i data-lucide="hard-drive" class="w-8 h-8 text-blue-600"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Google Drive Bağlantısı</h3>
-                    <p class="text-sm text-gray-500">Bir dosyaya bağlanın, sonraki girişlerde otomatik yüklensin</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="upload.drive.title">Google Drive Bağlantısı</h3>
+                    <p class="text-sm text-gray-500" data-i18n="upload.drive.desc">Bir dosyaya bağlanın, sonraki girişlerde otomatik yüklensin</p>
                 </div>
 
                 <!-- Step indicator -->
@@ -665,8 +665,8 @@
                         <i data-lucide="database" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Veri Yönetimi</h2>
-                        <p class="text-sm text-gray-500">Veri yükleme, Drive bağlantısı ve kullanıcı yönetimi</p>
+                        <h2 class="text-2xl font-bold text-gray-800" data-i18n="dm.title">Veri Yönetimi</h2>
+                        <p class="text-sm text-gray-500" data-i18n="dm.subtitle">Veri yükleme, Drive bağlantısı ve kullanıcı yönetimi</p>
                     </div>
                 </div>
                 <button onclick="DataManager.goBack()" id="dmBackBtn" class="hidden bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
@@ -719,17 +719,17 @@
                 <div id="dmUploadArea" class="border-2 border-dashed border-emerald-300 rounded-xl py-12 px-6 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all cursor-pointer group">
                     <div class="text-center">
                         <i data-lucide="folder-open" class="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform"></i>
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">JSON Dosya Seçin veya Sürükleyin</h3>
-                        <p class="text-sm text-gray-500 mb-4">Daire, rezervasyon ve gider verilerini içeren JSON dosyası</p>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2" data-i18n="upload.json.title">JSON Dosya Seçin veya Sürükleyin</h3>
+                        <p class="text-sm text-gray-500 mb-4" data-i18n="upload.json.desc">Daire, rezervasyon ve gider verilerini içeren JSON dosyası</p>
                         <input type="file" id="dmFileInput" accept=".json" class="hidden">
                         <div class="flex items-center justify-center space-x-4 mt-6">
                             <button onclick="document.getElementById('dmFileInput').click()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2">
                                 <i data-lucide="upload" class="w-4 h-4"></i>
-                                <span>Dosya Seç</span>
+                                <span data-i18n="btn.choose.file">Dosya Seç</span>
                             </button>
                             <button onclick="Analytics.loadSampleData()" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-orange-700 transition shadow-lg flex items-center space-x-2">
                                 <i data-lucide="database" class="w-4 h-4"></i>
-                                <span>Örnek Veri</span>
+                                <span data-i18n="btn.sample.data">Örnek Veri</span>
                             </button>
                         </div>
                     </div>
@@ -865,19 +865,19 @@
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
                         <i data-lucide="users" class="w-8 h-8 text-purple-600"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Daire Sahibi Hesapları</h3>
-                    <p class="text-sm text-gray-500">Daire sahipleri için giriş hesabı oluşturun. Hesaplar Google Drive'a kaydedilir.</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="modal.owner.accounts">Daire Sahibi Hesapları</h3>
+                    <p class="text-sm text-gray-500" data-i18n="modal.owner.accounts.desc">Daire sahipleri için giriş hesabı oluşturun. Hesaplar Google Drive'a kaydedilir.</p>
                 </div>
 
                 <!-- Existing accounts -->
                 <div id="dmOwnerAccountsList" class="space-y-2 mb-6">
-                    <p class="text-sm text-gray-400 text-center">Henüz daire sahibi hesabı yok.</p>
+                    <p class="text-sm text-gray-400 text-center" data-i18n="modal.no.accounts">Henüz daire sahibi hesabı yok.</p>
                 </div>
 
                 <!-- Add new account form -->
                 <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
                     <h4 class="text-sm font-semibold text-gray-600 mb-4 flex items-center gap-2">
-                        <i data-lucide="user-plus" class="w-4 h-4 text-purple-500"></i> Yeni Hesap Ekle
+                        <i data-lucide="user-plus" class="w-4 h-4 text-purple-500"></i> <span data-i18n="modal.new.account">Yeni Hesap Ekle</span>
                     </h4>
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
@@ -921,14 +921,14 @@
                     <div class="flex items-center space-x-2">
                         <i data-lucide="calendar-days" class="w-5 h-5 text-emerald-600"></i>
                         <select id="datePreset" class="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
-                            <option value="this-month">Bu Ay</option>
-                            <option value="last-month">Geçen Ay</option>
-                            <option value="last-3-months">Son 3 Ay</option>
-                            <option value="last-6-months">Son 6 Ay</option>
-                            <option value="this-year">Bu Yıl</option>
-                            <option value="last-year">Geçen Yıl</option>
-                            <option value="all" selected>Tüm Zamanlar</option>
-                            <option value="custom">Özel Seçim</option>
+                            <option value="this-month" data-i18n="date.this.month">Bu Ay</option>
+                            <option value="last-month" data-i18n="date.last.month">Geçen Ay</option>
+                            <option value="last-3-months" data-i18n="date.last.3m">Son 3 Ay</option>
+                            <option value="last-6-months" data-i18n="date.last.6m">Son 6 Ay</option>
+                            <option value="this-year" data-i18n="date.this.year">Bu Yıl</option>
+                            <option value="last-year" data-i18n="date.last.year">Geçen Yıl</option>
+                            <option value="all" selected data-i18n="date.all.time">Tüm Zamanlar</option>
+                            <option value="custom" data-i18n="date.custom">Özel Seçim</option>
                         </select>
                     </div>
                     
@@ -938,7 +938,7 @@
                         <input type="date" id="endDate" class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
                         <button onclick="Analytics.applyDateFilter()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition flex items-center space-x-1">
                             <i data-lucide="check" class="w-4 h-4"></i>
-                            <span>Uygula</span>
+                            <span data-i18n="btn.apply">Uygula</span>
                         </button>
                     </div>
                 </div>
@@ -1265,7 +1265,7 @@
                                 <label class="text-xs font-medium text-gray-500 block mb-1">Dönem B (çoklu seçim)</label>
                                 <select id="temporalCompareB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
                             </div>
-                            <button onclick="Analytics.runTemporalComparison()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end">Karşılaştır</button>
+                            <button onclick="Analytics.runTemporalComparison()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end" data-i18n="btn.compare">Karşılaştır</button>
                         </div>
                         <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile çoklu ay seçebilirsiniz. Farklı yıllardan aylar karşılaştırılabilir.</p>
                     </div>
@@ -1558,7 +1558,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-end">
-                                    <button onclick="Analytics.addCompanyExpense()" class="w-full text-sm font-semibold bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition">Ekle</button>
+                                    <button onclick="Analytics.addCompanyExpense()" class="w-full text-sm font-semibold bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition" data-i18n="btn.add">Ekle</button>
                                 </div>
                             </div>
                         </div>
@@ -1799,7 +1799,7 @@
                             <select id="projPlatformFilter" onchange="Projection.renderTable()" class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg">
                                 <option value="all" data-i18n="proj.all.platforms">Tüm Platformlar</option>
                             </select>
-                            <button onclick="Projection.clearAll()" class="text-xs text-red-400 hover:text-red-600 px-2 py-1">Temizle</button>
+                            <button onclick="Projection.clearAll()" class="text-xs text-red-400 hover:text-red-600 px-2 py-1" data-i18n="btn.clear">Temizle</button>
                         </div>
                     </div>
                     <div id="projResTable" class="max-h-[400px] overflow-y-auto"></div>
@@ -1837,7 +1837,7 @@
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
                         <i data-lucide="settings" class="w-5 h-5"></i>
-                        <span>Ayarlar</span>
+                        <span data-i18n="modal.settings">Ayarlar</span>
                     </h2>
                     <button onclick="Analytics.closeModal('settingsModal')" class="p-1 hover:bg-white/20 rounded-lg transition">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -1913,15 +1913,15 @@
                         <p class="text-xs text-gray-400 mb-2">Admin şifresi ile giriş yapıldığında eşleştirme Drive'a kaydedilebilir.</p>
                         <div class="flex gap-2">
                             <input type="password" id="adminPinInput" placeholder="Admin şifresi" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                            <button onclick="Projection.adminLogin()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">Giriş</button>
-                            <button onclick="Projection.adminLogout()" class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm text-gray-500">Çıkış</button>
+                            <button onclick="Projection.adminLogin()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium" data-i18n="btn.login">Giriş</button>
+                            <button onclick="Projection.adminLogout()" class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm text-gray-500" data-i18n="btn.logout">Çıkış</button>
                         </div>
                         <p id="adminStatusText" class="text-xs text-gray-400 mt-1.5" data-i18n="settings.admin.not.logged">Admin girişi yapılmadı</p>
                         <div class="mt-3 pt-3 border-t border-gray-100">
                             <p class="text-[10px] text-gray-300 mb-1">Yeni admin şifresi belirle (sadece admin):</p>
                             <div class="flex gap-2">
                                 <input type="password" id="newAdminPinInput" placeholder="Yeni şifre" class="flex-1 px-2 py-1.5 border border-gray-200 rounded-lg text-xs">
-                                <button onclick="Projection.changeAdminPin()" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-xs">Değiştir</button>
+                                <button onclick="Projection.changeAdminPin()" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-xs" data-i18n="btn.change">Değiştir</button>
                             </div>
                         </div>
                     </div>
@@ -1940,10 +1940,10 @@
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-3">
-                    <button onclick="Analytics.closeModal('settingsModal')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <button onclick="Analytics.closeModal('settingsModal')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition" data-i18n="btn.cancel">
                         İptal
                     </button>
-                    <button onclick="Analytics.saveSettings()" class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition">
+                    <button onclick="Analytics.saveSettings()" class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition" data-i18n="btn.save">
                         Kaydet
                     </button>
                 </div>
@@ -1958,26 +1958,26 @@
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold flex items-center space-x-2">
                         <i data-lucide="link-2" class="w-5 h-5"></i>
-                        <span>Daire Eşleştirme</span>
+                        <span data-i18n="modal.apt.matching">Daire Eşleştirme</span>
                     </h2>
                     <button onclick="Analytics.closeModal('aptMatchingModal')" class="p-1 hover:bg-white/20 rounded-lg transition">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
-                <p class="text-xs text-white/70 mt-1">PMS'deki oda numaralarını analiz dairelerine eşleştirin. Eşleşenler sistem tipi, KDV ve komisyon bilgilerini otomatik alır.</p>
+                <p class="text-xs text-white/70 mt-1" data-i18n="proj.apt.matching.desc">PMS'deki oda numaralarını analiz dairelerine eşleştirin. Eşleşenler sistem tipi, KDV ve komisyon bilgilerini otomatik alır.</p>
             </div>
             <div class="p-5 max-h-[65vh] overflow-y-auto">
                 <div id="aptMatchingContent" class="space-y-3">
-                    <p class="text-sm text-gray-400">Yükleniyor...</p>
+                    <p class="text-sm text-gray-400" data-i18n="misc.loading">Yükleniyor...</p>
                 </div>
             </div>
             <div class="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50">
                 <span class="text-xs text-gray-400" id="aptMatchingSummary"></span>
                 <div class="flex gap-2">
-                    <button onclick="Analytics.closeModal('aptMatchingModal')" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-100 transition">İptal</button>
-                    <button onclick="Projection.saveMatching()" class="px-4 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">Sadece Lokal Kaydet</button>
+                    <button onclick="Analytics.closeModal('aptMatchingModal')" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-100 transition" data-i18n="btn.cancel">İptal</button>
+                    <button onclick="Projection.saveMatching()" class="px-4 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition" data-i18n="btn.save.local">Sadece Lokal Kaydet</button>
                     <button id="aptMatchDriveBtn" onclick="Projection.saveMatchingToDrive()" class="px-4 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition hidden">
-                        <span class="flex items-center gap-1"><i data-lucide="cloud-upload" class="w-3 h-3"></i> Drive'a Kaydet</span>
+                        <span class="flex items-center gap-1"><i data-lucide="cloud-upload" class="w-3 h-3"></i> <span data-i18n="btn.save.drive">Drive'a Kaydet</span></span>
                     </button>
                 </div>
             </div>
@@ -1991,7 +1991,7 @@
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
                         <i data-lucide="file-plus" class="w-5 h-5"></i>
-                        <span>Özel Rapor Oluştur</span>
+                        <span data-i18n="modal.custom.report">Özel Rapor Oluştur</span>
                     </h2>
                     <button onclick="Analytics.closeModal('customReportModal')" class="p-1 hover:bg-white/20 rounded-lg transition">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -2087,15 +2087,15 @@
         <div id="quickActionsMenu" class="absolute bottom-16 right-0 bg-white rounded-lg shadow-xl p-2 min-w-[200px] hidden animate-slide-up">
             <button onclick="Analytics.quickExport()" class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
                 <i data-lucide="download" class="w-4 h-4 text-gray-600"></i>
-                <span>Hızlı Export</span>
+                <span data-i18n="btn.quick.export">Hızlı Export</span>
             </button>
             <button onclick="Analytics.quickCompare()" class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
                 <i data-lucide="git-compare" class="w-4 h-4 text-gray-600"></i>
-                <span>Hızlı Karşılaştırma</span>
+                <span data-i18n="btn.quick.compare">Hızlı Karşılaştırma</span>
             </button>
             <button onclick="Analytics.quickReport()" class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
                 <i data-lucide="file-text" class="w-4 h-4 text-gray-600"></i>
-                <span>Hızlı Rapor</span>
+                <span data-i18n="btn.quick.report">Hızlı Rapor</span>
             </button>
             <button onclick="Analytics.toggleFullscreen()" class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg flex items-center space-x-2">
                 <i data-lucide="maximize" class="w-4 h-4 text-gray-600"></i>
@@ -2498,7 +2498,241 @@
                 'expense.internet': 'Internet',
                 'expense.management': 'Management',
                 'expense.maintenance': 'Maintenance',
-                'expense.other': 'Other'
+                'expense.other': 'Other',
+                // Buttons
+                'btn.add': 'Add',
+                'btn.delete': 'Delete',
+                'btn.save': 'Save',
+                'btn.cancel': 'Cancel',
+                'btn.close': 'Close',
+                'btn.edit': 'Edit',
+                'btn.update': 'Update',
+                'btn.login': 'Login',
+                'btn.logout': 'Logout',
+                'btn.change': 'Change',
+                'btn.apply': 'Apply',
+                'btn.clear': 'Clear',
+                'btn.connect': 'Connect',
+                'btn.disconnect': 'Disconnect',
+                'btn.save.drive': 'Save to Drive',
+                'btn.save.local': 'Save Locally Only',
+                'btn.refresh': 'Refresh Data',
+                'btn.file.select': 'Select File',
+                'btn.sample.data': 'Sample Data',
+                'btn.new.file': 'Create New File',
+                'btn.choose.file': 'Choose File',
+                'btn.compare': 'Compare',
+                'btn.quick.export': 'Quick Export',
+                'btn.quick.compare': 'Quick Compare',
+                'btn.quick.report': 'Quick Report',
+                // Upload section
+                'upload.json.title': 'Select or Drag JSON File',
+                'upload.json.desc': 'JSON file containing apartment, reservation and expense data',
+                'upload.drive.title': 'Google Drive Connection',
+                'upload.drive.desc': 'Link to a file, it will load automatically on next login',
+                // Date filter
+                'date.this.month': 'This Month',
+                'date.last.month': 'Last Month',
+                'date.last.3m': 'Last 3 Months',
+                'date.last.6m': 'Last 6 Months',
+                'date.this.year': 'This Year',
+                'date.last.year': 'Last Year',
+                'date.all.time': 'All Time',
+                'date.custom': 'Custom',
+                // Modals
+                'modal.settings': 'Settings',
+                'modal.apt.matching': 'Apartment Matching',
+                'modal.custom.report': 'Create Custom Report',
+                'modal.owner.accounts': 'Owner Accounts',
+                'modal.owner.accounts.desc': 'Create login accounts for apartment owners. Accounts are saved to Google Drive.',
+                'modal.new.account': 'Add New Account',
+                'modal.add.account': 'Add Account',
+                'modal.username': 'Username',
+                'modal.password': 'Password',
+                'modal.secure.pass': 'Secure password',
+                'modal.no.accounts': 'No owner accounts yet.',
+                // Data Management
+                'dm.title': 'Data Management',
+                'dm.subtitle': 'Data upload, Drive connection and user management',
+                'dm.upload.title': 'Data Upload Center',
+                'dm.upload.desc': 'Start powerful analytics by uploading your data',
+                'dm.json.title': 'Select or Drag JSON File',
+                'dm.json.desc': 'JSON file with apartment, reservation and expense data',
+                'dm.drive.title': 'Google Drive Connection',
+                'dm.drive.desc': 'Connect to a file, auto-load on next login',
+                'dm.linked.file': 'Linked file',
+                'dm.unlink': 'Unlink',
+                'dm.which.file': 'Which file would you like to use?',
+                'dm.new.file.desc': 'A new JSON file will be created on Drive',
+                'dm.paste.id': 'Paste Drive file ID',
+                'dm.auto.sync': 'Auto-pull from Drive on login',
+                'dm.connected.account': 'Connected account',
+                'dm.uploaded.files': 'Uploaded Files',
+                // Toast messages
+                'toast.data.cleared': 'Browser data cleared.',
+                'toast.fill.all': 'Fill all fields and select at least one apartment!',
+                'toast.username.taken': 'This username is already taken!',
+                'toast.account.created': 'Account created: ',
+                'toast.account.deleted': ' account deleted',
+                'toast.enter.clientid': 'Please enter Google Client ID!',
+                'toast.api.failed': 'Google API failed to load. Refresh and try again.',
+                'toast.creating.file': 'Creating new file...',
+                'toast.file.created': 'File created and linked!',
+                'toast.file.create.error': 'File creation error: ',
+                'toast.enter.fileid': 'Please enter a file ID!',
+                'toast.checking.file': 'Checking file...',
+                'toast.file.not.found': 'File not found (HTTP ',
+                'toast.file.linked': 'File linked: ',
+                'toast.error': 'Error: ',
+                'toast.unlink.confirm': 'Are you sure you want to unlink the file? (Drive file will not be deleted)',
+                'toast.setup.drive': 'Please set up Google Drive first.',
+                'toast.create.file.first': 'Create or link a Drive file first.',
+                'toast.connect.google': 'Connect with Google first!',
+                'toast.no.data.save': 'No data to save. Upload data first.',
+                'toast.link.file.first': 'Link a file first!',
+                'toast.saving.drive': 'Saving to Drive...',
+                'toast.drive.expired': 'Drive session expired. Click the Drive button in the top right to reconnect.',
+                'toast.saved.drive': 'Saved to Drive!',
+                'toast.save.error': 'Save error: ',
+                'toast.loading.drive': 'Loading from Drive...',
+                'toast.loaded.drive': 'Loaded from Drive!',
+                'toast.invalid.json': 'Please select a valid JSON file!',
+                'toast.data.loaded': 'Data loaded successfully!',
+                'toast.file.read.error': 'File read error: ',
+                'toast.file.read.fail': 'File read error!',
+                'toast.sample.loaded': 'Sample data loaded!',
+                'toast.expense.required': 'Date, category and amount are required!',
+                'toast.expense.added': 'Company expense added!',
+                'toast.expense.deleted': 'Expense deleted',
+                'toast.excel.download': 'Downloading Excel file...',
+                'toast.settings.saved': 'Settings saved',
+                'toast.data.updated': 'Data updated',
+                'toast.select.two.apt': 'Please select two apartments',
+                'toast.apt.not.found': 'Apartments not found',
+                'toast.select.apt.period': 'Please select apartment and two periods',
+                'toast.select.groups': 'Please select apartments for both groups',
+                'toast.select.two.sys': 'Please select two systems',
+                'toast.comparison.done': 'Comparison completed!',
+                'toast.no.company.exp': 'No company expenses entered yet.',
+                // Admin auth
+                'admin.pin.created': 'Admin password created and logged in!',
+                'admin.login.success': 'Admin login successful!',
+                'admin.wrong.pass': 'Wrong password!',
+                'admin.logged.out': 'Admin session closed',
+                'admin.login.first': 'Login as admin first!',
+                'admin.pass.min': 'Password must be at least 4 characters!',
+                'admin.pass.changed': 'Admin password changed!',
+                'admin.drive.only': 'Drive write access is for admin users only.',
+                'admin.matching.saved': ' apartment matching saved!',
+                'admin.matching.drive': 'Matching saved to Drive! All users will see it.',
+                // Projection messages
+                'proj.no.valid.rows': 'No valid reservations found.',
+                'proj.res.loaded.count': ' reservations loaded!',
+                'proj.res.not.found': 'Reservations not found',
+                'proj.confirm.delete.file': 'Are you sure you want to delete this file and its reservations?',
+                'proj.moved.to.analysis': ' reservations transferred to analysis!',
+                'proj.clear.all.confirm': 'Are you sure you want to clear all projection data?',
+                // Projection detail
+                'proj.12m.total': '12-Month Total',
+                'proj.gross': 'Gross',
+                'proj.gross.income': 'Gross Income',
+                'proj.deduction': 'Deduction',
+                'proj.net': 'Net',
+                'proj.res.short': 'res',
+                'proj.night': 'night',
+                'proj.your.net': 'Your Net Earnings',
+                'proj.avg.nightly': 'Avg. Nightly',
+                'proj.deduction.detail': 'Deduction Details',
+                'proj.platform.comm': 'Platform Commission',
+                'proj.lagirio.comm': 'Lagirio Commission',
+                'proj.kdv.taxes': 'VAT / Taxes',
+                'proj.expenses': 'Expenses',
+                'proj.total.deduction': 'Total Deduction',
+                'proj.apt.breakdown': 'Apartment Breakdown',
+                'proj.click.detail': 'Click for details',
+                'proj.your.share': 'Your Share',
+                'proj.th.apt': 'Apt',
+                'proj.th.source': 'Source',
+                'proj.th.res': 'Res.',
+                'proj.th.avg.nightly': 'Avg.Ntly',
+                'proj.th.expense': 'Expense',
+                'proj.th.kdv': 'VAT',
+                'proj.th.plat.comm': 'Plt.Com',
+                // Drive status
+                'drive.connected': 'Connection established! Searching for file...',
+                'drive.file.found': 'File found! Loading data...',
+                'drive.no.file': 'No data file found on Drive. Admin may not have uploaded data yet.',
+                'drive.click.refresh': 'Click to refresh',
+                'drive.click.save': 'Click to save',
+                // Features
+                'feature.secure': 'Secure Processing',
+                'feature.fast': 'Fast Analysis',
+                'feature.detailed': 'Detailed Reports',
+                // Comparison
+                'comparison.period.a': 'Period A',
+                'comparison.period.b': 'Period B',
+                'comparison.diff': 'DIFF (A − B)',
+                'comparison.apt.gross': 'Apartment Comparison (Gross Income)',
+                // Misc
+                'misc.no.expenses': 'No company expenses yet',
+                'misc.loading': 'Loading...',
+                'misc.detailed.report': 'Detailed Analysis Report',
+                // Confirm dialogs
+                'confirm.clear.data': 'Are you sure you want to clear all browser data? Drive data will not be affected.',
+                'confirm.delete.account': ' — delete this account?',
+                'confirm.unlink.file': 'Are you sure you want to unlink the file? (Drive file will not be deleted)',
+                // Drive/Google messages
+                'drive.google.error.title': 'Google Verification Error (403: access_denied)',
+                'drive.google.error.desc': 'OAuth consent screen is in "Testing" mode. Only test users can log in.',
+                'drive.google.error.solution': 'Solution:',
+                'drive.google.error.step1': 'Go to Google Cloud Console > OAuth consent screen',
+                'drive.google.error.step2': 'Click "Test users" > "Add Users"',
+                'drive.google.error.step3': 'Add the Gmail address you want to log in with',
+                'drive.google.error.step4': 'Save and try again',
+                'drive.google.error.alt': 'Or to publish: OAuth consent screen > click "Publish App" (verification may be required).',
+                'drive.connection.error': 'Connection error: ',
+                'drive.enter.clientid': 'Please enter Google Client ID!',
+                'drive.creating.file': 'Creating new file...',
+                'drive.checking.file': 'Checking file...',
+                'drive.file.not.found': 'File not found (HTTP ',
+                'drive.file.linked.name': 'File linked: ',
+                'drive.enter.fileid': 'Please enter a file ID!',
+                'drive.no.data.save': 'No data to save. Upload data first.',
+                'drive.saving': 'Saving to Drive...',
+                'drive.session.expired': 'Drive session expired. Click the Drive button in the top right to reconnect.',
+                'drive.saved.time': 'Saved to Drive! (Last: ',
+                'drive.saved': 'Saved to Drive!',
+                'drive.save.error': 'Save error: ',
+                'drive.save.error.full': 'Drive save error: ',
+                'drive.loading': 'Loading from Drive...',
+                'drive.loaded.time': 'Loaded from Drive! (',
+                'drive.loaded': 'Data loaded from Drive!',
+                'drive.load.error': 'Load error: ',
+                'drive.api.failed': 'Google API failed to load. Refresh the page.',
+                'drive.session.expired.short': 'Drive session expired. Reconnect.',
+                'drive.setup.first': 'Set up Google Drive first.',
+                'drive.create.file.first': 'Create or link a Drive file first.',
+                'drive.status.active': 'Drive connection active. Data is loaded from this file automatically.',
+                'drive.status.connected': 'Connected! Select or create a file.',
+                'drive.status.clientid': 'Client ID saved. Connect with Google to log in.',
+                // Owner connect
+                'owner.enter.clientid': 'Please enter Client ID!',
+                'owner.connecting': 'Connecting to Google...',
+                'owner.connection.error': 'Connection error: ',
+                'owner.connected.searching': 'Connected! Searching for file...',
+                // Misc remaining
+                'toast.username.exists': 'This username is already taken!',
+                'toast.pass.min4': 'Password must be at least 4 characters!',
+                'toast.matching.count': ' apartment matching saved!',
+                'toast.drive.admin.only': 'Drive write access is for admin users only.',
+                'comparison.all.time': 'All Time',
+                'comparison.period.label': 'Period: ',
+                'comparison.subtitle': 'Comparison completed!',
+                // Chart legends
+                'chart.gross.profit': 'Gross Profit',
+                'chart.real.profit': 'Real Profit',
+                'chart.net.profit': 'Net Profit',
+                'chart.company.exp': 'Company Expenses'
             },
             ru: {
                 // Login screen
@@ -2867,7 +3101,241 @@
                 'expense.internet': 'Интернет',
                 'expense.management': 'Управление',
                 'expense.maintenance': 'Обслуживание',
-                'expense.other': 'Прочее'
+                'expense.other': 'Прочее',
+                // Buttons
+                'btn.add': 'Добавить',
+                'btn.delete': 'Удалить',
+                'btn.save': 'Сохранить',
+                'btn.cancel': 'Отмена',
+                'btn.close': 'Закрыть',
+                'btn.edit': 'Редактировать',
+                'btn.update': 'Обновить',
+                'btn.login': 'Войти',
+                'btn.logout': 'Выйти',
+                'btn.change': 'Изменить',
+                'btn.apply': 'Применить',
+                'btn.clear': 'Очистить',
+                'btn.connect': 'Подключить',
+                'btn.disconnect': 'Отключить',
+                'btn.save.drive': 'Сохранить на Drive',
+                'btn.save.local': 'Сохранить локально',
+                'btn.refresh': 'Обновить данные',
+                'btn.file.select': 'Выбрать файл',
+                'btn.sample.data': 'Тестовые данные',
+                'btn.new.file': 'Создать новый файл',
+                'btn.choose.file': 'Выбрать файл',
+                'btn.compare': 'Сравнить',
+                'btn.quick.export': 'Быстрый экспорт',
+                'btn.quick.compare': 'Быстрое сравнение',
+                'btn.quick.report': 'Быстрый отчёт',
+                // Upload section
+                'upload.json.title': 'Выберите или перетащите JSON файл',
+                'upload.json.desc': 'JSON файл с данными квартир, бронирований и расходов',
+                'upload.drive.title': 'Подключение Google Drive',
+                'upload.drive.desc': 'Подключитесь к файлу, он будет загружаться автоматически',
+                // Date filter
+                'date.this.month': 'Этот месяц',
+                'date.last.month': 'Прошлый месяц',
+                'date.last.3m': 'Последние 3 мес.',
+                'date.last.6m': 'Последние 6 мес.',
+                'date.this.year': 'Этот год',
+                'date.last.year': 'Прошлый год',
+                'date.all.time': 'Все время',
+                'date.custom': 'Произвольный',
+                // Modals
+                'modal.settings': 'Настройки',
+                'modal.apt.matching': 'Сопоставление квартир',
+                'modal.custom.report': 'Создать пользовательский отчёт',
+                'modal.owner.accounts': 'Аккаунты владельцев',
+                'modal.owner.accounts.desc': 'Создайте аккаунты для владельцев квартир. Аккаунты сохраняются на Google Drive.',
+                'modal.new.account': 'Добавить новый аккаунт',
+                'modal.add.account': 'Добавить аккаунт',
+                'modal.username': 'Имя пользователя',
+                'modal.password': 'Пароль',
+                'modal.secure.pass': 'Надёжный пароль',
+                'modal.no.accounts': 'Аккаунтов владельцев пока нет.',
+                // Data Management
+                'dm.title': 'Управление данными',
+                'dm.subtitle': 'Загрузка данных, подключение к Drive и управление пользователями',
+                'dm.upload.title': 'Центр загрузки данных',
+                'dm.upload.desc': 'Загрузите данные для мощной аналитики',
+                'dm.json.title': 'Выберите или перетащите JSON файл',
+                'dm.json.desc': 'JSON файл с данными квартир, бронирований и расходов',
+                'dm.drive.title': 'Подключение Google Drive',
+                'dm.drive.desc': 'Подключитесь к файлу, автозагрузка при входе',
+                'dm.linked.file': 'Подключённый файл',
+                'dm.unlink': 'Отключить',
+                'dm.which.file': 'Какой файл вы хотите использовать?',
+                'dm.new.file.desc': 'На Drive будет создан новый JSON файл',
+                'dm.paste.id': 'Вставьте ID файла Drive',
+                'dm.auto.sync': 'Автозагрузка с Drive при входе',
+                'dm.connected.account': 'Подключённый аккаунт',
+                'dm.uploaded.files': 'Загруженные файлы',
+                // Toast messages
+                'toast.data.cleared': 'Данные браузера очищены.',
+                'toast.fill.all': 'Заполните все поля и выберите хотя бы одну квартиру!',
+                'toast.username.taken': 'Это имя пользователя уже занято!',
+                'toast.account.created': 'Аккаунт создан: ',
+                'toast.account.deleted': ' аккаунт удалён',
+                'toast.enter.clientid': 'Введите Google Client ID!',
+                'toast.api.failed': 'Google API не загружен. Обновите и попробуйте снова.',
+                'toast.creating.file': 'Создание нового файла...',
+                'toast.file.created': 'Файл создан и подключён!',
+                'toast.file.create.error': 'Ошибка создания файла: ',
+                'toast.enter.fileid': 'Введите ID файла!',
+                'toast.checking.file': 'Проверка файла...',
+                'toast.file.not.found': 'Файл не найден (HTTP ',
+                'toast.file.linked': 'Файл подключён: ',
+                'toast.error': 'Ошибка: ',
+                'toast.unlink.confirm': 'Отключить файл? (Файл на Drive не будет удалён)',
+                'toast.setup.drive': 'Сначала настройте Google Drive.',
+                'toast.create.file.first': 'Сначала создайте или подключите файл Drive.',
+                'toast.connect.google': 'Сначала подключитесь к Google!',
+                'toast.no.data.save': 'Нет данных для сохранения. Сначала загрузите данные.',
+                'toast.link.file.first': 'Сначала подключите файл!',
+                'toast.saving.drive': 'Сохранение на Drive...',
+                'toast.drive.expired': 'Сессия Drive истекла. Нажмите кнопку Drive справа вверху для переподключения.',
+                'toast.saved.drive': 'Сохранено на Drive!',
+                'toast.save.error': 'Ошибка сохранения: ',
+                'toast.loading.drive': 'Загрузка с Drive...',
+                'toast.loaded.drive': 'Загружено с Drive!',
+                'toast.invalid.json': 'Выберите корректный JSON файл!',
+                'toast.data.loaded': 'Данные успешно загружены!',
+                'toast.file.read.error': 'Ошибка чтения файла: ',
+                'toast.file.read.fail': 'Ошибка чтения файла!',
+                'toast.sample.loaded': 'Тестовые данные загружены!',
+                'toast.expense.required': 'Дата, категория и сумма обязательны!',
+                'toast.expense.added': 'Расход компании добавлен!',
+                'toast.expense.deleted': 'Расход удалён',
+                'toast.excel.download': 'Загрузка Excel файла...',
+                'toast.settings.saved': 'Настройки сохранены',
+                'toast.data.updated': 'Данные обновлены',
+                'toast.select.two.apt': 'Выберите две квартиры',
+                'toast.apt.not.found': 'Квартиры не найдены',
+                'toast.select.apt.period': 'Выберите квартиру и два периода',
+                'toast.select.groups': 'Выберите квартиры для обеих групп',
+                'toast.select.two.sys': 'Выберите две системы',
+                'toast.comparison.done': 'Сравнение выполнено!',
+                'toast.no.company.exp': 'Расходы компании ещё не введены.',
+                // Admin auth
+                'admin.pin.created': 'Пароль админа создан, вход выполнен!',
+                'admin.login.success': 'Вход администратора выполнен!',
+                'admin.wrong.pass': 'Неверный пароль!',
+                'admin.logged.out': 'Сессия админа закрыта',
+                'admin.login.first': 'Сначала войдите как админ!',
+                'admin.pass.min': 'Пароль должен быть не менее 4 символов!',
+                'admin.pass.changed': 'Пароль админа изменён!',
+                'admin.drive.only': 'Запись на Drive доступна только администраторам.',
+                'admin.matching.saved': ' сопоставлений квартир сохранено!',
+                'admin.matching.drive': 'Сопоставление сохранено на Drive! Все пользователи увидят.',
+                // Projection messages
+                'proj.no.valid.rows': 'Валидных бронирований не найдено.',
+                'proj.res.loaded.count': ' бронирований загружено!',
+                'proj.res.not.found': 'Бронирования не найдены',
+                'proj.confirm.delete.file': 'Удалить этот файл и его бронирования?',
+                'proj.moved.to.analysis': ' бронирований перенесено в анализ!',
+                'proj.clear.all.confirm': 'Очистить все данные проекции?',
+                // Projection detail
+                'proj.12m.total': 'Итого за 12 месяцев',
+                'proj.gross': 'Валовой',
+                'proj.gross.income': 'Валовой доход',
+                'proj.deduction': 'Вычет',
+                'proj.net': 'Чистый',
+                'proj.res.short': 'брон',
+                'proj.night': 'ночь',
+                'proj.your.net': 'Ваш чистый доход',
+                'proj.avg.nightly': 'Ср. за ночь',
+                'proj.deduction.detail': 'Детали вычетов',
+                'proj.platform.comm': 'Комиссия платформы',
+                'proj.lagirio.comm': 'Комиссия Lagirio',
+                'proj.kdv.taxes': 'НДС / Налоги',
+                'proj.expenses': 'Расходы',
+                'proj.total.deduction': 'Итого вычеты',
+                'proj.apt.breakdown': 'По квартирам',
+                'proj.click.detail': 'Нажмите для деталей',
+                'proj.your.share': 'Ваша доля',
+                'proj.th.apt': 'Кв.',
+                'proj.th.source': 'Источник',
+                'proj.th.res': 'Брон.',
+                'proj.th.avg.nightly': 'Ср.ночь',
+                'proj.th.expense': 'Расход',
+                'proj.th.kdv': 'НДС',
+                'proj.th.plat.comm': 'Ком.пл.',
+                // Drive status
+                'drive.connected': 'Подключение установлено! Поиск файла...',
+                'drive.file.found': 'Файл найден! Загрузка данных...',
+                'drive.no.file': 'Файл данных на Drive не найден. Админ, возможно, ещё не загрузил данные.',
+                'drive.click.refresh': 'Нажмите для обновления',
+                'drive.click.save': 'Нажмите для сохранения',
+                // Features
+                'feature.secure': 'Безопасная обработка',
+                'feature.fast': 'Быстрый анализ',
+                'feature.detailed': 'Детальные отчёты',
+                // Comparison
+                'comparison.period.a': 'Период A',
+                'comparison.period.b': 'Период B',
+                'comparison.diff': 'РАЗН. (A − B)',
+                'comparison.apt.gross': 'Сравнение квартир (Валовый доход)',
+                // Misc
+                'misc.no.expenses': 'Расходов компании пока нет',
+                'misc.loading': 'Загрузка...',
+                'misc.detailed.report': 'Детальный аналитический отчёт',
+                // Confirm dialogs
+                'confirm.clear.data': 'Вы уверены, что хотите очистить все данные браузера? Данные на Drive не пострадают.',
+                'confirm.delete.account': ' — удалить этот аккаунт?',
+                'confirm.unlink.file': 'Отключить файл? (Файл на Drive не будет удалён)',
+                // Drive/Google messages
+                'drive.google.error.title': 'Ошибка верификации Google (403: access_denied)',
+                'drive.google.error.desc': 'Экран согласия OAuth в режиме "Testing". Только тестовые пользователи могут войти.',
+                'drive.google.error.solution': 'Решение:',
+                'drive.google.error.step1': 'Перейдите в Google Cloud Console > OAuth consent screen',
+                'drive.google.error.step2': 'Нажмите "Test users" > "Add Users"',
+                'drive.google.error.step3': 'Добавьте Gmail адрес для входа',
+                'drive.google.error.step4': 'Сохраните и попробуйте снова',
+                'drive.google.error.alt': 'Или для публикации: OAuth consent screen > "Publish App" (может потребоваться верификация).',
+                'drive.connection.error': 'Ошибка подключения: ',
+                'drive.enter.clientid': 'Введите Google Client ID!',
+                'drive.creating.file': 'Создание нового файла...',
+                'drive.checking.file': 'Проверка файла...',
+                'drive.file.not.found': 'Файл не найден (HTTP ',
+                'drive.file.linked.name': 'Файл подключён: ',
+                'drive.enter.fileid': 'Введите ID файла!',
+                'drive.no.data.save': 'Нет данных для сохранения. Сначала загрузите данные.',
+                'drive.saving': 'Сохранение на Drive...',
+                'drive.session.expired': 'Сессия Drive истекла. Нажмите кнопку Drive справа вверху для переподключения.',
+                'drive.saved.time': 'Сохранено на Drive! (Посл.: ',
+                'drive.saved': 'Сохранено на Drive!',
+                'drive.save.error': 'Ошибка сохранения: ',
+                'drive.save.error.full': 'Ошибка сохранения Drive: ',
+                'drive.loading': 'Загрузка с Drive...',
+                'drive.loaded.time': 'Загружено с Drive! (',
+                'drive.loaded': 'Данные загружены с Drive!',
+                'drive.load.error': 'Ошибка загрузки: ',
+                'drive.api.failed': 'Google API не загружен. Обновите страницу.',
+                'drive.session.expired.short': 'Сессия Drive истекла. Переподключитесь.',
+                'drive.setup.first': 'Сначала настройте Google Drive.',
+                'drive.create.file.first': 'Сначала создайте или подключите файл Drive.',
+                'drive.status.active': 'Подключение к Drive активно. Данные загружаются из этого файла автоматически.',
+                'drive.status.connected': 'Подключено! Выберите или создайте файл.',
+                'drive.status.clientid': 'Client ID сохранён. Подключитесь через Google.',
+                // Owner connect
+                'owner.enter.clientid': 'Введите Client ID!',
+                'owner.connecting': 'Подключение к Google...',
+                'owner.connection.error': 'Ошибка подключения: ',
+                'owner.connected.searching': 'Подключено! Поиск файла...',
+                // Misc remaining
+                'toast.username.exists': 'Это имя пользователя уже занято!',
+                'toast.pass.min4': 'Пароль должен быть не менее 4 символов!',
+                'toast.matching.count': ' сопоставлений квартир сохранено!',
+                'toast.drive.admin.only': 'Запись на Drive доступна только администраторам.',
+                'comparison.all.time': 'Все время',
+                'comparison.period.label': 'Период: ',
+                'comparison.subtitle': 'Сравнение выполнено!',
+                // Chart legends
+                'chart.gross.profit': 'Валовая прибыль',
+                'chart.real.profit': 'Реальная прибыль',
+                'chart.net.profit': 'Чистая прибыль',
+                'chart.company.exp': 'Расходы компании'
             },
             ar: {
                 // Login screen
@@ -3236,7 +3704,241 @@
                 'expense.internet': 'إنترنت',
                 'expense.management': 'إدارة',
                 'expense.maintenance': 'صيانة',
-                'expense.other': 'أخرى'
+                'expense.other': 'أخرى',
+                // Buttons
+                'btn.add': 'إضافة',
+                'btn.delete': 'حذف',
+                'btn.save': 'حفظ',
+                'btn.cancel': 'إلغاء',
+                'btn.close': 'إغلاق',
+                'btn.edit': 'تعديل',
+                'btn.update': 'تحديث',
+                'btn.login': 'دخول',
+                'btn.logout': 'خروج',
+                'btn.change': 'تغيير',
+                'btn.apply': 'تطبيق',
+                'btn.clear': 'مسح',
+                'btn.connect': 'اتصال',
+                'btn.disconnect': 'قطع الاتصال',
+                'btn.save.drive': 'حفظ على Drive',
+                'btn.save.local': 'حفظ محلي فقط',
+                'btn.refresh': 'تحديث البيانات',
+                'btn.file.select': 'اختر ملف',
+                'btn.sample.data': 'بيانات تجريبية',
+                'btn.new.file': 'إنشاء ملف جديد',
+                'btn.choose.file': 'اختيار ملف',
+                'btn.compare': 'مقارنة',
+                'btn.quick.export': 'تصدير سريع',
+                'btn.quick.compare': 'مقارنة سريعة',
+                'btn.quick.report': 'تقرير سريع',
+                // Upload section
+                'upload.json.title': 'اختر أو اسحب ملف JSON',
+                'upload.json.desc': 'ملف JSON يحتوي على بيانات الشقق والحجوزات والمصاريف',
+                'upload.drive.title': 'اتصال Google Drive',
+                'upload.drive.desc': 'اتصل بملف وسيتم تحميله تلقائياً في المرة القادمة',
+                // Date filter
+                'date.this.month': 'هذا الشهر',
+                'date.last.month': 'الشهر الماضي',
+                'date.last.3m': 'آخر 3 أشهر',
+                'date.last.6m': 'آخر 6 أشهر',
+                'date.this.year': 'هذا العام',
+                'date.last.year': 'العام الماضي',
+                'date.all.time': 'كل الأوقات',
+                'date.custom': 'مخصص',
+                // Modals
+                'modal.settings': 'الإعدادات',
+                'modal.apt.matching': 'مطابقة الشقق',
+                'modal.custom.report': 'إنشاء تقرير مخصص',
+                'modal.owner.accounts': 'حسابات المالكين',
+                'modal.owner.accounts.desc': 'أنشئ حسابات دخول لمالكي الشقق. يتم حفظ الحسابات على Google Drive.',
+                'modal.new.account': 'إضافة حساب جديد',
+                'modal.add.account': 'إضافة حساب',
+                'modal.username': 'اسم المستخدم',
+                'modal.password': 'كلمة المرور',
+                'modal.secure.pass': 'كلمة مرور آمنة',
+                'modal.no.accounts': 'لا توجد حسابات مالكين بعد.',
+                // Data Management
+                'dm.title': 'إدارة البيانات',
+                'dm.subtitle': 'تحميل البيانات، اتصال Drive وإدارة المستخدمين',
+                'dm.upload.title': 'مركز تحميل البيانات',
+                'dm.upload.desc': 'ابدأ بتحليلات قوية بتحميل بياناتك',
+                'dm.json.title': 'اختر أو اسحب ملف JSON',
+                'dm.json.desc': 'ملف JSON يحتوي بيانات الشقق والحجوزات والمصاريف',
+                'dm.drive.title': 'اتصال Google Drive',
+                'dm.drive.desc': 'اتصل بملف، تحميل تلقائي عند الدخول القادم',
+                'dm.linked.file': 'ملف متصل',
+                'dm.unlink': 'قطع الاتصال',
+                'dm.which.file': 'أي ملف تريد استخدامه؟',
+                'dm.new.file.desc': 'سيتم إنشاء ملف JSON جديد على Drive',
+                'dm.paste.id': 'الصق معرف ملف Drive',
+                'dm.auto.sync': 'سحب تلقائي من Drive عند الدخول',
+                'dm.connected.account': 'حساب متصل',
+                'dm.uploaded.files': 'الملفات المحملة',
+                // Toast messages
+                'toast.data.cleared': 'تم مسح بيانات المتصفح.',
+                'toast.fill.all': 'املأ جميع الحقول واختر شقة واحدة على الأقل!',
+                'toast.username.taken': 'اسم المستخدم هذا مستخدم بالفعل!',
+                'toast.account.created': 'تم إنشاء الحساب: ',
+                'toast.account.deleted': ' تم حذف الحساب',
+                'toast.enter.clientid': 'أدخل Google Client ID!',
+                'toast.api.failed': 'فشل تحميل Google API. قم بالتحديث وحاول مرة أخرى.',
+                'toast.creating.file': 'جارٍ إنشاء ملف جديد...',
+                'toast.file.created': 'تم إنشاء الملف وربطه!',
+                'toast.file.create.error': 'خطأ في إنشاء الملف: ',
+                'toast.enter.fileid': 'أدخل معرف الملف!',
+                'toast.checking.file': 'جارٍ فحص الملف...',
+                'toast.file.not.found': 'لم يتم العثور على الملف (HTTP ',
+                'toast.file.linked': 'تم ربط الملف: ',
+                'toast.error': 'خطأ: ',
+                'toast.unlink.confirm': 'هل تريد إلغاء ربط الملف؟ (لن يتم حذف الملف من Drive)',
+                'toast.setup.drive': 'قم بإعداد Google Drive أولاً.',
+                'toast.create.file.first': 'أنشئ أو اربط ملف Drive أولاً.',
+                'toast.connect.google': 'اتصل بـ Google أولاً!',
+                'toast.no.data.save': 'لا بيانات للحفظ. حمّل البيانات أولاً.',
+                'toast.link.file.first': 'اربط ملفاً أولاً!',
+                'toast.saving.drive': 'جارٍ الحفظ على Drive...',
+                'toast.drive.expired': 'انتهت جلسة Drive. انقر على زر Drive في أعلى اليمين لإعادة الاتصال.',
+                'toast.saved.drive': 'تم الحفظ على Drive!',
+                'toast.save.error': 'خطأ في الحفظ: ',
+                'toast.loading.drive': 'جارٍ التحميل من Drive...',
+                'toast.loaded.drive': 'تم التحميل من Drive!',
+                'toast.invalid.json': 'اختر ملف JSON صالح!',
+                'toast.data.loaded': 'تم تحميل البيانات بنجاح!',
+                'toast.file.read.error': 'خطأ في قراءة الملف: ',
+                'toast.file.read.fail': 'خطأ في قراءة الملف!',
+                'toast.sample.loaded': 'تم تحميل البيانات التجريبية!',
+                'toast.expense.required': 'التاريخ والفئة والمبلغ مطلوبة!',
+                'toast.expense.added': 'تمت إضافة مصروف الشركة!',
+                'toast.expense.deleted': 'تم حذف المصروف',
+                'toast.excel.download': 'جارٍ تنزيل ملف Excel...',
+                'toast.settings.saved': 'تم حفظ الإعدادات',
+                'toast.data.updated': 'تم تحديث البيانات',
+                'toast.select.two.apt': 'اختر شقتين',
+                'toast.apt.not.found': 'لم يتم العثور على الشقق',
+                'toast.select.apt.period': 'اختر شقة وفترتين',
+                'toast.select.groups': 'اختر شققاً لكلا المجموعتين',
+                'toast.select.two.sys': 'اختر نظامين',
+                'toast.comparison.done': 'تمت المقارنة!',
+                'toast.no.company.exp': 'لم يتم إدخال مصاريف الشركة بعد.',
+                // Admin auth
+                'admin.pin.created': 'تم إنشاء كلمة مرور المسؤول وتسجيل الدخول!',
+                'admin.login.success': 'تم تسجيل دخول المسؤول بنجاح!',
+                'admin.wrong.pass': 'كلمة مرور خاطئة!',
+                'admin.logged.out': 'تم إغلاق جلسة المسؤول',
+                'admin.login.first': 'سجل دخول كمسؤول أولاً!',
+                'admin.pass.min': 'يجب أن تكون كلمة المرور 4 أحرف على الأقل!',
+                'admin.pass.changed': 'تم تغيير كلمة مرور المسؤول!',
+                'admin.drive.only': 'صلاحية الكتابة على Drive للمسؤولين فقط.',
+                'admin.matching.saved': ' مطابقات شقق تم حفظها!',
+                'admin.matching.drive': 'تم حفظ المطابقة على Drive! سيراها جميع المستخدمين.',
+                // Projection messages
+                'proj.no.valid.rows': 'لم يتم العثور على حجوزات صالحة.',
+                'proj.res.loaded.count': ' حجوزات تم تحميلها!',
+                'proj.res.not.found': 'لم يتم العثور على حجوزات',
+                'proj.confirm.delete.file': 'هل أنت متأكد من حذف هذا الملف وحجوزاته؟',
+                'proj.moved.to.analysis': ' حجوزات تم نقلها إلى التحليل!',
+                'proj.clear.all.confirm': 'هل تريد مسح جميع بيانات الإسقاط؟',
+                // Projection detail
+                'proj.12m.total': 'إجمالي 12 شهر',
+                'proj.gross': 'إجمالي',
+                'proj.gross.income': 'الدخل الإجمالي',
+                'proj.deduction': 'خصم',
+                'proj.net': 'صافي',
+                'proj.res.short': 'حجز',
+                'proj.night': 'ليلة',
+                'proj.your.net': 'صافي أرباحك',
+                'proj.avg.nightly': 'متوسط الليلة',
+                'proj.deduction.detail': 'تفاصيل الخصومات',
+                'proj.platform.comm': 'عمولة المنصة',
+                'proj.lagirio.comm': 'عمولة Lagirio',
+                'proj.kdv.taxes': 'ضريبة القيمة المضافة',
+                'proj.expenses': 'المصاريف',
+                'proj.total.deduction': 'إجمالي الخصومات',
+                'proj.apt.breakdown': 'توزيع الشقق',
+                'proj.click.detail': 'انقر للتفاصيل',
+                'proj.your.share': 'حصتك',
+                'proj.th.apt': 'شقة',
+                'proj.th.source': 'مصدر',
+                'proj.th.res': 'حجز',
+                'proj.th.avg.nightly': 'مت.ليلة',
+                'proj.th.expense': 'مصروف',
+                'proj.th.kdv': 'ض.ق.م',
+                'proj.th.plat.comm': 'عم.من',
+                // Drive status
+                'drive.connected': 'تم الاتصال! جارٍ البحث عن الملف...',
+                'drive.file.found': 'تم العثور على الملف! جارٍ تحميل البيانات...',
+                'drive.no.file': 'لم يتم العثور على ملف بيانات على Drive. ربما لم يقم المسؤول بتحميل البيانات بعد.',
+                'drive.click.refresh': 'انقر للتحديث',
+                'drive.click.save': 'انقر للحفظ',
+                // Features
+                'feature.secure': 'معالجة آمنة',
+                'feature.fast': 'تحليل سريع',
+                'feature.detailed': 'تقارير مفصّلة',
+                // Comparison
+                'comparison.period.a': 'الفترة أ',
+                'comparison.period.b': 'الفترة ب',
+                'comparison.diff': 'الفرق (أ − ب)',
+                'comparison.apt.gross': 'مقارنة الشقق (الدخل الإجمالي)',
+                // Misc
+                'misc.no.expenses': 'لا مصاريف شركة بعد',
+                'misc.loading': 'جارٍ التحميل...',
+                'misc.detailed.report': 'تقرير تحليلي مفصّل',
+                // Confirm dialogs
+                'confirm.clear.data': 'هل أنت متأكد من مسح جميع بيانات المتصفح؟ بيانات Drive لن تتأثر.',
+                'confirm.delete.account': ' — حذف هذا الحساب؟',
+                'confirm.unlink.file': 'هل تريد فصل الملف؟ (لن يتم حذف الملف من Drive)',
+                // Drive/Google messages
+                'drive.google.error.title': 'خطأ في التحقق من Google (403: access_denied)',
+                'drive.google.error.desc': 'شاشة موافقة OAuth في وضع "Testing". فقط المستخدمين التجريبيين يمكنهم الدخول.',
+                'drive.google.error.solution': 'الحل:',
+                'drive.google.error.step1': 'اذهب إلى Google Cloud Console > OAuth consent screen',
+                'drive.google.error.step2': 'انقر "Test users" > "Add Users"',
+                'drive.google.error.step3': 'أضف عنوان Gmail الذي تريد الدخول به',
+                'drive.google.error.step4': 'احفظ وحاول مرة أخرى',
+                'drive.google.error.alt': 'أو للنشر: OAuth consent screen > "Publish App" (قد يتطلب التحقق).',
+                'drive.connection.error': 'خطأ في الاتصال: ',
+                'drive.enter.clientid': 'أدخل Google Client ID!',
+                'drive.creating.file': 'جارٍ إنشاء ملف جديد...',
+                'drive.checking.file': 'جارٍ فحص الملف...',
+                'drive.file.not.found': 'الملف غير موجود (HTTP ',
+                'drive.file.linked.name': 'تم ربط الملف: ',
+                'drive.enter.fileid': 'أدخل معرّف الملف!',
+                'drive.no.data.save': 'لا توجد بيانات للحفظ. قم بتحميل البيانات أولاً.',
+                'drive.saving': 'جارٍ الحفظ على Drive...',
+                'drive.session.expired': 'انتهت جلسة Drive. انقر زر Drive في أعلى اليمين لإعادة الاتصال.',
+                'drive.saved.time': 'تم الحفظ على Drive! (آخر: ',
+                'drive.saved': 'تم الحفظ على Drive!',
+                'drive.save.error': 'خطأ في الحفظ: ',
+                'drive.save.error.full': 'خطأ في حفظ Drive: ',
+                'drive.loading': 'جارٍ التحميل من Drive...',
+                'drive.loaded.time': 'تم التحميل من Drive! (',
+                'drive.loaded': 'تم تحميل البيانات من Drive!',
+                'drive.load.error': 'خطأ في التحميل: ',
+                'drive.api.failed': 'فشل تحميل Google API. قم بتحديث الصفحة.',
+                'drive.session.expired.short': 'انتهت جلسة Drive. أعد الاتصال.',
+                'drive.setup.first': 'قم بإعداد Google Drive أولاً.',
+                'drive.create.file.first': 'قم بإنشاء أو ربط ملف Drive أولاً.',
+                'drive.status.active': 'اتصال Drive نشط. يتم تحميل البيانات من هذا الملف تلقائياً.',
+                'drive.status.connected': 'متصل! اختر أو أنشئ ملفاً.',
+                'drive.status.clientid': 'تم حفظ Client ID. سجل الدخول عبر Google.',
+                // Owner connect
+                'owner.enter.clientid': 'أدخل Client ID!',
+                'owner.connecting': 'جارٍ الاتصال بـ Google...',
+                'owner.connection.error': 'خطأ في الاتصال: ',
+                'owner.connected.searching': 'تم الاتصال! جارٍ البحث عن الملف...',
+                // Misc remaining
+                'toast.username.exists': 'اسم المستخدم هذا مستخدم بالفعل!',
+                'toast.pass.min4': 'يجب أن تكون كلمة المرور 4 أحرف على الأقل!',
+                'toast.matching.count': ' مطابقات شقق تم حفظها!',
+                'toast.drive.admin.only': 'صلاحية الكتابة على Drive للمسؤولين فقط.',
+                'comparison.all.time': 'كل الأوقات',
+                'comparison.period.label': 'الفترة: ',
+                'comparison.subtitle': 'تمت المقارنة!',
+                // Chart legends
+                'chart.gross.profit': 'الربح الإجمالي',
+                'chart.real.profit': 'الربح الحقيقي',
+                'chart.net.profit': 'صافي الربح',
+                'chart.company.exp': 'مصاريف الشركة'
             }
         },
 
@@ -3253,9 +3955,7 @@
             this.applyTranslations();
             // Dil değişince dinamik JS içeriklerini yenile
             if (typeof Analytics !== 'undefined' && Analytics.data) {
-                try { Analytics.updateQuickStats(); } catch(e) {}
-                try { Analytics.updateSystemCards(); } catch(e) {}
-                try { Analytics.updateDashboard(); } catch(e) {}
+                try { Analytics.processData(); } catch(e) {}
             }
             if (typeof Projection !== 'undefined' && Projection._lastCalcResult) {
                 try { Projection.calculate(); } catch(e) {}
@@ -3409,13 +4109,13 @@
         },
 
         clearData() {
-            if (!confirm('Tarayıcıdaki tüm veriyi silmek istediğinize emin misiniz? Drive\'daki veri etkilenmez.')) return;
+            if (!confirm(t('confirm.clear.data', 'Tarayıcıdaki tüm veriyi silmek istediğinize emin misiniz? Drive\'daki veri etkilenmez.'))) return;
             localStorage.removeItem('lagirioAnalyticsData');
             Analytics.data = null;
             document.getElementById('dataManagerSection')?.classList.add('hidden');
             document.getElementById('mainDashboard')?.classList.add('hidden');
             document.getElementById('uploadSection')?.classList.remove('hidden');
-            if (typeof Analytics.showToast === 'function') Analytics.showToast('Tarayıcıdaki veri temizlendi.', 'info');
+            if (typeof Analytics.showToast === 'function') Analytics.showToast(t('toast.data.cleared', 'Tarayıcıdaki veri temizlendi.'), 'info');
         },
 
         bindFileInput() {
@@ -3460,20 +4160,20 @@
             const apartmentIds = aptSelect ? [...aptSelect.selectedOptions].map(o => o.value) : [];
 
             if (!username || !password || !apartmentIds.length) {
-                if (typeof Analytics !== 'undefined') Analytics.showToast('Tüm alanları doldurun ve en az bir daire seçin!', 'error');
+                if (typeof Analytics !== 'undefined') Analytics.showToast(t('toast.fill.all', 'Tüm alanları doldurun ve en az bir daire seçin!'), 'error');
                 return;
             }
 
             const users = JSON.parse(localStorage.getItem(Auth.USERS_STORAGE_KEY) || '[]');
             if (users.find(u => u.username === username) || username === 'admin') {
-                if (typeof Analytics !== 'undefined') Analytics.showToast('Bu kullanıcı adı zaten kullanılıyor!', 'error');
+                if (typeof Analytics !== 'undefined') Analytics.showToast(t('toast.username.exists', 'Bu kullanıcı adı zaten kullanılıyor!'), 'error');
                 return;
             }
 
             users.push({ username, password, role: 'owner', apartmentIds });
             localStorage.setItem(Auth.USERS_STORAGE_KEY, JSON.stringify(users));
             this.renderOwnerAccounts();
-            if (typeof Analytics !== 'undefined') Analytics.showToast('Hesap oluşturuldu: ' + username, 'success');
+            if (typeof Analytics !== 'undefined') Analytics.showToast(t('toast.account.created', 'Hesap oluşturuldu: ') + username, 'success');
 
             document.getElementById('dmNewOwnerUser').value = '';
             document.getElementById('dmNewOwnerPass').value = '';
@@ -3481,12 +4181,12 @@
         },
 
         removeOwnerAccount(username) {
-            if (!confirm(username + ' hesabını silmek istediğinize emin misiniz?')) return;
+            if (!confirm(username + t('confirm.delete.account', ' hesabını silmek istediğinize emin misiniz?'))) return;
             let users = JSON.parse(localStorage.getItem(Auth.USERS_STORAGE_KEY) || '[]');
             users = users.filter(u => u.username !== username);
             localStorage.setItem(Auth.USERS_STORAGE_KEY, JSON.stringify(users));
             this.renderOwnerAccounts();
-            if (typeof Analytics !== 'undefined') Analytics.showToast(username + ' hesabı silindi', 'success');
+            if (typeof Analytics !== 'undefined') Analytics.showToast(username + t('toast.account.deleted', ' hesabı silindi'), 'success');
         },
 
         renderOwnerAccounts() {
@@ -3496,7 +4196,7 @@
             const apartments = (typeof Analytics !== 'undefined' && Analytics.data?.apartments) || [];
 
             if (!users.length) {
-                container.innerHTML = '<p class="text-sm text-gray-400 text-center">Henüz daire sahibi hesabı yok.</p>';
+                container.innerHTML = '<p class="text-sm text-gray-400 text-center">' + t('modal.no.accounts', 'Henüz daire sahibi hesabı yok.') + '</p>';
             } else {
                 container.innerHTML = users.map(u => {
                     const aptNames = (u.apartmentIds || []).map(id => {
@@ -3609,20 +4309,20 @@
             const apartmentIds = aptSelect ? [...aptSelect.selectedOptions].map(o => o.value) : [];
 
             if (!username || !password || !apartmentIds.length) {
-                if (typeof Analytics !== 'undefined') Analytics.showToast('Tüm alanları doldurun ve en az bir daire seçin!', 'error');
+                if (typeof Analytics !== 'undefined') Analytics.showToast(t('toast.fill.all', 'Tüm alanları doldurun ve en az bir daire seçin!'), 'error');
                 return;
             }
 
             const users = JSON.parse(localStorage.getItem(this.USERS_STORAGE_KEY) || '[]');
             if (users.find(u => u.username === username) || username === 'admin') {
-                if (typeof Analytics !== 'undefined') Analytics.showToast('Bu kullanıcı adı zaten kullanılıyor!', 'error');
+                if (typeof Analytics !== 'undefined') Analytics.showToast(t('toast.username.exists', 'Bu kullanıcı adı zaten kullanılıyor!'), 'error');
                 return;
             }
 
             users.push({ username, password, role: 'owner', apartmentIds });
             localStorage.setItem(this.USERS_STORAGE_KEY, JSON.stringify(users));
             this.renderOwnerAccounts();
-            if (typeof Analytics !== 'undefined') Analytics.showToast('Hesap oluşturuldu: ' + username, 'success');
+            if (typeof Analytics !== 'undefined') Analytics.showToast(t('toast.account.created', 'Hesap oluşturuldu: ') + username, 'success');
 
             document.getElementById('newOwnerUser').value = '';
             document.getElementById('newOwnerPass').value = '';
@@ -3630,12 +4330,12 @@
         },
 
         removeOwnerAccount(username) {
-            if (!confirm(username + ' hesabını silmek istediğinize emin misiniz?')) return;
+            if (!confirm(username + t('confirm.delete.account', ' hesabını silmek istediğinize emin misiniz?'))) return;
             let users = JSON.parse(localStorage.getItem(this.USERS_STORAGE_KEY) || '[]');
             users = users.filter(u => u.username !== username);
             localStorage.setItem(this.USERS_STORAGE_KEY, JSON.stringify(users));
             this.renderOwnerAccounts();
-            if (typeof Analytics !== 'undefined') Analytics.showToast(username + ' hesabı silindi', 'success');
+            if (typeof Analytics !== 'undefined') Analytics.showToast(username + t('toast.account.deleted', ' hesabı silindi'), 'success');
         },
 
         renderOwnerAccounts() {
@@ -3645,7 +4345,7 @@
             const apartments = (typeof Analytics !== 'undefined' && Analytics.data?.apartments) || [];
 
             if (!users.length) {
-                container.innerHTML = '<p class="text-xs text-gray-400">Henüz daire sahibi hesabı yok.</p>';
+                container.innerHTML = '<p class="text-xs text-gray-400">' + t('modal.no.accounts', 'Henüz daire sahibi hesabı yok.') + '</p>';
             } else {
                 container.innerHTML = users.map(u => {
                     const aptNames = (u.apartmentIds || []).map(id => {
@@ -3924,7 +4624,7 @@
                 GoogleDrive.tokenClient.requestAccessToken();
             } catch(e) {
                 this.updateLoginDriveUI('form');
-                if (errorEl) { errorEl.textContent = 'Google API hatası. Sayfayı yenileyin.'; errorEl.classList.remove('hidden'); }
+                if (errorEl) { errorEl.textContent = t('drive.api.failed', 'Google API hatası. Sayfayı yenileyin.'); errorEl.classList.remove('hidden'); }
             }
         },
 
@@ -4255,11 +4955,11 @@
 
             // Status banner
             if (isConnected && hasFile) {
-                this.showStatus('<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700"><i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i> Drive bağlantısı aktif. Veriler otomatik bu dosyadan yüklenir.</div>');
+                this.showStatus('<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700"><i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i> ' + t('drive.status.active', 'Drive bağlantısı aktif. Veriler otomatik bu dosyadan yüklenir.') + '</div>');
             } else if (isConnected) {
-                this.showStatus('<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Bağlantı kuruldu! Bir dosya seçin veya yeni oluşturun.</div>');
+                this.showStatus('<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> ' + t('drive.status.connected', 'Bağlantı kuruldu! Bir dosya seçin veya yeni oluşturun.') + '</div>');
             } else if (hasClientId) {
-                this.showStatus('<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Client ID kayıtlı. Google ile giriş yaparak bağlanın.</div>');
+                this.showStatus('<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> ' + t('drive.status.clientid', 'Client ID kayıtlı. Google ile giriş yaparak bağlanın.') + '</div>');
             } else {
                 this.showStatus('<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600"><p class="font-semibold mb-1">Nasıl Kurulur?</p><ol class="list-decimal list-inside text-xs space-y-1 text-gray-500"><li><a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>\'a gidin</li><li>APIs &amp; Services &gt; Credentials &gt; Create OAuth Client ID</li><li>Application type: <b>Web application</b></li><li>Authorized JavaScript origins: <b>https://analizlagirio.netlify.app</b> ekleyin</li><li>Oluşan Client ID\'yi yukarıya yapıştırın</li><li class="text-amber-600 font-medium">OAuth consent screen &gt; Test users &gt; giriş yapacak Gmail\'i ekleyin</li><li class="text-amber-600">Ya da "Publish App" ile uygulamayı yayınlayın</li></ol></div>');
             }
@@ -4275,7 +4975,7 @@
             const clientEl = document.getElementById('driveClientId');
             const clientId = clientEl?.value?.trim() || this.getConfig().clientId;
             if (!clientId) {
-                this.showMessage('Lütfen Google Client ID girin!', 'error');
+                this.showMessage(t('drive.enter.clientid', 'Lütfen Google Client ID girin!'), 'error');
                 return;
             }
 
@@ -4293,21 +4993,21 @@
                             if (response.error === 'access_denied') {
                                 this.showMessage(
                                     '<div class="text-left">' +
-                                    '<p class="font-bold text-red-700 mb-2">Google Doğrulama Hatası (403: access_denied)</p>' +
-                                    '<p class="mb-2">OAuth consent screen <b>"Testing"</b> modunda. Bu durumda sadece test kullanıcıları giriş yapabilir.</p>' +
-                                    '<p class="font-semibold mb-1">Çözüm:</p>' +
+                                    '<p class="font-bold text-red-700 mb-2">' + t('drive.google.error.title', 'Google Doğrulama Hatası (403: access_denied)') + '</p>' +
+                                    '<p class="mb-2">' + t('drive.google.error.desc', 'OAuth consent screen <b>"Testing"</b> modunda. Bu durumda sadece test kullanıcıları giriş yapabilir.') + '</p>' +
+                                    '<p class="font-semibold mb-1">' + t('drive.google.error.solution', 'Çözüm:') + '</p>' +
                                     '<ol class="list-decimal list-inside text-xs space-y-1 mb-2">' +
-                                    '<li><a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" class="text-blue-600 underline">Google Cloud Console &gt; OAuth consent screen</a>\'a gidin</li>' +
-                                    '<li><b>"Test users"</b> bölümüne tıklayın &gt; <b>"+ Add Users"</b></li>' +
-                                    '<li>Giriş yapmak istediğiniz Gmail adresini ekleyin</li>' +
-                                    '<li>Kaydedin ve tekrar deneyin</li>' +
+                                    '<li><a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" class="text-blue-600 underline">' + t('drive.google.error.step1', 'Google Cloud Console &gt; OAuth consent screen') + '</a></li>' +
+                                    '<li>' + t('drive.google.error.step2', '<b>"Test users"</b> bölümüne tıklayın &gt; <b>"+ Add Users"</b>') + '</li>' +
+                                    '<li>' + t('drive.google.error.step3', 'Giriş yapmak istediğiniz Gmail adresini ekleyin') + '</li>' +
+                                    '<li>' + t('drive.google.error.step4', 'Kaydedin ve tekrar deneyin') + '</li>' +
                                     '</ol>' +
-                                    '<p class="text-xs text-gray-500">Ya da herkese açmak için: OAuth consent screen &gt; <b>"Publish App"</b> butonuna tıklayın (doğrulama gerekebilir).</p>' +
+                                    '<p class="text-xs text-gray-500">' + t('drive.google.error.alt', 'Ya da herkese açmak için: OAuth consent screen &gt; <b>"Publish App"</b> butonuna tıklayın (doğrulama gerekebilir).') + '</p>' +
                                     '</div>',
                                     'error'
                                 );
                             } else {
-                                this.showMessage('Bağlantı hatası: ' + response.error, 'error');
+                                this.showMessage(t('drive.connection.error', 'Bağlantı hatası: ') + response.error, 'error');
                             }
                             return;
                         }
@@ -4339,7 +5039,7 @@
                 });
                 this.tokenClient.requestAccessToken();
             } catch(e) {
-                this.showMessage('Google API yüklenemedi. Sayfayı yenileyin ve tekrar deneyin.', 'error');
+                this.showMessage(t('drive.api.failed', 'Google API yüklenemedi. Sayfayı yenileyin ve tekrar deneyin.'), 'error');
             }
         },
 
@@ -4395,7 +5095,7 @@
                     const msgEl = document.getElementById('ownerWelcomeMsg');
                     if (loadingEl) loadingEl.classList.add('hidden');
                     if (setupEl) setupEl.classList.remove('hidden');
-                    if (msgEl) msgEl.textContent = 'Drive oturumu sona erdi. Tekrar bağlanın.';
+                    if (msgEl) msgEl.textContent = t('drive.session.expired.short', 'Drive oturumu sona erdi. Tekrar bağlanın.');
                     // Client ID zaten kayıtlı — input'a doldur
                     const clientInput = document.getElementById('ownerClientId');
                     if (clientInput) clientInput.value = config.clientId;
@@ -4450,7 +5150,7 @@
 
         async createNewFile() {
             if (!this.accessToken) return;
-            this.showMessage('Yeni dosya oluşturuluyor...', 'info');
+            this.showMessage(t('drive.creating.file', 'Yeni dosya oluşturuluyor...'), 'info');
 
             const initialData = Analytics.data || { apartments: [], reservations: [], expenses: [], categories: [], capitalExpenses: [] };
             const metadata = { name: 'lagirio-analiz-data.json', mimeType: 'application/json' };
@@ -4472,10 +5172,10 @@
                 const result = await response.json();
 
                 this.saveFileLink(result.id, result.name);
-                this.showMessage('Dosya oluşturuldu ve bağlandı!', 'success');
+                this.showMessage(t('toast.file.created', 'Dosya oluşturuldu ve bağlandı!'), 'success');
                 this.updateUI();
             } catch(e) {
-                this.showMessage('Dosya oluşturma hatası: ' + e.message, 'error');
+                this.showMessage(t('toast.file.create.error', 'Dosya oluşturma hatası: ') + e.message, 'error');
             }
         },
 
@@ -4483,27 +5183,27 @@
             if (!this.accessToken) return;
             const fileId = document.getElementById('driveFileId')?.value?.trim();
             if (!fileId) {
-                this.showMessage('Lütfen bir dosya ID girin!', 'error');
+                this.showMessage(t('drive.enter.fileid', 'Lütfen bir dosya ID girin!'), 'error');
                 return;
             }
 
-            this.showMessage('Dosya kontrol ediliyor...', 'info');
+            this.showMessage(t('drive.checking.file', 'Dosya kontrol ediliyor...'), 'info');
             try {
                 const r = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?fields=id,name,modifiedTime', {
                     headers: { 'Authorization': 'Bearer ' + this.accessToken }
                 });
-                if (!r.ok) throw new Error('Dosya bulunamadı (HTTP ' + r.status + ')');
+                if (!r.ok) throw new Error(t('drive.file.not.found', 'Dosya bulunamadı (HTTP ') + r.status + ')');
                 const info = await r.json();
                 this.saveFileLink(info.id, info.name);
-                this.showMessage('Dosya bağlandı: ' + info.name, 'success');
+                this.showMessage(t('drive.file.linked.name', 'Dosya bağlandı: ') + info.name, 'success');
                 this.updateUI();
             } catch(e) {
-                this.showMessage('Hata: ' + e.message, 'error');
+                this.showMessage(t('toast.error', 'Hata: ') + e.message, 'error');
             }
         },
 
         unlinkFile() {
-            if (!confirm('Dosya bağlantısını kesmek istediğinizden emin misiniz? (Drive\'daki dosya silinmez)')) return;
+            if (!confirm(t('confirm.unlink.file', 'Dosya bağlantısını kesmek istediğinizden emin misiniz? (Drive\'daki dosya silinmez)'))) return;
             const config = this.getConfig();
             delete config.fileId;
             delete config.fileName;
@@ -4531,11 +5231,11 @@
             } else if (this.accessToken && !this.getConfig().fileId) {
                 // Bağlı ama dosya yok → Veri Yönetimi aç
                 DataManager.open('drive');
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce bir Drive dosyası oluşturun veya bağlayın.', 'info');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.create.file.first', 'Önce bir Drive dosyası oluşturun veya bağlayın.'), 'info');
             } else {
                 // Hiç config yok → Veri Yönetimi aç
                 DataManager.open('drive');
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Önce Google Drive\'ı ayarlayın.', 'info');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.setup.first', 'Önce Google Drive\'ı ayarlayın.'), 'info');
             }
         },
 
@@ -4620,11 +5320,11 @@
             const statusEl = document.getElementById('dmDriveStatus');
             if (statusEl) {
                 if (isConnected && hasFile) {
-                    statusEl.innerHTML = '<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700"><i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i> Drive bağlantısı aktif.</div>';
+                    statusEl.innerHTML = '<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700"><i data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i> ' + t('drive.status.active', 'Drive bağlantısı aktif.') + '</div>';
                 } else if (isConnected) {
-                    statusEl.innerHTML = '<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Bağlantı kuruldu! Bir dosya seçin veya yeni oluşturun.</div>';
+                    statusEl.innerHTML = '<div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> ' + t('drive.status.connected', 'Bağlantı kuruldu! Bir dosya seçin veya yeni oluşturun.') + '</div>';
                 } else if (hasClientId) {
-                    statusEl.innerHTML = '<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> Client ID kayıtlı. Google ile giriş yapın.</div>';
+                    statusEl.innerHTML = '<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700"><i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> ' + t('drive.status.clientid', 'Client ID kayıtlı. Google ile giriş yapın.') + '</div>';
                 } else {
                     statusEl.innerHTML = '<div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600"><p class="font-semibold mb-1">Nasıl Kurulur?</p><ol class="list-decimal list-inside text-xs space-y-1 text-gray-500"><li><a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>\'a gidin</li><li>APIs &amp; Services &gt; Credentials &gt; Create OAuth Client ID</li><li>Application type: <b>Web application</b></li><li>Authorized JavaScript origins: <b>' + window.location.origin + '</b> ekleyin</li><li>Client ID\'yi yukarıya yapıştırın</li></ol></div>';
                 }
@@ -4718,7 +5418,7 @@
             const clientEl = document.getElementById('dmDriveClientId');
             const clientId = clientEl?.value?.trim() || this.getConfig().clientId;
             if (!clientId) {
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Lütfen Google Client ID girin!', 'error');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('toast.enter.clientid', 'Lütfen Google Client ID girin!'), 'error');
                 return;
             }
 
@@ -4737,7 +5437,7 @@
                     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
                     callback: async (response) => {
                         if (response.error) {
-                            if (typeof Analytics.showToast === 'function') Analytics.showToast('Bağlantı hatası: ' + response.error, 'error');
+                            if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.connection.error', 'Bağlantı hatası: ') + response.error, 'error');
                             this.updateHeaderUI('warning');
                             return;
                         }
@@ -4764,7 +5464,7 @@
                 });
                 this.tokenClient.requestAccessToken();
             } catch(e) {
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Google API yüklenemedi. Sayfayı yenileyin.', 'error');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.api.failed', 'Google API yüklenemedi. Sayfayı yenileyin.'), 'error');
             }
         },
 
@@ -4773,7 +5473,7 @@
             if (!this.accessToken) return;
             const fileId = document.getElementById('dmDriveFileId')?.value?.trim();
             if (!fileId) {
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Lütfen bir dosya ID girin!', 'error');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('toast.enter.fileid', 'Lütfen bir dosya ID girin!'), 'error');
                 return;
             }
 
@@ -4784,22 +5484,22 @@
                 if (!r.ok) throw new Error('Dosya bulunamadı (HTTP ' + r.status + ')');
                 const info = await r.json();
                 this.saveFileLink(info.id, info.name);
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Dosya bağlandı: ' + info.name, 'success');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('toast.file.linked', 'Dosya bağlandı: ') + info.name, 'success');
                 this.updateUI();
                 this.updateModalUI();
             } catch(e) {
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Hata: ' + e.message, 'error');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('toast.error', 'Hata: ') + e.message, 'error');
             }
         },
 
         async saveToDrive() {
-            if (!this.accessToken) { this.showMessage('Önce Google ile bağlanın!', 'error'); return; }
-            if (!Analytics.data) { this.showMessage('Kaydedilecek veri yok. Önce veri yükleyin.', 'error'); return; }
+            if (!this.accessToken) { this.showMessage(t('toast.connect.google', 'Önce Google ile bağlanın!'), 'error'); return; }
+            if (!Analytics.data) { this.showMessage(t('drive.no.data.save', 'Kaydedilecek veri yok. Önce veri yükleyin.'), 'error'); return; }
 
             const config = this.getConfig();
-            if (!config.fileId) { this.showMessage('Önce bir dosya bağlayın!', 'error'); return; }
+            if (!config.fileId) { this.showMessage(t('toast.link.file.first', 'Önce bir dosya bağlayın!'), 'error'); return; }
 
-            this.showMessage('<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> Drive\'a kaydediliyor...', 'info');
+            this.showMessage('<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> ' + t('drive.saving', 'Drive\'a kaydediliyor...'), 'info');
 
             try {
                 // Uygulama ayarlarını data'ya ekle
@@ -4835,37 +5535,37 @@
                     if (response.status === 401) {
                         this.clearToken();
                         this.updateHeaderUI('warning');
-                        this.showMessage('Drive oturumu sona erdi. Sağ üstteki Drive butonuna tıklayarak tekrar bağlanın.', 'error');
-                        if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive oturumu sona erdi. Tekrar bağlanın.', 'error');
+                        this.showMessage(t('drive.session.expired', 'Drive oturumu sona erdi. Sağ üstteki Drive butonuna tıklayarak tekrar bağlanın.'), 'error');
+                        if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.session.expired.short', 'Drive oturumu sona erdi. Tekrar bağlanın.'), 'error');
                         return;
                     }
                     const errText = await response.text().catch(() => '');
                     throw new Error('HTTP ' + response.status + (errText ? ': ' + errText.substring(0, 100) : ''));
                 }
                 const now = new Date().toLocaleTimeString('tr-TR');
-                this.showMessage('Drive\'a kaydedildi! (Son: ' + now + ')', 'success');
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive\'a kaydedildi!', 'success');
+                this.showMessage(t('drive.saved.time', 'Drive\'a kaydedildi! (Son: ') + now + ')', 'success');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.saved', 'Drive\'a kaydedildi!'), 'success');
             } catch(e) {
-                console.error('Drive kaydetme hatası:', e);
-                this.showMessage('Kaydetme hatası: ' + e.message, 'error');
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive kaydetme hatası: ' + e.message, 'error');
+                console.error('Drive save error:', e);
+                this.showMessage(t('drive.save.error', 'Kaydetme hatası: ') + e.message, 'error');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.save.error.full', 'Drive kaydetme hatası: ') + e.message, 'error');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
         async loadFromDrive(silent) {
             if (!this.accessToken) {
-                if (!silent) this.showMessage('Önce Google ile bağlanın!', 'error');
+                if (!silent) this.showMessage(t('toast.connect.google', 'Önce Google ile bağlanın!'), 'error');
                 return;
             }
 
             const config = this.getConfig();
             if (!config.fileId) {
-                if (!silent) this.showMessage('Önce bir dosya bağlayın!', 'error');
+                if (!silent) this.showMessage(t('toast.link.file.first', 'Önce bir dosya bağlayın!'), 'error');
                 return;
             }
 
-            if (!silent) this.showMessage('<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> Drive\'dan çekiliyor...', 'info');
+            if (!silent) this.showMessage('<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> ' + t('drive.loading', 'Drive\'dan çekiliyor...'), 'info');
 
             try {
                 const response = await fetch(
@@ -4877,8 +5577,8 @@
                         this.clearToken();
                         this.updateHeaderUI('warning');
                         if (!silent) {
-                            this.showMessage('Drive oturumu sona erdi. Sağ üstteki Drive butonuna tıklayarak tekrar bağlanın.', 'error');
-                            if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive oturumu sona erdi. Tekrar bağlanın.', 'error');
+                            this.showMessage(t('drive.session.expired', 'Drive oturumu sona erdi. Sağ üstteki Drive butonuna tıklayarak tekrar bağlanın.'), 'error');
+                            if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.session.expired.short', 'Drive oturumu sona erdi. Tekrar bağlanın.'), 'error');
                         }
                         return;
                     }
@@ -4930,10 +5630,10 @@
                 }
 
                 const now = new Date().toLocaleTimeString('tr-TR');
-                this.showMessage('Drive\'dan yüklendi! (' + now + ')', 'success');
-                if (typeof Analytics.showToast === 'function') Analytics.showToast('Drive\'dan veri yüklendi!', 'success');
+                this.showMessage(t('drive.loaded.time', 'Drive\'dan yüklendi! (') + now + ')', 'success');
+                if (typeof Analytics.showToast === 'function') Analytics.showToast(t('drive.loaded', 'Drive\'dan veri yüklendi!'), 'success');
             } catch(e) {
-                if (!silent) this.showMessage('Yükleme hatası: ' + e.message, 'error');
+                if (!silent) this.showMessage(t('drive.load.error', 'Yükleme hatası: ') + e.message, 'error');
                 console.error('Drive load error:', e);
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -4943,7 +5643,7 @@
         async ownerConnect() {
             const clientId = document.getElementById('ownerClientId')?.value?.trim();
             if (!clientId) {
-                this.showMessage('Lütfen Client ID girin!', 'error');
+                this.showMessage(t('owner.enter.clientid', 'Lütfen Client ID girin!'), 'error');
                 return;
             }
 
@@ -4955,7 +5655,7 @@
 
             // OAuth başlat
             const statusEl = document.getElementById('ownerWelcomeMsg');
-            if (statusEl) statusEl.textContent = 'Google hesabına bağlanılıyor...';
+            if (statusEl) statusEl.textContent = t('owner.connecting', 'Google hesabına bağlanılıyor...');
 
             try {
                 this.tokenClient = google.accounts.oauth2.initTokenClient({
@@ -4963,7 +5663,7 @@
                     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
                     callback: async (response) => {
                         if (response.error) {
-                            if (statusEl) statusEl.textContent = 'Bağlantı hatası: ' + response.error;
+                            if (statusEl) statusEl.textContent = t('owner.connection.error', 'Bağlantı hatası: ') + response.error;
                             return;
                         }
                         this.accessToken = response.access_token;
@@ -4978,7 +5678,7 @@
                         this.updateHeaderUI('connected');
                         this.startRefreshTimer();
 
-                        if (statusEl) statusEl.textContent = 'Bağlantı kuruldu! Dosya aranıyor...';
+                        if (statusEl) statusEl.textContent = t('owner.connected.searching', 'Bağlantı kuruldu! Dosya aranıyor...');
 
                         // Drive'daki lagirio dosyasını otomatik bul
                         await this.autoFindAndLoad();
@@ -4986,7 +5686,7 @@
                 });
                 this.tokenClient.requestAccessToken({ prompt: 'consent' });
             } catch(e) {
-                if (statusEl) statusEl.textContent = 'Bağlantı hatası: ' + e.message;
+                if (statusEl) statusEl.textContent = t('owner.connection.error', 'Bağlantı hatası: ') + e.message;
             }
         },
 
@@ -4998,20 +5698,20 @@
                 const r = await fetch(searchUrl, {
                     headers: { 'Authorization': 'Bearer ' + this.accessToken }
                 });
-                if (!r.ok) throw new Error('Arama hatası: HTTP ' + r.status);
+                if (!r.ok) throw new Error('HTTP ' + r.status);
 
                 const result = await r.json();
                 if (result.files && result.files.length > 0) {
                     const file = result.files[0];
                     this.saveFileLink(file.id, file.name);
                     this.updateUI();
-                    if (statusEl) statusEl.textContent = 'Dosya bulundu! Veriler yükleniyor...';
+                    if (statusEl) statusEl.textContent = t('drive.file.found', 'Dosya bulundu! Veriler yükleniyor...');
                     await this.loadFromDrive(false);
                 } else {
-                    if (statusEl) statusEl.textContent = 'Drive\'da veri dosyası bulunamadı. Admin henüz veri yüklememiş olabilir.';
+                    if (statusEl) statusEl.textContent = t('drive.no.file', 'Drive\'da veri dosyası bulunamadı. Admin henüz veri yüklememiş olabilir.');
                 }
             } catch(e) {
-                if (statusEl) statusEl.textContent = 'Dosya arama hatası: ' + e.message;
+                if (statusEl) statusEl.textContent = t('toast.error', 'Hata: ') + e.message;
                 console.error('Auto find error:', e);
             }
         }
@@ -5366,7 +6066,7 @@
         },
 
         removeFile(fileName) {
-            if (!confirm('"' + fileName + '" dosyasını ve rezervasyonlarını silmek istediğinizden emin misiniz?')) return;
+            if (!confirm(t('proj.confirm.delete.file', '"' + fileName + '" dosyasını ve rezervasyonlarını silmek istediğinizden emin misiniz?'))) return;
             this.reservations = this.reservations.filter(r => r.sourceFile !== fileName);
             this.uploadedFiles = this.uploadedFiles.filter(f => f.name !== fileName);
             this.save();
@@ -5429,7 +6129,7 @@
             Analytics.filteredData = Analytics.data;
             Analytics.processData();
             if (typeof Analytics.showToast === 'function') {
-                Analytics.showToast(converted.length + ' rezervasyon analize aktarıldı!', 'success');
+                Analytics.showToast(converted.length + t('proj.moved.to.analysis', ' rezervasyon analize aktarıldı!'), 'success');
             }
         }
     };
@@ -5558,7 +6258,7 @@
         },
 
         clearAll() {
-            if (!confirm('Tüm projeksiyon verilerini temizlemek istediğinizden emin misiniz?')) return;
+            if (!confirm(t('proj.clear.all.confirm', 'Tüm projeksiyon verilerini temizlemek istediğinizden emin misiniz?'))) return;
             this.reservations = [];
             this.uploadedFiles = [];
             this.save();
@@ -6202,11 +6902,11 @@
             const pctDeductions = estGross > 0 ? ((estGross - ownerNet) / estGross * 100).toFixed(1) : '0.0';
             html += '</div>' +
                 '<div class="flex items-center justify-center gap-6 mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500">' +
-                '<span>Br\u00fct Gelir: <strong class="text-gray-700">\u20ac' + estGross.toFixed(0) + '</strong></span>' +
+                '<span>' + t('proj.gross.income', 'Brüt Gelir') + ': <strong class="text-gray-700">\u20ac' + estGross.toFixed(0) + '</strong></span>' +
                 '<span class="text-gray-300">|</span>' +
-                '<span>Toplam Kesinti: <strong class="text-red-500">%' + pctDeductions + '</strong></span>' +
+                '<span>' + t('proj.total.deduction', 'Toplam Kesinti') + ': <strong class="text-red-500">%' + pctDeductions + '</strong></span>' +
                 '<span class="text-gray-300">|</span>' +
-                '<span>Elinize Ge\u00e7en: <strong class="text-emerald-600">%' + pctOwner + '</strong></span>' +
+                '<span>' + t('proj.your.share', 'Elinize Geçen') + ': <strong class="text-emerald-600">%' + pctOwner + '</strong></span>' +
                 '</div></div>';
 
             wf.innerHTML = html;
@@ -6579,23 +7279,23 @@
                             const idx = params[0].dataIndex;
                             let html = '<div style="font-weight:600;margin-bottom:6px">' + params[0].axisValue + '</div>';
                             params.forEach(function(p) { html += '<div style="display:flex;align-items:center;gap:6px;margin:3px 0"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + p.color + '"></span>' + p.seriesName + ': <strong>€' + p.value.toLocaleString() + '</strong></div>'; });
-                            html += '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.15);font-size:11px;color:#aaa">' + countData[idx] + ' rez · €' + avgNightlyData[idx].toFixed(2) + '/gece</div>';
-                            html += '<div style="font-size:10px;color:#6ee7b7;margin-top:2px">Detay için tıklayın</div>';
+                            html += '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.15);font-size:11px;color:#aaa">' + countData[idx] + ' ' + t('proj.res.short', 'rez') + ' · €' + avgNightlyData[idx].toFixed(2) + '/' + t('proj.night', 'gece') + '</div>';
+                            html += '<div style="font-size:10px;color:#6ee7b7;margin-top:2px">' + t('proj.click.detail', 'Detay için tıklayın') + '</div>';
                             return html;
                         }
                     },
-                    legend: { data: ['Net Kazancınız', 'Brüt Gelir'], bottom: 0, textStyle: { fontSize: 11 } },
+                    legend: { data: [t('proj.your.net', 'Net Kazancınız'), t('proj.gross.income', 'Brüt Gelir')], bottom: 0, textStyle: { fontSize: 11 } },
                     grid: { left: '2%', right: '3%', bottom: '15%', top: '8%', containLabel: true },
                     xAxis: { type: 'category', data: labels, axisLabel: { rotate: 45, fontSize: 10 }, axisTick: { alignWithLabel: true } },
                     yAxis: { type: 'value', axisLabel: { formatter: function(v) { return '€' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v); }, fontSize: 10 }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
                     series: [
                         {
-                            name: 'Net Kazancınız', type: 'bar', data: netData, barWidth: '45%',
+                            name: t('proj.your.net', 'Net Kazancınız'), type: 'bar', data: netData, barWidth: '45%',
                             itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [6,6,0,0] },
                             label: { show: true, position: 'top', formatter: function(p) { return '€' + p.value.toLocaleString(); }, fontSize: 9, color: '#059669', fontWeight: 'bold' }
                         },
                         {
-                            name: 'Brüt Gelir', type: 'line', data: grossData, smooth: true,
+                            name: t('proj.gross.income', 'Brüt Gelir'), type: 'line', data: grossData, smooth: true,
                             itemStyle: { color: '#3b82f6' }, lineStyle: { width: 2.5 }, symbol: 'circle', symbolSize: 7,
                             areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.12)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) }
                         }
@@ -6746,21 +7446,21 @@
                 if (aptRows.length > 0) {
                     html += '<table class="w-full text-[11px]"><thead><tr class="text-gray-400">';
                     if (isOwner) {
-                        html += '<th class="py-1 px-2 text-left font-medium">Daire</th>' +
-                            '<th class="py-1 px-2 text-left font-medium">Kaynak</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Rez.</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Br\u00fct</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Kesinti</th>' +
-                            '<th class="py-1 px-2 text-right font-medium text-emerald-700">Net</th>';
+                        html += '<th class="py-1 px-2 text-left font-medium">' + t('proj.th.apt', 'Daire') + '</th>' +
+                            '<th class="py-1 px-2 text-left font-medium">' + t('proj.th.source', 'Kaynak') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.th.res', 'Rez.') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.gross', 'Brüt') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.deduction', 'Kesinti') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium text-emerald-700">' + t('proj.net', 'Net') + '</th>';
                     } else {
-                        html += '<th class="py-1 px-2 text-left font-medium">Daire</th>' +
-                            '<th class="py-1 px-2 text-left font-medium">Kaynak</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Rez.</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Ort.Gclk</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Br\u00fct</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Gider</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">KDV</th>' +
-                            '<th class="py-1 px-2 text-right font-medium">Plt.Kom</th>' +
+                        html += '<th class="py-1 px-2 text-left font-medium">' + t('proj.th.apt', 'Daire') + '</th>' +
+                            '<th class="py-1 px-2 text-left font-medium">' + t('proj.th.source', 'Kaynak') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.th.res', 'Rez.') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.th.avg.nightly', 'Ort.Gclk') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.gross', 'Brüt') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.th.expense', 'Gider') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.th.kdv', 'KDV') + '</th>' +
+                            '<th class="py-1 px-2 text-right font-medium">' + t('proj.th.plat.comm', 'Plt.Kom') + '</th>' +
                             '<th class="py-1 px-2 text-right font-medium text-emerald-700">Lagirio</th>';
                     }
                     html += '</tr></thead><tbody>';
@@ -6872,12 +7572,12 @@
 
                 // Brüt ve kesinti
                 html += '<div class="flex justify-between text-[10px] mb-2">';
-                html += '<span class="text-gray-500">Brüt €' + d.gross.toFixed(0) + '</span>';
+                html += '<span class="text-gray-500">' + t('proj.gross', 'Brüt') + ' €' + d.gross.toFixed(0) + '</span>';
                 html += '<span class="text-red-400">-€' + deductions.toFixed(0) + '</span>';
                 html += '</div>';
 
                 // Rez ve gecelik
-                html += '<div class="text-[10px] text-gray-400 mb-1.5">' + d.count + ' rez · €' + d.avgNightly.toFixed(0) + '/gece</div>';
+                html += '<div class="text-[10px] text-gray-400 mb-1.5">' + d.count + ' ' + t('proj.res.short', 'rez') + ' · €' + d.avgNightly.toFixed(0) + '/' + t('proj.night', 'gece') + '</div>';
 
                 html += '</div>';
             });
@@ -6891,12 +7591,12 @@
             const grandRatio = grandGross > 0 ? ((grandOwner / grandGross) * 100).toFixed(1) : '0.0';
 
             html += '<div class="mt-4 bg-gradient-to-r from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">';
-            html += '<div class="flex items-center gap-3"><i data-lucide="calendar-check-2" class="w-5 h-5 text-emerald-600"></i><span class="text-sm font-semibold text-gray-700">12 Aylık Toplam</span></div>';
+            html += '<div class="flex items-center gap-3"><i data-lucide="calendar-check-2" class="w-5 h-5 text-emerald-600"></i><span class="text-sm font-semibold text-gray-700">' + t('proj.12m.total', '12 Aylık Toplam') + '</span></div>';
             html += '<div class="flex items-center gap-6 text-sm">';
-            html += '<div><span class="text-gray-500">Brüt</span> <strong class="text-gray-700">€' + grandGross.toFixed(0) + '</strong></div>';
-            html += '<div><span class="text-red-400">Kesinti</span> <strong class="text-red-500">-€' + grandDeductions.toFixed(0) + '</strong></div>';
-            html += '<div><span class="text-emerald-600">Net</span> <strong class="text-emerald-700 text-base">€' + grandOwner.toFixed(0) + '</strong> <span class="text-[10px] text-gray-400">%' + grandRatio + '</span></div>';
-            html += '<div><span class="text-gray-400">' + grandCount + ' rez</span></div>';
+            html += '<div><span class="text-gray-500">' + t('proj.gross', 'Brüt') + '</span> <strong class="text-gray-700">€' + grandGross.toFixed(0) + '</strong></div>';
+            html += '<div><span class="text-red-400">' + t('proj.deduction', 'Kesinti') + '</span> <strong class="text-red-500">-€' + grandDeductions.toFixed(0) + '</strong></div>';
+            html += '<div><span class="text-emerald-600">' + t('proj.net', 'Net') + '</span> <strong class="text-emerald-700 text-base">€' + grandOwner.toFixed(0) + '</strong> <span class="text-[10px] text-gray-400">%' + grandRatio + '</span></div>';
+            html += '<div><span class="text-gray-400">' + grandCount + ' ' + t('proj.res.short', 'rez') + '</span></div>';
             html += '</div></div>';
 
             container.innerHTML = html;
@@ -6999,9 +7699,9 @@
 
             // KPI kartları
             html += '<div class="grid grid-cols-3 gap-3 mb-4">';
-            html += '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-[10px] text-blue-500 font-medium mb-1">Br\u00fct Gelir</div><div class="text-base font-bold text-blue-700">\u20ac' + (md.gross || 0).toFixed(0) + '</div></div>';
-            html += '<div class="bg-emerald-50 rounded-lg p-3 text-center"><div class="text-[10px] text-emerald-500 font-medium mb-1">Net Kazanc\u0131n\u0131z</div><div class="text-base font-bold text-emerald-700">\u20ac' + ownerVal.toFixed(0) + '</div></div>';
-            html += '<div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-[10px] text-purple-500 font-medium mb-1">Ort. Gecelik</div><div class="text-base font-bold text-purple-700">\u20ac' + (md.avgNightly || 0).toFixed(0) + '</div></div>';
+            html += '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-[10px] text-blue-500 font-medium mb-1">' + t('proj.gross.income', 'Brüt Gelir') + '</div><div class="text-base font-bold text-blue-700">\u20ac' + (md.gross || 0).toFixed(0) + '</div></div>';
+            html += '<div class="bg-emerald-50 rounded-lg p-3 text-center"><div class="text-[10px] text-emerald-500 font-medium mb-1">' + t('proj.your.net', 'Net Kazancınız') + '</div><div class="text-base font-bold text-emerald-700">\u20ac' + ownerVal.toFixed(0) + '</div></div>';
+            html += '<div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-[10px] text-purple-500 font-medium mb-1">' + t('proj.avg.nightly', 'Ort. Gecelik') + '</div><div class="text-base font-bold text-purple-700">\u20ac' + (md.avgNightly || 0).toFixed(0) + '</div></div>';
             html += '</div>';
 
             // Kesinti detayları
@@ -7010,13 +7710,13 @@
             var mdKdv = md.kdv || 0;
             var mdExpenses = md.expenses || 0;
             html += '<div class="bg-gray-50 rounded-xl p-4 mb-5">';
-            html += '<h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-3">Kesinti Detay\u0131</h4>';
+            html += '<h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-3">' + t('proj.deduction.detail', 'Kesinti Detayı') + '</h4>';
             html += '<div class="space-y-2">';
             var deductionItems = [
-                { label: 'Platform Komisyonu', value: mdPlatComm, color: 'text-orange-600', bg: 'bg-orange-400' },
-                { label: 'Lagirio Komisyonu', value: mdLagirioComm, color: 'text-indigo-600', bg: 'bg-indigo-400' },
-                { label: 'KDV / Vergiler', value: mdKdv, color: 'text-red-600', bg: 'bg-red-400' },
-                { label: 'Giderler', value: mdExpenses, color: 'text-amber-600', bg: 'bg-amber-400' }
+                { label: t('proj.platform.comm', 'Platform Komisyonu'), value: mdPlatComm, color: 'text-orange-600', bg: 'bg-orange-400' },
+                { label: t('proj.lagirio.comm', 'Lagirio Komisyonu'), value: mdLagirioComm, color: 'text-indigo-600', bg: 'bg-indigo-400' },
+                { label: t('proj.kdv.taxes', 'KDV / Vergiler'), value: mdKdv, color: 'text-red-600', bg: 'bg-red-400' },
+                { label: t('proj.expenses', 'Giderler'), value: mdExpenses, color: 'text-amber-600', bg: 'bg-amber-400' }
             ];
             var maxDeduction = Math.max(mdPlatComm, mdLagirioComm, mdKdv, mdExpenses, 1);
             deductionItems.forEach(function(item) {
@@ -7028,13 +7728,13 @@
                 html += '</div>';
             });
             html += '<div class="border-t border-gray-200 mt-2 pt-2 flex justify-between">';
-            html += '<span class="text-[11px] font-bold text-gray-600">Toplam Kesinti</span>';
+            html += '<span class="text-[11px] font-bold text-gray-600">' + t('proj.total.deduction', 'Toplam Kesinti') + '</span>';
             html += '<span class="text-[11px] font-bold text-red-600">-\u20ac' + deductions.toFixed(0) + '</span>';
             html += '</div></div></div>';
 
             // Daire dağılımı
             if (aptRows.length > 0) {
-                html += '<h4 class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">Daire Bazl\u0131 Da\u011f\u0131l\u0131m</h4>';
+                html += '<h4 class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">' + t('proj.apt.breakdown', 'Daire Bazlı Dağılım') + '</h4>';
                 html += '<div class="space-y-2.5 mb-4">';
                 aptRows.forEach(function(a) {
                     var barW = maxAptOwner > 0 ? Math.max(5, (a.ownerShare / maxAptOwner) * 100) : 5;
@@ -7810,7 +8510,7 @@
             if (!select) return;
             const platforms = [...new Set(futureRes.map(r => r.platform))];
             const current = select.value;
-            select.innerHTML = '<option value="all">Tüm Platformlar</option>' +
+            select.innerHTML = '<option value="all">' + t('proj.all.platforms', 'Tüm Platformlar') + '</option>' +
                 platforms.map(p => '<option value="' + p + '">' + p + '</option>').join('');
             select.value = current;
         },
@@ -8118,19 +8818,19 @@
                 }
 
                 if (typeof Analytics.showToast === 'function') {
-                    Analytics.showToast('Admin şifresi oluşturuldu ve giriş yapıldı!', 'success');
+                    Analytics.showToast(t('admin.pin.created', 'Admin şifresi oluşturuldu ve giriş yapıldı!'), 'success');
                 }
             } else {
                 const hash = await this.hashPin(pin);
                 if (hash === storedHash) {
                     this.adminAuthenticated = true;
                     if (typeof Analytics.showToast === 'function') {
-                        Analytics.showToast('Admin girişi başarılı!', 'success');
+                        Analytics.showToast(t('admin.login.success', 'Admin girişi başarılı!'), 'success');
                     }
                 } else {
                     this.adminAuthenticated = false;
                     if (typeof Analytics.showToast === 'function') {
-                        Analytics.showToast('Yanlış şifre!', 'error');
+                        Analytics.showToast(t('admin.wrong.pass', 'Yanlış şifre!'), 'error');
                     }
                 }
             }
@@ -8151,14 +8851,14 @@
                 statusEl.className = 'text-xs text-gray-400';
             }
             if (typeof Analytics.showToast === 'function') {
-                Analytics.showToast('Admin oturumu kapatıldı', 'info');
+                Analytics.showToast(t('admin.logged.out', 'Admin oturumu kapatıldı'), 'info');
             }
         },
 
         async changeAdminPin() {
             if (!this.adminAuthenticated) {
                 if (typeof Analytics.showToast === 'function') {
-                    Analytics.showToast('Önce admin girişi yapın!', 'error');
+                    Analytics.showToast(t('admin.login.first', 'Önce admin girişi yapın!'), 'error');
                 }
                 return;
             }
@@ -8166,7 +8866,7 @@
             const newPin = input?.value?.trim();
             if (!newPin || newPin.length < 4) {
                 if (typeof Analytics.showToast === 'function') {
-                    Analytics.showToast('Şifre en az 4 karakter olmalı!', 'error');
+                    Analytics.showToast(t('toast.pass.min4', 'Şifre en az 4 karakter olmalı!'), 'error');
                 }
                 return;
             }
@@ -8179,7 +8879,7 @@
 
             if (input) input.value = '';
             if (typeof Analytics.showToast === 'function') {
-                Analytics.showToast('Admin şifresi değiştirildi!', 'success');
+                Analytics.showToast(t('admin.pass.changed', 'Admin şifresi değiştirildi!'), 'success');
             }
         },
 
@@ -8201,14 +8901,14 @@
 
             if (typeof Analytics.showToast === 'function') {
                 const count = Object.keys(mapping).length;
-                Analytics.showToast(count + ' daire eşleştirmesi kaydedildi!', 'success');
+                Analytics.showToast(count + t('toast.matching.count', ' daire eşleştirmesi kaydedildi!'), 'success');
             }
         },
 
         async saveMatchingToDrive() {
             if (!this.isAdmin()) {
                 if (typeof Analytics.showToast === 'function') {
-                    Analytics.showToast('Drive\'a kaydetme yetkisi sadece admin kullanıcılara aittir.', 'error');
+                    Analytics.showToast(t('toast.drive.admin.only', 'Drive\'a kaydetme yetkisi sadece admin kullanıcılara aittir.'), 'error');
                 }
                 return;
             }
@@ -8230,7 +8930,7 @@
             this.calculate();
 
             if (typeof Analytics.showToast === 'function') {
-                Analytics.showToast('Eşleştirme Drive\'a kaydedildi! Tüm kullanıcılar görecek.', 'success');
+                Analytics.showToast(t('admin.matching.drive', 'Eşleştirme Drive\'a kaydedildi! Tüm kullanıcılar görecek.'), 'success');
             }
         }
     };
@@ -8378,7 +9078,7 @@
         // File handling
         handleFile(file) {
             if (file.type !== 'application/json') {
-                this.showToast('Lütfen geçerli bir JSON dosyası seçin!', 'error');
+                this.showToast(t('toast.invalid.json', 'Lütfen geçerli bir JSON dosyası seçin!'), 'error');
                 return;
             }
             
@@ -8394,9 +9094,9 @@
                     }
                     this.filteredData = this.data;
                     this.processData();
-                    this.showToast('Veri başarıyla yüklendi!', 'success');
+                    this.showToast(t('toast.data.loaded', 'Veri başarıyla yüklendi!'), 'success');
                 } catch (error) {
-                    this.showToast('Dosya okuma hatası: ' + error.message, 'error');
+                    this.showToast(t('toast.file.read.error', 'Dosya okuma hatası: ') + error.message, 'error');
                     console.error('File parsing error:', error);
                 } finally {
                     this.hideLoading();
@@ -8405,7 +9105,7 @@
             
             reader.onerror = () => {
                 this.hideLoading();
-                this.showToast('Dosya okuma hatası!', 'error');
+                this.showToast(t('toast.file.read.fail', 'Dosya okuma hatası!'), 'error');
             };
             
             reader.readAsText(file);
@@ -8661,7 +9361,7 @@
                 this.data = sampleData;
                 this.filteredData = sampleData;
                 this.processData();
-                this.showToast('Örnek veri yüklendi!', 'success');
+                this.showToast(t('toast.sample.loaded', 'Örnek veri yüklendi!'), 'success');
                 this.hideLoading();
             }, 500);
         },
@@ -9170,7 +9870,7 @@
             const currency = document.getElementById('compExpCurrency')?.value || 'EUR';
 
             if (!date || !category || !amount || amount <= 0) {
-                this.showToast('Tarih, kategori ve tutar zorunludur!', 'error');
+                this.showToast(t('toast.expense.required', 'Tarih, kategori ve tutar zorunludur!'), 'error');
                 return;
             }
 
@@ -9191,14 +9891,14 @@
             document.getElementById('compExpAmount').value = '';
 
             this.renderCompanyExpenses();
-            this.showToast('Şirket gideri eklendi!', 'success');
+            this.showToast(t('toast.expense.added', 'Şirket gideri eklendi!'), 'success');
         },
 
         deleteCompanyExpense(id) {
             if (!this.data?.lagirioExpenses) return;
             this.data.lagirioExpenses = this.data.lagirioExpenses.filter(e => e.id !== id);
             this.renderCompanyExpenses();
-            this.showToast('Gider silindi', 'info');
+            this.showToast(t('toast.expense.deleted', 'Gider silindi'), 'info');
         },
 
         renderCompanyExpenses() {
@@ -10186,17 +10886,17 @@
                             return html;
                         }
                     },
-                    legend: { data: ['Brüt Kazanç', 'Gerçek Kâr'], bottom: 0, textStyle: { color: '#6b7280', fontSize: 11 } },
+                    legend: { data: [t('chart.gross.profit', 'Brüt Kazanç'), t('chart.real.profit', 'Gerçek Kâr')], bottom: 0, textStyle: { color: '#6b7280', fontSize: 11 } },
                     grid: { left: '3%', right: '4%', bottom: '12%', top: '10%', containLabel: true },
                     xAxis: { type: 'category', data: labels, axisLine: { lineStyle: { color: '#e5e7eb' } }, axisLabel: { color: '#6b7280', fontSize: 11 } },
                     yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
                         axisLabel: { color: '#6b7280', formatter: value => `€${(value / 1000).toFixed(0)}k` } },
                     series: [
-                        { name: 'Brüt Kazanç', type: 'line', data: lagirioVals, smooth: true, symbol: 'circle', symbolSize: 8,
+                        { name: t('chart.gross.profit', 'Brüt Kazanç'), type: 'line', data: lagirioVals, smooth: true, symbol: 'circle', symbolSize: 8,
                           lineStyle: { width: 3, color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]) },
                           itemStyle: { color: '#10b981', borderColor: '#fff', borderWidth: 2 },
                           areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(16,185,129,0.3)'},{offset:1,color:'rgba(16,185,129,0.05)'}]) } },
-                        { name: 'Gerçek Kâr', type: 'line', data: realProfitVals, smooth: true, symbol: 'diamond', symbolSize: 7,
+                        { name: t('chart.real.profit', 'Gerçek Kâr'), type: 'line', data: realProfitVals, smooth: true, symbol: 'diamond', symbolSize: 7,
                           lineStyle: { width: 2, color: '#6366f1', type: 'dashed' },
                           itemStyle: { color: '#6366f1', borderColor: '#fff', borderWidth: 2 },
                           markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } }
@@ -10485,7 +11185,8 @@
                     for (let i = 29; i >= 0; i--) {
                         const date = new Date(now);
                         date.setDate(date.getDate() - i);
-                        const dateStr = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+                        const mnShort = I18n.getMonthNames('short');
+                    const dateStr = date.getDate() + ' ' + mnShort[date.getMonth()];
                         data.labels.push(dateStr);
                         
                         let dayRevenue = 0;
@@ -10565,7 +11266,7 @@
                     break;
                     
                 default: // monthly
-                    const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+                    const months = I18n.getMonthNames('short');
                     
                     for (let i = 5; i >= 0; i--) {
                         const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -11652,7 +12353,7 @@
             link.click();
             document.body.removeChild(link);
             
-            this.showToast('Excel dosyası indiriliyor...', 'success');
+            this.showToast(t('toast.excel.download', 'Excel dosyası indiriliyor...'), 'success');
         },
         
         // Settings
@@ -11694,7 +12395,7 @@
             
             // Close modal
             this.closeModal('settingsModal');
-            this.showToast('Ayarlar kaydedildi', 'success');
+            this.showToast(t('toast.settings.saved', 'Ayarlar kaydedildi'), 'success');
             
             // Refresh data if needed
             if (this.data) {
@@ -11949,7 +12650,7 @@
                 requestAnimationFrame(() => this.initializeCharts());
             });
             
-            this.showToast('Veriler güncellendi', 'success');
+            this.showToast(t('toast.data.updated', 'Veriler güncellendi'), 'success');
         },
         resizeAllCharts() {
             Object.values(this.charts).forEach(chart => {
@@ -12553,7 +13254,7 @@
             const period = document.getElementById('compPeriod')?.value;
             
             if (!apartmentAId || !apartmentBId) {
-                this.showToast('Lütfen iki daire seçin', 'warning');
+                this.showToast(t('toast.select.two.apt', 'Lütfen iki daire seçin'), 'warning');
                 return null;
             }
             
@@ -12561,7 +13262,7 @@
             const apartmentB = this.data.apartments?.find(a => a.id === apartmentBId);
             
             if (!apartmentA || !apartmentB) {
-                this.showToast('Daireler bulunamadı', 'error');
+                this.showToast(t('toast.apt.not.found', 'Daireler bulunamadı'), 'error');
                 return null;
             }
             
@@ -12584,7 +13285,7 @@
             return {
                 mode: 'apartment-apartment',
                 title: `${apartmentA.code} vs ${apartmentB.code}`,
-                subtitle: period ? `Dönem: ${this.formatMonthYear(periodStart)}` : 'Tüm Zamanlar',
+                subtitle: period ? `${t('comparison.period.label', 'Dönem: ')}${this.formatMonthYear(periodStart)}` : t('comparison.all.time', 'Tüm Zamanlar'),
                 groupA: {
                     label: apartmentA.code,
                     sublabel: isOwner ? '' : apartmentA.ownerName,
@@ -12607,14 +13308,14 @@
             const periodB = document.getElementById('compPeriodB')?.value;
             
             if (!apartmentId || !periodA || !periodB) {
-                this.showToast('Lütfen daire ve iki dönem seçin', 'warning');
+                this.showToast(t('toast.select.apt.period', 'Lütfen daire ve iki dönem seçin'), 'warning');
                 return null;
             }
             
             const apartment = this.data.apartments?.find(a => a.id === apartmentId);
             
             if (!apartment) {
-                this.showToast('Daire bulunamadı', 'error');
+                this.showToast(t('toast.apt.not.found', 'Daire bulunamadı'), 'error');
                 return null;
             }
             
@@ -12660,7 +13361,7 @@
             const period = document.getElementById('compGroupPeriod')?.value;
             
             if (groupAIds.length === 0 || groupBIds.length === 0) {
-                this.showToast('Lütfen her iki grup için daire seçin', 'warning');
+                this.showToast(t('toast.select.groups', 'Lütfen her iki grup için daire seçin'), 'warning');
                 return null;
             }
             
@@ -12682,7 +13383,7 @@
             return {
                 mode: 'group-group',
                 title: 'Grup Karşılaştırması',
-                subtitle: period ? `Dönem: ${this.formatMonthYear(periodStart)}` : 'Tüm Zamanlar',
+                subtitle: period ? `${t('comparison.period.label', 'Dönem: ')}${this.formatMonthYear(periodStart)}` : t('comparison.all.time', 'Tüm Zamanlar'),
                 groupA: {
                     label: `Grup A (${groupAIds.length} daire)`,
                     sublabel: 'Toplam Performans',
@@ -12705,7 +13406,7 @@
             const period = document.getElementById('compSystemPeriod')?.value;
             
             if (!systemA || !systemB) {
-                this.showToast('Lütfen iki sistem seçin', 'warning');
+                this.showToast(t('toast.select.two.sys', 'Lütfen iki sistem seçin'), 'warning');
                 return null;
             }
             
@@ -12738,7 +13439,7 @@
             return {
                 mode: 'system-system',
                 title: 'Sistem Karşılaştırması',
-                subtitle: period ? `Dönem: ${this.formatMonthYear(periodStart)}` : 'Tüm Zamanlar',
+                subtitle: period ? `${t('comparison.period.label', 'Dönem: ')}${this.formatMonthYear(periodStart)}` : t('comparison.all.time', 'Tüm Zamanlar'),
                 groupA: {
                     label: systemNames[systemA],
                     sublabel: `${metricsA.apartmentCount} daire`,
@@ -12915,7 +13616,7 @@
 
         // Helper: Format month/year
         formatMonthYear(date) {
-            const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const months = I18n.getMonthNames('short');
             return `${months[date.getMonth()]} ${date.getFullYear()}`;
         },
 
@@ -13116,7 +13817,7 @@
             // Scroll to results
             container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             
-            this.showToast('Karşılaştırma tamamlandı!', 'success');
+            this.showToast(t('comparison.subtitle', 'Karşılaştırma tamamlandı!'), 'success');
         },
 
         // Helper: Render metric row
@@ -13494,7 +14195,7 @@
                 xAxis: { type: 'category', data: labels, axisLabel: { color: '#6b7280', fontSize: 11 } },
                 yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: v => `€${(v/1000).toFixed(0)}k` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
                 series: [
-                    { name: 'Net Kazanç', type: 'bar', stack: 'total', data: net, itemStyle: { color: '#10b981' }, barWidth: '50%' },
+                    { name: t('chart.net.profit', 'Net Kazanç'), type: 'bar', stack: 'total', data: net, itemStyle: { color: '#10b981' }, barWidth: '50%' },
                     { name: 'Giderler', type: 'bar', stack: 'total', data: exp, itemStyle: { color: '#f59e0b' } },
                     { name: 'Platform Kom.', type: 'bar', stack: 'total', data: platComm, itemStyle: { color: '#3b82f6' } },
                     { name: 'Lagirio Kom.', type: 'bar', stack: 'total', data: lagComm, itemStyle: { color: '#8b5cf6' } },
@@ -13744,15 +14445,15 @@
 
             chart.setOption({
                 tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
-                legend: { data: ['Brüt Kazanç', 'Gerçek Kâr', 'Şirket Gideri'], bottom: 0, textStyle: { fontSize: 10 } },
+                legend: { data: [t('chart.gross.profit', 'Brüt Kazanç'), t('chart.real.profit', 'Gerçek Kâr'), t('chart.company.exp', 'Şirket Gideri')], bottom: 0, textStyle: { fontSize: 10 } },
                 grid: { top: 30, right: 20, bottom: 55, left: 55 },
                 xAxis: { type: 'category', data: d.labels, axisLabel: { fontSize: 10 } },
                 yAxis: { type: 'value', axisLabel: { formatter: '€{value}', fontSize: 10 } },
                 series: [
-                    { name: 'Brüt Kazanç', type: 'bar', data: d.lagirio, itemStyle: { color: '#93c5fd' }, barWidth: '35%' },
-                    { name: 'Gerçek Kâr', type: 'line', data: d.realProfit, itemStyle: { color: '#6366f1' }, lineStyle: { width: 3, type: 'dashed' }, symbol: 'diamond', symbolSize: 8,
+                    { name: t('chart.gross.profit', 'Brüt Kazanç'), type: 'bar', data: d.lagirio, itemStyle: { color: '#93c5fd' }, barWidth: '35%' },
+                    { name: t('chart.real.profit', 'Gerçek Kâr'), type: 'line', data: d.realProfit, itemStyle: { color: '#6366f1' }, lineStyle: { width: 3, type: 'dashed' }, symbol: 'diamond', symbolSize: 8,
                       markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } },
-                    { name: 'Şirket Gideri', type: 'line', data: d.compExp, itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' }
+                    { name: t('chart.company.exp', 'Şirket Gideri'), type: 'line', data: d.compExp, itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' }
                 ]
             });
         },
@@ -13892,7 +14593,8 @@
                 const now = new Date();
                 for (let i = 11; i >= 0; i--) {
                     const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                    const monthName = targetDate.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' });
+                    const mnShort = I18n.getMonthNames('short');
+                    const monthName = mnShort[targetDate.getMonth()] + ' ' + targetDate.getFullYear();
                     let monthGross = 0, monthNet = 0;
                     this.data.apartments?.forEach(apartment => {
                         const monthRes = this.data.reservations?.filter(res => {
@@ -13912,14 +14614,14 @@
                 }
                 chart.setOption({
                     tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent' },
-                    legend: { data: ['Brüt Gelir', 'Net Kazanç'], bottom: 0 },
+                    legend: { data: [t('proj.gross.income', 'Brüt Gelir'), t('chart.net.profit', 'Net Kazanç')], bottom: 0 },
                     grid: { left: '3%', right: '4%', bottom: '15%', top: '3%', containLabel: true },
                     xAxis: { type: 'category', data: data.months, axisLabel: { rotate: 45, fontSize: 10 } },
                     yAxis: { type: 'value', axisLabel: { formatter: value => `€${(value / 1000).toFixed(0)}k` } },
                     series: [
-                        { name: 'Brüt Gelir', type: 'line', data: data.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
+                        { name: t('proj.gross.income', 'Brüt Gelir'), type: 'line', data: data.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
                           areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.2)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } },
-                        { name: 'Net Kazanç', type: 'bar', data: data.netIncome, itemStyle: {
+                        { name: t('chart.net.profit', 'Net Kazanç'), type: 'bar', data: data.netIncome, itemStyle: {
                             color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } }
                     ]
                 });
@@ -13934,19 +14636,19 @@
                             return html;
                         }
                     },
-                    legend: { data: ['Brüt Gelir', 'Brüt Kazanç', 'Şirket Gideri', 'Gerçek Kâr'], bottom: 0 },
+                    legend: { data: [t('proj.gross.income', 'Brüt Gelir'), t('chart.gross.profit', 'Brüt Kazanç'), t('chart.company.exp', 'Şirket Gideri'), t('chart.real.profit', 'Gerçek Kâr')], bottom: 0 },
                     grid: { left: '3%', right: '4%', bottom: '15%', top: '3%', containLabel: true },
                     xAxis: { type: 'category', data: d.labels, axisLabel: { rotate: 45, fontSize: 10 } },
                     yAxis: { type: 'value', axisLabel: { formatter: value => `€${(value / 1000).toFixed(0)}k` } },
                     series: [
-                        { name: 'Brüt Gelir', type: 'line', data: d.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
+                        { name: t('proj.gross.income', 'Brüt Gelir'), type: 'line', data: d.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
                           lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6,
                           areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.15)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } },
                         { name: 'Brüt Kazanç', type: 'bar', data: d.lagirio, itemStyle: {
                             color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
-                        { name: 'Şirket Gideri', type: 'line', data: d.compExp, smooth: true, itemStyle: { color: '#f59e0b' },
+                        { name: t('chart.company.exp', 'Şirket Gideri'), type: 'line', data: d.compExp, smooth: true, itemStyle: { color: '#f59e0b' },
                           lineStyle: { width: 2, type: 'dashed' }, symbol: 'circle', symbolSize: 5 },
-                        { name: 'Gerçek Kâr', type: 'line', data: d.realProfit, smooth: true, itemStyle: { color: '#6366f1' },
+                        { name: t('chart.real.profit', 'Gerçek Kâr'), type: 'line', data: d.realProfit, smooth: true, itemStyle: { color: '#6366f1' },
                           lineStyle: { width: 3 }, symbol: 'diamond', symbolSize: 8,
                           areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(99,102,241,0.2)'},{offset:1,color:'rgba(99,102,241,0.02)'}]) },
                           markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } }
