@@ -9899,9 +9899,9 @@
                     sum + this.convertToEUR(exp.amount, exp.currency), 0);
                 metrics.reservationCount += reservations.length;
                 metrics.avgNightlyRate += this.calculateAvgNightlyRate(reservations);
-                
-                // Occupancy for period
-                const occupancy = this.calculateOccupancyRate(apartment.id, startDate, endDate);
+
+                // Occupancy for period - sadece rez olan ayları baz al
+                const occupancy = this._calculateActiveMonthsOccupancy(apartment.id, reservations, startDate, endDate);
                 metrics.avgOccupancy += occupancy;
                 
                 // Platform distribution
@@ -11552,6 +11552,37 @@
             return { year, month, key: year * 12 + month };
         },
 
+        // Doluluk: sadece rezervasyon olan ayların ortalaması
+        // "Tüm Zamanlar" seçildiğinde 9500 günlük payda yerine aktif ayları kullanır
+        _calculateActiveMonthsOccupancy(apartmentId, reservations, startDate, endDate) {
+            if (!reservations || reservations.length === 0) return 0;
+
+            // Tek ay mı? (startDate ve endDate aynı ayda ise doğrudan hesapla)
+            if (startDate.getFullYear() === endDate.getFullYear() && startDate.getMonth() === endDate.getMonth()) {
+                return this.calculateOccupancyRate(apartmentId, startDate, endDate);
+            }
+
+            // Çoklu ay: her aktif ayın doluluğunu hesapla, ortalamasını al
+            const activeMonths = new Set();
+            reservations.forEach(res => {
+                const d = new Date(res.checkIn);
+                activeMonths.add(d.getFullYear() * 12 + d.getMonth());
+            });
+
+            if (activeMonths.size === 0) return 0;
+
+            let totalOcc = 0;
+            activeMonths.forEach(key => {
+                const year = Math.floor(key / 12);
+                const month = key % 12;
+                const mStart = new Date(year, month, 1);
+                const mEnd = new Date(year, month + 1, 0);
+                totalOcc += this.calculateOccupancyRate(apartmentId, mStart, mEnd);
+            });
+
+            return totalOcc / activeMonths.size;
+        },
+
         calculateApartmentMetrics(apartment, startDate, endDate) {
             // Ay/yıl bazlı filtreleme (trendlerle tutarlı, timezone-safe)
             const startKey = startDate.getFullYear() * 12 + startDate.getMonth();
@@ -11579,7 +11610,8 @@
             const lagirioRevenue = detailed.lagirioCommission;
             const ownerShare = detailed.netOwnerShare;
 
-            const occupancy = this.calculateOccupancyRate(apartment.id, startDate, endDate);
+            // Doluluk: sadece rezervasyon olan ayların ortalaması (Dashboard ile tutarlı)
+            const occupancy = this._calculateActiveMonthsOccupancy(apartment.id, reservations, startDate, endDate);
             const avgNightlyRate = this.calculateAvgNightlyRate(reservations);
 
             // Calculate total nights
