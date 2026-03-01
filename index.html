@@ -972,7 +972,7 @@
                         </div>
                         <span class="text-xs text-emerald-600 font-semibold" id="portfolioTrend">+0%</span>
                     </div>
-                    <p class="text-xs text-gray-500 mb-1" id="portfolioLabel">Toplam Portföy</p>
+                    <p class="text-xs text-gray-500 mb-1" id="portfolioLabel" data-i18n="kpi.portfolio">Toplam Portföy</p>
                     <p class="text-2xl font-bold text-gray-800" id="totalPortfolioValue">€0</p>
                     <div class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
                         <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-500" id="portfolioProgress" style="width: 0%"></div>
@@ -990,9 +990,9 @@
                         </div>
                         <span class="text-xs text-blue-600 font-semibold" id="monthlyTrend">→</span>
                     </div>
-                    <p class="text-xs text-gray-500 mb-1" id="revenueLabel">Bu Ay Kazanç</p>
+                    <p class="text-xs text-gray-500 mb-1" id="revenueLabel" data-i18n="kpi.monthly.revenue">Bu Ay Kazanç</p>
                     <p class="text-2xl font-bold text-gray-800" id="monthlyRevenue">€0</p>
-                    <p class="text-xs text-gray-400 mt-2" id="monthlyChange">vs geçen dönem</p>
+                    <p class="text-xs text-gray-400 mt-2" id="monthlyChange" data-i18n="kpi.vs.last">vs geçen dönem</p>
                 </div>
             </div>
             
@@ -1006,9 +1006,9 @@
                         </div>
                         <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full" id="activePercentage">0%</span>
                     </div>
-                    <p class="text-xs text-gray-500 mb-1">Aktif Daireler</p>
+                    <p class="text-xs text-gray-500 mb-1" data-i18n="kpi.active.apartments">Aktif Daireler</p>
                     <p class="text-2xl font-bold text-gray-800" id="activeProperties">0/0</p>
-                    <p class="text-xs text-gray-400 mt-2">Rezervasyonlu</p>
+                    <p class="text-xs text-gray-400 mt-2" data-i18n="kpi.with.reservation">Rezervasyonlu</p>
                 </div>
             </div>
             
@@ -1022,7 +1022,7 @@
                         </div>
                         <span class="text-xs text-orange-600" id="occupancyIndicator">→</span>
                     </div>
-                    <p class="text-xs text-gray-500 mb-1">Ortalama Doluluk</p>
+                    <p class="text-xs text-gray-500 mb-1" data-i18n="kpi.avg.occupancy">Ortalama Doluluk</p>
                     <p class="text-2xl font-bold text-gray-800" id="avgOccupancy">0%</p>
                     <div class="mt-2 flex space-x-1">
                         <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
@@ -1044,7 +1044,7 @@
                         </div>
                         <i data-lucide="crown" class="w-4 h-4 text-yellow-500"></i>
                     </div>
-                    <p class="text-xs text-gray-500 mb-1" id="bestSystemLabel">En Karlı Sistem</p>
+                    <p class="text-xs text-gray-500 mb-1" id="bestSystemLabel" data-i18n="kpi.best.system">En Karlı Sistem</p>
                     <p class="text-xl font-bold text-gray-800" id="bestSystem">-</p>
                     <p class="text-xs text-emerald-600 font-semibold mt-2" id="systemProfit">€0</p>
                 </div>
@@ -1120,7 +1120,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                                 <i data-lucide="line-chart" class="w-5 h-5 text-emerald-600"></i>
-                                <span id="dashboardTrendTitle">Gelir Trendi</span>
+                                <span id="dashboardTrendTitle" data-i18n="overview.revenue.trend">Gelir Trendi</span>
                             </h3>
                             <select id="trendPeriod" class="text-sm px-3 py-1 border border-gray-200 rounded-lg" onchange="Analytics.createRevenueTrendChart()">
                                 <option value="daily">Günlük</option>
@@ -1136,7 +1136,7 @@
                     <div id="topPerformersSection" class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="trophy" class="w-5 h-5 text-yellow-500"></i>
-                            <span>En İyi Performans</span>
+                            <span data-i18n="overview.top.performers">En İyi Performans</span>
                         </h3>
                         <div class="space-y-3" id="topPerformers">
                             <!-- Dynamic content -->
@@ -1149,7 +1149,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="globe" class="w-5 h-5 text-blue-600"></i>
-                            <span>Platform Dağılımı</span>
+                            <span data-i18n="overview.platform.dist">Platform Dağılımı</span>
                         </h3>
                         <div class="chart-container-sm" id="platformDistChart"></div>
                     </div>
@@ -1157,7 +1157,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="credit-card" class="w-5 h-5 text-green-600"></i>
-                            <span>Ödeme Yöntemi Dağılımı</span>
+                            <span data-i18n="overview.payment.dist">Ödeme Yöntemi Dağılımı</span>
                         </h3>
                         <div class="chart-container-sm" id="paymentMethodChart"></div>
                     </div>
@@ -1211,21 +1211,21 @@
                 <!-- Advanced Comparison Controls -->
                 <!-- Advanced Comparison Controls -->
                 <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Genel Karşılaştırma Parametreleri</h3>
-                    
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4" data-i18n="comparison.params">Genel Karşılaştırma Parametreleri</h3>
+
                     <!-- Comparison Mode Selection -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Karşılaştırma Modu</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3" data-i18n="comparison.mode">Karşılaştırma Modu</label>
                         <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                            <button onclick="Analytics.setComparisonMode('apartment-apartment')" 
+                            <button onclick="Analytics.setComparisonMode('apartment-apartment')"
                                     class="comparison-mode-btn active px-4 py-3 bg-white border-2 border-emerald-500 rounded-lg hover:bg-emerald-50 transition text-left">
-                                <div class="font-semibold text-emerald-700">Daire vs Daire</div>
+                                <div class="font-semibold text-emerald-700" data-i18n="comparison.apt.vs.apt">Daire vs Daire</div>
                                 <div class="text-xs text-gray-500 mt-1">Aynı dönemde</div>
                             </button>
                             
                             <button onclick="Analytics.setComparisonMode('apartment-period')" 
                                     class="comparison-mode-btn px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-500 transition text-left">
-                                <div class="font-semibold text-gray-700">Daire vs Dönem</div>
+                                <div class="font-semibold text-gray-700" data-i18n="comparison.apt.vs.period">Daire vs Dönem</div>
                                 <div class="text-xs text-gray-500 mt-1">Bir daire, farklı aylar</div>
                             </button>
                             
@@ -1237,13 +1237,13 @@
                             
                             <button onclick="Analytics.setComparisonMode('system-system')"
                                     class="comparison-mode-btn admin-only px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-500 transition text-left">
-                                <div class="font-semibold text-gray-700">Sistem vs Sistem</div>
+                                <div class="font-semibold text-gray-700" data-i18n="comparison.sys.vs.sys">Sistem vs Sistem</div>
                                 <div class="text-xs text-gray-500 mt-1">Sistem karşılaştır</div>
                             </button>
                             <button onclick="Analytics.setComparisonMode('temporal')"
                                     class="comparison-mode-btn admin-only px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-500 transition text-left">
-                                <div class="font-semibold text-gray-700">Zamansal Karşılaştırma</div>
-                                <div class="text-xs text-gray-500 mt-1">Dönem vs Dönem kârlılık</div>
+                                <div class="font-semibold text-gray-700" data-i18n="comparison.temporal">Zamansal Karşılaştırma</div>
+                                <div class="text-xs text-gray-500 mt-1" data-i18n="comparison.temporal.desc">Dönem vs Dönem kârlılık</div>
                             </button>
                         </div>
                     </div>
@@ -1273,7 +1273,7 @@
                     <button id="comparisonRunBtn" onclick="Analytics.runAdvancedComparison()"
                             class="mt-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2 mx-auto">
                         <i data-lucide="git-compare" class="w-5 h-5"></i>
-                        <span>Karşılaştır</span>
+                        <span data-i18n="comparison.btn">Karşılaştır</span>
                     </button>
                 </div>
 
@@ -1291,7 +1291,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
-                            <span id="revenueTrendTitle">Gelir Trend Analizi</span>
+                            <span id="revenueTrendTitle" data-i18n="trends.revenue">Gelir Trend Analizi</span>
                         </h3>
                         <div class="chart-container" id="revenueTrendAnalysisChart"></div>
                     </div>
@@ -1300,7 +1300,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="calendar-range" class="w-5 h-5 text-blue-600"></i>
-                            <span>Doluluk Trend Analizi</span>
+                            <span data-i18n="trends.occupancy">Doluluk Trend Analizi</span>
                         </h3>
                         <div class="chart-container" id="occupancyTrendChart"></div>
                     </div>
@@ -1309,7 +1309,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="sun" class="w-5 h-5 text-orange-600"></i>
-                            <span>Mevsimsel Analiz</span>
+                            <span data-i18n="trends.seasonal">Mevsimsel Analiz</span>
                         </h3>
                         <div class="chart-container" id="seasonalAnalysisChart"></div>
                     </div>
@@ -1318,7 +1318,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="bar-chart-3" class="w-5 h-5 text-purple-600"></i>
-                            <span>Büyüme Analizi</span>
+                            <span data-i18n="trends.growth">Büyüme Analizi</span>
                         </h3>
                         <div class="chart-container" id="growthAnalysisChart"></div>
                     </div>
@@ -1329,27 +1329,27 @@
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="bar-chart-big" class="w-5 h-5 text-indigo-600"></i>
-                            <span>Kâr Trendleri</span>
+                            <span data-i18n="trends.profit">Kâr Trendleri</span>
                         </h3>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Aylık Kâr Akışı</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Brüt Kazanç → Gerçek Kâr dönüşümü</p>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.monthly.profit">Aylık Kâr Akışı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.monthly.profit.desc">Brüt Kazanç → Gerçek Kâr dönüşümü</p>
                                 <div id="trendProfitFlowChart" style="height:320px"></div>
                             </div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Daire Kârlılık Trendi (Top 5)</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">En kârlı 5 dairenin aylık Lagirio kazancı</p>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.apt.profit.trend">Daire Kârlılık Trendi (Top 5)</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.apt.profit.desc">En kârlı 5 dairenin aylık Lagirio kazancı</p>
                                 <div id="trendAptProfitChart" style="height:320px"></div>
                             </div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Kâr Marjı Trendi</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Gerçek Kâr / Brüt Kazanç oranının aylık değişimi</p>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.margin.trend">Kâr Marjı Trendi</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.margin.desc">Gerçek Kâr / Brüt Kazanç oranının aylık değişimi</p>
                                 <div id="trendProfitMarginChart" style="height:280px"></div>
                             </div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Doluluk-Kârlılık İlişkisi</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Ort. doluluk oranı ile daire başına gerçek kâr arasındaki korelasyon</p>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.occ.profit">Doluluk-Kârlılık İlişkisi</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.occ.profit.desc">Ort. doluluk oranı ile daire başına gerçek kâr arasındaki korelasyon</p>
                                 <div id="trendOccupancyProfitChart" style="height:280px"></div>
                             </div>
                         </div>
@@ -1361,27 +1361,27 @@
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="wallet" class="w-5 h-5 text-emerald-600"></i>
-                            <span>Kazanç Analizi</span>
+                            <span data-i18n="trends.revenue.analysis">Kazanç Analizi</span>
                         </h3>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Aylık Kazanç Kırılımı</h4>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.monthly.breakdown">Aylık Kazanç Kırılımı</h4>
                                 <p class="text-[10px] text-gray-400 mb-2">Brüt gelirden net kazanca: kesintilerin aylık dağılımı</p>
                                 <div id="ownerIncomeBreakdownChart" style="height:320px"></div>
                             </div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Daire Performans Karşılaştırma</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Her dairenin aylık net kazancı</p>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.apt.perf.compare">Daire Performans Karşılaştırma</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.apt.perf.desc">Her dairenin aylık net kazancı</p>
                                 <div id="ownerAptPerformanceChart" style="height:320px"></div>
                             </div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Gecelik Fiyat vs Doluluk</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Fiyat-doluluk dengesi: optimum noktayı bulun</p>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.price.vs.occ">Gecelik Fiyat vs Doluluk</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.price.occ.desc">Fiyat-doluluk dengesi: optimum noktayı bulun</p>
                                 <div id="ownerPriceOccupancyChart" style="height:280px"></div>
                             </div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-600 mb-2">Platform Gelir Dağılımı</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Hangi platform daha fazla gelir getiriyor?</p>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.platform.revenue">Platform Gelir Dağılımı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.platform.desc">Hangi platform daha fazla gelir getiriyor?</p>
                                 <div id="ownerPlatformTrendChart" style="height:280px"></div>
                             </div>
                         </div>
@@ -1392,21 +1392,21 @@
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <i data-lucide="crystal-ball" class="w-5 h-5 text-indigo-600"></i>
-                        <span>Tahminler ve Projeksiyonlar</span>
+                        <span data-i18n="trends.forecasts">Tahminler ve Projeksiyonlar</span>
                     </h3>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="bg-indigo-50 rounded-lg p-4">
-                            <h4 class="font-medium text-indigo-900 mb-2">Sonraki Ay Tahmini</h4>
+                            <h4 class="font-medium text-indigo-900 mb-2" data-i18n="trends.next.month">Sonraki Ay Tahmini</h4>
                             <p class="text-2xl font-bold text-indigo-600" id="nextMonthForecast">€0</p>
                             <p class="text-sm text-indigo-700 mt-1">Geçmiş verilere dayalı</p>
                         </div>
                         <div class="bg-emerald-50 rounded-lg p-4">
-                            <h4 class="font-medium text-emerald-900 mb-2">3 Aylık Projeksiyon</h4>
+                            <h4 class="font-medium text-emerald-900 mb-2" data-i18n="trends.3month">3 Aylık Projeksiyon</h4>
                             <p class="text-2xl font-bold text-emerald-600" id="quarterForecast">€0</p>
-                            <p class="text-sm text-emerald-700 mt-1">Trend analizi bazlı</p>
+                            <p class="text-sm text-emerald-700 mt-1" data-i18n="trends.based.on">Trend analizi bazlı</p>
                         </div>
                         <div class="bg-purple-50 rounded-lg p-4">
-                            <h4 class="font-medium text-purple-900 mb-2">Yıllık Hedef</h4>
+                            <h4 class="font-medium text-purple-900 mb-2" data-i18n="trends.annual">Yıllık Hedef</h4>
                             <p class="text-2xl font-bold text-purple-600" id="yearlyTarget">€0</p>
                             <p class="text-sm text-purple-700 mt-1">Mevcut performansa göre</p>
                         </div>
@@ -1421,7 +1421,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="coins" class="w-5 h-5 text-yellow-600"></i>
-                            <span>Maliyet Verimliliği</span>
+                            <span data-i18n="eff.cost">Maliyet Verimliliği</span>
                         </h3>
                         <div class="chart-container" id="costEfficiencyChart"></div>
                     </div>
@@ -1430,7 +1430,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="gauge" class="w-5 h-5 text-red-600"></i>
-                            <span>Sistem Verimliliği</span>
+                            <span data-i18n="eff.system">Sistem Verimliliği</span>
                         </h3>
                         <div class="chart-container" id="systemEfficiencyChart"></div>
                     </div>
@@ -1441,19 +1441,19 @@
                     <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
                         <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                             <i data-lucide="table" class="w-5 h-5 text-gray-600"></i>
-                            <span>Detaylı Verimlilik Metrikleri</span>
+                            <span data-i18n="eff.detailed">Detaylı Verimlilik Metrikleri</span>
                         </h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Daire</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gider/Gelir</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net Kar Marjı</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">€/Gece</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Boş Gün Maliyeti</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verimlilik Skoru</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.apartment">Daire</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.expense.ratio">Gider/Gelir</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.margin">Net Kar Marjı</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.per.night">€/Gece</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.idle.cost">Boş Gün Maliyeti</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.score">Verimlilik Skoru</th>
                                 </tr>
                             </thead>
                             <tbody id="efficiencyMetricsTable" class="bg-white divide-y divide-gray-200">
@@ -1468,42 +1468,42 @@
             <div id="reports-content" class="tab-content hidden bg-white/95 p-6">
                 <!-- Report Type Selection -->
                 <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Rapor Oluştur</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4" data-i18n="reports.create">Rapor Oluştur</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <button onclick="Analytics.generateReport('summary')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
                             <i data-lucide="file-text" class="w-8 h-8 text-emerald-600 mb-3 group-hover:scale-110 transition"></i>
-                            <h4 class="font-semibold text-gray-800 mb-1">Özet Rapor</h4>
-                            <p class="text-sm text-gray-600">Tek sayfalık yönetici özeti</p>
+                            <h4 class="font-semibold text-gray-800 mb-1" data-i18n="reports.summary">Özet Rapor</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.summary.desc">Tek sayfalık yönetici özeti</p>
                         </button>
-                        
+
                         <button onclick="Analytics.generateReport('detailed')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
                             <i data-lucide="file-bar-chart" class="w-8 h-8 text-blue-600 mb-3 group-hover:scale-110 transition"></i>
-                            <h4 class="font-semibold text-gray-800 mb-1">Detaylı Rapor</h4>
-                            <p class="text-sm text-gray-600">Kapsamlı analiz raporu</p>
+                            <h4 class="font-semibold text-gray-800 mb-1" data-i18n="reports.detailed">Detaylı Rapor</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.detailed.desc">Kapsamlı analiz raporu</p>
                         </button>
-                        
+
                         <button onclick="Analytics.generateReport('comparison')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
                             <i data-lucide="git-compare" class="w-8 h-8 text-purple-600 mb-3 group-hover:scale-110 transition"></i>
-                            <h4 class="font-semibold text-gray-800 mb-1">Karşılaştırma Raporu</h4>
-                            <p class="text-sm text-gray-600">Dönem/daire karşılaştırması</p>
+                            <h4 class="font-semibold text-gray-800 mb-1" data-i18n="reports.comparison">Karşılaştırma Raporu</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.comparison.desc">Dönem/daire karşılaştırması</p>
                         </button>
-                        
+
                         <button onclick="Analytics.generateReport('financial')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
                             <i data-lucide="wallet" class="w-8 h-8 text-green-600 mb-3 group-hover:scale-110 transition"></i>
                             <h4 class="font-semibold text-gray-800 mb-1">Finansal Rapor</h4>
-                            <p class="text-sm text-gray-600">Gelir-gider detayları</p>
+                            <p class="text-sm text-gray-600" data-i18n="reports.revenue.expense">Gelir-gider detayları</p>
                         </button>
-                        
+
                         <button onclick="Analytics.generateReport('performance')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
                             <i data-lucide="trending-up" class="w-8 h-8 text-orange-600 mb-3 group-hover:scale-110 transition"></i>
                             <h4 class="font-semibold text-gray-800 mb-1">Performans Raporu</h4>
                             <p class="text-sm text-gray-600">KPI ve metrik analizi</p>
                         </button>
-                        
+
                         <button onclick="Analytics.generateReport('custom')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
                             <i data-lucide="settings" class="w-8 h-8 text-gray-600 mb-3 group-hover:scale-110 transition"></i>
-                            <h4 class="font-semibold text-gray-800 mb-1">Özel Rapor</h4>
-                            <p class="text-sm text-gray-600">Kendi raporunuzu oluşturun</p>
+                            <h4 class="font-semibold text-gray-800 mb-1" data-i18n="reports.custom">Özel Rapor</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.custom.desc">Kendi raporunuzu oluşturun</p>
                         </button>
                     </div>
                 </div>
@@ -1513,7 +1513,7 @@
                     <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="document.getElementById('companyExpSection').classList.toggle('hidden'); this.querySelector('svg:last-child')?.classList.toggle('rotate-180')">
                         <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                             <i data-lucide="building" class="w-5 h-5 text-orange-600"></i>
-                            <span>Şirket Giderleri (Lagirio)</span>
+                            <span data-i18n="proj.company.expenses">Şirket Giderleri (Lagirio)</span>
                         </h3>
                         <div class="flex items-center gap-3">
                             <span class="text-sm text-gray-400" id="companyExpTotal">Toplam: €0</span>
@@ -1565,7 +1565,7 @@
 
                         <!-- Liste -->
                         <div id="companyExpList" class="max-h-[250px] overflow-y-auto">
-                            <p class="text-sm text-gray-400 text-center py-4">Henüz şirket gideri yok</p>
+                            <p class="text-sm text-gray-400 text-center py-4" data-i18n="proj.no.expenses">Henüz şirket gideri yok</p>
                         </div>
                     </div>
                 </div>
@@ -1584,9 +1584,9 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                             <i data-lucide="calendar-plus" class="w-5 h-5 text-purple-600"></i>
-                            <span>Gelecek Rezervasyonları Yükle (PMS)</span>
+                            <span data-i18n="proj.load.pms">Gelecek Rezervasyonları Yükle (PMS)</span>
                         </h3>
-                        <span class="text-xs text-gray-400">Zirkon / PMS HTML dışa aktarma</span>
+                        <span class="text-xs text-gray-400" data-i18n="proj.pms.desc">Zirkon / PMS HTML dışa aktarma</span>
                     </div>
 
                     <div class="flex gap-4">
@@ -1594,7 +1594,7 @@
                         <div id="projHtmlUploadArea" class="flex-1 border-2 border-dashed border-purple-200 rounded-xl py-6 px-4 hover:border-purple-400 hover:bg-purple-50/30 transition-all cursor-pointer group text-center"
                              onclick="document.getElementById('projHtmlFileInput').click()">
                             <i data-lucide="file-code" class="w-8 h-8 text-purple-300 mx-auto mb-2 group-hover:scale-110 transition-transform"></i>
-                            <p class="text-sm font-medium text-gray-600">HTML Dosya Sürükle / Seç</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="proj.drag.file">HTML Dosya Sürükle / Seç</p>
                             <p class="text-xs text-gray-400">.html, .htm</p>
                         </div>
                         <input type="file" id="projHtmlFileInput" accept=".html,.htm" class="hidden" multiple onchange="Projection.handleHTMLFiles(event)">
@@ -1603,7 +1603,7 @@
                         <div class="w-72 bg-gray-50 rounded-xl p-4">
                             <div class="text-xs font-bold text-gray-400 uppercase mb-2">Yüklenen Dosyalar</div>
                             <div id="projFilesList" class="space-y-1.5 max-h-24 overflow-y-auto">
-                                <p class="text-xs text-gray-400">Henüz dosya yüklenmedi</p>
+                                <p class="text-xs text-gray-400" data-i18n="proj.no.file">Henüz dosya yüklenmedi</p>
                             </div>
                             <div id="projResCounts" class="mt-2 pt-2 border-t border-gray-200 text-xs hidden">
                                 <span class="text-emerald-600 font-semibold"><span id="projFutureCount">0</span> gelecek</span>
@@ -1619,10 +1619,10 @@
                         <div class="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5">
                             <div class="flex items-center gap-2">
                                 <i data-lucide="link-2" class="w-4 h-4 text-amber-500"></i>
-                                <span class="text-xs text-amber-700" id="projMatchingStatus">Eşleşmeyen daireler var</span>
+                                <span class="text-xs text-amber-700" id="projMatchingStatus" data-i18n="proj.unmatched">Eşleşmeyen daireler var</span>
                             </div>
                             <button onclick="Projection.showMatchingModal()" class="text-xs font-semibold bg-amber-500 text-white px-3 py-1.5 rounded-lg hover:bg-amber-600 transition">
-                                Daire Eşleştir
+                                <span data-i18n="proj.match.apt">Daire Eşleştir</span>
                             </button>
                         </div>
                     </div>
@@ -1633,7 +1633,7 @@
                     <div class="flex items-center gap-4 flex-wrap">
                         <div class="flex items-center gap-2">
                             <i data-lucide="sliders" class="w-4 h-4 text-gray-400"></i>
-                            <span class="text-xs font-semibold text-gray-500 uppercase">Karma Tahmin</span>
+                            <span class="text-xs font-semibold text-gray-500 uppercase" data-i18n="proj.blend">Karma Tahmin</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <label class="text-xs text-gray-500">Veri olmayan aylar için ayarlama (%):</label>
@@ -1642,8 +1642,8 @@
                                 onchange="Projection.calculate()">
                         </div>
                         <div class="flex items-center gap-3 ml-auto text-[10px] text-gray-400">
-                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span> Mevcut Rez.</span>
-                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400"></span> Geçmiş +5%</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span> <span data-i18n="proj.current.res">Mevcut Rez.</span></span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400"></span> <span data-i18n="proj.past.plus5">Geçmiş +5%</span></span>
                             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-blue-400"></span> Ortalama</span>
                             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-orange-400"></span> Zincir</span>
                             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-red-300"></span> Veri Yok</span>
@@ -1659,17 +1659,17 @@
                     <!-- Top row: big cards -->
                     <div id="projTopGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
-                            <div class="text-sm opacity-80 mb-1">Tahmini Brüt Gelir</div>
+                            <div class="text-sm opacity-80 mb-1" data-i18n="proj.est.gross">Tahmini Brüt Gelir</div>
                             <div class="text-2xl font-bold" id="projGrossRevenue">€0</div>
                             <div class="text-xs opacity-60 mt-1" id="projGrossDetail">Ort. gecelik × 25 gün/ay</div>
                         </div>
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
-                            <div class="text-sm opacity-80 mb-1" id="projMainLabel">Lagirio Net Kazanç</div>
+                            <div class="text-sm opacity-80 mb-1" id="projMainLabel" data-i18n="proj.lagirio.net">Lagirio Net Kazanç</div>
                             <div class="text-2xl font-bold" id="projLagirioNet">€0</div>
                             <div class="text-xs opacity-60 mt-1" id="projLagirioDetail">Sistem bazlı komisyon hesabı</div>
                         </div>
                         <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white">
-                            <div class="text-sm opacity-80 mb-1">Ort. Gecelik Fiyat</div>
+                            <div class="text-sm opacity-80 mb-1" data-i18n="proj.avg.nightly">Ort. Gecelik Fiyat</div>
                             <div class="text-2xl font-bold" id="projAvgNightly">€0</div>
                             <div class="text-xs opacity-60 mt-1" id="projNightlyDetail">Gelecek rez. ortalaması</div>
                         </div>
@@ -1687,7 +1687,7 @@
                             <div class="bg-white border border-orange-200 rounded-xl p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <div class="text-xs font-semibold text-orange-500 uppercase">Tahmini Giderler</div>
+                                        <div class="text-xs font-semibold text-orange-500 uppercase" data-i18n="proj.est.expenses">Tahmini Giderler</div>
                                         <div class="text-xl font-bold text-gray-800 mt-1" id="projExpenses">€0</div>
                                     </div>
                                     <div class="text-right">
@@ -1698,18 +1698,18 @@
                             <div class="bg-white border border-red-200 rounded-xl p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <div class="text-xs font-semibold text-red-500 uppercase">Tahmini KDV</div>
+                                        <div class="text-xs font-semibold text-red-500 uppercase" data-i18n="proj.est.vat">Tahmini KDV</div>
                                         <div class="text-xl font-bold text-gray-800 mt-1" id="projKDV">€0</div>
                                     </div>
                                     <div class="text-right">
-                                        <span class="text-xs text-gray-400" id="projKDVDetail">Sistem bazlı</span>
+                                        <span class="text-xs text-gray-400" id="projKDVDetail" data-i18n="proj.system.based">Sistem bazlı</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="bg-white border border-indigo-200 rounded-xl p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <div class="text-xs font-semibold text-indigo-500 uppercase">Tahmini Platform Komisyonu</div>
+                                        <div class="text-xs font-semibold text-indigo-500 uppercase" data-i18n="proj.est.platform">Tahmini Platform Komisyonu</div>
                                         <div class="text-xl font-bold text-gray-800 mt-1" id="projPlatComm">€0</div>
                                     </div>
                                     <div class="text-right">
@@ -1721,7 +1721,7 @@
                             <div id="projLagirioCommCard" class="bg-white border border-blue-200 rounded-xl p-4 hidden">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <div class="text-xs font-semibold text-blue-500 uppercase">Tahmini Lagirio Komisyonu</div>
+                                        <div class="text-xs font-semibold text-blue-500 uppercase" data-i18n="proj.est.lagirio">Tahmini Lagirio Komisyonu</div>
                                         <div class="text-xl font-bold text-gray-800 mt-1" id="projLagirioComm">€0</div>
                                     </div>
                                     <div class="text-right">
@@ -1738,7 +1738,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-600"></i>
-                            <span id="projChartTitle">Aylık Projeksiyon (Lagirio Kazancı)</span>
+                            <span id="projChartTitle" data-i18n="proj.monthly.title">Aylık Projeksiyon (Lagirio Kazancı)</span>
                         </h3>
                         <div class="chart-container" id="projMonthlyChart" style="height:280px"></div>
                     </div>
@@ -1747,8 +1747,8 @@
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="calendar-range" class="w-5 h-5 text-indigo-600"></i>
-                            <span id="projTableTitle">Aylık Lagirio Kazanç Detayı</span>
-                            <span class="text-xs text-gray-400 ml-2" id="projTableSubtitle">(tüm daireler toplam)</span>
+                            <span id="projTableTitle" data-i18n="proj.monthly.detail">Aylık Lagirio Kazanç Detayı</span>
+                            <span class="text-xs text-gray-400 ml-2" id="projTableSubtitle" data-i18n="proj.all.apts.total">(tüm daireler toplam)</span>
                         </h3>
                         <div id="projMonthlyOverview"></div>
                     </div>
@@ -1757,8 +1757,8 @@
                     <div class="bg-white rounded-xl shadow-lg p-6" id="projApartmentSection">
                         <h3 id="projAptSectionHeader" class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="building-2" class="w-5 h-5 text-blue-600" id="projAptSectionIcon"></i>
-                            <span id="projAptSectionTitle">Daire Bazlı Tahmin</span>
-                            <span class="text-xs text-gray-400 ml-2" id="projAptSectionSubtitle">(tıklayarak aylık detay görün)</span>
+                            <span id="projAptSectionTitle" data-i18n="proj.apt.forecast">Daire Bazlı Tahmin</span>
+                            <span class="text-xs text-gray-400 ml-2" id="projAptSectionSubtitle" data-i18n="proj.click.detail">(tıklayarak aylık detay görün)</span>
                         </h3>
                         <div id="projApartmentList" class="space-y-1">
                             <p class="text-sm text-gray-400">Veri bekleniyor...</p>
@@ -1774,7 +1774,7 @@
                             <span>K\u00e2rl\u0131l\u0131k Analizi</span>
                         </h3>
                         <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
-                            <button onclick="Projection.switchProfitView('monthly')" id="profitViewMonthly" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white shadow text-gray-800">Ay-Ay</button>
+                            <button onclick="Projection.switchProfitView('monthly')" id="profitViewMonthly" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white shadow text-gray-800" data-i18n="proj.month.by.month">Ay-Ay</button>
                             <button onclick="Projection.switchProfitView('range')" id="profitViewRange" class="px-3 py-1.5 text-xs font-medium rounded-md text-gray-500 hover:text-gray-800">Aral\u0131k</button>
                         </div>
                     </div>
@@ -1793,11 +1793,11 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                             <i data-lucide="list" class="w-5 h-5 text-purple-600"></i>
-                            <span id="projResListTitle">Gelecek Rezervasyonlar Listesi</span>
+                            <span id="projResListTitle" data-i18n="proj.future.res.list">Gelecek Rezervasyonlar Listesi</span>
                         </h3>
                         <div class="flex items-center gap-2">
                             <select id="projPlatformFilter" onchange="Projection.renderTable()" class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg">
-                                <option value="all">Tüm Platformlar</option>
+                                <option value="all" data-i18n="proj.all.platforms">Tüm Platformlar</option>
                             </select>
                             <button onclick="Projection.clearAll()" class="text-xs text-red-400 hover:text-red-600 px-2 py-1">Temizle</button>
                         </div>
@@ -1848,26 +1848,26 @@
                 <div class="space-y-6">
                     <!-- Display Settings -->
                     <div>
-                        <h3 class="font-semibold text-gray-700 mb-3">Görüntüleme Ayarları</h3>
+                        <h3 class="font-semibold text-gray-700 mb-3" data-i18n="settings.display">Görüntüleme Ayarları</h3>
                         <div class="space-y-3">
                             <label class="flex items-center space-x-3">
                                 <input type="checkbox" id="darkMode" class="w-4 h-4 text-emerald-600 rounded">
-                                <span class="text-gray-600">Karanlık Tema</span>
+                                <span class="text-gray-600" data-i18n="settings.dark">Karanlık Tema</span>
                             </label>
                             <label class="flex items-center space-x-3">
                                 <input type="checkbox" id="animations" checked class="w-4 h-4 text-emerald-600 rounded">
-                                <span class="text-gray-600">Animasyonları Etkinleştir</span>
+                                <span class="text-gray-600" data-i18n="settings.animations">Animasyonları Etkinleştir</span>
                             </label>
                             <label class="flex items-center space-x-3">
                                 <input type="checkbox" id="compactView" class="w-4 h-4 text-emerald-600 rounded">
-                                <span class="text-gray-600">Kompakt Görünüm</span>
+                                <span class="text-gray-600" data-i18n="settings.compact">Kompakt Görünüm</span>
                             </label>
                         </div>
                     </div>
                     
                     <!-- Data Settings -->
                     <div>
-                        <h3 class="font-semibold text-gray-700 mb-3">Veri Ayarları</h3>
+                        <h3 class="font-semibold text-gray-700 mb-3" data-i18n="settings.data">Veri Ayarları</h3>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Varsayılan Para Birimi</label>
@@ -1890,14 +1890,14 @@
                     
                     <!-- Alert Settings -->
                     <div>
-                        <h3 class="font-semibold text-gray-700 mb-3">Uyarı Ayarları</h3>
+                        <h3 class="font-semibold text-gray-700 mb-3" data-i18n="settings.alerts">Uyarı Ayarları</h3>
                         <div class="space-y-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-1">Düşük Doluluk Uyarısı (%)</label>
+                                <label class="block text-sm font-medium text-gray-600 mb-1" data-i18n="settings.low.occ">Düşük Doluluk Uyarısı (%)</label>
                                 <input type="number" id="lowOccupancyThreshold" value="30" min="0" max="100" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-1">Yüksek Gider Uyarısı (€)</label>
+                                <label class="block text-sm font-medium text-gray-600 mb-1" data-i18n="settings.high.expense">Yüksek Gider Uyarısı (€)</label>
                                 <input type="number" id="highExpenseThreshold" value="500" min="0" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
                             </div>
                         </div>
@@ -1916,7 +1916,7 @@
                             <button onclick="Projection.adminLogin()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">Giriş</button>
                             <button onclick="Projection.adminLogout()" class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-sm text-gray-500">Çıkış</button>
                         </div>
-                        <p id="adminStatusText" class="text-xs text-gray-400 mt-1.5">Admin girişi yapılmadı</p>
+                        <p id="adminStatusText" class="text-xs text-gray-400 mt-1.5" data-i18n="settings.admin.not.logged">Admin girişi yapılmadı</p>
                         <div class="mt-3 pt-3 border-t border-gray-100">
                             <p class="text-[10px] text-gray-300 mb-1">Yeni admin şifresi belirle (sadece admin):</p>
                             <div class="flex gap-2">
@@ -2187,7 +2187,318 @@
                 'tab.analysis.expense': 'Expense Analysis',
                 'tab.analysis.owner': 'Owner Analysis',
                 // Overview
-                'overview.financial.title': 'Financial Summary'
+                'overview.financial.title': 'Financial Summary',
+                'overview.revenue.trend': 'Revenue Trend',
+                'overview.top.performers': 'Top Performers',
+                'overview.platform.dist': 'Platform Distribution',
+                'overview.payment.dist': 'Payment Method Distribution',
+                // KPI Cards
+                'kpi.portfolio': 'Total Portfolio',
+                'kpi.monthly.revenue': 'This Month Revenue',
+                'kpi.vs.last': 'vs last period',
+                'kpi.active.apartments': 'Active Apartments',
+                'kpi.with.reservation': 'With Reservations',
+                'kpi.avg.occupancy': 'Average Occupancy',
+                'kpi.best.system': 'Best System',
+                'kpi.total.expense': 'Total Expenses',
+                'kpi.net.income': 'Net Income',
+                'kpi.net.income.yours': 'Your Net Income',
+                'kpi.real.profit': 'Real Profit',
+                'kpi.this.month': 'This Month',
+                'kpi.apartment': 'apartment',
+                'kpi.apartments': 'apartments',
+                'kpi.vs.prev.month': 'vs previous month:',
+                'kpi.no.prev.data': 'no previous month data',
+                // Owner Financial Summary
+                'owner.gross.income': 'Gross Income',
+                'owner.platform.comm': 'Platform Commission',
+                'owner.lagirio.comm': 'Lagirio Commission',
+                'owner.vat.taxes': 'VAT/Taxes',
+                'owner.expenses': 'Expenses',
+                'owner.net.income': 'Net Income',
+                'owner.reservations': 'reservations',
+                'owner.nights': 'nights',
+                'owner.avg.per.night': 'Avg €/night',
+                'owner.total': 'Total',
+                // Comparison
+                'comparison.params': 'Comparison Parameters',
+                'comparison.mode': 'Comparison Mode',
+                'comparison.apt.vs.apt': 'Apartment vs Apartment',
+                'comparison.apt.vs.period': 'Apartment vs Period',
+                'comparison.sys.vs.sys': 'System vs System',
+                'comparison.temporal': 'Temporal Comparison',
+                'comparison.temporal.desc': 'Period vs Period profitability',
+                'comparison.btn': 'Compare',
+                'comparison.revenue': 'Revenue',
+                'comparison.expense': 'Expense',
+                'comparison.occupancy': 'Occupancy',
+                'comparison.reservation': 'Reservation',
+                // Trends
+                'trends.revenue': 'Revenue Trend Analysis',
+                'trends.occupancy': 'Occupancy Trend Analysis',
+                'trends.seasonal': 'Seasonal Analysis',
+                'trends.growth': 'Growth Analysis',
+                'trends.profit': 'Profit Trends',
+                'trends.monthly.profit': 'Monthly Profit Flow',
+                'trends.monthly.profit.desc': 'Gross Income → Real Profit conversion',
+                'trends.apt.profit.trend': 'Apartment Profitability Trend (Top 5)',
+                'trends.apt.profit.desc': 'Monthly Lagirio income of top 5 apartments',
+                'trends.margin.trend': 'Profit Margin Trend',
+                'trends.margin.desc': 'Monthly change of Real Profit / Gross Income ratio',
+                'trends.occ.profit': 'Occupancy-Profitability Relationship',
+                'trends.occ.profit.desc': 'Correlation between avg occupancy and real profit per apt',
+                'trends.revenue.analysis': 'Revenue Analysis',
+                'trends.monthly.breakdown': 'Monthly Revenue Breakdown',
+                'trends.apt.perf.compare': 'Apartment Performance Comparison',
+                'trends.apt.perf.desc': 'Monthly net income per apartment',
+                'trends.price.vs.occ': 'Nightly Price vs Occupancy',
+                'trends.price.occ.desc': 'Price-occupancy balance: find the optimum',
+                'trends.platform.revenue': 'Platform Revenue Distribution',
+                'trends.platform.desc': 'Which platform brings more revenue?',
+                'trends.forecasts': 'Forecasts and Projections',
+                'trends.next.month': 'Next Month Forecast',
+                'trends.3month': '3 Month Projection',
+                'trends.annual': 'Annual Target',
+                'trends.based.on': 'Based on trend analysis',
+                // Chart labels
+                'chart.gross.income': 'Gross Income',
+                'chart.real.profit': 'Real Profit',
+                'chart.net.income': 'Net Income',
+                'chart.revenue': 'Revenue',
+                'chart.occupancy': 'Occupancy',
+                'chart.growth.pct': 'Growth %',
+                'chart.company.expense': 'Company Expense',
+                'chart.margin': 'Profit Margin',
+                'chart.expenses': 'Expenses',
+                'chart.platform.comm': 'Platform Comm.',
+                'chart.lagirio.comm': 'Lagirio Comm.',
+                'chart.vat': 'VAT',
+                'chart.nightly.eur': 'Nightly (€)',
+                'chart.occ.pct': 'Occupancy (%)',
+                'chart.avg.nightly': 'Avg Nightly',
+                'chart.total': 'Total',
+                'chart.avg.income': 'Avg Income',
+                'chart.avg.net': 'Avg Net Income',
+                'chart.per.apt.profit': 'Profit per Apt',
+                'chart.active.apt': 'Active Apartments',
+                'chart.avg.occ.pct': 'Avg Occupancy (%)',
+                'chart.per.apt.eur': 'Profit per Apt (€)',
+                'chart.correlation': 'Correlation',
+                // Efficiency
+                'eff.cost': 'Cost Efficiency',
+                'eff.system': 'System Efficiency',
+                'eff.detailed': 'Detailed Efficiency Metrics',
+                'eff.col.apartment': 'Apartment',
+                'eff.col.expense.ratio': 'Expense/Revenue',
+                'eff.col.margin': 'Net Profit Margin',
+                'eff.col.per.night': '€/Night',
+                'eff.col.idle.cost': 'Idle Day Cost',
+                'eff.col.score': 'Efficiency Score',
+                'eff.chart.expense': 'Expense',
+                'eff.chart.revenue': 'Revenue',
+                'eff.chart.ratio': 'Ratio',
+                'eff.chart.ratio.label': 'Expense/Revenue Ratio (%)',
+                'eff.chart.ratio.legend': 'Expense/Revenue',
+                'eff.chart.target': 'Target: 50%',
+                'eff.chart.efficiency': 'Efficiency',
+                // Reports
+                'reports.create': 'Create Report',
+                'reports.summary': 'Summary Report',
+                'reports.summary.desc': 'Single page executive summary',
+                'reports.detailed': 'Detailed Report',
+                'reports.detailed.desc': 'Comprehensive analysis report',
+                'reports.comparison': 'Comparison Report',
+                'reports.comparison.desc': 'Period/apartment comparison',
+                'reports.revenue.expense': 'Revenue-expense details',
+                'reports.custom': 'Custom Report',
+                'reports.custom.desc': 'Create your own report',
+                'reports.sections': 'Report Sections',
+                'reports.section.summary': 'Summary',
+                'reports.section.system': 'System Comparison',
+                'reports.apt.selection': 'Apartment Selection',
+                'reports.apt.multiselect': 'Hold Ctrl/Cmd for multi-select',
+                'reports.date.range': 'Date Range',
+                'reports.generate': 'Generate Report',
+                'reports.quick.export': 'Quick Export',
+                'reports.quick.compare': 'Quick Comparison',
+                'reports.quick.report': 'Quick Report',
+                'reports.exec.summary': 'Executive Summary Report',
+                'reports.total.portfolio': 'Total Portfolio',
+                'reports.monthly.income': 'Monthly Revenue',
+                'reports.avg.occupancy': 'Average Occupancy',
+                'reports.active.apt': 'Active Apartments',
+                'reports.sys.performance': 'System Performance',
+                'reports.col.revenue': 'Revenue',
+                'reports.col.occupancy': 'Occupancy',
+                'reports.col.efficiency': 'Efficiency',
+                // Projection
+                'proj.company.expenses': 'Company Expenses (Lagirio)',
+                'proj.office': 'Office Expenses',
+                'proj.personnel': 'Personnel Expenses',
+                'proj.other': 'Other',
+                'proj.expense.desc.ph': 'Expense description',
+                'proj.no.expenses': 'No company expenses yet',
+                'proj.load.pms': 'Load Future Reservations (PMS)',
+                'proj.pms.desc': 'Zirkon / PMS HTML export',
+                'proj.drag.file': 'Drag / Select HTML File',
+                'proj.no.file': 'No file uploaded yet',
+                'proj.past': 'past',
+                'proj.unmatched': 'Unmatched apartments exist',
+                'proj.match.apt': 'Match Apartments',
+                'proj.blend.settings': 'Blend Forecast Settings',
+                'proj.blend': 'Blend Forecast',
+                'proj.current.res': 'Current Res.',
+                'proj.past.plus5': 'Past +5%',
+                'proj.est.gross': 'Estimated Gross Income',
+                'proj.avg.nightly.calc': 'Avg nightly × 25 days/month',
+                'proj.avg.nightly': 'Avg Nightly Price',
+                'proj.lagirio.net': 'Lagirio Net Income',
+                'proj.real.profit': 'Real Profit',
+                'proj.company.expense': 'Company Expense',
+                'proj.per.year': '/year',
+                'proj.est.expenses': 'Estimated Expenses',
+                'proj.est.vat': 'Estimated VAT',
+                'proj.system.based': 'System-based',
+                'proj.est.platform': 'Estimated Platform Commission',
+                'proj.est.lagirio': 'Estimated Lagirio Commission',
+                'proj.monthly.title': 'Monthly Projection (Lagirio Income)',
+                'proj.monthly.detail': 'Monthly Lagirio Income Detail',
+                'proj.all.apts.total': '(all apartments total)',
+                'proj.owner.monthly.title': 'Monthly Projection (Your Net Income)',
+                'proj.owner.monthly.detail': 'Monthly Income Detail',
+                'proj.owner.all.total': '(all your apartments total)',
+                'proj.apt.forecast': 'Apartment-Based Forecast',
+                'proj.click.detail': '(click for monthly details)',
+                'proj.month.by.month': 'Month-by-Month',
+                'proj.future.res.list': 'Future Reservations List',
+                'proj.all.platforms': 'All Platforms',
+                'proj.est.net.income': 'Estimated Net Income',
+                'proj.est.gross.short': 'Gross Income (from Apartments)',
+                'proj.apt.standard': 'Apartment-based standard (extreme outlier elimination)',
+                'proj.past.ratio': 'Past ratio:',
+                'proj.gross.pct': '% of Gross',
+                'proj.flow.title': 'Income Flow',
+                'proj.flow.desc': '(From gross income to net income)',
+                'proj.total.deduction': 'Total Deduction',
+                'proj.your.income': 'Your Income',
+                'proj.col.month': 'Month',
+                'proj.col.apt': 'Apartment',
+                'proj.col.res': 'Res.',
+                'proj.col.gross': 'Gross Income',
+                'proj.col.apt.expense': 'Apt Expense',
+                'proj.col.vat': 'VAT',
+                'proj.col.plt.comm': 'Plt.Comm',
+                'proj.col.gross.profit': 'Gross Profit',
+                'proj.col.company.exp': 'Company Exp.',
+                'proj.col.real.profit': 'Real Profit',
+                'proj.col.margin': 'Margin',
+                'proj.col.lagirio': 'Lagirio',
+                'proj.col.nightly': 'Nightly',
+                'proj.total.12m': 'TOTAL (12 Months)',
+                'proj.per.night.profit': 'Profit/Night',
+                'proj.total.profit': 'Total Profit',
+                'proj.gross': 'Gross',
+                'proj.night': 'Night',
+                'proj.profitability': 'Profitability',
+                'proj.no.data': 'No data for selected range',
+                'proj.blend.gross': 'Blended Estimated Gross',
+                'proj.std.expense': 'Standard Expense',
+                'proj.detail.click': 'Click for details',
+                'proj.no.detail': 'No apartment details for this month',
+                'proj.12m.total': '12 Month Total',
+                'proj.deduction': 'Deduction',
+                'proj.net': 'Net',
+                'proj.detail.title': 'Projection Detail',
+                'proj.summary': 'Summary',
+                'proj.future.res': 'Future Res.',
+                'proj.past.year': 'Past Year',
+                'proj.deduction.detail': 'Deduction Detail',
+                'proj.apt.distribution': 'Apartment Distribution',
+                'proj.col.guest': 'Guest',
+                'proj.col.date': 'Date',
+                'proj.col.platform': 'Platform',
+                'proj.col.amount': 'Amount',
+                'proj.col.per.night': '/Night',
+                'proj.col.checkin': 'Check-in',
+                'proj.col.checkout': 'Check-out',
+                'proj.total': 'TOTAL',
+                'proj.avg.nightly.label': 'Avg Nightly:',
+                'proj.total.nights': 'Total Nights:',
+                'proj.res.count': 'Res. Count:',
+                'proj.no.future.res': 'No future reservations for this month',
+                'proj.est.from.past': 'Estimates generated from past data',
+                'proj.data.suffix': 'data',
+                'proj.no.past.data': 'No data found for this month in past year',
+                'proj.close': 'Close',
+                'proj.future': 'future',
+                'proj.past.year.short': 'past year',
+                'proj.current.future': 'Current / Future Reservations',
+                'proj.past.year.label': 'Past Year',
+                'proj.no.res.data': 'No reservation data for this month',
+                'proj.reservations': 'Reservations',
+                'proj.12m.compare': '(12 months — future + past year comparison)',
+                'proj.view.res': 'view reservations',
+                'proj.col.source': 'Source',
+                'proj.col.deduction': 'Deduction',
+                'proj.col.nights.res': 'Res (Nights)',
+                'proj.col.gross.25d': 'Gross (×25d)',
+                'proj.upcoming.res': 'Upcoming Reservations',
+                'proj.more.res': 'more reservations',
+                'proj.no.future.res.yet': 'No future reservations yet',
+                'proj.est.from.past2': 'Estimates are generated from past data',
+                'proj.current.res.label': 'Current Reservations',
+                'proj.past.year.res': 'Past Year Reservations',
+                'proj.actual.data': 'Actual Data',
+                'proj.past.plus5.label': 'Past Year +5%',
+                'proj.all.future.res': 'All Future Reservations',
+                'proj.no.future.global': 'No future reservations',
+                'proj.clear.confirm': 'Are you sure you want to clear all projection data?',
+                'proj.loaded': 'reservations loaded!',
+                'proj.no.valid': 'No valid reservations found',
+                'proj.apt.matching': 'Apartment Matching',
+                'proj.apt.matching.desc': 'Match PMS room numbers to analysis apartments...',
+                'proj.loading': 'Loading...',
+                // Settings
+                'settings.display': 'Display Settings',
+                'settings.dark': 'Dark Theme',
+                'settings.animations': 'Enable Animations',
+                'settings.compact': 'Compact View',
+                'settings.data': 'Data Settings',
+                'settings.alerts': 'Alert Settings',
+                'settings.low.occ': 'Low Occupancy Alert (%)',
+                'settings.high.expense': 'High Expense Alert (€)',
+                'settings.admin.pass': 'Admin password',
+                'settings.admin.not.logged': 'Admin login not performed',
+                'settings.new.admin.pass': 'Set new admin password (admin only):',
+                'settings.new.pass.ph': 'New password',
+                // Custom Reports
+                'custom.report.title': 'Create Custom Report',
+                // System Types
+                'system.rental': 'Rental',
+                'system.sole': 'Sole Proprietorship',
+                'system.commission': 'Commission',
+                'system.special': 'Special Commission',
+                'system.withholding': 'Withholding',
+                'system.platform.sep': 'Platform Separated',
+                'system.mixed': 'Mixed Platform',
+                'system.profit.based': 'Profit-Based',
+                // Common
+                'common.apartment': 'apartment',
+                'common.apartments': 'apartments',
+                'common.occupancy': 'occupancy',
+                'common.avg.commission': 'Avg Commission',
+                'common.night': 'night',
+                'common.nights': 'nights',
+                'common.reservation': 'reservation',
+                'common.reservations': 'reservations',
+                // Expense Categories
+                'expense.cleaning': 'Cleaning',
+                'expense.electricity': 'Electricity',
+                'expense.water': 'Water',
+                'expense.internet': 'Internet',
+                'expense.management': 'Management',
+                'expense.maintenance': 'Maintenance',
+                'expense.other': 'Other'
             },
             ru: {
                 // Login screen
@@ -2245,7 +2556,318 @@
                 'tab.analysis.expense': 'Анализ расходов',
                 'tab.analysis.owner': 'Анализ владельцев',
                 // Overview
-                'overview.financial.title': 'Финансовая сводка'
+                'overview.financial.title': 'Финансовая сводка',
+                'overview.revenue.trend': 'Тренд доходов',
+                'overview.top.performers': 'Лучшие показатели',
+                'overview.platform.dist': 'Распределение по платформам',
+                'overview.payment.dist': 'Распределение способов оплаты',
+                // KPI
+                'kpi.portfolio': 'Общий портфель',
+                'kpi.monthly.revenue': 'Доход за месяц',
+                'kpi.vs.last': 'к предыдущему периоду',
+                'kpi.active.apartments': 'Активные квартиры',
+                'kpi.with.reservation': 'С бронированием',
+                'kpi.avg.occupancy': 'Средняя заполняемость',
+                'kpi.best.system': 'Лучшая система',
+                'kpi.total.expense': 'Общие расходы',
+                'kpi.net.income': 'Чистый доход',
+                'kpi.net.income.yours': 'Ваш чистый доход',
+                'kpi.real.profit': 'Реальная прибыль',
+                'kpi.this.month': 'Этот месяц',
+                'kpi.apartment': 'квартира',
+                'kpi.apartments': 'квартир',
+                'kpi.vs.prev.month': 'к прошлому месяцу:',
+                'kpi.no.prev.data': 'нет данных прошлого месяца',
+                // Owner Financial
+                'owner.gross.income': 'Валовый доход',
+                'owner.platform.comm': 'Комиссия платформы',
+                'owner.lagirio.comm': 'Комиссия Lagirio',
+                'owner.vat.taxes': 'НДС/Налоги',
+                'owner.expenses': 'Расходы',
+                'owner.net.income': 'Чистый доход',
+                'owner.reservations': 'бронирований',
+                'owner.nights': 'ночей',
+                'owner.avg.per.night': 'Ср. €/ночь',
+                'owner.total': 'Итого',
+                // Comparison
+                'comparison.params': 'Параметры сравнения',
+                'comparison.mode': 'Режим сравнения',
+                'comparison.apt.vs.apt': 'Квартира vs Квартира',
+                'comparison.apt.vs.period': 'Квартира vs Период',
+                'comparison.sys.vs.sys': 'Система vs Система',
+                'comparison.temporal': 'Временное сравнение',
+                'comparison.temporal.desc': 'Рентабельность по периодам',
+                'comparison.btn': 'Сравнить',
+                'comparison.revenue': 'Доход',
+                'comparison.expense': 'Расход',
+                'comparison.occupancy': 'Заполняемость',
+                'comparison.reservation': 'Бронирование',
+                // Trends
+                'trends.revenue': 'Анализ тренда доходов',
+                'trends.occupancy': 'Анализ тренда заполняемости',
+                'trends.seasonal': 'Сезонный анализ',
+                'trends.growth': 'Анализ роста',
+                'trends.profit': 'Тренды прибыли',
+                'trends.monthly.profit': 'Ежемесячный поток прибыли',
+                'trends.monthly.profit.desc': 'Валовый доход → Реальная прибыль',
+                'trends.apt.profit.trend': 'Тренд рентабельности квартир (Топ 5)',
+                'trends.apt.profit.desc': 'Ежемесячный доход Lagirio от 5 лучших квартир',
+                'trends.margin.trend': 'Тренд маржи прибыли',
+                'trends.margin.desc': 'Ежемесячное изменение соотношения Реальная прибыль / Валовый доход',
+                'trends.occ.profit': 'Связь заполняемости и прибыли',
+                'trends.occ.profit.desc': 'Корреляция между заполняемостью и реальной прибылью на квартиру',
+                'trends.revenue.analysis': 'Анализ доходов',
+                'trends.monthly.breakdown': 'Ежемесячная разбивка доходов',
+                'trends.apt.perf.compare': 'Сравнение эффективности квартир',
+                'trends.apt.perf.desc': 'Ежемесячный чистый доход каждой квартиры',
+                'trends.price.vs.occ': 'Цена за ночь vs Заполняемость',
+                'trends.price.occ.desc': 'Баланс цена-заполняемость: найти оптимум',
+                'trends.platform.revenue': 'Распределение дохода по платформам',
+                'trends.platform.desc': 'Какая платформа приносит больше дохода?',
+                'trends.forecasts': 'Прогнозы и проекции',
+                'trends.next.month': 'Прогноз на следующий месяц',
+                'trends.3month': '3-месячная проекция',
+                'trends.annual': 'Годовая цель',
+                'trends.based.on': 'На основе трендового анализа',
+                // Chart labels
+                'chart.gross.income': 'Валовый доход',
+                'chart.real.profit': 'Реальная прибыль',
+                'chart.net.income': 'Чистый доход',
+                'chart.revenue': 'Доход',
+                'chart.occupancy': 'Заполняемость',
+                'chart.growth.pct': 'Рост %',
+                'chart.company.expense': 'Расходы компании',
+                'chart.margin': 'Маржа прибыли',
+                'chart.expenses': 'Расходы',
+                'chart.platform.comm': 'Комиссия платф.',
+                'chart.lagirio.comm': 'Комиссия Lagirio',
+                'chart.vat': 'НДС',
+                'chart.nightly.eur': 'За ночь (€)',
+                'chart.occ.pct': 'Заполняемость (%)',
+                'chart.avg.nightly': 'Средняя за ночь',
+                'chart.total': 'Итого',
+                'chart.avg.income': 'Средний доход',
+                'chart.avg.net': 'Ср. чистый доход',
+                'chart.per.apt.profit': 'Прибыль на кв.',
+                'chart.active.apt': 'Активные квартиры',
+                'chart.avg.occ.pct': 'Ср. заполняемость (%)',
+                'chart.per.apt.eur': 'Прибыль на кв. (€)',
+                'chart.correlation': 'Корреляция',
+                // Efficiency
+                'eff.cost': 'Эффективность затрат',
+                'eff.system': 'Системная эффективность',
+                'eff.detailed': 'Детальные метрики эффективности',
+                'eff.col.apartment': 'Квартира',
+                'eff.col.expense.ratio': 'Расход/Доход',
+                'eff.col.margin': 'Маржа чистой прибыли',
+                'eff.col.per.night': '€/Ночь',
+                'eff.col.idle.cost': 'Простой (стоимость)',
+                'eff.col.score': 'Балл эффективности',
+                'eff.chart.expense': 'Расход',
+                'eff.chart.revenue': 'Доход',
+                'eff.chart.ratio': 'Соотношение',
+                'eff.chart.ratio.label': 'Соотношение Расход/Доход (%)',
+                'eff.chart.ratio.legend': 'Расход/Доход',
+                'eff.chart.target': 'Цель: 50%',
+                'eff.chart.efficiency': 'Эффективность',
+                // Reports
+                'reports.create': 'Создать отчёт',
+                'reports.summary': 'Сводный отчёт',
+                'reports.summary.desc': 'Краткая сводка для руководства',
+                'reports.detailed': 'Детальный отчёт',
+                'reports.detailed.desc': 'Комплексный аналитический отчёт',
+                'reports.comparison': 'Сравнительный отчёт',
+                'reports.comparison.desc': 'Сравнение периодов/квартир',
+                'reports.revenue.expense': 'Детали доходов-расходов',
+                'reports.custom': 'Пользовательский отчёт',
+                'reports.custom.desc': 'Создайте свой отчёт',
+                'reports.sections': 'Разделы отчёта',
+                'reports.section.summary': 'Сводка',
+                'reports.section.system': 'Сравнение систем',
+                'reports.apt.selection': 'Выбор квартир',
+                'reports.apt.multiselect': 'Удерживайте Ctrl/Cmd для множественного выбора',
+                'reports.date.range': 'Диапазон дат',
+                'reports.generate': 'Сформировать отчёт',
+                'reports.quick.export': 'Быстрый экспорт',
+                'reports.quick.compare': 'Быстрое сравнение',
+                'reports.quick.report': 'Быстрый отчёт',
+                'reports.exec.summary': 'Отчёт руководителя',
+                'reports.total.portfolio': 'Общий портфель',
+                'reports.monthly.income': 'Ежемесячный доход',
+                'reports.avg.occupancy': 'Средняя заполняемость',
+                'reports.active.apt': 'Активные квартиры',
+                'reports.sys.performance': 'Эффективность систем',
+                'reports.col.revenue': 'Доход',
+                'reports.col.occupancy': 'Заполняемость',
+                'reports.col.efficiency': 'Эффективность',
+                // Projection
+                'proj.company.expenses': 'Расходы компании (Lagirio)',
+                'proj.office': 'Офисные расходы',
+                'proj.personnel': 'Расходы на персонал',
+                'proj.other': 'Прочее',
+                'proj.expense.desc.ph': 'Описание расхода',
+                'proj.no.expenses': 'Расходов компании пока нет',
+                'proj.load.pms': 'Загрузить будущие бронирования (PMS)',
+                'proj.pms.desc': 'Экспорт HTML из Zirkon / PMS',
+                'proj.drag.file': 'Перетащите / Выберите HTML файл',
+                'proj.no.file': 'Файл ещё не загружен',
+                'proj.past': 'прошлый',
+                'proj.unmatched': 'Есть несопоставленные квартиры',
+                'proj.match.apt': 'Сопоставить квартиры',
+                'proj.blend.settings': 'Настройки смешанного прогноза',
+                'proj.blend': 'Смешанный прогноз',
+                'proj.current.res': 'Текущие брон.',
+                'proj.past.plus5': 'Прошлый +5%',
+                'proj.est.gross': 'Ожидаемый валовый доход',
+                'proj.avg.nightly.calc': 'Ср. за ночь × 25 дней/мес',
+                'proj.avg.nightly': 'Ср. цена за ночь',
+                'proj.lagirio.net': 'Чистый доход Lagirio',
+                'proj.real.profit': 'Реальная прибыль',
+                'proj.company.expense': 'Расход компании',
+                'proj.per.year': '/год',
+                'proj.est.expenses': 'Ожидаемые расходы',
+                'proj.est.vat': 'Ожидаемый НДС',
+                'proj.system.based': 'По системам',
+                'proj.est.platform': 'Ожидаемая комиссия платформы',
+                'proj.est.lagirio': 'Ожидаемая комиссия Lagirio',
+                'proj.monthly.title': 'Ежемесячная проекция (доход Lagirio)',
+                'proj.monthly.detail': 'Ежемесячная детализация дохода Lagirio',
+                'proj.all.apts.total': '(все квартиры итого)',
+                'proj.owner.monthly.title': 'Ежемесячная проекция (ваш чистый доход)',
+                'proj.owner.monthly.detail': 'Ежемесячная детализация дохода',
+                'proj.owner.all.total': '(все ваши квартиры итого)',
+                'proj.apt.forecast': 'Прогноз по квартирам',
+                'proj.click.detail': '(нажмите для деталей)',
+                'proj.month.by.month': 'По месяцам',
+                'proj.future.res.list': 'Список будущих бронирований',
+                'proj.all.platforms': 'Все платформы',
+                'proj.est.net.income': 'Ожидаемый чистый доход',
+                'proj.est.gross.short': 'Валовый доход (от квартир)',
+                'proj.apt.standard': 'По квартирам стандартный (с удалением выбросов)',
+                'proj.past.ratio': 'Прошлое соотношение:',
+                'proj.gross.pct': '% от валового',
+                'proj.flow.title': 'Поток дохода',
+                'proj.flow.desc': '(От валового дохода к чистому)',
+                'proj.total.deduction': 'Общие вычеты',
+                'proj.your.income': 'Ваш доход',
+                'proj.col.month': 'Месяц',
+                'proj.col.apt': 'Квартира',
+                'proj.col.res': 'Брон.',
+                'proj.col.gross': 'Валовый доход',
+                'proj.col.apt.expense': 'Расход кв.',
+                'proj.col.vat': 'НДС',
+                'proj.col.plt.comm': 'Ком.плат.',
+                'proj.col.gross.profit': 'Валовая прибыль',
+                'proj.col.company.exp': 'Расход комп.',
+                'proj.col.real.profit': 'Реальная прибыль',
+                'proj.col.margin': 'Маржа',
+                'proj.col.lagirio': 'Lagirio',
+                'proj.col.nightly': 'За ночь',
+                'proj.total.12m': 'ИТОГО (12 мес.)',
+                'proj.per.night.profit': 'Прибыль/ночь',
+                'proj.total.profit': 'Общая прибыль',
+                'proj.gross': 'Валовый',
+                'proj.night': 'Ночь',
+                'proj.profitability': 'Рентабельность',
+                'proj.no.data': 'Нет данных для выбранного периода',
+                'proj.blend.gross': 'Смешанный валовый прогноз',
+                'proj.std.expense': 'Стандартный расход',
+                'proj.detail.click': 'Нажмите для деталей',
+                'proj.no.detail': 'Нет деталей по квартирам за этот месяц',
+                'proj.12m.total': 'Итого за 12 мес.',
+                'proj.deduction': 'Вычет',
+                'proj.net': 'Чистый',
+                'proj.detail.title': 'Детали проекции',
+                'proj.summary': 'Сводка',
+                'proj.future.res': 'Будущие брон.',
+                'proj.past.year': 'Прошлый год',
+                'proj.deduction.detail': 'Детали вычетов',
+                'proj.apt.distribution': 'Распределение по квартирам',
+                'proj.col.guest': 'Гость',
+                'proj.col.date': 'Дата',
+                'proj.col.platform': 'Платформа',
+                'proj.col.amount': 'Сумма',
+                'proj.col.per.night': '/Ночь',
+                'proj.col.checkin': 'Заезд',
+                'proj.col.checkout': 'Выезд',
+                'proj.total': 'ИТОГО',
+                'proj.avg.nightly.label': 'Ср. за ночь:',
+                'proj.total.nights': 'Всего ночей:',
+                'proj.res.count': 'Кол-во брон.:',
+                'proj.no.future.res': 'Нет будущих бронирований за этот месяц',
+                'proj.est.from.past': 'Прогнозы построены на основе прошлых данных',
+                'proj.data.suffix': 'данные',
+                'proj.no.past.data': 'Нет данных за этот месяц в прошлом году',
+                'proj.close': 'Закрыть',
+                'proj.future': 'будущие',
+                'proj.past.year.short': 'прошлый год',
+                'proj.current.future': 'Текущие / Будущие бронирования',
+                'proj.past.year.label': 'Прошлый год',
+                'proj.no.res.data': 'Нет данных бронирований за этот месяц',
+                'proj.reservations': 'Бронирования',
+                'proj.12m.compare': '(12 мес. — будущие + прошлый год сравнение)',
+                'proj.view.res': 'просмотр бронирований',
+                'proj.col.source': 'Источник',
+                'proj.col.deduction': 'Вычет',
+                'proj.col.nights.res': 'Брон (Ночей)',
+                'proj.col.gross.25d': 'Валовый (×25д)',
+                'proj.upcoming.res': 'Предстоящие бронирования',
+                'proj.more.res': 'ещё бронирований',
+                'proj.no.future.res.yet': 'Будущих бронирований пока нет',
+                'proj.est.from.past2': 'Прогнозы строятся на основе прошлых данных',
+                'proj.current.res.label': 'Текущие бронирования',
+                'proj.past.year.res': 'Бронирования прошлого года',
+                'proj.actual.data': 'Реальные данные',
+                'proj.past.plus5.label': 'Прошлый год +5%',
+                'proj.all.future.res': 'Все будущие бронирования',
+                'proj.no.future.global': 'Нет будущих бронирований',
+                'proj.clear.confirm': 'Вы уверены, что хотите очистить все данные проекции?',
+                'proj.loaded': 'бронирований загружено!',
+                'proj.no.valid': 'Валидных бронирований не найдено',
+                'proj.apt.matching': 'Сопоставление квартир',
+                'proj.apt.matching.desc': 'Сопоставьте номера комнат PMS с квартирами...',
+                'proj.loading': 'Загрузка...',
+                // Settings
+                'settings.display': 'Настройки отображения',
+                'settings.dark': 'Тёмная тема',
+                'settings.animations': 'Включить анимации',
+                'settings.compact': 'Компактный вид',
+                'settings.data': 'Настройки данных',
+                'settings.alerts': 'Настройки уведомлений',
+                'settings.low.occ': 'Предупреждение о низкой заполняемости (%)',
+                'settings.high.expense': 'Предупреждение о высоком расходе (€)',
+                'settings.admin.pass': 'Пароль администратора',
+                'settings.admin.not.logged': 'Вход администратора не выполнен',
+                'settings.new.admin.pass': 'Задать новый пароль админа (только для админа):',
+                'settings.new.pass.ph': 'Новый пароль',
+                // Custom Reports
+                'custom.report.title': 'Создать пользовательский отчёт',
+                // System Types
+                'system.rental': 'Аренда',
+                'system.sole': 'ИП',
+                'system.commission': 'Комиссия',
+                'system.special': 'Спец. комиссия',
+                'system.withholding': 'С удержанием',
+                'system.platform.sep': 'Раздельная платформа',
+                'system.mixed': 'Смешанная платформа',
+                'system.profit.based': 'На основе прибыли',
+                // Common
+                'common.apartment': 'квартира',
+                'common.apartments': 'квартир',
+                'common.occupancy': 'заполняемость',
+                'common.avg.commission': 'Ср. комиссия',
+                'common.night': 'ночь',
+                'common.nights': 'ночей',
+                'common.reservation': 'бронирование',
+                'common.reservations': 'бронирований',
+                // Expense Categories
+                'expense.cleaning': 'Уборка',
+                'expense.electricity': 'Электричество',
+                'expense.water': 'Вода',
+                'expense.internet': 'Интернет',
+                'expense.management': 'Управление',
+                'expense.maintenance': 'Обслуживание',
+                'expense.other': 'Прочее'
             },
             ar: {
                 // Login screen
@@ -2303,7 +2925,318 @@
                 'tab.analysis.expense': 'تحليل المصاريف',
                 'tab.analysis.owner': 'تحليل المالكين',
                 // Overview
-                'overview.financial.title': 'الملخص المالي'
+                'overview.financial.title': 'الملخص المالي',
+                'overview.revenue.trend': 'اتجاه الإيرادات',
+                'overview.top.performers': 'أفضل الأداء',
+                'overview.platform.dist': 'توزيع المنصات',
+                'overview.payment.dist': 'توزيع طرق الدفع',
+                // KPI
+                'kpi.portfolio': 'إجمالي المحفظة',
+                'kpi.monthly.revenue': 'إيراد الشهر',
+                'kpi.vs.last': 'مقارنة بالفترة السابقة',
+                'kpi.active.apartments': 'الشقق النشطة',
+                'kpi.with.reservation': 'بها حجوزات',
+                'kpi.avg.occupancy': 'متوسط الإشغال',
+                'kpi.best.system': 'أفضل نظام',
+                'kpi.total.expense': 'إجمالي المصاريف',
+                'kpi.net.income': 'صافي الدخل',
+                'kpi.net.income.yours': 'صافي دخلك',
+                'kpi.real.profit': 'الربح الفعلي',
+                'kpi.this.month': 'هذا الشهر',
+                'kpi.apartment': 'شقة',
+                'kpi.apartments': 'شقق',
+                'kpi.vs.prev.month': 'مقارنة بالشهر السابق:',
+                'kpi.no.prev.data': 'لا بيانات للشهر السابق',
+                // Owner Financial
+                'owner.gross.income': 'الدخل الإجمالي',
+                'owner.platform.comm': 'عمولة المنصة',
+                'owner.lagirio.comm': 'عمولة Lagirio',
+                'owner.vat.taxes': 'ضريبة القيمة المضافة/الضرائب',
+                'owner.expenses': 'المصاريف',
+                'owner.net.income': 'صافي الدخل',
+                'owner.reservations': 'حجوزات',
+                'owner.nights': 'ليالٍ',
+                'owner.avg.per.night': 'متوسط €/ليلة',
+                'owner.total': 'الإجمالي',
+                // Comparison
+                'comparison.params': 'معايير المقارنة',
+                'comparison.mode': 'وضع المقارنة',
+                'comparison.apt.vs.apt': 'شقة مقابل شقة',
+                'comparison.apt.vs.period': 'شقة مقابل فترة',
+                'comparison.sys.vs.sys': 'نظام مقابل نظام',
+                'comparison.temporal': 'مقارنة زمنية',
+                'comparison.temporal.desc': 'ربحية فترة مقابل فترة',
+                'comparison.btn': 'قارن',
+                'comparison.revenue': 'الإيراد',
+                'comparison.expense': 'المصروف',
+                'comparison.occupancy': 'الإشغال',
+                'comparison.reservation': 'الحجز',
+                // Trends
+                'trends.revenue': 'تحليل اتجاه الإيرادات',
+                'trends.occupancy': 'تحليل اتجاه الإشغال',
+                'trends.seasonal': 'التحليل الموسمي',
+                'trends.growth': 'تحليل النمو',
+                'trends.profit': 'اتجاهات الأرباح',
+                'trends.monthly.profit': 'التدفق الشهري للأرباح',
+                'trends.monthly.profit.desc': 'الدخل الإجمالي ← الربح الفعلي',
+                'trends.apt.profit.trend': 'اتجاه ربحية الشقق (أفضل 5)',
+                'trends.apt.profit.desc': 'دخل Lagirio الشهري من أفضل 5 شقق',
+                'trends.margin.trend': 'اتجاه هامش الربح',
+                'trends.margin.desc': 'التغير الشهري لنسبة الربح الفعلي / الدخل الإجمالي',
+                'trends.occ.profit': 'علاقة الإشغال والربحية',
+                'trends.occ.profit.desc': 'الارتباط بين الإشغال والربح الفعلي لكل شقة',
+                'trends.revenue.analysis': 'تحليل الإيرادات',
+                'trends.monthly.breakdown': 'تفصيل الإيرادات الشهرية',
+                'trends.apt.perf.compare': 'مقارنة أداء الشقق',
+                'trends.apt.perf.desc': 'صافي الدخل الشهري لكل شقة',
+                'trends.price.vs.occ': 'السعر الليلي مقابل الإشغال',
+                'trends.price.occ.desc': 'توازن السعر-الإشغال: إيجاد النقطة المثلى',
+                'trends.platform.revenue': 'توزيع الإيرادات حسب المنصة',
+                'trends.platform.desc': 'أي منصة تحقق إيراداً أكبر؟',
+                'trends.forecasts': 'التوقعات والإسقاطات',
+                'trends.next.month': 'توقعات الشهر القادم',
+                'trends.3month': 'إسقاط 3 أشهر',
+                'trends.annual': 'الهدف السنوي',
+                'trends.based.on': 'بناءً على تحليل الاتجاهات',
+                // Chart labels
+                'chart.gross.income': 'الدخل الإجمالي',
+                'chart.real.profit': 'الربح الفعلي',
+                'chart.net.income': 'صافي الدخل',
+                'chart.revenue': 'الإيراد',
+                'chart.occupancy': 'الإشغال',
+                'chart.growth.pct': 'نسبة النمو',
+                'chart.company.expense': 'مصاريف الشركة',
+                'chart.margin': 'هامش الربح',
+                'chart.expenses': 'المصاريف',
+                'chart.platform.comm': 'عمولة المنصة',
+                'chart.lagirio.comm': 'عمولة Lagirio',
+                'chart.vat': 'ضريبة القيمة المضافة',
+                'chart.nightly.eur': 'الليلة (€)',
+                'chart.occ.pct': 'الإشغال (%)',
+                'chart.avg.nightly': 'متوسط الليلة',
+                'chart.total': 'الإجمالي',
+                'chart.avg.income': 'متوسط الدخل',
+                'chart.avg.net': 'متوسط صافي الدخل',
+                'chart.per.apt.profit': 'ربح لكل شقة',
+                'chart.active.apt': 'الشقق النشطة',
+                'chart.avg.occ.pct': 'متوسط الإشغال (%)',
+                'chart.per.apt.eur': 'ربح لكل شقة (€)',
+                'chart.correlation': 'الارتباط',
+                // Efficiency
+                'eff.cost': 'كفاءة التكاليف',
+                'eff.system': 'كفاءة النظام',
+                'eff.detailed': 'مقاييس الكفاءة التفصيلية',
+                'eff.col.apartment': 'الشقة',
+                'eff.col.expense.ratio': 'مصروف/إيراد',
+                'eff.col.margin': 'هامش الربح الصافي',
+                'eff.col.per.night': '€/ليلة',
+                'eff.col.idle.cost': 'تكلفة الأيام الفارغة',
+                'eff.col.score': 'درجة الكفاءة',
+                'eff.chart.expense': 'مصروف',
+                'eff.chart.revenue': 'إيراد',
+                'eff.chart.ratio': 'نسبة',
+                'eff.chart.ratio.label': 'نسبة المصروف/الإيراد (%)',
+                'eff.chart.ratio.legend': 'مصروف/إيراد',
+                'eff.chart.target': 'الهدف: 50%',
+                'eff.chart.efficiency': 'الكفاءة',
+                // Reports
+                'reports.create': 'إنشاء تقرير',
+                'reports.summary': 'تقرير ملخص',
+                'reports.summary.desc': 'ملخص تنفيذي من صفحة واحدة',
+                'reports.detailed': 'تقرير مفصّل',
+                'reports.detailed.desc': 'تقرير تحليلي شامل',
+                'reports.comparison': 'تقرير مقارنة',
+                'reports.comparison.desc': 'مقارنة الفترات/الشقق',
+                'reports.revenue.expense': 'تفاصيل الإيرادات والمصاريف',
+                'reports.custom': 'تقرير مخصص',
+                'reports.custom.desc': 'أنشئ تقريرك الخاص',
+                'reports.sections': 'أقسام التقرير',
+                'reports.section.summary': 'ملخص',
+                'reports.section.system': 'مقارنة الأنظمة',
+                'reports.apt.selection': 'اختيار الشقق',
+                'reports.apt.multiselect': 'اضغط Ctrl/Cmd للتحديد المتعدد',
+                'reports.date.range': 'النطاق الزمني',
+                'reports.generate': 'إنشاء التقرير',
+                'reports.quick.export': 'تصدير سريع',
+                'reports.quick.compare': 'مقارنة سريعة',
+                'reports.quick.report': 'تقرير سريع',
+                'reports.exec.summary': 'تقرير ملخص تنفيذي',
+                'reports.total.portfolio': 'إجمالي المحفظة',
+                'reports.monthly.income': 'الإيراد الشهري',
+                'reports.avg.occupancy': 'متوسط الإشغال',
+                'reports.active.apt': 'الشقق النشطة',
+                'reports.sys.performance': 'أداء النظام',
+                'reports.col.revenue': 'الإيراد',
+                'reports.col.occupancy': 'الإشغال',
+                'reports.col.efficiency': 'الكفاءة',
+                // Projection
+                'proj.company.expenses': 'مصاريف الشركة (Lagirio)',
+                'proj.office': 'مصاريف المكتب',
+                'proj.personnel': 'مصاريف الموظفين',
+                'proj.other': 'أخرى',
+                'proj.expense.desc.ph': 'وصف المصروف',
+                'proj.no.expenses': 'لا توجد مصاريف شركة بعد',
+                'proj.load.pms': 'تحميل الحجوزات المستقبلية (PMS)',
+                'proj.pms.desc': 'تصدير HTML من Zirkon / PMS',
+                'proj.drag.file': 'اسحب / اختر ملف HTML',
+                'proj.no.file': 'لم يتم تحميل ملف بعد',
+                'proj.past': 'سابق',
+                'proj.unmatched': 'توجد شقق غير متطابقة',
+                'proj.match.apt': 'مطابقة الشقق',
+                'proj.blend.settings': 'إعدادات التوقع المختلط',
+                'proj.blend': 'توقع مختلط',
+                'proj.current.res': 'حجز حالي',
+                'proj.past.plus5': 'سابق +5%',
+                'proj.est.gross': 'الدخل الإجمالي المتوقع',
+                'proj.avg.nightly.calc': 'متوسط الليلة × 25 يوم/شهر',
+                'proj.avg.nightly': 'متوسط سعر الليلة',
+                'proj.lagirio.net': 'صافي دخل Lagirio',
+                'proj.real.profit': 'الربح الفعلي',
+                'proj.company.expense': 'مصاريف الشركة',
+                'proj.per.year': '/سنة',
+                'proj.est.expenses': 'المصاريف المتوقعة',
+                'proj.est.vat': 'ضريبة القيمة المضافة المتوقعة',
+                'proj.system.based': 'حسب النظام',
+                'proj.est.platform': 'عمولة المنصة المتوقعة',
+                'proj.est.lagirio': 'عمولة Lagirio المتوقعة',
+                'proj.monthly.title': 'الإسقاط الشهري (دخل Lagirio)',
+                'proj.monthly.detail': 'تفاصيل الدخل الشهري لـ Lagirio',
+                'proj.all.apts.total': '(جميع الشقق إجمالي)',
+                'proj.owner.monthly.title': 'الإسقاط الشهري (صافي دخلك)',
+                'proj.owner.monthly.detail': 'تفاصيل الدخل الشهري',
+                'proj.owner.all.total': '(جميع شققك إجمالي)',
+                'proj.apt.forecast': 'التوقعات حسب الشقة',
+                'proj.click.detail': '(انقر للتفاصيل)',
+                'proj.month.by.month': 'شهر بشهر',
+                'proj.future.res.list': 'قائمة الحجوزات المستقبلية',
+                'proj.all.platforms': 'جميع المنصات',
+                'proj.est.net.income': 'صافي الدخل المتوقع',
+                'proj.est.gross.short': 'الدخل الإجمالي (من الشقق)',
+                'proj.apt.standard': 'حسب الشقة القياسي (مع إزالة القيم المتطرفة)',
+                'proj.past.ratio': 'النسبة السابقة:',
+                'proj.gross.pct': '% من الإجمالي',
+                'proj.flow.title': 'تدفق الدخل',
+                'proj.flow.desc': '(من الدخل الإجمالي إلى الصافي)',
+                'proj.total.deduction': 'إجمالي الخصومات',
+                'proj.your.income': 'دخلك',
+                'proj.col.month': 'الشهر',
+                'proj.col.apt': 'الشقة',
+                'proj.col.res': 'حجز',
+                'proj.col.gross': 'الدخل الإجمالي',
+                'proj.col.apt.expense': 'مصاريف الشقة',
+                'proj.col.vat': 'ض.ق.م',
+                'proj.col.plt.comm': 'عمولة منصة',
+                'proj.col.gross.profit': 'الربح الإجمالي',
+                'proj.col.company.exp': 'مصاريف شركة',
+                'proj.col.real.profit': 'الربح الفعلي',
+                'proj.col.margin': 'الهامش',
+                'proj.col.lagirio': 'Lagirio',
+                'proj.col.nightly': 'الليلة',
+                'proj.total.12m': 'الإجمالي (12 شهر)',
+                'proj.per.night.profit': 'ربح/ليلة',
+                'proj.total.profit': 'إجمالي الربح',
+                'proj.gross': 'إجمالي',
+                'proj.night': 'ليلة',
+                'proj.profitability': 'الربحية',
+                'proj.no.data': 'لا بيانات للفترة المحددة',
+                'proj.blend.gross': 'الإجمالي المختلط المتوقع',
+                'proj.std.expense': 'المصروف القياسي',
+                'proj.detail.click': 'انقر للتفاصيل',
+                'proj.no.detail': 'لا تفاصيل شقق لهذا الشهر',
+                'proj.12m.total': 'إجمالي 12 شهر',
+                'proj.deduction': 'خصم',
+                'proj.net': 'صافي',
+                'proj.detail.title': 'تفاصيل الإسقاط',
+                'proj.summary': 'ملخص',
+                'proj.future.res': 'حجوزات مستقبلية',
+                'proj.past.year': 'العام الماضي',
+                'proj.deduction.detail': 'تفاصيل الخصومات',
+                'proj.apt.distribution': 'التوزيع حسب الشقة',
+                'proj.col.guest': 'الضيف',
+                'proj.col.date': 'التاريخ',
+                'proj.col.platform': 'المنصة',
+                'proj.col.amount': 'المبلغ',
+                'proj.col.per.night': '/ليلة',
+                'proj.col.checkin': 'الدخول',
+                'proj.col.checkout': 'الخروج',
+                'proj.total': 'الإجمالي',
+                'proj.avg.nightly.label': 'متوسط الليلة:',
+                'proj.total.nights': 'إجمالي الليالي:',
+                'proj.res.count': 'عدد الحجوزات:',
+                'proj.no.future.res': 'لا حجوزات مستقبلية لهذا الشهر',
+                'proj.est.from.past': 'التوقعات مبنية على بيانات سابقة',
+                'proj.data.suffix': 'بيانات',
+                'proj.no.past.data': 'لا بيانات لهذا الشهر في العام الماضي',
+                'proj.close': 'إغلاق',
+                'proj.future': 'مستقبلية',
+                'proj.past.year.short': 'العام الماضي',
+                'proj.current.future': 'الحجوزات الحالية / المستقبلية',
+                'proj.past.year.label': 'العام الماضي',
+                'proj.no.res.data': 'لا بيانات حجوزات لهذا الشهر',
+                'proj.reservations': 'الحجوزات',
+                'proj.12m.compare': '(12 شهر — مستقبلية + مقارنة بالعام الماضي)',
+                'proj.view.res': 'عرض الحجوزات',
+                'proj.col.source': 'المصدر',
+                'proj.col.deduction': 'خصم',
+                'proj.col.nights.res': 'حجز (ليالٍ)',
+                'proj.col.gross.25d': 'إجمالي (×25ي)',
+                'proj.upcoming.res': 'الحجوزات القادمة',
+                'proj.more.res': 'حجوزات أخرى',
+                'proj.no.future.res.yet': 'لا حجوزات مستقبلية بعد',
+                'proj.est.from.past2': 'التوقعات مبنية على بيانات سابقة',
+                'proj.current.res.label': 'الحجوزات الحالية',
+                'proj.past.year.res': 'حجوزات العام الماضي',
+                'proj.actual.data': 'بيانات فعلية',
+                'proj.past.plus5.label': 'العام الماضي +5%',
+                'proj.all.future.res': 'جميع الحجوزات المستقبلية',
+                'proj.no.future.global': 'لا حجوزات مستقبلية',
+                'proj.clear.confirm': 'هل أنت متأكد من مسح جميع بيانات الإسقاط؟',
+                'proj.loaded': 'حجوزات تم تحميلها!',
+                'proj.no.valid': 'لم يتم العثور على حجوزات صالحة',
+                'proj.apt.matching': 'مطابقة الشقق',
+                'proj.apt.matching.desc': 'طابق أرقام غرف PMS مع شقق التحليل...',
+                'proj.loading': 'جارٍ التحميل...',
+                // Settings
+                'settings.display': 'إعدادات العرض',
+                'settings.dark': 'المظهر الداكن',
+                'settings.animations': 'تفعيل الرسوم المتحركة',
+                'settings.compact': 'العرض المضغوط',
+                'settings.data': 'إعدادات البيانات',
+                'settings.alerts': 'إعدادات التنبيهات',
+                'settings.low.occ': 'تنبيه الإشغال المنخفض (%)',
+                'settings.high.expense': 'تنبيه المصروف المرتفع (€)',
+                'settings.admin.pass': 'كلمة مرور المسؤول',
+                'settings.admin.not.logged': 'لم يتم تسجيل دخول المسؤول',
+                'settings.new.admin.pass': 'تعيين كلمة مرور جديدة للمسؤول (للمسؤول فقط):',
+                'settings.new.pass.ph': 'كلمة مرور جديدة',
+                // Custom Reports
+                'custom.report.title': 'إنشاء تقرير مخصص',
+                // System Types
+                'system.rental': 'إيجار',
+                'system.sole': 'شركة فردية',
+                'system.commission': 'عمولة',
+                'system.special': 'عمولة خاصة',
+                'system.withholding': 'خصم ضريبي',
+                'system.platform.sep': 'منصة منفصلة',
+                'system.mixed': 'منصة مختلطة',
+                'system.profit.based': 'على أساس الربح',
+                // Common
+                'common.apartment': 'شقة',
+                'common.apartments': 'شقق',
+                'common.occupancy': 'إشغال',
+                'common.avg.commission': 'متوسط العمولة',
+                'common.night': 'ليلة',
+                'common.nights': 'ليالٍ',
+                'common.reservation': 'حجز',
+                'common.reservations': 'حجوزات',
+                // Expense Categories
+                'expense.cleaning': 'تنظيف',
+                'expense.electricity': 'كهرباء',
+                'expense.water': 'مياه',
+                'expense.internet': 'إنترنت',
+                'expense.management': 'إدارة',
+                'expense.maintenance': 'صيانة',
+                'expense.other': 'أخرى'
             }
         },
 
@@ -2316,7 +3249,17 @@
         setLang(lang) {
             this.currentLang = lang;
             localStorage.setItem(this.STORAGE_KEY, lang);
+            this.updateLanguageSelector();
             this.applyTranslations();
+            // Dil değişince dinamik JS içeriklerini yenile
+            if (typeof Analytics !== 'undefined' && Analytics.data) {
+                try { Analytics.updateQuickStats(); } catch(e) {}
+                try { Analytics.updateSystemCards(); } catch(e) {}
+                try { Analytics.updateDashboard(); } catch(e) {}
+            }
+            if (typeof Projection !== 'undefined' && Projection._lastCalcResult) {
+                try { Projection.calculate(); } catch(e) {}
+            }
         },
 
         t(key, fallback) {
@@ -5032,9 +5975,9 @@
             const chartTitle = document.getElementById('projChartTitle');
             const tableTitle = document.getElementById('projTableTitle');
             const tableSubtitle = document.getElementById('projTableSubtitle');
-            if (chartTitle) chartTitle.textContent = isOwner ? 'Aylık Projeksiyon (Net Kazancınız)' : 'Aylık Projeksiyon (Lagirio Kazancı)';
-            if (tableTitle) tableTitle.textContent = isOwner ? 'Aylık Kazanç Detayı' : 'Aylık Lagirio Kazanç Detayı';
-            if (tableSubtitle) tableSubtitle.textContent = isOwner ? '(tüm daireleriniz toplam)' : '(tüm daireler toplam)';
+            if (chartTitle) chartTitle.textContent = isOwner ? t('proj.owner.monthly.title', 'Aylık Projeksiyon (Net Kazancınız)') : t('proj.monthly.title', 'Aylık Projeksiyon (Lagirio Kazancı)');
+            if (tableTitle) tableTitle.textContent = isOwner ? t('proj.owner.monthly.detail', 'Aylık Kazanç Detayı') : t('proj.monthly.detail', 'Aylık Lagirio Kazanç Detayı');
+            if (tableSubtitle) tableSubtitle.textContent = isOwner ? t('proj.owner.all.total', '(tüm daireleriniz toplam)') : t('proj.all.apts.total', '(tüm daireler toplam)');
             if (!isOwner) {
                 document.getElementById('projResTableSection')?.classList.remove('hidden');
                 // Admin kârlılık paneli (Ay-Ay + Aralık)
@@ -5112,15 +6055,15 @@
 
             // \u00dcst sat\u0131r: Br\u00fct, Ana Kazan\u00e7, Gecelik
             document.getElementById('projGrossRevenue').textContent = '\u20ac' + estGross.toFixed(2);
-            document.getElementById('projGrossDetail').textContent = aptCount + ' daire | 12 ay | Karma tahmin';
+            document.getElementById('projGrossDetail').textContent = aptCount + ' ' + t('common.apartment', 'daire') + ' | 12 ' + t('proj.col.month', 'ay').toLowerCase() + ' | ' + t('proj.blend', 'Karma tahmin');
 
             if (isOwner) {
-                document.getElementById('projMainLabel').textContent = 'Tahmini Net Kazanc\u0131n\u0131z';
+                document.getElementById('projMainLabel').textContent = t('proj.est.net.income', 'Tahmini Net Kazancınız');
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + ownerNet.toFixed(2);
                 const ownerRatio = estGross > 0 ? Math.round((ownerNet / estGross) * 100) : 0;
                 document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + ownerRatio + '\'i';
             } else {
-                document.getElementById('projMainLabel').textContent = 'Br\u00fct Kazan\u00e7 (Dairelerden)';
+                document.getElementById('projMainLabel').textContent = t('proj.est.gross.short', 'Brüt Kazanç (Dairelerden)');
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + lagirioNet.toFixed(2);
                 const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
                 document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
@@ -7977,7 +8920,7 @@
             const shownYear = stats._monthlyTargetYear;
             const now2 = new Date();
             const isCurrentMonth = shownMonth === now2.getMonth() && shownYear === now2.getFullYear();
-            const monthLabel = isCurrentMonth ? 'Bu Ay' : monthNamesShort[shownMonth] + ' ' + shownYear;
+            const monthLabel = isCurrentMonth ? t('kpi.this.month', 'Bu Ay') : monthNamesShort[shownMonth] + ' ' + shownYear;
 
             // Admin'de aylık kazanç = gerçek kâr, header'da da gerçek kâr
             const monthlyDisplay = isOwner ? stats.monthlyRevenue : monthlyRealProfit;
@@ -8010,30 +8953,30 @@
             if (isOwner) {
                 // Owner modunda KPI etiketlerini değiştir
                 const portfolioLabel = document.getElementById('portfolioLabel');
-                if (portfolioLabel) portfolioLabel.textContent = 'Net Kazancınız';
+                if (portfolioLabel) portfolioLabel.textContent = t('kpi.net.income.yours', 'Net Kazancınız');
                 const headerPortLabel = document.getElementById('headerPortfolioLabel');
-                if (headerPortLabel) headerPortLabel.textContent = 'Net Kazanç';
+                if (headerPortLabel) headerPortLabel.textContent = t('kpi.net.income', 'Net Kazanç');
                 const headerMonthLabel = document.getElementById('headerMonthlyLabel');
-                if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? 'Bu Ay Kazanç' : monthLabel;
+                if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? t('kpi.this.month', 'Bu Ay') + ' ' + t('kpi.monthly.revenue', 'Kazanç') : monthLabel;
                 const revenueLabel = document.getElementById('revenueLabel');
-                if (revenueLabel) revenueLabel.textContent = isCurrentMonth ? 'Bu Ay Kazanç' : monthLabel;
+                if (revenueLabel) revenueLabel.textContent = isCurrentMonth ? t('kpi.this.month', 'Bu Ay') + ' ' + t('kpi.monthly.revenue', 'Kazanç') : monthLabel;
 
                 // "En Karlı Sistem" → "Toplam Gider"
                 const systemLabel = document.getElementById('bestSystemLabel');
-                if (systemLabel) systemLabel.textContent = 'Toplam Gider';
+                if (systemLabel) systemLabel.textContent = t('kpi.total.expense', 'Toplam Gider');
                 document.getElementById('bestSystem').textContent = `€${stats.totalExpenses.toLocaleString()}`;
                 const systemProfitEl = document.getElementById('systemProfit');
-                if (systemProfitEl) systemProfitEl.textContent = `${stats.totalProperties} daire`;
+                if (systemProfitEl) systemProfitEl.textContent = `${stats.totalProperties} ${t('common.apartment', 'daire')}`;
             } else {
                 // Admin: label'ları düzelt
                 const portfolioLabel = document.getElementById('portfolioLabel');
-                if (portfolioLabel) portfolioLabel.textContent = 'Gerçek Kâr';
+                if (portfolioLabel) portfolioLabel.textContent = t('kpi.real.profit', 'Gerçek Kâr');
                 const headerPortLabel = document.getElementById('headerPortfolioLabel');
-                if (headerPortLabel) headerPortLabel.textContent = 'Gerçek Kâr';
+                if (headerPortLabel) headerPortLabel.textContent = t('kpi.real.profit', 'Gerçek Kâr');
                 const headerMonthLabel = document.getElementById('headerMonthlyLabel');
-                if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? 'Bu Ay' : monthLabel;
+                if (headerMonthLabel) headerMonthLabel.textContent = isCurrentMonth ? t('kpi.this.month', 'Bu Ay') : monthLabel;
                 const revenueLabel = document.getElementById('revenueLabel');
-                if (revenueLabel) revenueLabel.textContent = isCurrentMonth ? 'Bu Ay Gerçek Kâr' : monthLabel + ' Gerçek Kâr';
+                if (revenueLabel) revenueLabel.textContent = isCurrentMonth ? t('kpi.this.month', 'Bu Ay') + ' ' + t('kpi.real.profit', 'Gerçek Kâr') : monthLabel + ' ' + t('kpi.real.profit', 'Gerçek Kâr');
 
                 // Trend badge: önceki aya göre % fark
                 if (monthlyTrendEl && monthPctText) {
@@ -8048,9 +8991,9 @@
                 if (monthlyChangeEl) {
                     const prevMNShort = monthNamesShort[stats._prevMonthIdx ?? 0];
                     if (prevMonthRealProfit !== 0) {
-                        monthlyChangeEl.textContent = `vs önceki ay: €${prevMonthRealProfit.toLocaleString()}`;
+                        monthlyChangeEl.textContent = `${t('kpi.vs.prev.month', 'vs önceki ay:')} €${prevMonthRealProfit.toLocaleString()}`;
                     } else {
-                        monthlyChangeEl.textContent = 'önceki ay verisi yok';
+                        monthlyChangeEl.textContent = t('kpi.no.prev.data', 'önceki ay verisi yok');
                     }
                 }
 
@@ -9943,12 +10886,12 @@
                         <h4 class="font-semibold mb-3">${system.name}</h4>
                         <p class="text-3xl font-bold mb-2">€${system.revenue.toLocaleString()}</p>
                         <div class="flex justify-between text-sm opacity-90">
-                            <span>${system.apartmentCount} daire</span>
-                            <span>${system.avgOccupancy.toFixed(1)}% doluluk</span>
+                            <span>${system.apartmentCount} ${t('common.apartment', 'daire')}</span>
+                            <span>${system.avgOccupancy.toFixed(1)}% ${t('common.occupancy', 'doluluk')}</span>
                         </div>
                         <div class="mt-3 pt-3 border-t border-white/20">
                             <div class="flex justify-between text-xs">
-                                <span>Ort. Komisyon</span>
+                                <span>${t('common.avg.commission', 'Ort. Komisyon')}</span>
                                 <span class="font-semibold">${system.avgCommission.toFixed(1)}%</span>
                             </div>
                         </div>
@@ -9979,14 +10922,14 @@
             ];
             
             const systemNames = {
-                '1': 'Kira',
-                '2': 'Kişi Şirketi',
-                '3': 'Komisyon',
-                '4': 'Özel Komisyon',
-                '5': 'Stopajlı',
-                '6': 'Platform Ayrımlı',
-                '7': 'Karma Platform',
-                '8': 'Kâr Bazlı'
+                '1': t('system.rental', 'Kira'),
+                '2': t('system.sole', 'Kişi Şirketi'),
+                '3': t('system.commission', 'Komisyon'),
+                '4': t('system.special', 'Özel Komisyon'),
+                '5': t('system.withholding', 'Stopajlı'),
+                '6': t('system.platform.sep', 'Platform Ayrımlı'),
+                '7': t('system.mixed', 'Karma Platform'),
+                '8': t('system.profit.based', 'Kâr Bazlı')
             };
             
             const systems = [];
