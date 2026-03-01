@@ -12151,10 +12151,10 @@
                 const label = monthNames[targetDate.getMonth()] + '\'' + String(targetDate.getFullYear()).slice(2);
                 const mStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
                 const mEnd = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+                const monthIdx = 11 - i;
 
                 let mGross = 0, mPlatComm = 0, mLagComm = 0, mKdv = 0, mExp = 0, mNet = 0;
                 let mNights = 0, mResCount = 0, totalOccupancy = 0, aptCount = 0;
-                const mPlatforms = {};
 
                 this.data.apartments?.forEach(apartment => {
                     const monthRes = this.data.reservations?.filter(res => {
@@ -12167,6 +12167,11 @@
                         return exp.apartmentId === apartment.id &&
                             d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
                     }) || [];
+
+                    // Daire verisini her zaman yaz (0 dahil)
+                    if (!result.aptData[apartment.id]) {
+                        result.aptData[apartment.id] = { code: apartment.code, months: new Array(12).fill(0) };
+                    }
 
                     if (monthRes.length > 0) {
                         const det = this.calculateOwnerShareDetailed(apartment, monthRes, monthExp);
@@ -12181,20 +12186,14 @@
                         aptCount++;
                         totalOccupancy += this.calculateOccupancyRate(apartment.id, mStart, mEnd);
 
-                        // Daire bazlı
-                        if (!result.aptData[apartment.id]) result.aptData[apartment.id] = { code: apartment.code, months: [] };
-                        result.aptData[apartment.id].months.push({ label, net: det.netOwnerShare });
+                        result.aptData[apartment.id].months[monthIdx] = det.netOwnerShare;
 
                         // Platform bazlı
                         monthRes.forEach(res => {
                             const p = res.platform || 'Direkt';
-                            if (!mPlatforms[p]) mPlatforms[p] = 0;
-                            mPlatforms[p] += this.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                            if (!result.platformData[p]) result.platformData[p] = new Array(12).fill(0);
+                            result.platformData[p][monthIdx] += this.convertToEUR(res.totalAmount, res.currency || 'EUR');
                         });
-                    } else {
-                        if (result.aptData[apartment.id]) {
-                            result.aptData[apartment.id].months.push({ label, net: 0 });
-                        }
                     }
                 });
 
@@ -12209,29 +12208,6 @@
                 result.occupancy.push(aptCount > 0 ? +(totalOccupancy / aptCount).toFixed(1) : 0);
                 result.resCounts.push(mResCount);
 
-                Object.entries(mPlatforms).forEach(([p, v]) => {
-                    if (!result.platformData[p]) result.platformData[p] = [];
-                });
-            }
-
-            // Platform verilerini hizala (her ay için değer olsun)
-            const allPlatforms = Object.keys(result.platformData);
-            // Yeniden hesapla
-            result.platformData = {};
-            for (let i = 11; i >= 0; i--) {
-                const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                this.data.apartments?.forEach(apartment => {
-                    const monthRes = this.data.reservations?.filter(res => {
-                        const d = new Date(res.checkIn);
-                        return res.apartmentId === apartment.id &&
-                            d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
-                    }) || [];
-                    monthRes.forEach(res => {
-                        const p = res.platform || 'Direkt';
-                        if (!result.platformData[p]) result.platformData[p] = new Array(12).fill(0);
-                        result.platformData[p][11 - i] += this.convertToEUR(res.totalAmount, res.currency || 'EUR');
-                    });
-                });
             }
 
             return result;
@@ -12305,7 +12281,7 @@
                 smooth: true,
                 symbol: 'circle',
                 symbolSize: 7,
-                data: showIdx.map(i => apt.months[i] ? +apt.months[i].net.toFixed(2) : 0),
+                data: showIdx.map(i => +(apt.months[i] || 0).toFixed(2)),
                 lineStyle: { width: 2.5, color: colors[idx % colors.length] },
                 itemStyle: { color: colors[idx % colors.length], borderColor: '#fff', borderWidth: 2 }
             }));
@@ -12375,7 +12351,7 @@
             });
         },
 
-        // Owner Grafik 4: Platform Gelir Dağılımı Trendi (Stacked Area)
+        // Owner Grafik 4: Platform Gelir Dağılımı Trendi
         createOwnerPlatformTrendChart(data) {
             const container = document.getElementById('ownerPlatformTrendChart');
             if (!container) return;
@@ -12392,16 +12368,20 @@
             const platformColors = { 'Airbnb': '#FF5A5F', 'Booking.com': '#003580', 'Direkt': '#10b981', 'Expedia': '#FBAF00' };
             const fallbackColors = ['#6366f1', '#ec4899', '#14b8a6', '#f97316'];
 
-            const series = platforms.map((p, idx) => ({
-                name: p,
-                type: 'line',
-                stack: 'platform',
-                smooth: true,
-                areaStyle: { opacity: 0.6 },
-                data: showIdx.map(i => +(data.platformData[p][i] || 0).toFixed(2)),
-                lineStyle: { width: 1.5, color: platformColors[p] || fallbackColors[idx % fallbackColors.length] },
-                itemStyle: { color: platformColors[p] || fallbackColors[idx % fallbackColors.length] }
-            }));
+            const series = platforms.map((p, idx) => {
+                const color = platformColors[p] || fallbackColors[idx % fallbackColors.length];
+                return {
+                    name: p,
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 7,
+                    data: showIdx.map(i => +(data.platformData[p][i] || 0).toFixed(2)),
+                    lineStyle: { width: 2.5, color },
+                    itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
+                    areaStyle: { opacity: 0.15 }
+                };
+            });
 
             const chart = echarts.init(container);
             this.charts.ownerPlatformTrend = chart;
