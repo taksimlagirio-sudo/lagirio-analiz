@@ -206,10 +206,8 @@
 
         /* ========= OWNER MODE ========= */
         body.owner-mode #uploadSection,
-        body.owner-mode [data-tab="comparison"],
         body.owner-mode [data-tab="efficiency"],
         body.owner-mode [data-tab="reports"],
-        body.owner-mode #comparison-content,
         body.owner-mode #efficiency-content,
         body.owner-mode #reports-content,
         body.owner-mode .admin-only,
@@ -223,6 +221,19 @@
         body.owner-mode .owner-readonly {
             pointer-events: none;
             opacity: 0.6;
+        }
+        /* Owner filter chip styles */
+        .owner-filter-chip {
+            user-select: none;
+        }
+        .owner-filter-chip:not(.active) {
+            background: white;
+            border-color: #e5e7eb;
+            color: #6b7280;
+        }
+        .owner-filter-chip:not(.active):hover {
+            border-color: #9ca3af;
+            background: #f9fafb;
         }
     </style>
 </head>
@@ -1053,7 +1064,21 @@
                     </button>
                 </nav>
             </div>
-            
+
+            <!-- Owner Apartment Filter Bar - sadece çok daireli owner'da görünür -->
+            <div id="ownerApartmentFilter" class="hidden bg-white/90 backdrop-blur border-b border-gray-200 px-4 py-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">Daire:</span>
+                    <button onclick="Analytics.ownerFilterSelectAll()" id="ownerFilterAll"
+                            class="owner-filter-chip active px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition cursor-pointer bg-emerald-50 border-emerald-500 text-emerald-700">
+                        Tümü
+                    </button>
+                    <div id="ownerFilterChips" class="flex items-center gap-2 flex-wrap">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Overview Tab Content -->
             <div id="overview-content" class="tab-content active bg-white/95 p-6">
                 <!-- Owner Financial Summary - sadece owner modunda görünür -->
@@ -1190,7 +1215,7 @@
                             </button>
                             
                             <button onclick="Analytics.setComparisonMode('system-system')"
-                                    class="comparison-mode-btn px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-500 transition text-left">
+                                    class="comparison-mode-btn admin-only px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-500 transition text-left">
                                 <div class="font-semibold text-gray-700">Sistem vs Sistem</div>
                                 <div class="text-xs text-gray-500 mt-1">Sistem karşılaştır</div>
                             </button>
@@ -3679,6 +3704,7 @@
 
                 // Owner ise veriyi filtrele
                 if (Auth.currentUser && Auth.currentUser.role === 'owner' && Auth.currentUser.apartmentIds) {
+                    Analytics._fullData = null; // Drive'dan taze veri geldi, eski cache'i temizle
                     Analytics.applyOwnerFilter(Auth.currentUser.apartmentIds);
                 }
 
@@ -7207,19 +7233,145 @@
         applyOwnerFilter(apartmentIds) {
             if (!apartmentIds || !apartmentIds.length || !this.data) return;
 
-            // Orijinal veriyi sakla
+            // Orijinal veriyi sakla (owner'ın TÜM dairelerini içeren veri)
             if (!this._fullData) {
                 this._fullData = JSON.parse(JSON.stringify(this.data));
             }
 
             this.data = {
                 ...this.data,
-                apartments: this.data.apartments.filter(a => apartmentIds.includes(a.id)),
-                reservations: (this.data.reservations || []).filter(r => apartmentIds.includes(r.apartmentId)),
-                expenses: (this.data.expenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
-                capitalExpenses: (this.data.capitalExpenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
-                lagirioExpenses: (this.data.lagirioExpenses || []).filter(e => apartmentIds.includes(e.apartmentId))
+                apartments: (this._fullData || this.data).apartments.filter(a => apartmentIds.includes(a.id)),
+                reservations: ((this._fullData || this.data).reservations || []).filter(r => apartmentIds.includes(r.apartmentId)),
+                expenses: ((this._fullData || this.data).expenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
+                capitalExpenses: ((this._fullData || this.data).capitalExpenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
+                lagirioExpenses: ((this._fullData || this.data).lagirioExpenses || []).filter(e => apartmentIds.includes(e.apartmentId))
             };
+        },
+
+        // Owner'ın sahip olduğu tüm daire ID'leri (login'deki tam liste)
+        _ownerAllApartmentIds: null,
+
+        // Owner daire filtre barını başlat
+        initOwnerFilter() {
+            if (!Auth.currentUser || Auth.currentUser.role !== 'owner') return;
+            const allIds = Auth.currentUser.apartmentIds || [];
+
+            // Tek daireli owner → filtre barı ve karşılaştırma sekmesi gereksiz
+            if (allIds.length <= 1) {
+                const compTab = document.querySelector('[data-tab="comparison"]');
+                const compContent = document.getElementById('comparison-content');
+                if (compTab) compTab.style.display = 'none';
+                if (compContent) compContent.style.display = 'none';
+                return;
+            }
+
+            this._ownerAllApartmentIds = allIds;
+            this._ownerSelectedIds = [...allIds]; // Başlangıçta hepsi seçili
+
+            const filterBar = document.getElementById('ownerApartmentFilter');
+            const chipsContainer = document.getElementById('ownerFilterChips');
+            if (!filterBar || !chipsContainer) return;
+
+            // Daire chip'lerini oluştur
+            const source = this._fullData || this.data;
+            const ownerApts = source.apartments.filter(a => allIds.includes(a.id));
+            chipsContainer.innerHTML = ownerApts.map(apt =>
+                '<button onclick="Analytics.ownerFilterToggle(\'' + apt.id + '\')" ' +
+                'data-apt-id="' + apt.id + '" ' +
+                'class="owner-filter-chip active px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition cursor-pointer bg-emerald-50 border-emerald-500 text-emerald-700">' +
+                apt.code + '</button>'
+            ).join('');
+
+            filterBar.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        // "Tümü" butonuna tıklandı
+        ownerFilterSelectAll() {
+            if (!this._ownerAllApartmentIds) return;
+            this._ownerSelectedIds = [...this._ownerAllApartmentIds];
+            this._ownerUpdateChips();
+            this._ownerApplyFilter();
+        },
+
+        // Tek daire chip'ine tıklandı
+        ownerFilterToggle(aptId) {
+            if (!this._ownerAllApartmentIds) return;
+
+            const idx = this._ownerSelectedIds.indexOf(aptId);
+            const allSelected = this._ownerSelectedIds.length === this._ownerAllApartmentIds.length;
+
+            if (allSelected) {
+                // Tümü seçiliyken bir tanesine tıkla → sadece o seçili olsun
+                this._ownerSelectedIds = [aptId];
+            } else if (idx >= 0 && this._ownerSelectedIds.length > 1) {
+                // Zaten seçili ve birden fazla seçili → kaldır
+                this._ownerSelectedIds.splice(idx, 1);
+            } else if (idx >= 0) {
+                // Son kalan → tümünü seç
+                this._ownerSelectedIds = [...this._ownerAllApartmentIds];
+            } else {
+                // Seçili değil → ekle
+                this._ownerSelectedIds.push(aptId);
+            }
+
+            // Hepsi seçildiyse otomatik "Tümü" moduna geç
+            if (this._ownerSelectedIds.length === this._ownerAllApartmentIds.length) {
+                this._ownerSelectedIds = [...this._ownerAllApartmentIds];
+            }
+
+            this._ownerUpdateChips();
+            this._ownerApplyFilter();
+        },
+
+        // Chip görsellerini güncelle
+        _ownerUpdateChips() {
+            const allBtn = document.getElementById('ownerFilterAll');
+            const isAll = this._ownerSelectedIds.length === this._ownerAllApartmentIds.length;
+
+            // "Tümü" butonu
+            if (allBtn) {
+                if (isAll) {
+                    allBtn.classList.add('active', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
+                } else {
+                    allBtn.classList.remove('active', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
+                }
+            }
+
+            // Her daire chip'i
+            document.querySelectorAll('#ownerFilterChips .owner-filter-chip').forEach(chip => {
+                const id = chip.dataset.aptId;
+                if (this._ownerSelectedIds.includes(id)) {
+                    chip.classList.add('active', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
+                } else {
+                    chip.classList.remove('active', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
+                }
+            });
+        },
+
+        // Filtreyi uygula ve dashboard'u yeniden çiz
+        _ownerApplyFilter() {
+            this.applyOwnerFilter(this._ownerSelectedIds);
+            this.filteredData = this.data;
+
+            // Cache temizle
+            this.cache.calculations.clear();
+            this.cache.lastUpdate = Date.now();
+
+            // UI'ı güncelle
+            this.updateAllMetrics();
+            this.populateSelectors();
+            this.renderCompanyExpenses();
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    this.initializeCharts();
+                    if (Auth.currentUser?.role === 'owner') {
+                        this.renderOwnerFinancialSummary();
+                    }
+                    lucide.createIcons();
+                });
+            });
         },
 
         // Load sample data for testing
@@ -7408,6 +7560,7 @@
                     // Owner modunda finansal özet kartını render et
                     if (Auth.currentUser?.role === 'owner') {
                         this.renderOwnerFinancialSummary();
+                        this.initOwnerFilter();
                     }
                 });
             });
