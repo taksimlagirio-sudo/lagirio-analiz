@@ -400,6 +400,15 @@
 
                     <div class="w-px h-8 bg-white/10"></div>
 
+                    <!-- Header Language Selector -->
+                    <select id="headerLangSelector" onchange="I18n.setLang(this.value)"
+                            class="bg-white/10 hover:bg-white/20 text-white text-sm px-2 py-2 rounded-lg border-none cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
+                        <option value="tr" class="text-gray-800">TR</option>
+                        <option value="en" class="text-gray-800">EN</option>
+                        <option value="ru" class="text-gray-800">RU</option>
+                        <option value="ar" class="text-gray-800">AR</option>
+                    </select>
+
                     <button onclick="Auth.logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 px-3 py-2 rounded-lg flex items-center space-x-2 transition text-sm">
                         <i data-lucide="log-out" class="w-4 h-4"></i>
                         <span class="hidden sm:inline" data-i18n="header.logout">Çıkış</span>
@@ -2336,12 +2345,30 @@
         },
 
         updateLanguageSelector() {
-            const sel = document.getElementById('langSelector');
-            if (sel) sel.value = this.currentLang;
+            const login = document.getElementById('langSelector');
+            if (login) login.value = this.currentLang;
+            const header = document.getElementById('headerLangSelector');
+            if (header) header.value = this.currentLang;
+        },
+
+        // Ay isimleri — merkezileştirilmiş
+        months: {
+            tr: { full: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
+                  short: ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'] },
+            en: { full: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+                  short: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] },
+            ru: { full: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+                  short: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'] },
+            ar: { full: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
+                  short: ['ينا','فبر','مار','أبر','ماي','يون','يول','أغس','سبت','أكت','نوف','ديس'] }
+        },
+
+        getMonthNames(type) {
+            return this.months[this.currentLang]?.[type] || this.months.tr[type];
         }
     };
 
-    // Global shortcut
+    // Global shortcuts
     function t(key, fallback) { return I18n.t(key, fallback); }
 
     // Initialize Lucide icons + I18n
@@ -4354,7 +4381,7 @@
             filtered.forEach(r => {
                 const d = new Date(r.checkIn);
                 const key = d.getFullYear() + '-' + (d.getMonth()+1);
-                const monthNames = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+                const monthNames = I18n.getMonthNames('full');
                 if (!groups[key]) groups[key] = { label: monthNames[d.getMonth()] + ' ' + d.getFullYear(), items: [], total: 0, nights: 0 };
                 groups[key].items.push(r);
                 groups[key].total += r.totalPrice || 0;
@@ -4723,7 +4750,7 @@
 
         // Karma tahmin: bir daire + hedef ay için gelir tahmini
         estimateMonthRevenue(analyticsAptId, targetMonth, targetYear, defaultAdjust) {
-            const monthNamesShort = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const monthNamesShort = I18n.getMonthNames('short');
 
             // "Gelecek" = PMS + Analytics (hedef ay, hedef yıl)
             const futureFromPms = this.getPmsResForMonth(analyticsAptId, targetMonth, targetYear);
@@ -5272,7 +5299,7 @@
             const monthlyData = this._lastMonthlyData;
             const aptDetail = this._lastAptMonthlyDetail || {};
             const compExp = this._estMonthlyCompanyExp || 0;
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const sortedKeys = Object.keys(monthlyData).sort();
 
             let grandLagirio = 0, grandCompExp = 0, grandReal = 0, grandGross = 0, grandExp = 0, grandKdv = 0, grandPlat = 0;
@@ -5393,7 +5420,7 @@
             const startSel = document.getElementById('profitRangeStart');
             const endSel = document.getElementById('profitRangeEnd');
             if (!startSel || !endSel || !this._lastMonthlyData) return;
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const keys = Object.keys(this._lastMonthlyData).sort();
             const opts = keys.map(k => { const [y,m] = k.split('-'); return '<option value="' + k + '">' + monthNames[parseInt(m)-1] + ' ' + y + '</option>'; }).join('');
             if (!startSel.options.length) { startSel.innerHTML = opts; endSel.innerHTML = opts; endSel.selectedIndex = keys.length - 1; }
@@ -5410,7 +5437,7 @@
             const aptDetail = this._lastAptMonthlyDetail || {};
             const aptTotals = this._lastAptTotals || {};
             const compExp = this._estMonthlyCompanyExp || 0;
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
 
             const startKey = document.getElementById('profitRangeStart')?.value;
             const endKey = document.getElementById('profitRangeEnd')?.value;
@@ -5576,7 +5603,7 @@
             const container = document.getElementById('projMonthlyChart');
             if (!container) return;
             const isOwner = Auth.currentUser?.role === 'owner';
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const sortedKeys = Object.keys(monthlyData).sort();
 
             if (sortedKeys.length === 0) {
@@ -5681,7 +5708,7 @@
             const container = document.getElementById('projMonthlyOverview');
             if (!container) return;
             const isOwner = Auth.currentUser?.role === 'owner';
-            const monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
+            const monthNames = I18n.getMonthNames('full');
             const sortedKeys = Object.keys(monthlyData).sort();
 
             if (sortedKeys.length === 0) {
@@ -5935,7 +5962,7 @@
 
         // ========= OWNER: Ay Detay Modal (tabbed) =========
         showOwnerMonthDetail(monthKey) {
-            const monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
+            const monthNames = I18n.getMonthNames('full');
             const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : function(a) { return a; };
             const fmt = function(d) { const dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
             const [year, month] = monthKey.split('-');
@@ -6213,7 +6240,7 @@
             var self = this;
             var convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : function(a) { return a; };
             var fmt = function(d) { var dt = new Date(d); return dt.getDate() + '.' + (dt.getMonth()+1) + '.' + dt.getFullYear(); };
-            var monthNames = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
+            var monthNames = I18n.getMonthNames('full');
             var apartments = Analytics?.data?.apartments || [];
 
             if (apartments.length === 0) {
@@ -6417,7 +6444,7 @@
 
             const sorted = results.sort((a, b) => b.lagirio - a.lagirio);
             const sysNames = { '1': 'S1 Net', '2': 'S2 Br\u00fct', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
-            const monthNames = ['Oca','\u015eub','Mar','Nis','May','Haz','Tem','A\u011fu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const sourceColorMap = { emerald: 'bg-emerald-50 border-l-2 border-emerald-400', amber: 'bg-amber-50 border-l-2 border-amber-400', blue: 'bg-blue-50 border-l-2 border-blue-400', orange: 'bg-orange-50 border-l-2 border-orange-400', red: 'bg-red-50 border-l-2 border-red-300' };
 
             // Owner i\u00e7in gelecek rez say\u0131s\u0131 hesapla
@@ -6608,7 +6635,7 @@
 
         showReservationDetail(aptId, month, year) {
             const isOwner = Auth.currentUser?.role === 'owner';
-            const monthNamesFull = ['Ocak','\u015eubat','Mart','Nisan','May\u0131s','Haziran','Temmuz','A\u011fustos','Eyl\u00fcl','Ekim','Kas\u0131m','Aral\u0131k'];
+            const monthNamesFull = I18n.getMonthNames('full');
             const convertEUR = Analytics.convertToEUR ? Analytics.convertToEUR.bind(Analytics) : (a) => a;
             const apt = Analytics.data?.apartments?.find(a => a.id === aptId);
             const aptCode = apt ? apt.code : aptId;
@@ -7945,7 +7972,7 @@
             }
 
             // Aylık gelir label'ını güncelle (hangi ay gösteriliyor)
-            const monthNamesShort = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const monthNamesShort = I18n.getMonthNames('short');
             const shownMonth = stats._monthlyTargetMonth;
             const shownYear = stats._monthlyTargetYear;
             const now2 = new Date();
@@ -11106,7 +11133,7 @@
             if (!selA || !selB) return;
             if (selA.options.length > 0) return; // already populated
 
-            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const now = new Date();
             // Son 24 ay
             const allKeys = [];
@@ -11145,7 +11172,7 @@
                 return;
             }
 
-            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
 
             // Şirket gideri tahmini
@@ -12382,7 +12409,7 @@
         // Owner: Aylık detaylı kırılım verisi (calculateOwnerShareDetailed kullanarak)
         _getOwnerHistoricalData() {
             const now = new Date();
-            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const result = {
                 labels: [], grossIncome: [], platformComm: [], lagirioComm: [],
                 kdv: [], expenses: [], netOwner: [], avgNightly: [], occupancy: [],
@@ -12651,7 +12678,7 @@
         // Geçmiş veriden aylık Lagirio kazancı + şirket gideri tahmini hesapla
         _getHistoricalProfitData() {
             const now = new Date();
-            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const monthNames = I18n.getMonthNames('short');
             const result = { keys: [], labels: [], lagirio: [], grossIncome: [], compExp: [], realProfit: [], margins: [], resCounts: [], activeAptCounts: [], avgOccupancies: [], aptData: {} };
 
             // Şirket gideri tahmini
@@ -13074,7 +13101,7 @@
                 monthlyCounts[i] > 0 ? total / monthlyCounts[i] : 0
             );
 
-            const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const monthNames = I18n.getMonthNames('short');
 
             const option = {
                 tooltip: {
@@ -13279,7 +13306,7 @@
                 if (yearlyTarget) yearlyTarget.textContent = `€${yearVal.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
 
                 // Etiketleri güncelle
-                const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+                const monthNames = I18n.getMonthNames('short');
                 const [fy, fm] = firstKey.split('-');
                 const profitLabel = isOwner ? 'Net kazanç' : 'Gerçek kâr';
 
