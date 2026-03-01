@@ -1366,7 +1366,7 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
                                 <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.monthly.breakdown">Aylık Kazanç Kırılımı</h4>
-                                <p class="text-[10px] text-gray-400 mb-2">Brüt gelirden net kazanca: kesintilerin aylık dağılımı</p>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.monthly.profit.desc">Brüt gelirden net kazanca: kesintilerin aylık dağılımı</p>
                                 <div id="ownerIncomeBreakdownChart" style="height:320px"></div>
                             </div>
                             <div>
@@ -2491,6 +2491,8 @@
                 'common.nights': 'nights',
                 'common.reservation': 'reservation',
                 'common.reservations': 'reservations',
+                'common.res.short': 'res.',
+                'common.avg.short': 'Avg.',
                 // Expense Categories
                 'expense.cleaning': 'Cleaning',
                 'expense.electricity': 'Electricity',
@@ -2732,7 +2734,60 @@
                 'chart.gross.profit': 'Gross Profit',
                 'chart.real.profit': 'Real Profit',
                 'chart.net.profit': 'Net Profit',
-                'chart.company.exp': 'Company Expenses'
+                'chart.company.exp': 'Company Expenses',
+                // Phase 7 — Projection KPI & Waterfall
+                'proj.waterfall.title': 'Income Flow',
+                'proj.waterfall.desc': '(From gross income to net income)',
+                'proj.platform.comm.short': 'Platform Com.',
+                'proj.lagirio.comm.short': 'Lagirio Com.',
+                'proj.days.month': 'days/mo',
+                'proj.expense.detail': 'Apt-based standard (outlier elimination)',
+                'proj.of.gross': '% of gross',
+                'proj.hist.ratio': 'Past ratio:',
+                // Owner Financial Summary
+                'owner.bank': 'Bank:',
+                'owner.cash': 'Cash:',
+                'owner.total.res.nights': 'Total {0} reservations / {1} nights',
+                // Projection reservation section
+                'proj.nights.label': 'nights',
+                'proj.no.data.label': 'no data',
+                'proj.past.label': 'past',
+                'proj.res.badge': 'res',
+                'proj.past.year.note': 'No reservations for {0}, using {1} data with +5% adjustment.',
+                'proj.both.year.note': 'Calculated as average of both years.',
+                // Comparison section
+                'comparison.total.income': 'Total Income',
+                'comparison.owner.profit': "Owner's Profit",
+                'comparison.res.count': 'Reservation Count',
+                'comparison.total.nights': 'Total Nights',
+                'comparison.avg.nightly': 'Avg. Nightly Rate',
+                'comparison.lagirio.income': 'Lagirio Income',
+                'comparison.total.expense': 'Total Expenses',
+                'comparison.owner.share': 'Owner Share',
+                'comparison.expense.ratio': 'Expense/Revenue Ratio',
+                'comparison.details': '- Details',
+                // Chart series
+                'chart.platform.comm.short': 'Platform Com.',
+                'chart.lagirio.comm.short': 'Lagirio Com.',
+                'chart.kdv': 'VAT',
+                // Projection overview legends
+                'proj.blend.est.gross': 'Blended Est. Gross',
+                'proj.gross.profit': 'Gross Profit',
+                'proj.std.expense.label': 'Standard Expense',
+                'proj.real.profit.label': 'Real Profit',
+                // Apartment summary
+                'proj.summary.brut': 'Gross',
+                'proj.summary.deduction': 'Deduction',
+                'proj.summary.expense': 'Exp',
+                // Misc projection
+                'proj.tooltip.gross': 'Gross Income:',
+                'proj.avg.nightly.rate': 'Avg. Nightly Rate',
+                'proj.avg.nightly.colon': 'Avg. Nightly:',
+                'proj.chain.source': 'Chain Source:',
+                'proj.chain.label': 'Chain',
+                'proj.chain.note': 'No direct data for this month, using nearest available data.',
+                'proj.res.details': 'Reservation Details',
+                'proj.month.est.net': 'Estimated Net Income This Month'
             },
             ru: {
                 // Login screen
@@ -3094,6 +3149,8 @@
                 'common.nights': 'ночей',
                 'common.reservation': 'бронирование',
                 'common.reservations': 'бронирований',
+                'common.res.short': 'брон.',
+                'common.avg.short': 'Ср.',
                 // Expense Categories
                 'expense.cleaning': 'Уборка',
                 'expense.electricity': 'Электричество',
@@ -3335,7 +3392,60 @@
                 'chart.gross.profit': 'Валовая прибыль',
                 'chart.real.profit': 'Реальная прибыль',
                 'chart.net.profit': 'Чистая прибыль',
-                'chart.company.exp': 'Расходы компании'
+                'chart.company.exp': 'Расходы компании',
+                // Phase 7 — Projection KPI & Waterfall
+                'proj.waterfall.title': 'Денежный поток',
+                'proj.waterfall.desc': '(От валового дохода к чистому)',
+                'proj.platform.comm.short': 'Ком. платф.',
+                'proj.lagirio.comm.short': 'Ком. Lagirio',
+                'proj.days.month': 'дн/мес',
+                'proj.expense.detail': 'По квартирам (без выбросов)',
+                'proj.of.gross': '% от валового',
+                'proj.hist.ratio': 'Прошлое соотн.:',
+                // Owner Financial Summary
+                'owner.bank': 'Банк:',
+                'owner.cash': 'Наличные:',
+                'owner.total.res.nights': 'Всего {0} бронирований / {1} ночей',
+                // Projection reservation section
+                'proj.nights.label': 'ночей',
+                'proj.no.data.label': 'нет данных',
+                'proj.past.label': 'прошлый',
+                'proj.res.badge': 'брон',
+                'proj.past.year.note': 'Нет бронирований за {0}, используются данные {1} с корректировкой +5%.',
+                'proj.both.year.note': 'Рассчитано как среднее за оба года.',
+                // Comparison section
+                'comparison.total.income': 'Общий доход',
+                'comparison.owner.profit': 'Прибыль владельца',
+                'comparison.res.count': 'Кол-во бронирований',
+                'comparison.total.nights': 'Всего ночей',
+                'comparison.avg.nightly': 'Ср. стоимость ночи',
+                'comparison.lagirio.income': 'Доход Lagirio',
+                'comparison.total.expense': 'Общие расходы',
+                'comparison.owner.share': 'Доля владельца',
+                'comparison.expense.ratio': 'Расход/Доход',
+                'comparison.details': '- Детали',
+                // Chart series
+                'chart.platform.comm.short': 'Ком. платф.',
+                'chart.lagirio.comm.short': 'Ком. Lagirio',
+                'chart.kdv': 'НДС',
+                // Projection overview legends
+                'proj.blend.est.gross': 'Смеш. валовый',
+                'proj.gross.profit': 'Валовая прибыль',
+                'proj.std.expense.label': 'Стандартный расход',
+                'proj.real.profit.label': 'Реальная прибыль',
+                // Apartment summary
+                'proj.summary.brut': 'Валовый',
+                'proj.summary.deduction': 'Вычет',
+                'proj.summary.expense': 'Расх',
+                // Misc projection
+                'proj.tooltip.gross': 'Валовый доход:',
+                'proj.avg.nightly.rate': 'Ср. за ночь',
+                'proj.avg.nightly.colon': 'Ср. за ночь:',
+                'proj.chain.source': 'Цепной источник:',
+                'proj.chain.label': 'Цепная',
+                'proj.chain.note': 'Прямых данных за этот месяц нет, используются ближайшие.',
+                'proj.res.details': 'Детали бронирований',
+                'proj.month.est.net': 'Ожидаемый чистый доход за этот месяц'
             },
             ar: {
                 // Login screen
@@ -3697,6 +3807,8 @@
                 'common.nights': 'ليالٍ',
                 'common.reservation': 'حجز',
                 'common.reservations': 'حجوزات',
+                'common.res.short': 'حجز',
+                'common.avg.short': 'متوسط',
                 // Expense Categories
                 'expense.cleaning': 'تنظيف',
                 'expense.electricity': 'كهرباء',
@@ -3938,7 +4050,60 @@
                 'chart.gross.profit': 'الربح الإجمالي',
                 'chart.real.profit': 'الربح الحقيقي',
                 'chart.net.profit': 'صافي الربح',
-                'chart.company.exp': 'مصاريف الشركة'
+                'chart.company.exp': 'مصاريف الشركة',
+                // Phase 7 — Projection KPI & Waterfall
+                'proj.waterfall.title': 'تدفق الدخل',
+                'proj.waterfall.desc': '(من الدخل الإجمالي إلى الصافي)',
+                'proj.platform.comm.short': 'عمولة المنصة',
+                'proj.lagirio.comm.short': 'عمولة Lagirio',
+                'proj.days.month': 'يوم/شهر',
+                'proj.expense.detail': 'معيار الشقق (إزالة القيم المتطرفة)',
+                'proj.of.gross': '% من الإجمالي',
+                'proj.hist.ratio': 'النسبة السابقة:',
+                // Owner Financial Summary
+                'owner.bank': 'بنك:',
+                'owner.cash': 'نقداً:',
+                'owner.total.res.nights': 'إجمالي {0} حجز / {1} ليلة',
+                // Projection reservation section
+                'proj.nights.label': 'ليلة',
+                'proj.no.data.label': 'لا توجد بيانات',
+                'proj.past.label': 'سابق',
+                'proj.res.badge': 'حجز',
+                'proj.past.year.note': 'لا توجد حجوزات لعام {0}، تم استخدام بيانات {1} بزيادة 5%.',
+                'proj.both.year.note': 'تم الحساب كمتوسط للسنتين.',
+                // Comparison section
+                'comparison.total.income': 'إجمالي الدخل',
+                'comparison.owner.profit': 'ربح المالك',
+                'comparison.res.count': 'عدد الحجوزات',
+                'comparison.total.nights': 'إجمالي الليالي',
+                'comparison.avg.nightly': 'متوسط سعر الليلة',
+                'comparison.lagirio.income': 'دخل Lagirio',
+                'comparison.total.expense': 'إجمالي المصاريف',
+                'comparison.owner.share': 'حصة المالك',
+                'comparison.expense.ratio': 'نسبة المصاريف/الدخل',
+                'comparison.details': '- تفاصيل',
+                // Chart series
+                'chart.platform.comm.short': 'عمولة المنصة',
+                'chart.lagirio.comm.short': 'عمولة Lagirio',
+                'chart.kdv': 'ضريبة القيمة المضافة',
+                // Projection overview legends
+                'proj.blend.est.gross': 'إجمالي مختلط',
+                'proj.gross.profit': 'الربح الإجمالي',
+                'proj.std.expense.label': 'مصاريف معيارية',
+                'proj.real.profit.label': 'الربح الحقيقي',
+                // Apartment summary
+                'proj.summary.brut': 'إجمالي',
+                'proj.summary.deduction': 'خصم',
+                'proj.summary.expense': 'مصاريف',
+                // Misc projection
+                'proj.tooltip.gross': 'الدخل الإجمالي:',
+                'proj.avg.nightly.rate': 'متوسط سعر الليلة',
+                'proj.avg.nightly.colon': 'متوسط الليلة:',
+                'proj.chain.source': 'مصدر السلسلة:',
+                'proj.chain.label': 'سلسلة',
+                'proj.chain.note': 'لا توجد بيانات مباشرة لهذا الشهر، تم استخدام أقرب بيانات.',
+                'proj.res.details': 'تفاصيل الحجوزات',
+                'proj.month.est.net': 'صافي الدخل المتوقع لهذا الشهر'
             }
         },
 
@@ -6761,12 +6926,12 @@
                 document.getElementById('projMainLabel').textContent = t('proj.est.net.income', 'Tahmini Net Kazancınız');
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + ownerNet.toFixed(2);
                 const ownerRatio = estGross > 0 ? Math.round((ownerNet / estGross) * 100) : 0;
-                document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + ownerRatio + '\'i';
+                document.getElementById('projLagirioDetail').textContent = t('proj.gross.pct', 'Brüt gelirin %') + ownerRatio + (I18n.currentLang === 'tr' ? '\'i' : '%');
             } else {
                 document.getElementById('projMainLabel').textContent = t('proj.est.gross.short', 'Brüt Kazanç (Dairelerden)');
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + lagirioNet.toFixed(2);
                 const lagirioRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
-                document.getElementById('projLagirioDetail').textContent = 'Br\u00fct gelirin %' + lagirioRatio + '\'i';
+                document.getElementById('projLagirioDetail').textContent = t('proj.gross.pct', 'Brüt gelirin %') + lagirioRatio + (I18n.currentLang === 'tr' ? '\'i' : '%');
 
                 // Ger\u00e7ek K\u00e2r kart\u0131
                 const rpEl = document.getElementById('projRealProfit');
@@ -6794,19 +6959,19 @@
 
             const avgNightly = estGross > 0 ? estGross / (aptCount * 12 * this.OCCUPANCY_DAYS || 1) : 0;
             document.getElementById('projAvgNightly').textContent = '\u20ac' + avgNightly.toFixed(2);
-            document.getElementById('projNightlyDetail').textContent = aptCount + ' daire | ' + this.OCCUPANCY_DAYS + ' gün/ay | Brüt/' + (aptCount*12) + ' ay';
+            document.getElementById('projNightlyDetail').textContent = aptCount + ' ' + t('common.apartment', 'daire') + ' | ' + this.OCCUPANCY_DAYS + ' ' + t('proj.days.month', 'gün/ay') + ' | ' + t('proj.gross', 'Brüt') + '/' + (aptCount*12) + ' ' + t('proj.col.month', 'ay');
 
             // Alt satır: Gider, KDV, Platform Komis. (+ Owner: Lagirio Komis.)
             document.getElementById('projExpenses').textContent = '\u20ac' + estExpenses.toFixed(2);
-            document.getElementById('projExpenseDetail').textContent = 'Daire bazlı standart (ekstrem eleme)';
+            document.getElementById('projExpenseDetail').textContent = t('proj.expense.detail', 'Daire bazlı standart (ekstrem eleme)');
 
             document.getElementById('projKDV').textContent = '\u20ac' + estKDV.toFixed(2);
             const kdvRatio = estGross > 0 ? ((estKDV / estGross) * 100).toFixed(1) : 0;
-            document.getElementById('projKDVDetail').textContent = 'Brütün %' + kdvRatio + '\'i';
+            document.getElementById('projKDVDetail').textContent = t('proj.of.gross', 'Brütün %') + kdvRatio + (I18n.currentLang === 'tr' ? '\'i' : '%');
 
             document.getElementById('projPlatComm').textContent = '\u20ac' + estPlatComm.toFixed(2);
             const platRatio = estGross > 0 ? Math.round((estPlatComm / estGross) * 100) : 0;
-            document.getElementById('projPlatCommDetail').textContent = 'Geçmiş oranı: %' + platRatio;
+            document.getElementById('projPlatCommDetail').textContent = t('proj.hist.ratio', 'Geçmiş oranı: %') + platRatio;
 
             // Owner: 4. kart - Lagirio Komisyonu göster + grid 4 sütun yap
             const lagirioCommCard = document.getElementById('projLagirioCommCard');
@@ -6816,7 +6981,7 @@
                     lagirioCommCard.classList.remove('hidden');
                     document.getElementById('projLagirioComm').textContent = '\u20ac' + lagirioNet.toFixed(2);
                     const lagirioCommRatio = estGross > 0 ? Math.round((lagirioNet / estGross) * 100) : 0;
-                    document.getElementById('projLagirioCommDetail').textContent = 'Brütün %' + lagirioCommRatio + '\'i';
+                    document.getElementById('projLagirioCommDetail').textContent = t('proj.of.gross', 'Brütün %') + lagirioCommRatio + (I18n.currentLang === 'tr' ? '\'i' : '%');
                 }
                 if (deductionGrid) deductionGrid.classList.replace('md:grid-cols-3', 'md:grid-cols-4');
             } else {
@@ -6842,12 +7007,12 @@
             wf.classList.remove('hidden');
 
             const steps = [
-                { label: 'Br\u00fct Gelir', value: estGross, color: 'bg-blue-500', textColor: 'text-blue-700' },
-                { label: 'Platform Kom.', value: -estPlatComm, color: 'bg-orange-400', textColor: 'text-orange-600' },
-                { label: 'Lagirio Kom.', value: -lagirioComm, color: 'bg-indigo-400', textColor: 'text-indigo-600' },
-                { label: 'KDV/Vergiler', value: -estKDV, color: 'bg-red-400', textColor: 'text-red-600' },
-                { label: 'Giderler', value: -estExpenses, color: 'bg-amber-400', textColor: 'text-amber-600' },
-                { label: 'Net Kazanc\u0131n\u0131z', value: ownerNet, color: 'bg-emerald-500', textColor: 'text-emerald-700', isResult: true }
+                { label: t('proj.gross.income', 'Brüt Gelir'), value: estGross, color: 'bg-blue-500', textColor: 'text-blue-700' },
+                { label: t('proj.platform.comm.short', 'Platform Kom.'), value: -estPlatComm, color: 'bg-orange-400', textColor: 'text-orange-600' },
+                { label: t('proj.lagirio.comm.short', 'Lagirio Kom.'), value: -lagirioComm, color: 'bg-indigo-400', textColor: 'text-indigo-600' },
+                { label: t('proj.kdv.taxes', 'KDV/Vergiler'), value: -estKDV, color: 'bg-red-400', textColor: 'text-red-600' },
+                { label: t('proj.expenses', 'Giderler'), value: -estExpenses, color: 'bg-amber-400', textColor: 'text-amber-600' },
+                { label: t('proj.your.net', 'Net Kazancınız'), value: ownerNet, color: 'bg-emerald-500', textColor: 'text-emerald-700', isResult: true }
             ];
 
             const maxVal = estGross;
@@ -6857,8 +7022,8 @@
             let html = '<div class="bg-white rounded-xl shadow-lg p-6">' +
                 '<h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">' +
                 '<i data-lucide="git-branch" class="w-5 h-5 text-emerald-600"></i>' +
-                '<span>Kazan\u00e7 Ak\u0131\u015f\u0131</span>' +
-                '<span class="text-xs text-gray-400 ml-2">(Br\u00fct gelirden net kazanca)</span></h3>';
+                '<span>' + t('proj.waterfall.title', 'Kazanç Akışı') + '</span>' +
+                '<span class="text-xs text-gray-400 ml-2">(' + t('proj.waterfall.desc', 'Brüt gelirden net kazanca') + ')</span></h3>';
 
             html += '<div class="space-y-2">';
 
@@ -7250,7 +7415,7 @@
             const sortedKeys = Object.keys(monthlyData).sort();
 
             if (sortedKeys.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">Veri yok</p>';
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">' + t('proj.no.data.label', 'Veri yok') + '</p>';
                 return;
             }
 
@@ -7335,14 +7500,14 @@
                         '<div class="absolute bottom-0 left-0 right-0 bg-emerald-500 rounded-t-sm" style="height:' + lagirioH + 'px"></div></div>' +
                         '<div class="w-2 bg-orange-300 rounded-t-sm" style="height:' + expH + 'px"></div></div>' +
                         '<span class="text-[10px] text-gray-600 whitespace-nowrap font-medium">' + label + '</span>' +
-                        '<span class="text-[9px] text-gray-400">' + d.count + ' rez. | ' + d.aptCount + ' daire</span>' +
+                        '<span class="text-[9px] text-gray-400">' + d.count + ' ' + t('common.res.short', 'rez.') + ' | ' + d.aptCount + ' ' + t('common.apartment', 'daire') + '</span>' +
                         '</div>';
                 }).join('') + '</div>' +
                 '<div class="flex items-center gap-4 mt-3 justify-center text-[10px] text-gray-400">' +
-                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> Karma Tahmini Br\u00fct</span>' +
-                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> Br\u00fct Kazan\u00e7</span>' +
-                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-300 rounded"></span> Standart Gider</span>' +
-                '<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-indigo-500 rounded"></span> Ger\u00e7ek K\u00e2r</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 rounded"></span> ' + t('proj.blend.est.gross', 'Karma Tahmini Brüt') + '</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> ' + t('proj.gross.profit', 'Brüt Kazanç') + '</span>' +
+                '<span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-300 rounded"></span> ' + t('proj.std.expense.label', 'Standart Gider') + '</span>' +
+                '<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-indigo-500 rounded"></span> ' + t('proj.real.profit.label', 'Gerçek Kâr') + '</span>' +
                 '</div>';
             }
         },
@@ -7355,7 +7520,7 @@
             const sortedKeys = Object.keys(monthlyData).sort();
 
             if (sortedKeys.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Veri yok</p>';
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">' + t('proj.no.data.label', 'Veri yok') + '</p>';
                 return;
             }
 
@@ -7678,20 +7843,20 @@
             html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl">';
             html += '<div class="flex justify-between items-start">';
             html += '<div><h3 class="text-lg font-bold">' + mName + '</h3>';
-            html += '<p class="text-emerald-200 text-sm mt-0.5">Projeksiyon Detay\u0131</p></div>';
+            html += '<p class="text-emerald-200 text-sm mt-0.5">' + t('proj.detail.title', 'Projeksiyon Detayı') + '</p></div>';
             html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
             html += '</div>';
             html += '<div class="mt-3 pt-3 border-t border-emerald-500/30">';
-            html += '<div class="text-emerald-200 text-xs">Tahmini Net Kazanc\u0131n\u0131z</div>';
+            html += '<div class="text-emerald-200 text-xs">' + t('proj.est.net.income', 'Tahmini Net Kazancınız') + '</div>';
             html += '<div class="text-2xl font-bold">\u20ac' + ownerVal.toFixed(0) + '</div></div></div>';
 
             // Tabs
             html += '<div class="border-b border-gray-200 flex">';
-            html += '<button class="ownerMonthTab flex-1 py-3 text-sm font-medium text-emerald-600 border-b-2 border-emerald-500" data-tab="summary" onclick="Projection._switchOwnerMonthTab(\'summary\')">Özet</button>';
+            html += '<button class="ownerMonthTab flex-1 py-3 text-sm font-medium text-emerald-600 border-b-2 border-emerald-500" data-tab="summary" onclick="Projection._switchOwnerMonthTab(\'summary\')">' + t('proj.summary', 'Özet') + '</button>';
             html += '<button class="ownerMonthTab flex-1 py-3 text-sm font-medium text-gray-400 hover:text-gray-600 border-b-2 border-transparent" data-tab="future" onclick="Projection._switchOwnerMonthTab(\'future\')">';
-            html += 'Gelecek Rez. <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full ml-1">' + futureRes.length + '</span></button>';
+            html += t('proj.future.res', 'Gelecek Rez.') + ' <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full ml-1">' + futureRes.length + '</span></button>';
             html += '<button class="ownerMonthTab flex-1 py-3 text-sm font-medium text-gray-400 hover:text-gray-600 border-b-2 border-transparent" data-tab="past" onclick="Projection._switchOwnerMonthTab(\'past\')">';
-            html += 'Ge\u00e7mi\u015f Y\u0131l <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full ml-1">' + pastRes.length + '</span></button>';
+            html += t('proj.past.year', 'Geçmiş Yıl') + ' <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full ml-1">' + pastRes.length + '</span></button>';
             html += '</div>';
 
             // === Tab 1: Özet ===
@@ -7757,7 +7922,7 @@
                 var changeClass = yoyChange >= 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-red-600 bg-red-50 border-red-200';
                 var arrow = yoyChange >= 0 ? '\u2191' : '\u2193';
                 html += '<div class="border ' + changeClass + ' rounded-lg p-3 flex items-center justify-between">';
-                html += '<span class="text-xs text-gray-600">Ort. gecelik \u00fccret de\u011fi\u015fimi <span class="text-gray-400">(\u20ac' + pastAvgNightly.toFixed(0) + ' \u2192 \u20ac' + futureAvgNightly.toFixed(0) + ')</span></span>';
+                html += '<span class="text-xs text-gray-600">' + t('proj.avg.nightly.rate', 'Ort. gecelik ücret değişimi') + ' <span class="text-gray-400">(\u20ac' + pastAvgNightly.toFixed(0) + ' \u2192 \u20ac' + futureAvgNightly.toFixed(0) + ')</span></span>';
                 html += '<span class="text-sm font-bold">' + arrow + ' %' + Math.abs(yoyChange).toFixed(1) + '</span>';
                 html += '</div>';
             }
@@ -7767,13 +7932,13 @@
             html += '<div id="ownerMonthPane_future" class="p-5 hidden">';
             if (futureRes.length > 0) {
                 html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Daire</th>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Tarih</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
-                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
-                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.th.apt', 'Daire') + '</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.guest', 'Misafir') + '</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('proj.col.date', 'Tarih') + '</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('common.night', 'Gece') + '</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.platform', 'Platform') + '</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.amount', 'Tutar') + '</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.per.night', '/Gece') + '</th>';
                 html += '</tr></thead><tbody>';
                 futureRes.forEach(function(res) {
                     var nights = res.nights || Math.max(1, Math.round((new Date(res.checkOut) - new Date(res.checkIn)) / 86400000));
@@ -7791,20 +7956,20 @@
                     html += '</tr>';
                 });
                 html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
-                html += '<td class="py-2 px-3" colspan="3">TOPLAM</td>';
+                html += '<td class="py-2 px-3" colspan="3">' + t('proj.total', 'TOPLAM') + '</td>';
                 html += '<td class="py-2 px-3 text-center">' + futureNights + '</td><td></td>';
                 html += '<td class="py-2 px-3 text-right text-emerald-600">\u20ac' + futureTotal.toFixed(2) + '</td>';
                 html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + futureAvgNightly.toFixed(2) + '</td>';
                 html += '</tr></tbody></table></div>';
                 html += '<div class="flex gap-3 mt-3">';
-                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-emerald-700">\u20ac' + futureAvgNightly.toFixed(2) + '</strong></div>';
-                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + futureNights + '</strong></div>';
-                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Say\u0131s\u0131:</span> <strong class="text-amber-700">' + futureRes.length + '</strong></div>';
+                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.avg.nightly.colon', 'Ort. Gecelik:') + '</span> <strong class="text-emerald-700">\u20ac' + futureAvgNightly.toFixed(2) + '</strong></div>';
+                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.total.nights', 'Toplam Gece:') + '</span> <strong class="text-blue-700">' + futureNights + '</strong></div>';
+                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.res.count', 'Rez. Sayısı:') + '</span> <strong class="text-amber-700">' + futureRes.length + '</strong></div>';
                 html += '</div>';
             } else {
                 html += '<div class="text-center py-8"><i data-lucide="calendar-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>';
-                html += '<p class="text-sm text-gray-400">Bu ay i\u00e7in hen\u00fcz gelecek rezervasyon yok</p>';
-                html += '<p class="text-xs text-gray-300 mt-1">Tahminler ge\u00e7mi\u015f verilerden \u00fcretilmi\u015ftir</p></div>';
+                html += '<p class="text-sm text-gray-400">' + t('proj.no.future.res', 'Bu ay için henüz gelecek rezervasyon yok') + '</p>';
+                html += '<p class="text-xs text-gray-300 mt-1">' + t('proj.est.from.past', 'Tahminler geçmiş verilerden üretilmiştir') + '</p></div>';
             }
             html += '</div>';
 
@@ -7812,17 +7977,17 @@
             html += '<div id="ownerMonthPane_past" class="p-5 hidden">';
             if (pastRes.length > 0) {
                 html += '<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-center justify-between">';
-                html += '<span class="text-xs text-amber-700">' + monthNames[m] + ' ' + (y - 1) + ' verileri</span>';
-                html += '<span class="text-sm font-bold text-amber-700">' + pastRes.length + ' rezervasyon</span>';
+                html += '<span class="text-xs text-amber-700">' + monthNames[m] + ' ' + (y - 1) + ' ' + t('proj.data.suffix', 'verileri') + '</span>';
+                html += '<span class="text-sm font-bold text-amber-700">' + pastRes.length + ' ' + t('common.reservation', 'rezervasyon') + '</span>';
                 html += '</div>';
                 html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Daire</th>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Tarih</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
-                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
-                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.th.apt', 'Daire') + '</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.guest', 'Misafir') + '</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('proj.col.date', 'Tarih') + '</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('common.night', 'Gece') + '</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.platform', 'Platform') + '</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.amount', 'Tutar') + '</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.per.night', '/Gece') + '</th>';
                 html += '</tr></thead><tbody>';
                 pastRes.forEach(function(res) {
                     var nights = res.nights || Math.max(1, Math.round((new Date(res.checkOut) - new Date(res.checkIn)) / 86400000));
@@ -7840,26 +8005,26 @@
                     html += '</tr>';
                 });
                 html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
-                html += '<td class="py-2 px-3" colspan="3">TOPLAM</td>';
+                html += '<td class="py-2 px-3" colspan="3">' + t('proj.total', 'TOPLAM') + '</td>';
                 html += '<td class="py-2 px-3 text-center">' + pastNights + '</td><td></td>';
                 html += '<td class="py-2 px-3 text-right text-amber-600">\u20ac' + pastTotal.toFixed(2) + '</td>';
                 html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + pastAvgNightly.toFixed(2) + '</td>';
                 html += '</tr></tbody></table></div>';
                 html += '<div class="flex gap-3 mt-3">';
-                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-amber-700">\u20ac' + pastAvgNightly.toFixed(2) + '</strong></div>';
-                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + pastNights + '</strong></div>';
-                html += '<div class="bg-gray-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Say\u0131s\u0131:</span> <strong class="text-gray-700">' + pastRes.length + '</strong></div>';
+                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.avg.nightly.colon', 'Ort. Gecelik:') + '</span> <strong class="text-amber-700">\u20ac' + pastAvgNightly.toFixed(2) + '</strong></div>';
+                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.total.nights', 'Toplam Gece:') + '</span> <strong class="text-blue-700">' + pastNights + '</strong></div>';
+                html += '<div class="bg-gray-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.res.count', 'Rez. Sayısı:') + '</span> <strong class="text-gray-700">' + pastRes.length + '</strong></div>';
                 html += '</div>';
             } else {
                 html += '<div class="text-center py-8"><i data-lucide="archive-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>';
-                html += '<p class="text-sm text-gray-400">Ge\u00e7mi\u015f y\u0131l i\u00e7in bu ayda veri bulunamad\u0131</p>';
-                html += '<p class="text-xs text-gray-300 mt-1">' + monthNames[m] + ' ' + (y - 1) + ' verisi yok</p></div>';
+                html += '<p class="text-sm text-gray-400">' + t('proj.no.past.data', 'Geçmiş yıl için bu ayda veri bulunamadı') + '</p>';
+                html += '<p class="text-xs text-gray-300 mt-1">' + monthNames[m] + ' ' + (y - 1) + ' — ' + t('proj.no.data.label', 'veri yok') + '</p></div>';
             }
             html += '</div>';
 
             // Footer
             html += '<div class="p-4 border-t border-gray-100 flex justify-end">';
-            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">Kapat</button>';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">' + t('proj.close', 'Kapat') + '</button>';
             html += '</div></div></div>';
 
             document.getElementById('projResDetailOverlay')?.remove();
@@ -7955,9 +8120,9 @@
 
             var html = '<div class="flex items-center justify-between mb-4">';
             html += '<div class="text-sm text-gray-500">';
-            html += '<span class="text-emerald-600 font-semibold">' + totalFuture + '</span> gelecek';
-            html += ' · <span class="text-amber-600 font-semibold">' + totalPast + '</span> ge\u00e7mi\u015f y\u0131l';
-            html += ' · ' + apartments.length + ' daire · 12 ay</div>';
+            html += '<span class="text-emerald-600 font-semibold">' + totalFuture + '</span> ' + t('proj.future', 'gelecek');
+            html += ' · <span class="text-amber-600 font-semibold">' + totalPast + '</span> ' + t('proj.past.year.short', 'geçmiş yıl');
+            html += ' · ' + apartments.length + ' ' + t('common.apartment', 'daire') + ' · 12 ' + t('proj.col.month', 'ay') + '</div>';
             html += '</div>';
 
             html += '<div class="space-y-2">';
@@ -7972,7 +8137,7 @@
                 s += '<div class="flex items-center gap-2 min-w-0">';
                 if (apartments.length > 1) s += '<span class="text-[10px] font-bold text-gray-400 shrink-0">' + (r._aptCode || '-') + '</span>';
                 s += '<span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold ' + platformColor + ' shrink-0">' + (r.platform || '-') + '</span>';
-                s += '<span class="text-[11px] text-gray-700 truncate">' + (r.guestName || 'Misafir') + '</span>';
+                s += '<span class="text-[11px] text-gray-700 truncate">' + (r.guestName || t('proj.col.guest', 'Misafir')) + '</span>';
                 s += '<span class="text-[10px] text-gray-400 shrink-0">' + fmt(r.checkIn) + '\u2192' + fmt(r.checkOut) + '</span>';
                 s += '</div>';
                 s += '<div class="text-right shrink-0 ml-2"><span class="text-[11px] font-bold text-gray-800">\u20ac' + amount.toFixed(0) + '</span>';
@@ -7993,13 +8158,13 @@
                 html += '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="ownerResChev_' + md.mk + '"' + (idx === 0 && hasData ? ' style="transform:rotate(90deg)"' : '') + '></i>';
                 html += '<span class="text-sm font-semibold text-gray-700">' + md.mName + '</span>';
                 if (md.futureRes.length > 0) {
-                    html += '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">' + md.futureRes.length + ' rez</span>';
+                    html += '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">' + md.futureRes.length + ' ' + t('proj.res.badge', 'rez') + '</span>';
                 }
                 if (md.pastRes.length > 0) {
-                    html += '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold">' + md.pastRes.length + ' ge\u00e7mi\u015f</span>';
+                    html += '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold">' + md.pastRes.length + ' ' + t('proj.past.label', 'geçmiş') + '</span>';
                 }
                 if (!hasData) {
-                    html += '<span class="text-[10px] text-gray-300">veri yok</span>';
+                    html += '<span class="text-[10px] text-gray-300">' + t('proj.no.data.label', 'veri yok') + '</span>';
                 }
                 html += '</div>';
 
@@ -8027,8 +8192,8 @@
                 if (md.futureRes.length > 0) {
                     html += '<div class="border-l-2 border-emerald-300 ml-3">';
                     html += '<div class="px-3 py-1.5 text-[10px] font-bold text-emerald-600 uppercase tracking-wide bg-emerald-50/50">';
-                    html += 'Mevcut / Gelecek Rezervasyonlar (' + md.futureRes.length + ')';
-                    html += ' \u2014 ' + md.fNights + ' gece \u2014 \u20ac' + md.fTotal.toFixed(0);
+                    html += t('proj.current.future', 'Mevcut / Gelecek Rezervasyonlar') + ' (' + md.futureRes.length + ')';
+                    html += ' \u2014 ' + md.fNights + ' ' + t('common.night', 'gece') + ' \u2014 \u20ac' + md.fTotal.toFixed(0);
                     html += '</div>';
                     html += '<div class="divide-y divide-gray-50">';
                     md.futureRes.forEach(function(r) { html += renderResRow(r); });
@@ -8039,9 +8204,9 @@
                 if (md.pastRes.length > 0) {
                     html += '<div class="border-l-2 border-amber-300 ml-3">';
                     html += '<div class="px-3 py-1.5 text-[10px] font-bold text-amber-600 uppercase tracking-wide bg-amber-50/50">';
-                    html += 'Ge\u00e7mi\u015f Y\u0131l \u2014 ' + monthNames[md.month] + ' ' + (md.year - 1);
+                    html += t('proj.past.year.label', 'Geçmiş Yıl') + ' \u2014 ' + monthNames[md.month] + ' ' + (md.year - 1);
                     html += ' (' + md.pastRes.length + ')';
-                    html += ' \u2014 ' + md.pNights + ' gece \u2014 \u20ac' + md.pTotal.toFixed(0);
+                    html += ' \u2014 ' + md.pNights + ' ' + t('common.night', 'gece') + ' \u2014 \u20ac' + md.pTotal.toFixed(0);
                     html += '</div>';
                     html += '<div class="divide-y divide-gray-50">';
                     md.pastRes.forEach(function(r) { html += renderResRow(r); });
@@ -8049,7 +8214,7 @@
                 }
 
                 if (!hasData) {
-                    html += '<div class="px-4 py-3 text-xs text-gray-400 text-center">Bu ay i\u00e7in rezervasyon verisi yok</div>';
+                    html += '<div class="px-4 py-3 text-xs text-gray-400 text-center">' + t('proj.no.res.data', 'Bu ay için rezervasyon verisi yok') + '</div>';
                 }
 
                 html += '</div></div>';
@@ -8079,8 +8244,8 @@
                 // Owner: Daire accordion yerine ay bazlı rez paneli (gelecek + geçmiş yıl)
                 const titleEl = document.getElementById('projAptSectionTitle');
                 const subtitleEl = document.getElementById('projAptSectionSubtitle');
-                if (titleEl) titleEl.textContent = 'Rezervasyonlar';
-                if (subtitleEl) subtitleEl.textContent = '(12 ay \u2014 gelecek + ge\u00e7mi\u015f y\u0131l kar\u015f\u0131la\u015ft\u0131rmal\u0131)';
+                if (titleEl) titleEl.textContent = t('proj.reservations', 'Rezervasyonlar');
+                if (subtitleEl) subtitleEl.textContent = t('proj.12m.compare', '(12 ay — gelecek + geçmiş yıl karşılaştırmalı)');
                 this.renderOwnerFutureReservations(el);
                 return;
             }
@@ -8244,12 +8409,12 @@
                 // Summary line for each apartment
                 const mainValue = isOwner ? (apt.ownerShare || 0) : apt.lagirio;
                 const summaryLine = isOwner
-                    ? 'Br\u00fct \u20ac' + apt.gross.toFixed(2) + ' | Kesinti -\u20ac' + ((apt.gross || 0) - (apt.ownerShare || 0)).toFixed(2)
-                    : 'Br\u00fct \u20ac' + apt.gross.toFixed(2) + ' | Gdr \u20ac' + apt.expenses.toFixed(2) + ' | KDV \u20ac' + apt.kdv.toFixed(2) + ' | Plt \u20ac' + apt.platComm.toFixed(2);
+                    ? t('proj.summary.brut', 'Brüt') + ' \u20ac' + apt.gross.toFixed(2) + ' | ' + t('proj.summary.deduction', 'Kesinti') + ' -\u20ac' + ((apt.gross || 0) - (apt.ownerShare || 0)).toFixed(2)
+                    : t('proj.summary.brut', 'Brüt') + ' \u20ac' + apt.gross.toFixed(2) + ' | ' + t('proj.summary.expense', 'Gdr') + ' \u20ac' + apt.expenses.toFixed(2) + ' | KDV \u20ac' + apt.kdv.toFixed(2) + ' | Plt \u20ac' + apt.platComm.toFixed(2);
 
-                // Owner: gelecek rez badge'\u0131 daire kart\u0131nda
+                // Owner: gelecek rez badge
                 const futureResBadge = (isOwner && futureResCount > 0)
-                    ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 ml-2"><i data-lucide="calendar-days" class="w-3 h-3"></i>' + futureResCount + ' gelecek rez</span>'
+                    ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 ml-2"><i data-lucide="calendar-days" class="w-3 h-3"></i>' + futureResCount + ' ' + t('proj.upcoming.res', 'gelecek rez') + '</span>'
                     : '';
 
                 return '<div class="border border-gray-100 rounded-lg overflow-hidden">' +
@@ -8258,7 +8423,7 @@
                     '<span class="text-xs font-bold text-gray-300 w-5">' + (i+1) + '</span>' +
                     '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="projAptChev_' + i + '"></i>' +
                     '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + futureResBadge + '</p>' +
-                    '<p class="text-[10px] text-gray-400">' + (isOwner ? '' : (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ') + apt.months + ' ay | \u20ac' + apt.avgNightly.toFixed(2) + '/g</p></div></div>' +
+                    '<p class="text-[10px] text-gray-400">' + (isOwner ? '' : (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ') + apt.months + ' ' + t('proj.col.month', 'ay') + ' | \u20ac' + apt.avgNightly.toFixed(2) + '/g</p></div></div>' +
                     '<div class="text-right">' +
                     '<p class="text-sm font-bold text-emerald-600">\u20ac' + mainValue.toFixed(2) + '</p>' +
                     '<p class="text-[10px] text-gray-400">' + summaryLine + '</p></div></div>' +
@@ -8295,18 +8460,18 @@
 
             let sections = [];
             if (hasFuture && !hasPast) {
-                sections.push({ title: 'Mevcut Rezervasyonlar (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: 'Ger\u00e7ek Veri', badgeColor: 'emerald', note: null });
+                sections.push({ title: t('proj.current.res.label', 'Mevcut Rezervasyonlar') + ' (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: t('proj.actual.data', 'Gerçek Veri'), badgeColor: 'emerald', note: null });
             } else if (!hasFuture && hasPast) {
-                sections.push({ title: 'Ge\u00e7mi\u015f Y\u0131l Rezervasyonlar\u0131 (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Ge\u00e7mi\u015f Y\u0131l +5%', badgeColor: 'amber', note: 'Bu ay i\u00e7in ' + year + ' y\u0131l\u0131nda rezervasyon bulunmad\u0131\u011f\u0131ndan, ' + (year - 1) + ' y\u0131l\u0131 verileri %5 art\u0131\u015fla kullan\u0131lm\u0131\u015ft\u0131r.' });
+                sections.push({ title: t('proj.past.year.res', 'Geçmiş Yıl Rezervasyonları') + ' (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: t('proj.past.plus5.label', 'Geçmiş Yıl +5%'), badgeColor: 'amber', note: t('proj.past.year.note', 'Bu ay için {0} yılında rezervasyon bulunmadığından, {1} yılı verileri %5 artışla kullanılmıştır.').replace('{0}', year).replace('{1}', year - 1) });
             } else if (hasFuture && hasPast) {
-                sections.push({ title: 'Mevcut Rezervasyonlar (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: 'Gelecek', badgeColor: 'emerald', note: null });
-                sections.push({ title: 'Ge\u00e7mi\u015f Y\u0131l Rezervasyonlar\u0131 (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: 'Ge\u00e7mi\u015f Y\u0131l', badgeColor: 'amber', note: 'Her iki y\u0131l\u0131n ortalamas\u0131 al\u0131narak hesaplanm\u0131\u015ft\u0131r.' });
+                sections.push({ title: t('proj.current.res.label', 'Mevcut Rezervasyonlar') + ' (' + monthNamesFull[month] + ' ' + year + ')', reservations: futureRes, badge: t('proj.future', 'Gelecek'), badgeColor: 'emerald', note: null });
+                sections.push({ title: t('proj.past.year.res', 'Geçmiş Yıl Rezervasyonları') + ' (' + monthNamesFull[month] + ' ' + (year - 1) + ')', reservations: pastRes, badge: t('proj.past.year.label', 'Geçmiş Yıl'), badgeColor: 'amber', note: t('proj.both.year.note', 'Her iki yılın ortalaması alınarak hesaplanmıştır.') });
             } else {
                 const chain = this.chainBackward(aptId, month, year);
                 if (chain) {
                     const adjustKey = aptId + '_' + month + '_' + year;
                     const adjustPct = this.chainAdjustments[adjustKey] !== undefined ? this.chainAdjustments[adjustKey] : 0;
-                    sections.push({ title: 'Zincir Kaynak: ' + monthNamesFull[chain.month] + ' ' + chain.year, reservations: chain.reservations, badge: 'Zincir ' + (adjustPct >= 0 ? '+' : '') + adjustPct + '%', badgeColor: 'orange', note: 'Bu ay i\u00e7in do\u011frudan veri bulunmad\u0131\u011f\u0131ndan, en yak\u0131n veri olan ' + monthNamesFull[chain.month] + ' ' + chain.year + ' ay\u0131 kullan\u0131lm\u0131\u015ft\u0131r.' });
+                    sections.push({ title: t('proj.chain.source', 'Zincir Kaynak:') + ' ' + monthNamesFull[chain.month] + ' ' + chain.year, reservations: chain.reservations, badge: t('proj.chain.label', 'Zincir') + ' ' + (adjustPct >= 0 ? '+' : '') + adjustPct + '%', badgeColor: 'orange', note: t('proj.chain.note', 'Bu ay için doğrudan veri bulunmadığından, en yakın veri kullanılmıştır.') });
                 }
             }
 
@@ -8334,12 +8499,12 @@
                 html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl">';
                 html += '<div class="flex justify-between items-start">';
                 html += '<div><h3 class="text-lg font-bold">' + aptCode + ' \u2014 ' + monthNamesFull[month] + ' ' + year + '</h3>';
-                html += '<p class="text-emerald-100 text-sm mt-1">Rezervasyon Detaylar\u0131</p></div>';
+                html += '<p class="text-emerald-100 text-sm mt-1">' + t('proj.res.details', 'Rezervasyon Detayları') + '</p></div>';
                 html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
                 html += '</div>';
                 if (monthOwnerShare > 0) {
                     html += '<div class="mt-3 pt-3 border-t border-emerald-500/30 flex items-center gap-4">';
-                    html += '<div><span class="text-emerald-200 text-xs">Bu Aydaki Tahmini Net Kazanc\u0131n\u0131z</span>';
+                    html += '<div><span class="text-emerald-200 text-xs">' + t('proj.month.est.net', 'Bu Aydaki Tahmini Net Kazancınız') + '</span>';
                     html += '<p class="text-xl font-bold">\u20ac' + monthOwnerShare.toFixed(2) + '</p></div>';
                     html += '</div>';
                 }
@@ -8367,13 +8532,13 @@
 
                 html += '<div class="overflow-x-auto"><table class="w-full text-xs">';
                 html += '<thead class="bg-gray-50"><tr>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Giri\u015f</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">\u00c7\u0131k\u0131\u015f</th>';
-                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
-                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
-                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
-                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.guest', 'Misafir') + '</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('proj.col.checkin', 'Giriş') + '</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('proj.col.checkout', 'Çıkış') + '</th>';
+                html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('common.night', 'Gece') + '</th>';
+                html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.platform', 'Platform') + '</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.amount', 'Tutar') + '</th>';
+                html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.per.night', '/Gece') + '</th>';
                 html += '</tr></thead><tbody>';
 
                 let totalAmount = 0, totalNights = 0;
@@ -8402,7 +8567,7 @@
                 // Total row
                 const avgNightly = totalNights > 0 ? totalAmount / totalNights : 0;
                 html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
-                html += '<td class="py-2 px-3" colspan="2">TOPLAM</td>';
+                html += '<td class="py-2 px-3" colspan="2">' + t('proj.total', 'TOPLAM') + '</td>';
                 html += '<td></td>';
                 html += '<td class="py-2 px-3 text-center">' + totalNights + '</td>';
                 html += '<td></td>';
@@ -8413,9 +8578,9 @@
 
                 // Summary cards
                 html += '<div class="flex gap-3 mt-3 flex-wrap">';
-                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Ort. Gecelik:</span> <strong class="text-emerald-700">\u20ac' + avgNightly.toFixed(2) + '</strong></div>';
-                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Toplam Gece:</span> <strong class="text-blue-700">' + totalNights + '</strong></div>';
-                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">Rez. Say\u0131s\u0131:</span> <strong class="text-amber-700">' + section.reservations.length + '</strong></div>';
+                html += '<div class="bg-emerald-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.avg.nightly.colon', 'Ort. Gecelik:') + '</span> <strong class="text-emerald-700">\u20ac' + avgNightly.toFixed(2) + '</strong></div>';
+                html += '<div class="bg-blue-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.total.nights', 'Toplam Gece:') + '</span> <strong class="text-blue-700">' + totalNights + '</strong></div>';
+                html += '<div class="bg-amber-50 px-3 py-2 rounded-lg text-xs"><span class="text-gray-500">' + t('proj.res.count', 'Rez. Sayısı:') + '</span> <strong class="text-amber-700">' + section.reservations.length + '</strong></div>';
                 html += '</div>';
                 html += '</div>';
             });
@@ -8424,7 +8589,7 @@
 
             // Footer
             html += '<div class="p-4 border-t border-gray-100 flex justify-end">';
-            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">Kapat</button>';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">' + t('proj.close', 'Kapat') + '</button>';
             html += '</div>';
 
             html += '</div></div>';
@@ -8497,7 +8662,7 @@
             html += '</tr></tbody></table></div></div>';
 
             html += '<div class="p-4 border-t border-gray-100 flex justify-end">';
-            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">Kapat</button>';
+            html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">' + t('proj.close', 'Kapat') + '</button>';
             html += '</div></div></div>';
 
             document.getElementById('projResDetailOverlay')?.remove();
@@ -9755,29 +9920,29 @@
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                         <div class="bg-white rounded p-2">
-                            <p class="text-gray-400">Brüt Gelir</p>
+                            <p class="text-gray-400">${t('owner.gross.income', 'Brüt Gelir')}</p>
                             <p class="font-semibold text-gray-700">€${d.grossIncome.total.toFixed(2)}</p>
-                            <p class="text-[10px] text-gray-400">Banka: €${d.grossIncome.bank.toFixed(2)} | Nakit: €${d.grossIncome.cash.toFixed(2)}</p>
+                            <p class="text-[10px] text-gray-400">${t('owner.bank', 'Banka:')} €${d.grossIncome.bank.toFixed(2)} | ${t('owner.cash', 'Nakit:')} €${d.grossIncome.cash.toFixed(2)}</p>
                         </div>
                         <div class="bg-white rounded p-2">
-                            <p class="text-gray-400">Platform Komisyonu</p>
+                            <p class="text-gray-400">${t('owner.platform.comm', 'Platform Komisyonu')}</p>
                             <p class="font-semibold text-red-500">-€${d.platformCommission.total.toFixed(2)}</p>
                         </div>
                         <div class="bg-white rounded p-2">
-                            <p class="text-gray-400">Lagirio Komisyonu</p>
+                            <p class="text-gray-400">${t('owner.lagirio.comm', 'Lagirio Komisyonu')}</p>
                             <p class="font-semibold text-red-500">-€${d.lagirioCommission.toFixed(2)}</p>
                         </div>
                         <div class="bg-white rounded p-2">
-                            <p class="text-gray-400">KDV/Vergiler</p>
+                            <p class="text-gray-400">${t('owner.vat.taxes', 'KDV/Vergiler')}</p>
                             <p class="font-semibold text-red-500">-€${d.kdv.toFixed(2)}</p>
                         </div>
                         <div class="bg-white rounded p-2">
-                            <p class="text-gray-400">Giderler</p>
+                            <p class="text-gray-400">${t('owner.expenses', 'Giderler')}</p>
                             <p class="font-semibold text-red-500">-€${d.expenses.toFixed(2)}</p>
                         </div>
                         <div class="bg-white rounded p-2">
-                            <p class="text-gray-400">${d.reservationCount} rez. / ${d.nightCount} gece</p>
-                            <p class="font-semibold text-gray-700">Ort. €${d.avgNightlyRate.toFixed(2)}/gece</p>
+                            <p class="text-gray-400">${d.reservationCount} ${t('common.res.short', 'rez.')} / ${d.nightCount} ${t('common.night', 'gece')}</p>
+                            <p class="font-semibold text-gray-700">${t('common.avg.short', 'Ort.')} €${d.avgNightlyRate.toFixed(2)}/${t('common.night', 'gece')}</p>
                         </div>
                     </div>
                 </div>`;
@@ -9788,32 +9953,32 @@
             <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
                 <div class="grid grid-cols-3 md:grid-cols-6 gap-3 text-center text-xs">
                     <div>
-                        <p class="text-gray-500">Brüt Gelir</p>
+                        <p class="text-gray-500">${t('owner.gross.income', 'Brüt Gelir')}</p>
                         <p class="font-bold text-gray-800">€${totalDetail.grossIncome.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
                     </div>
                     <div>
-                        <p class="text-gray-500">Platform Kom.</p>
+                        <p class="text-gray-500">${t('proj.platform.comm.short', 'Platform Kom.')}</p>
                         <p class="font-bold text-red-500">-€${totalDetail.platformComm.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
                     </div>
                     <div>
-                        <p class="text-gray-500">Lagirio Kom.</p>
+                        <p class="text-gray-500">${t('proj.lagirio.comm.short', 'Lagirio Kom.')}</p>
                         <p class="font-bold text-red-500">-€${totalDetail.lagirioComm.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
                     </div>
                     <div>
-                        <p class="text-gray-500">KDV/Vergiler</p>
+                        <p class="text-gray-500">${t('owner.vat.taxes', 'KDV/Vergiler')}</p>
                         <p class="font-bold text-red-500">-€${totalDetail.kdv.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
                     </div>
                     <div>
-                        <p class="text-gray-500">Giderler</p>
+                        <p class="text-gray-500">${t('owner.expenses', 'Giderler')}</p>
                         <p class="font-bold text-red-500">-€${totalDetail.expenses.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
                     </div>
                     <div>
-                        <p class="text-gray-500">Net Kazanç</p>
+                        <p class="text-gray-500">${t('owner.net.income', 'Net Kazanç')}</p>
                         <p class="font-bold text-emerald-600 text-lg">€${totalDetail.netOwner.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
                     </div>
                 </div>
                 <div class="mt-2 pt-2 border-t border-emerald-200 text-center text-[10px] text-gray-500">
-                    Toplam ${totalDetail.reservations} rezervasyon / ${totalDetail.nights} gece
+                    ${t('owner.total', 'Toplam')} ${totalDetail.reservations} ${t('common.reservation', 'rezervasyon')} / ${totalDetail.nights} ${t('common.night', 'gece')}
                 </div>
             </div>
             ${apartmentCards}`;
@@ -11874,50 +12039,50 @@
                         <h4 class="font-semibold text-blue-900 mb-4">${data.first.label}</h4>
                         <div class="space-y-3">
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Toplam Kazanç:</span>
+                                <span class="text-gray-600">${t('comparison.total.income', 'Toplam Kazanç')}:</span>
                                 <span class="font-semibold">€${data.first.metrics.totalRevenue.toLocaleString()}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Toplam Gider:</span>
+                                <span class="text-gray-600">${t('comparison.total.expense', 'Toplam Gider')}:</span>
                                 <span class="font-semibold">€${data.first.metrics.totalExpenses.toLocaleString()}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Ortalama Doluluk:</span>
+                                <span class="text-gray-600">${t('comparison.occupancy', 'Ortalama Doluluk')}:</span>
                                 <span class="font-semibold">${data.first.metrics.avgOccupancy.toFixed(1)}%</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Rezervasyon Sayısı:</span>
+                                <span class="text-gray-600">${t('comparison.res.count', 'Rezervasyon Sayısı')}:</span>
                                 <span class="font-semibold">${data.first.metrics.reservationCount}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Ort. Gecelik Ücret:</span>
+                                <span class="text-gray-600">${t('comparison.avg.nightly', 'Ort. Gecelik Ücret')}:</span>
                                 <span class="font-semibold">€${data.first.metrics.avgNightlyRate.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Second Group/Period -->
                     <div class="bg-green-50 rounded-lg p-6">
                         <h4 class="font-semibold text-green-900 mb-4">${data.second.label}</h4>
                         <div class="space-y-3">
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Toplam Kazanç:</span>
+                                <span class="text-gray-600">${t('comparison.total.income', 'Toplam Kazanç')}:</span>
                                 <span class="font-semibold">€${data.second.metrics.totalRevenue.toLocaleString()}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Toplam Gider:</span>
+                                <span class="text-gray-600">${t('comparison.total.expense', 'Toplam Gider')}:</span>
                                 <span class="font-semibold">€${data.second.metrics.totalExpenses.toLocaleString()}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Ortalama Doluluk:</span>
+                                <span class="text-gray-600">${t('comparison.occupancy', 'Ortalama Doluluk')}:</span>
                                 <span class="font-semibold">${data.second.metrics.avgOccupancy.toFixed(1)}%</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Rezervasyon Sayısı:</span>
+                                <span class="text-gray-600">${t('comparison.res.count', 'Rezervasyon Sayısı')}:</span>
                                 <span class="font-semibold">${data.second.metrics.reservationCount}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Ort. Gecelik Ücret:</span>
+                                <span class="text-gray-600">${t('comparison.avg.nightly', 'Ort. Gecelik Ücret')}:</span>
                                 <span class="font-semibold">€${data.second.metrics.avgNightlyRate.toFixed(2)}</span>
                             </div>
                         </div>
@@ -11928,11 +12093,11 @@
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h4 class="font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <i data-lucide="trending-up" class="w-5 h-5 text-indigo-600"></i>
-                        <span>Karşılaştırma Özeti</span>
+                        <span>${t('comparison.subtitle', 'Karşılaştırma Özeti')}</span>
                     </h4>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="text-center p-4 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500 mb-1">Kazanç Farkı</p>
+                            <p class="text-xs text-gray-500 mb-1">${t('comparison.revenue', 'Kazanç')} Δ</p>
                             <p class="text-xl font-bold ${data.comparison.revenue.diff >= 0 ? 'text-green-600' : 'text-red-600'}">
                                 ${data.comparison.revenue.diff >= 0 ? '+' : ''}€${data.comparison.revenue.diff.toFixed(0)}
                             </p>
@@ -11941,7 +12106,7 @@
                             </p>
                         </div>
                         <div class="text-center p-4 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500 mb-1">Gider Farkı</p>
+                            <p class="text-xs text-gray-500 mb-1">${t('comparison.expense', 'Gider')} Δ</p>
                             <p class="text-xl font-bold ${data.comparison.expenses.diff <= 0 ? 'text-green-600' : 'text-red-600'}">
                                 ${data.comparison.expenses.diff >= 0 ? '+' : ''}€${data.comparison.expenses.diff.toFixed(0)}
                             </p>
@@ -11950,7 +12115,7 @@
                             </p>
                         </div>
                         <div class="text-center p-4 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500 mb-1">Doluluk Farkı</p>
+                            <p class="text-xs text-gray-500 mb-1">${t('comparison.occupancy', 'Doluluk')} Δ</p>
                             <p class="text-xl font-bold ${data.comparison.occupancy.diff >= 0 ? 'text-green-600' : 'text-red-600'}">
                                 ${data.comparison.occupancy.diff >= 0 ? '+' : ''}${data.comparison.occupancy.diff.toFixed(1)}%
                             </p>
@@ -11959,7 +12124,7 @@
                             </p>
                         </div>
                         <div class="text-center p-4 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500 mb-1">Rezervasyon Farkı</p>
+                            <p class="text-xs text-gray-500 mb-1">${t('comparison.reservation', 'Rezervasyon')} Δ</p>
                             <p class="text-xl font-bold ${data.comparison.reservations.diff >= 0 ? 'text-green-600' : 'text-red-600'}">
                                 ${data.comparison.reservations.diff >= 0 ? '+' : ''}${data.comparison.reservations.diff}
                             </p>
@@ -13699,33 +13864,33 @@
                     <div class="bg-${colorA}-50 rounded-xl shadow-lg p-6">
                         <h4 class="font-semibold text-${colorA}-900 mb-4 flex items-center space-x-2">
                             <span class="inline-flex items-center justify-center w-6 h-6 bg-${colorA}-500 text-white rounded-full text-xs">A</span>
-                            <span>${data.groupA.label} - Detaylar</span>
+                            <span>${data.groupA.label} ${t('comparison.details', '- Detaylar')}</span>
                         </h4>
                         <div class="space-y-3">
                             ${isOwner ? `
-                                ${this.renderMetricRow('Toplam Gelir', data.groupA.metrics.totalIncome, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.total.income', 'Toplam Gelir'), data.groupA.metrics.totalIncome, 'EUR')}
                                 <div class="border-t border-gray-300 my-1"></div>
-                                ${this.renderMetricRow('Giderler', data.groupA.metrics.totalExpenses, 'EUR', true)}
-                                ${this.renderMetricRow('Platform Komisyonu', data.groupA.metrics.platformCommission, 'EUR', true)}
-                                ${this.renderMetricRow('Lagirio Komisyonu', data.groupA.metrics.lagirioCommissionAmount, 'EUR', true)}
-                                ${this.renderMetricRow('KDV', data.groupA.metrics.kdv, 'EUR', true)}
+                                ${this.renderMetricRow(t('owner.expenses', 'Giderler'), data.groupA.metrics.totalExpenses, 'EUR', true)}
+                                ${this.renderMetricRow(t('owner.platform.comm', 'Platform Komisyonu'), data.groupA.metrics.platformCommission, 'EUR', true)}
+                                ${this.renderMetricRow(t('owner.lagirio.comm', 'Lagirio Komisyonu'), data.groupA.metrics.lagirioCommissionAmount, 'EUR', true)}
+                                ${this.renderMetricRow(t('chart.vat', 'KDV'), data.groupA.metrics.kdv, 'EUR', true)}
                                 <div class="border-t-2 border-gray-400 my-1"></div>
-                                ${this.renderMetricRow('Daire Sahibinin Kârı', data.groupA.metrics.ownerShare, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.owner.profit', 'Daire Sahibinin Kârı'), data.groupA.metrics.ownerShare, 'EUR')}
                                 <div class="border-t border-gray-300 my-1"></div>
-                                ${this.renderMetricRow('Doluluk Oranı', data.groupA.metrics.occupancy, '%')}
-                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupA.metrics.reservationCount, '')}
-                                ${this.renderMetricRow('Toplam Gece', data.groupA.metrics.totalNights, '')}
-                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupA.metrics.avgNightlyRate, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.occupancy', 'Doluluk Oranı'), data.groupA.metrics.occupancy, '%')}
+                                ${this.renderMetricRow(t('comparison.res.count', 'Rezervasyon Sayısı'), data.groupA.metrics.reservationCount, '')}
+                                ${this.renderMetricRow(t('comparison.total.nights', 'Toplam Gece'), data.groupA.metrics.totalNights, '')}
+                                ${this.renderMetricRow(t('comparison.avg.nightly', 'Ort. Gecelik Ücret'), data.groupA.metrics.avgNightlyRate, 'EUR')}
                             ` : `
-                                ${this.renderMetricRow('Lagirio Kazancı', data.groupA.metrics.lagirioRevenue, 'EUR')}
-                                ${this.renderMetricRow('Toplam Gelir', data.groupA.metrics.totalIncome, 'EUR')}
-                                ${this.renderMetricRow('Toplam Gider', data.groupA.metrics.totalExpenses, 'EUR')}
-                                ${this.renderMetricRow('Ev Sahibi Payı', data.groupA.metrics.ownerShare, 'EUR')}
-                                ${this.renderMetricRow('Doluluk Oranı', data.groupA.metrics.occupancy, '%')}
-                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupA.metrics.reservationCount, '')}
-                                ${this.renderMetricRow('Toplam Gece', data.groupA.metrics.totalNights, '')}
-                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupA.metrics.avgNightlyRate, 'EUR')}
-                                ${this.renderMetricRow('Gider/Gelir Oranı', data.groupA.metrics.expenseRatio, '%')}
+                                ${this.renderMetricRow(t('comparison.lagirio.income', 'Lagirio Kazancı'), data.groupA.metrics.lagirioRevenue, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.total.income', 'Toplam Gelir'), data.groupA.metrics.totalIncome, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.total.expense', 'Toplam Gider'), data.groupA.metrics.totalExpenses, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.owner.share', 'Ev Sahibi Payı'), data.groupA.metrics.ownerShare, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.occupancy', 'Doluluk Oranı'), data.groupA.metrics.occupancy, '%')}
+                                ${this.renderMetricRow(t('comparison.res.count', 'Rezervasyon Sayısı'), data.groupA.metrics.reservationCount, '')}
+                                ${this.renderMetricRow(t('comparison.total.nights', 'Toplam Gece'), data.groupA.metrics.totalNights, '')}
+                                ${this.renderMetricRow(t('comparison.avg.nightly', 'Ort. Gecelik Ücret'), data.groupA.metrics.avgNightlyRate, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.expense.ratio', 'Gider/Gelir Oranı'), data.groupA.metrics.expenseRatio, '%')}
                             `}
                         </div>
                     </div>
@@ -13734,33 +13899,33 @@
                     <div class="bg-${colorB}-50 rounded-xl shadow-lg p-6">
                         <h4 class="font-semibold text-${colorB}-900 mb-4 flex items-center space-x-2">
                             <span class="inline-flex items-center justify-center w-6 h-6 bg-${colorB}-500 text-white rounded-full text-xs">B</span>
-                            <span>${data.groupB.label} - Detaylar</span>
+                            <span>${data.groupB.label} ${t('comparison.details', '- Detaylar')}</span>
                         </h4>
                         <div class="space-y-3">
                             ${isOwner ? `
-                                ${this.renderMetricRow('Toplam Gelir', data.groupB.metrics.totalIncome, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.total.income', 'Toplam Gelir'), data.groupB.metrics.totalIncome, 'EUR')}
                                 <div class="border-t border-gray-300 my-1"></div>
-                                ${this.renderMetricRow('Giderler', data.groupB.metrics.totalExpenses, 'EUR', true)}
-                                ${this.renderMetricRow('Platform Komisyonu', data.groupB.metrics.platformCommission, 'EUR', true)}
-                                ${this.renderMetricRow('Lagirio Komisyonu', data.groupB.metrics.lagirioCommissionAmount, 'EUR', true)}
-                                ${this.renderMetricRow('KDV', data.groupB.metrics.kdv, 'EUR', true)}
+                                ${this.renderMetricRow(t('owner.expenses', 'Giderler'), data.groupB.metrics.totalExpenses, 'EUR', true)}
+                                ${this.renderMetricRow(t('owner.platform.comm', 'Platform Komisyonu'), data.groupB.metrics.platformCommission, 'EUR', true)}
+                                ${this.renderMetricRow(t('owner.lagirio.comm', 'Lagirio Komisyonu'), data.groupB.metrics.lagirioCommissionAmount, 'EUR', true)}
+                                ${this.renderMetricRow(t('chart.vat', 'KDV'), data.groupB.metrics.kdv, 'EUR', true)}
                                 <div class="border-t-2 border-gray-400 my-1"></div>
-                                ${this.renderMetricRow('Daire Sahibinin Kârı', data.groupB.metrics.ownerShare, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.owner.profit', 'Daire Sahibinin Kârı'), data.groupB.metrics.ownerShare, 'EUR')}
                                 <div class="border-t border-gray-300 my-1"></div>
-                                ${this.renderMetricRow('Doluluk Oranı', data.groupB.metrics.occupancy, '%')}
-                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupB.metrics.reservationCount, '')}
-                                ${this.renderMetricRow('Toplam Gece', data.groupB.metrics.totalNights, '')}
-                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupB.metrics.avgNightlyRate, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.occupancy', 'Doluluk Oranı'), data.groupB.metrics.occupancy, '%')}
+                                ${this.renderMetricRow(t('comparison.res.count', 'Rezervasyon Sayısı'), data.groupB.metrics.reservationCount, '')}
+                                ${this.renderMetricRow(t('comparison.total.nights', 'Toplam Gece'), data.groupB.metrics.totalNights, '')}
+                                ${this.renderMetricRow(t('comparison.avg.nightly', 'Ort. Gecelik Ücret'), data.groupB.metrics.avgNightlyRate, 'EUR')}
                             ` : `
-                                ${this.renderMetricRow('Lagirio Kazancı', data.groupB.metrics.lagirioRevenue, 'EUR')}
-                                ${this.renderMetricRow('Toplam Gelir', data.groupB.metrics.totalIncome, 'EUR')}
-                                ${this.renderMetricRow('Toplam Gider', data.groupB.metrics.totalExpenses, 'EUR')}
-                                ${this.renderMetricRow('Ev Sahibi Payı', data.groupB.metrics.ownerShare, 'EUR')}
-                                ${this.renderMetricRow('Doluluk Oranı', data.groupB.metrics.occupancy, '%')}
-                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupB.metrics.reservationCount, '')}
-                                ${this.renderMetricRow('Toplam Gece', data.groupB.metrics.totalNights, '')}
-                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupB.metrics.avgNightlyRate, 'EUR')}
-                                ${this.renderMetricRow('Gider/Gelir Oranı', data.groupB.metrics.expenseRatio, '%')}
+                                ${this.renderMetricRow(t('comparison.lagirio.income', 'Lagirio Kazancı'), data.groupB.metrics.lagirioRevenue, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.total.income', 'Toplam Gelir'), data.groupB.metrics.totalIncome, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.total.expense', 'Toplam Gider'), data.groupB.metrics.totalExpenses, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.owner.share', 'Ev Sahibi Payı'), data.groupB.metrics.ownerShare, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.occupancy', 'Doluluk Oranı'), data.groupB.metrics.occupancy, '%')}
+                                ${this.renderMetricRow(t('comparison.res.count', 'Rezervasyon Sayısı'), data.groupB.metrics.reservationCount, '')}
+                                ${this.renderMetricRow(t('comparison.total.nights', 'Toplam Gece'), data.groupB.metrics.totalNights, '')}
+                                ${this.renderMetricRow(t('comparison.avg.nightly', 'Ort. Gecelik Ücret'), data.groupB.metrics.avgNightlyRate, 'EUR')}
+                                ${this.renderMetricRow(t('comparison.expense.ratio', 'Gider/Gelir Oranı'), data.groupB.metrics.expenseRatio, '%')}
                             `}
                         </div>
                     </div>
@@ -14186,7 +14351,7 @@
                         let html = params[0].name + '<br/>';
                         let total = 0;
                         params.forEach(p => { html += `<span style="color:${p.color}">●</span> ${p.seriesName}: €${p.value.toLocaleString()}<br/>`; total += p.value; });
-                        html += `<b>Brüt Gelir: €${total.toLocaleString()}</b>`;
+                        html += `<b>${t('proj.tooltip.gross', 'Brüt Gelir:')} €${total.toLocaleString()}</b>`;
                         return html;
                     }
                 },
@@ -14196,10 +14361,10 @@
                 yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: v => `€${(v/1000).toFixed(0)}k` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
                 series: [
                     { name: t('chart.net.profit', 'Net Kazanç'), type: 'bar', stack: 'total', data: net, itemStyle: { color: '#10b981' }, barWidth: '50%' },
-                    { name: 'Giderler', type: 'bar', stack: 'total', data: exp, itemStyle: { color: '#f59e0b' } },
-                    { name: 'Platform Kom.', type: 'bar', stack: 'total', data: platComm, itemStyle: { color: '#3b82f6' } },
-                    { name: 'Lagirio Kom.', type: 'bar', stack: 'total', data: lagComm, itemStyle: { color: '#8b5cf6' } },
-                    { name: 'KDV', type: 'bar', stack: 'total', data: kdv, itemStyle: { color: '#ef4444' } }
+                    { name: t('owner.expenses', 'Giderler'), type: 'bar', stack: 'total', data: exp, itemStyle: { color: '#f59e0b' } },
+                    { name: t('chart.platform.comm.short', 'Platform Kom.'), type: 'bar', stack: 'total', data: platComm, itemStyle: { color: '#3b82f6' } },
+                    { name: t('chart.lagirio.comm.short', 'Lagirio Kom.'), type: 'bar', stack: 'total', data: lagComm, itemStyle: { color: '#8b5cf6' } },
+                    { name: t('chart.kdv', 'KDV'), type: 'bar', stack: 'total', data: kdv, itemStyle: { color: '#ef4444' } }
                 ]
             });
         },
@@ -14285,12 +14450,12 @@
                 grid: { left: '3%', right: '4%', bottom: '15%', top: '8%', containLabel: true },
                 xAxis: { type: 'category', data: labels, axisLabel: { color: '#6b7280', fontSize: 11 } },
                 yAxis: [
-                    { type: 'value', name: 'Gecelik (€)', nameTextStyle: { color: '#6b7280', fontSize: 10 }, axisLabel: { color: '#6b7280', formatter: v => `€${v}` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
-                    { type: 'value', name: 'Doluluk (%)', nameTextStyle: { color: '#6b7280', fontSize: 10 }, axisLabel: { color: '#6b7280', formatter: v => `${v}%` }, splitLine: { show: false }, max: 100 }
+                    { type: 'value', name: t('chart.nightly.eur', 'Gecelik (€)'), nameTextStyle: { color: '#6b7280', fontSize: 10 }, axisLabel: { color: '#6b7280', formatter: v => `€${v}` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+                    { type: 'value', name: t('chart.occ.pct', 'Doluluk (%)'), nameTextStyle: { color: '#6b7280', fontSize: 10 }, axisLabel: { color: '#6b7280', formatter: v => `${v}%` }, splitLine: { show: false }, max: 100 }
                 ],
                 series: [
-                    { name: 'Ort. Gecelik', type: 'bar', data: nightly, barWidth: '40%', itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
-                    { name: 'Doluluk', type: 'line', yAxisIndex: 1, data: occ, smooth: true, symbol: 'circle', symbolSize: 8,
+                    { name: t('chart.avg.nightly', 'Ort. Gecelik'), type: 'bar', data: nightly, barWidth: '40%', itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
+                    { name: t('chart.occupancy', 'Doluluk'), type: 'line', yAxisIndex: 1, data: occ, smooth: true, symbol: 'circle', symbolSize: 8,
                       lineStyle: { width: 2.5, color: '#3b82f6' }, itemStyle: { color: '#3b82f6', borderColor: '#fff', borderWidth: 2 },
                       areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.2)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } }
                 ]
@@ -14784,7 +14949,7 @@
                 tooltip: {
                     trigger: 'axis',
                     formatter: params => {
-                        const label = Auth.currentUser?.role === 'owner' ? 'Ort. Net Kazanç' : 'Ort. Kazanç';
+                        const label = Auth.currentUser?.role === 'owner' ? t('chart.avg.net', 'Ort. Net Kazanç') : t('chart.avg.income', 'Ort. Kazanç');
                         return `${params[0].name}<br/>${label}: €${params[0].value.toLocaleString()}`;
                     }
                 },
@@ -14806,7 +14971,7 @@
                     }
                 },
                 series: [{
-                    name: Auth.currentUser?.role === 'owner' ? 'Ort. Net Kazanç' : 'Ortalama Kazanç',
+                    name: Auth.currentUser?.role === 'owner' ? t('chart.avg.net', 'Ort. Net Kazanç') : t('chart.avg.income', 'Ortalama Kazanç'),
                     type: 'bar',
                     data: avgMonthlyRevenue,
                     itemStyle: {
