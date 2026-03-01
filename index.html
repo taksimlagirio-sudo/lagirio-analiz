@@ -7255,7 +7255,15 @@
         initOwnerFilter() {
             if (!Auth.currentUser || Auth.currentUser.role !== 'owner') return;
             const allIds = Auth.currentUser.apartmentIds || [];
-            if (allIds.length <= 1) return; // Tek daire → filtre gereksiz
+
+            // Tek daireli owner → filtre barı ve karşılaştırma sekmesi gereksiz
+            if (allIds.length <= 1) {
+                const compTab = document.querySelector('[data-tab="comparison"]');
+                const compContent = document.getElementById('comparison-content');
+                if (compTab) compTab.style.display = 'none';
+                if (compContent) compContent.style.display = 'none';
+                return;
+            }
 
             this._ownerAllApartmentIds = allIds;
             this._ownerSelectedIds = [...allIds]; // Başlangıçta hepsi seçili
