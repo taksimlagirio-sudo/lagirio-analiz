@@ -351,18 +351,18 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-white">Analytics Pro</h1>
-                        <p class="text-emerald-200 text-xs">Gelişmiş Veri Analizi Platformu</p>
+                        <p class="text-emerald-200 text-xs" data-i18n="header.subtitle">Gelişmiş Veri Analizi Platformu</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
                     <!-- Quick Stats -->
                     <div class="hidden lg:flex items-center space-x-6 mr-6">
                         <div class="text-center">
-                            <p class="text-emerald-200 text-xs" id="headerPortfolioLabel">Portföy Değeri</p>
+                            <p class="text-emerald-200 text-xs" id="headerPortfolioLabel" data-i18n="header.portfolio">Portföy Değeri</p>
                             <p class="text-white font-bold text-lg" id="headerPortfolioValue">€0</p>
                         </div>
                         <div class="text-center">
-                            <p class="text-emerald-200 text-xs" id="headerMonthlyLabel">Bu Ay</p>
+                            <p class="text-emerald-200 text-xs" id="headerMonthlyLabel" data-i18n="header.monthly">Bu Ay</p>
                             <p class="text-white font-bold text-lg" id="headerMonthlyValue">€0</p>
                         </div>
                     </div>
@@ -402,7 +402,7 @@
 
                     <button onclick="Auth.logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 px-3 py-2 rounded-lg flex items-center space-x-2 transition text-sm">
                         <i data-lucide="log-out" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Çıkış</span>
+                        <span class="hidden sm:inline" data-i18n="header.logout">Çıkış</span>
                     </button>
                 </div>
             </div>
@@ -1048,31 +1048,31 @@
                 <nav class="flex flex-wrap">
                     <button onclick="Analytics.switchMainTab('overview')" class="main-tab active flex-1 px-4 py-3 text-sm font-semibold text-white bg-white/20 rounded-t-lg transition hover:bg-white/30 flex items-center justify-center space-x-2" data-tab="overview">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                        <span>Genel Bakış</span>
+                        <span data-i18n="tab.overview">Genel Bakış</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('analysis')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="analysis">
                         <i data-lucide="pie-chart" class="w-4 h-4"></i>
-                        <span>Detaylı Analiz</span>
+                        <span data-i18n="tab.analysis">Detaylı Analiz</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('comparison')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="comparison">
                         <i data-lucide="git-compare" class="w-4 h-4"></i>
-                        <span>Genel Karşılaştırma</span>
+                        <span data-i18n="tab.comparison">Genel Karşılaştırma</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('trends')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="trends">
                         <i data-lucide="trending-up" class="w-4 h-4"></i>
-                        <span>Trendler</span>
+                        <span data-i18n="tab.trends">Trendler</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('efficiency')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="efficiency">
                         <i data-lucide="gauge" class="w-4 h-4"></i>
-                        <span>Verimlilik</span>
+                        <span data-i18n="tab.efficiency">Verimlilik</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('reports')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="reports">
                         <i data-lucide="file-bar-chart" class="w-4 h-4"></i>
-                        <span>Raporlar</span>
+                        <span data-i18n="tab.reports">Raporlar</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('projection')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="projection">
                         <i data-lucide="telescope" class="w-4 h-4"></i>
-                        <span>Projeksiyon</span>
+                        <span data-i18n="tab.projection">Projeksiyon</span>
                     </button>
                 </nav>
             </div>
@@ -1080,10 +1080,10 @@
             <!-- Owner Apartment Filter Bar - sadece çok daireli owner'da görünür -->
             <div id="ownerApartmentFilter" class="hidden bg-white/90 backdrop-blur border-b border-gray-200 px-4 py-3">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">Daire:</span>
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1" data-i18n="header.filter.apartment">Daire:</span>
                     <button onclick="Analytics.ownerFilterSelectAll()" id="ownerFilterAll"
                             class="owner-filter-chip active px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition cursor-pointer bg-emerald-50 border-emerald-500 text-emerald-700">
-                        Tümü
+                        <span data-i18n="header.filter.all">Tümü</span>
                     </button>
                     <div id="ownerFilterChips" class="flex items-center gap-2 flex-wrap">
                         <!-- Dynamically populated -->
@@ -1098,7 +1098,7 @@
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                             <i data-lucide="receipt" class="w-5 h-5 text-emerald-600"></i>
-                            <span>Finansal Özet</span>
+                            <span data-i18n="overview.financial.title">Finansal Özet</span>
                         </h3>
                         <div id="ownerFinancialDetail"></div>
                     </div>
@@ -1162,19 +1162,19 @@
                 <div class="bg-gray-50 rounded-lg p-1 mb-6">
                     <nav class="flex flex-wrap">
                         <button onclick="Analytics.switchAnalysisTab('system')" class="analysis-tab active flex-1 px-4 py-2 text-sm font-medium bg-white rounded-lg shadow-sm" data-analysis="system">
-                            Sistem Analizi
+                            <span data-i18n="tab.analysis.system">Sistem Analizi</span>
                         </button>
                         <button onclick="Analytics.switchAnalysisTab('apartment')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="apartment">
-                            Daire Analizi
+                            <span data-i18n="tab.analysis.apartment">Daire Analizi</span>
                         </button>
                         <button onclick="Analytics.switchAnalysisTab('platform')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="platform">
-                            Platform Analizi
+                            <span data-i18n="tab.analysis.platform">Platform Analizi</span>
                         </button>
                         <button onclick="Analytics.switchAnalysisTab('expense')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="expense">
-                            Gider Analizi
+                            <span data-i18n="tab.analysis.expense">Gider Analizi</span>
                         </button>
                         <button onclick="Analytics.switchAnalysisTab('owner')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="owner">
-                            Sahip Analizi
+                            <span data-i18n="tab.analysis.owner">Sahip Analizi</span>
                         </button>
                     </nav>
                 </div>
@@ -2155,7 +2155,30 @@
                 'owner.drive.clientid.hint': 'Enter the Client ID you received from your manager.',
                 'owner.drive.clientid.label': 'Google Client ID',
                 'owner.drive.connect.btn': 'Connect with Google',
-                'owner.loading': 'Loading data...'
+                'owner.loading': 'Loading data...',
+                // Header & Navigation
+                'header.subtitle': 'Advanced Data Analytics Platform',
+                'header.portfolio': 'Portfolio Value',
+                'header.monthly': 'This Month',
+                'header.logout': 'Logout',
+                'header.filter.apartment': 'Apartment:',
+                'header.filter.all': 'All',
+                // Main tabs
+                'tab.overview': 'Overview',
+                'tab.analysis': 'Detailed Analysis',
+                'tab.comparison': 'Comparison',
+                'tab.trends': 'Trends',
+                'tab.efficiency': 'Efficiency',
+                'tab.reports': 'Reports',
+                'tab.projection': 'Projection',
+                // Analysis subtabs
+                'tab.analysis.system': 'System Analysis',
+                'tab.analysis.apartment': 'Apartment Analysis',
+                'tab.analysis.platform': 'Platform Analysis',
+                'tab.analysis.expense': 'Expense Analysis',
+                'tab.analysis.owner': 'Owner Analysis',
+                // Overview
+                'overview.financial.title': 'Financial Summary'
             },
             ru: {
                 // Login screen
@@ -2190,7 +2213,30 @@
                 'owner.drive.clientid.hint': 'Введите Client ID, полученный от вашего менеджера.',
                 'owner.drive.clientid.label': 'Google Client ID',
                 'owner.drive.connect.btn': 'Подключить через Google',
-                'owner.loading': 'Загрузка данных...'
+                'owner.loading': 'Загрузка данных...',
+                // Header & Navigation
+                'header.subtitle': 'Платформа аналитики данных',
+                'header.portfolio': 'Стоимость портфеля',
+                'header.monthly': 'Этот месяц',
+                'header.logout': 'Выход',
+                'header.filter.apartment': 'Квартира:',
+                'header.filter.all': 'Все',
+                // Main tabs
+                'tab.overview': 'Обзор',
+                'tab.analysis': 'Детальный анализ',
+                'tab.comparison': 'Сравнение',
+                'tab.trends': 'Тренды',
+                'tab.efficiency': 'Эффективность',
+                'tab.reports': 'Отчёты',
+                'tab.projection': 'Прогноз',
+                // Analysis subtabs
+                'tab.analysis.system': 'Системный анализ',
+                'tab.analysis.apartment': 'Анализ квартир',
+                'tab.analysis.platform': 'Анализ платформ',
+                'tab.analysis.expense': 'Анализ расходов',
+                'tab.analysis.owner': 'Анализ владельцев',
+                // Overview
+                'overview.financial.title': 'Финансовая сводка'
             },
             ar: {
                 // Login screen
@@ -2225,7 +2271,30 @@
                 'owner.drive.clientid.hint': 'أدخل Client ID الذي حصلت عليه من مديرك.',
                 'owner.drive.clientid.label': 'Google Client ID',
                 'owner.drive.connect.btn': 'الاتصال عبر Google',
-                'owner.loading': 'جارٍ تحميل البيانات...'
+                'owner.loading': 'جارٍ تحميل البيانات...',
+                // Header & Navigation
+                'header.subtitle': 'منصة تحليل البيانات المتقدمة',
+                'header.portfolio': 'قيمة المحفظة',
+                'header.monthly': 'هذا الشهر',
+                'header.logout': 'خروج',
+                'header.filter.apartment': 'شقة:',
+                'header.filter.all': 'الكل',
+                // Main tabs
+                'tab.overview': 'نظرة عامة',
+                'tab.analysis': 'تحليل مفصّل',
+                'tab.comparison': 'مقارنة',
+                'tab.trends': 'الاتجاهات',
+                'tab.efficiency': 'الكفاءة',
+                'tab.reports': 'التقارير',
+                'tab.projection': 'التوقعات',
+                // Analysis subtabs
+                'tab.analysis.system': 'تحليل النظام',
+                'tab.analysis.apartment': 'تحليل الشقق',
+                'tab.analysis.platform': 'تحليل المنصات',
+                'tab.analysis.expense': 'تحليل المصاريف',
+                'tab.analysis.owner': 'تحليل المالكين',
+                // Overview
+                'overview.financial.title': 'الملخص المالي'
             }
         },
 
