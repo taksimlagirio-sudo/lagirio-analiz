@@ -2403,6 +2403,11 @@
                 'proj.gross': 'Gross',
                 'proj.night': 'Night',
                 'proj.profitability': 'Profitability',
+                'proj.profit.margin': 'Profit Margin',
+                'proj.avg.nightly.profit': 'Avg. Nightly Profit',
+                'proj.no.apt.data': 'No apartment data',
+                'proj.calc.included.res': 'Reservations Included in Calculation',
+                'proj.all.future.res': 'All Future Reservations',
                 'proj.no.data': 'No data for selected range',
                 'proj.blend.gross': 'Blended Estimated Gross',
                 'proj.std.expense': 'Standard Expense',
@@ -3065,6 +3070,11 @@
                 'proj.gross': 'Валовый',
                 'proj.night': 'Ночь',
                 'proj.profitability': 'Рентабельность',
+                'proj.profit.margin': 'Маржа прибыли',
+                'proj.avg.nightly.profit': 'Ср. прибыль/ночь',
+                'proj.no.apt.data': 'Нет данных по квартирам',
+                'proj.calc.included.res': 'Включённые в расчёт бронирования',
+                'proj.all.future.res': 'Все будущие бронирования',
                 'proj.no.data': 'Нет данных для выбранного периода',
                 'proj.blend.gross': 'Смешанный валовый прогноз',
                 'proj.std.expense': 'Стандартный расход',
@@ -3727,6 +3737,11 @@
                 'proj.gross': 'إجمالي',
                 'proj.night': 'ليلة',
                 'proj.profitability': 'الربحية',
+                'proj.profit.margin': 'هامش الربح',
+                'proj.avg.nightly.profit': 'متوسط ربح/ليلة',
+                'proj.no.apt.data': 'لا توجد بيانات شقق',
+                'proj.calc.included.res': 'الحجوزات المدرجة في الحساب',
+                'proj.all.future.res': 'جميع الحجوزات المستقبلية',
                 'proj.no.data': 'لا بيانات للفترة المحددة',
                 'proj.blend.gross': 'الإجمالي المختلط المتوقع',
                 'proj.std.expense': 'المصروف القياسي',
@@ -7133,17 +7148,17 @@
             });
 
             let html = '<div class="overflow-x-auto"><table class="w-full text-xs border-collapse"><thead><tr class="bg-gray-50 text-gray-500">';
-            html += '<th class="py-2 px-3 text-left font-medium">Ay</th>';
-            html += '<th class="py-2 px-3 text-right font-medium">Daire</th>';
-            html += '<th class="py-2 px-3 text-right font-medium">Rez.</th>';
-            html += '<th class="py-2 px-3 text-right font-medium">Br\u00fct Gelir</th>';
-            html += '<th class="py-2 px-3 text-right font-medium">Daire Gider</th>';
-            html += '<th class="py-2 px-3 text-right font-medium">KDV</th>';
-            html += '<th class="py-2 px-3 text-right font-medium">Plt.Kom</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-blue-600">Br\u00fct Kazan\u00e7</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-amber-600">\u015eirket Gideri</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-indigo-600">Ger\u00e7ek K\u00e2r</th>';
-            html += '<th class="py-2 px-3 text-right font-medium">Marj</th>';
+            html += '<th class="py-2 px-3 text-left font-medium">' + t('proj.col.month', 'Ay') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.apt', 'Daire') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.res', 'Rez.') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.gross', 'Brüt Gelir') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.apt.expense', 'Daire Gider') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.vat', 'KDV') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.plt.comm', 'Plt.Kom') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-blue-600">' + t('proj.col.gross.profit', 'Brüt Kazanç') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-amber-600">' + t('proj.col.company.exp', 'Şirket Gideri') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-indigo-600">' + t('proj.col.real.profit', 'Gerçek Kâr') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.margin', 'Marj') + '</th>';
             html += '</tr></thead><tbody>';
 
             sortedKeys.forEach((mk, idx) => {
@@ -7185,13 +7200,13 @@
 
                 if (aptRows.length > 0) {
                     html += '<table class="w-full text-[11px]"><thead><tr class="text-gray-400">';
-                    html += '<th class="py-1 px-2 text-left">Daire</th>';
-                    html += '<th class="py-1 px-2 text-right">K\u00e2r/Gece</th>';
-                    html += '<th class="py-1 px-2 text-right">Toplam K\u00e2r</th>';
-                    html += '<th class="py-1 px-2 text-right">Br\u00fct</th>';
-                    html += '<th class="py-1 px-2 text-right">Gece</th>';
-                    html += '<th class="py-1 px-2 text-right">Rez.</th>';
-                    html += '<th class="py-1 px-2 text-right">K\u00e2rl\u0131l\u0131k</th>';
+                    html += '<th class="py-1 px-2 text-left">' + t('proj.col.apt', 'Daire') + '</th>';
+                    html += '<th class="py-1 px-2 text-right">' + t('proj.per.night.profit', 'Kâr/Gece') + '</th>';
+                    html += '<th class="py-1 px-2 text-right">' + t('proj.total.profit', 'Toplam Kâr') + '</th>';
+                    html += '<th class="py-1 px-2 text-right">' + t('proj.gross', 'Brüt') + '</th>';
+                    html += '<th class="py-1 px-2 text-right">' + t('proj.night', 'Gece') + '</th>';
+                    html += '<th class="py-1 px-2 text-right">' + t('proj.col.res', 'Rez.') + '</th>';
+                    html += '<th class="py-1 px-2 text-right">' + t('proj.profitability', 'Kârlılık') + '</th>';
                     html += '</tr></thead><tbody>';
                     aptRows.forEach(a => {
                         html += '<tr class="border-t border-gray-100/60">';
@@ -7206,7 +7221,7 @@
                     });
                     html += '</tbody></table>';
                 } else {
-                    html += '<p class="text-xs text-gray-400 text-center py-2">Bu ayda daire verisi yok</p>';
+                    html += '<p class="text-xs text-gray-400 text-center py-2">' + t('proj.no.detail', 'Bu ayda daire verisi yok') + '</p>';
                 }
                 html += '</div></td></tr>';
             });
@@ -7215,7 +7230,7 @@
             const totalMargin = grandLagirio > 0 ? ((grandReal / grandLagirio) * 100).toFixed(1) : '0.0';
             const totalRealClass = grandReal >= 0 ? 'text-emerald-600' : 'text-red-600';
             html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
-            html += '<td class="py-2.5 px-3" colspan="3">TOPLAM (12 Ay)</td>';
+            html += '<td class="py-2.5 px-3" colspan="3">' + t('proj.total.12m', 'TOPLAM (12 Ay)') + '</td>';
             html += '<td class="py-2.5 px-3 text-right">\u20ac' + grandGross.toFixed(0) + '</td>';
             html += '<td class="py-2.5 px-3 text-right text-orange-500">\u20ac' + grandExp.toFixed(0) + '</td>';
             html += '<td class="py-2.5 px-3 text-right text-red-500">\u20ac' + grandKdv.toFixed(0) + '</td>';
@@ -7267,7 +7282,7 @@
             const allKeys = Object.keys(monthlyData).sort();
             const rangeKeys = allKeys.filter(k => (!startKey || k >= startKey) && (!endKey || k <= endKey));
 
-            if (rangeKeys.length === 0) { el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Se\u00e7ilen aral\u0131kta veri yok</p>'; return; }
+            if (rangeKeys.length === 0) { el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">' + t('proj.no.data', 'Seçilen aralıkta veri yok') + '</p>'; return; }
 
             // Toplam
             let totLagirio = 0, totCompExp = 0, totGross = 0;
@@ -7282,12 +7297,12 @@
             })();
 
             let html = '<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">';
-            html += '<div class="bg-blue-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">Br\u00fct Kazan\u00e7</p><p class="text-lg font-bold text-blue-600">\u20ac' + totLagirio.toFixed(0) + '</p></div>';
-            html += '<div class="bg-amber-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">\u015eirket Gideri</p><p class="text-lg font-bold text-amber-600">\u20ac' + totCompExp.toFixed(0) + '</p></div>';
-            html += '<div class="bg-' + (totReal >= 0 ? 'emerald' : 'red') + '-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">Ger\u00e7ek K\u00e2r</p><p class="text-lg font-bold ' + (totReal >= 0 ? 'text-emerald-600' : 'text-red-600') + '">\u20ac' + totReal.toFixed(0) + '</p></div>';
-            html += '<div class="bg-indigo-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">K\u00e2r Marj\u0131</p><p class="text-lg font-bold text-indigo-600">%' + margin + '</p></div>';
+            html += '<div class="bg-blue-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">' + t('proj.col.gross.profit', 'Brüt Kazanç') + '</p><p class="text-lg font-bold text-blue-600">\u20ac' + totLagirio.toFixed(0) + '</p></div>';
+            html += '<div class="bg-amber-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">' + t('proj.col.company.exp', 'Şirket Gideri') + '</p><p class="text-lg font-bold text-amber-600">\u20ac' + totCompExp.toFixed(0) + '</p></div>';
+            html += '<div class="bg-' + (totReal >= 0 ? 'emerald' : 'red') + '-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">' + t('proj.col.real.profit', 'Gerçek Kâr') + '</p><p class="text-lg font-bold ' + (totReal >= 0 ? 'text-emerald-600' : 'text-red-600') + '">\u20ac' + totReal.toFixed(0) + '</p></div>';
+            html += '<div class="bg-indigo-50 rounded-lg p-3 text-center"><p class="text-[10px] text-gray-500">' + t('proj.profit.margin', 'Kâr Marjı') + '</p><p class="text-lg font-bold text-indigo-600">%' + margin + '</p></div>';
             html += '</div>';
-            html += '<p class="text-xs text-gray-400 mb-3">' + rangeLabel + ' | ' + rangeKeys.length + ' ay</p>';
+            html += '<p class="text-xs text-gray-400 mb-3">' + rangeLabel + ' | ' + rangeKeys.length + ' ' + t('proj.col.month', 'ay') + '</p>';
 
             // Daire baz\u0131nda k\u00e2rl\u0131l\u0131k s\u0131ralamas\u0131
             const aptData = [];
@@ -7306,13 +7321,13 @@
 
             html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
             html += '<th class="py-2 px-3 text-left font-medium text-gray-500">#</th>';
-            html += '<th class="py-2 px-3 text-left font-medium text-gray-500">Daire</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Ort.Gecelik K\u00e2r</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Toplam K\u00e2r</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Br\u00fct</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Gece</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">Rez.</th>';
-            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">K\u00e2rl\u0131l\u0131k</th>';
+            html += '<th class="py-2 px-3 text-left font-medium text-gray-500">' + t('proj.col.apt', 'Daire') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">' + t('proj.avg.nightly.profit', 'Ort.Gecelik Kâr') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">' + t('proj.total.profit', 'Toplam Kâr') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">' + t('proj.gross', 'Brüt') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">' + t('proj.night', 'Gece') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">' + t('proj.col.res', 'Rez.') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-medium text-gray-500">' + t('proj.profitability', 'Kârlılık') + '</th>';
             html += '</tr></thead><tbody>';
 
             aptData.forEach((a, i) => {
@@ -7559,15 +7574,15 @@
                 // (eski owner tablo kodu — artık kullanılmıyor)
             } else {
                 // Admin: t\u00fcm s\u00fctunlar
-                html += '<th class="py-2 px-3 text-left font-medium">Ay</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Rez.</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Daire</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Ort. Gecelik</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Br\u00fct Gelir</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Gider</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">KDV</th>' +
-                    '<th class="py-2 px-3 text-right font-medium">Plt.Kom</th>' +
-                    '<th class="py-2 px-3 text-right font-medium text-emerald-700">Lagirio</th>';
+                html += '<th class="py-2 px-3 text-left font-medium">' + t('proj.col.month', 'Ay') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.res', 'Rez.') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.apt', 'Daire') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">' + t('proj.avg.nightly', 'Ort. Gecelik') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.gross', 'Brüt Gelir') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.apt.expense', 'Gider') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.vat', 'KDV') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium">' + t('proj.col.plt.comm', 'Plt.Kom') + '</th>' +
+                    '<th class="py-2 px-3 text-right font-medium text-emerald-700">' + t('proj.col.lagirio', 'Lagirio') + '</th>';
             }
             html += '</tr></thead><tbody>';
 
@@ -7675,7 +7690,7 @@
                     });
                     html += '</tbody></table>';
                 } else {
-                    html += '<p class="text-gray-400 text-xs py-2">Bu ay i\u00e7in daire detay\u0131 yok</p>';
+                    html += '<p class="text-gray-400 text-xs py-2">' + t('proj.no.detail', 'Bu ay için daire detayı yok') + '</p>';
                 }
                 html += '</div></td></tr>';
             });
@@ -7685,7 +7700,7 @@
                 const grandOwnerRatio = grandGross > 0 ? ((grandOwner / grandGross) * 100).toFixed(1) : '0.0';
                 const grandDeductions = grandGross - grandOwner;
                 html += '<tr class="border-t-2 border-gray-300 bg-gray-50 font-bold">' +
-                    '<td class="py-2.5 px-3 text-gray-800">TOPLAM (12 Ay)</td>' +
+                    '<td class="py-2.5 px-3 text-gray-800">' + t('proj.total.12m', 'TOPLAM (12 Ay)') + '</td>' +
                     '<td class="py-2.5 px-3 text-right text-gray-700">' + grandCount + '</td>' +
                     '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
                     '<td class="py-2.5 px-3 text-right text-gray-800">\u20ac' + grandGross.toFixed(2) + '</td>' +
@@ -7695,7 +7710,7 @@
             } else {
                 const grandRatio = grandGross > 0 ? ((grandLagirio / grandGross) * 100).toFixed(1) : '0.0';
                 html += '<tr class="border-t-2 border-gray-300 bg-gray-50 font-bold">' +
-                    '<td class="py-2.5 px-3 text-gray-800">TOPLAM (12 Ay)</td>' +
+                    '<td class="py-2.5 px-3 text-gray-800">' + t('proj.total.12m', 'TOPLAM (12 Ay)') + '</td>' +
                     '<td class="py-2.5 px-3 text-right text-gray-700">' + grandCount + '</td>' +
                     '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
                     '<td class="py-2.5 px-3 text-right text-gray-500">-</td>' +
@@ -8067,7 +8082,7 @@
             var apartments = Analytics?.data?.apartments || [];
 
             if (apartments.length === 0) {
-                el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Daire verisi yok</p>';
+                el.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">' + t('proj.no.apt.data', 'Daire verisi yok') + '</p>';
                 return;
             }
 
@@ -8294,7 +8309,7 @@
                             : '';
                         const nightsInfo = d.totalNights > 0 ? d.totalNights + t('proj.day.abbr', 'g') : '-';
                         const isClickable = d.resCount > 0 && d.source !== 'veri-yok';
-                        const clickAttr = isClickable ? ' onclick="event.stopPropagation(); Projection.showReservationDetail(\'' + apt.id + '\',' + (parseInt(m)-1) + ',' + y + ')" style="cursor:pointer;" title="Rezervasyon detay\u0131 i\u00e7in t\u0131klay\u0131n"' : '';
+                        const clickAttr = isClickable ? ' onclick="event.stopPropagation(); Projection.showReservationDetail(\'' + apt.id + '\',' + (parseInt(m)-1) + ',' + y + ')" style="cursor:pointer;" title="' + t('proj.detail.click', 'Rezervasyon detayı için tıklayın') + '"' : '';
 
                         if (isOwner) {
                             const ownerVal = d.ownerShare || 0;
@@ -8302,8 +8317,8 @@
                             // Belirgin rez badge'i
                             const rezBadgeColor = d.sourceColor === 'emerald' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : d.sourceColor === 'amber' ? 'bg-amber-100 text-amber-700 border border-amber-200' : d.sourceColor === 'orange' ? 'bg-orange-100 text-orange-700 border border-orange-200' : 'bg-gray-100 text-gray-600 border border-gray-200';
                             const rezBadge = isClickable
-                                ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ' + rezBadgeColor + ' cursor-pointer hover:shadow-sm transition-shadow"><i data-lucide="calendar-check" class="w-3 h-3"></i>' + d.resCount + ' rez g\u00f6r\u00fcnt\u00fcle</span>'
-                                : '<span class="text-[10px] text-gray-400">' + d.resCount + ' rez</span>';
+                                ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ' + rezBadgeColor + ' cursor-pointer hover:shadow-sm transition-shadow"><i data-lucide="calendar-check" class="w-3 h-3"></i>' + d.resCount + ' ' + t('proj.view.res', 'rez görüntüle') + '</span>'
+                                : '<span class="text-[10px] text-gray-400">' + d.resCount + ' ' + t('proj.res.badge', 'rez') + '</span>';
 
                             return '<tr class="border-t border-gray-100 ' + rowClass + (isClickable ? ' hover:bg-emerald-50/50 transition-colors' : '') + '"' + clickAttr + '>' +
                                 '<td class="py-2 px-2 text-xs font-medium text-gray-700">' + mName + '</td>' +
@@ -8334,27 +8349,27 @@
                 if (isOwner) {
                     const ownerTotal = apt.ownerShare || 0;
                     const totalDeduction = (apt.gross || 0) - ownerTotal;
-                    detailHeaders = '<th class="py-1 px-2 text-left">Ay</th>' +
-                        '<th class="py-1 px-2 text-left">Rezervasyonlar</th>' +
-                        '<th class="py-1 px-2 text-left">Kaynak</th>' +
-                        '<th class="py-1 px-2 text-right">Br\u00fct</th>' +
-                        '<th class="py-1 px-2 text-right">Kesinti</th>' +
-                        '<th class="py-1 px-2 text-right">Net</th>';
-                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="3">TOPLAM (12 Ay)</td>' +
+                    detailHeaders = '<th class="py-1 px-2 text-left">' + t('proj.col.month', 'Ay') + '</th>' +
+                        '<th class="py-1 px-2 text-left">' + t('proj.col.res', 'Rez.') + '</th>' +
+                        '<th class="py-1 px-2 text-left">' + t('proj.col.source', 'Kaynak') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.gross', 'Brüt') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.deduction', 'Kesinti') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.net', 'Net') + '</th>';
+                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="3">' + t('proj.total.12m', 'TOPLAM (12 Ay)') + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.gross.toFixed(2) + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right text-red-500">-\u20ac' + totalDeduction.toFixed(2) + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right text-emerald-600">\u20ac' + ownerTotal.toFixed(2) + '</td>';
                 } else {
-                    detailHeaders = '<th class="py-1 px-2 text-left">Ay</th>' +
-                        '<th class="py-1 px-2 text-left">Kaynak</th>' +
-                        '<th class="py-1 px-2 text-right">Rez (Gece)</th>' +
-                        '<th class="py-1 px-2 text-right">/Gece</th>' +
-                        '<th class="py-1 px-2 text-right">Br\u00fct (\u00d725g)</th>' +
-                        '<th class="py-1 px-2 text-right">Gider</th>' +
-                        '<th class="py-1 px-2 text-right">KDV</th>' +
-                        '<th class="py-1 px-2 text-right">Plt.Kom</th>' +
-                        '<th class="py-1 px-2 text-right">Lagirio</th>';
-                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="2">TOPLAM (12 Ay)</td>' +
+                    detailHeaders = '<th class="py-1 px-2 text-left">' + t('proj.col.month', 'Ay') + '</th>' +
+                        '<th class="py-1 px-2 text-left">' + t('proj.col.source', 'Kaynak') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.col.nights.res', 'Rez (Gece)') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.col.per.night', '/Gece') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.col.gross.25d', 'Brüt (×25g)') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.col.apt.expense', 'Gider') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.col.vat', 'KDV') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.col.plt.comm', 'Plt.Kom') + '</th>' +
+                        '<th class="py-1 px-2 text-right">' + t('proj.col.lagirio', 'Lagirio') + '</th>';
+                    detailTotalRow = '<td class="py-1.5 px-2 text-xs" colspan="2">' + t('proj.total.12m', 'TOPLAM (12 Ay)') + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right">' + apt.count + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.avgNightly.toFixed(2) + '</td>' +
                         '<td class="py-1.5 px-2 text-xs text-right">\u20ac' + apt.gross.toFixed(2) + '</td>' +
@@ -8376,8 +8391,8 @@
                     ownerInlineResSection = '<div class="mt-3 mb-2">' +
                         '<div class="flex items-center gap-2 mb-2">' +
                         '<i data-lucide="calendar-clock" class="w-4 h-4 text-emerald-500"></i>' +
-                        '<span class="text-xs font-bold text-gray-700">Yakla\u015fan Rezervasyonlar</span>' +
-                        '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">' + futureResForApt.length + ' rez</span>' +
+                        '<span class="text-xs font-bold text-gray-700">' + t('proj.upcoming.res', 'Yaklaşan Rezervasyonlar') + '</span>' +
+                        '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">' + futureResForApt.length + ' ' + t('proj.res.badge', 'rez') + '</span>' +
                         '</div>' +
                         '<div class="space-y-1.5">';
 
@@ -8392,7 +8407,7 @@
                             '<div class="flex items-center gap-3">' +
                             '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ' + platformColor + '">' + (res.platform || '-') + '</span>' +
                             '<div>' +
-                            '<span class="text-xs font-medium text-gray-700">' + (res.guestName || 'Misafir') + '</span>' +
+                            '<span class="text-xs font-medium text-gray-700">' + (res.guestName || t('proj.col.guest', 'Misafir')) + '</span>' +
                             '<span class="text-[10px] text-gray-400 ml-2">' + fmt(res.checkIn) + ' \u2192 ' + fmt(res.checkOut) + ' (' + nights + 'g)</span>' +
                             '</div></div>' +
                             '<span class="text-xs font-bold text-gray-800">\u20ac' + amountEUR.toFixed(2) + '</span>' +
@@ -8401,14 +8416,14 @@
 
                     if (futureResForApt.length > 5) {
                         ownerInlineResSection += '<button onclick="event.stopPropagation(); Projection.showAllFutureResForApt(\'' + apt.id + '\')" class="w-full text-center py-1.5 text-[11px] text-emerald-600 hover:text-emerald-800 font-medium hover:bg-emerald-50 rounded-lg transition">' +
-                            '+ ' + (futureResForApt.length - 5) + ' rez daha g\u00f6r\u00fcnt\u00fcle</button>';
+                            '+ ' + (futureResForApt.length - 5) + ' ' + t('proj.more.res', 'rez daha görüntüle') + '</button>';
                     }
                     ownerInlineResSection += '</div></div>';
                 } else if (isOwner) {
                     ownerInlineResSection = '<div class="mt-3 mb-2 text-center py-3 bg-gray-50 rounded-lg">' +
                         '<i data-lucide="calendar-x" class="w-5 h-5 text-gray-300 mx-auto mb-1"></i>' +
-                        '<p class="text-xs text-gray-400">Hen\u00fcz gelecek rezervasyon yok</p>' +
-                        '<p class="text-[10px] text-gray-300 mt-0.5">Tahminler ge\u00e7mi\u015f verilerden \u00fcretilmektedir</p>' +
+                        '<p class="text-xs text-gray-400">' + t('proj.no.future.res', 'Henüz gelecek rezervasyon yok') + '</p>' +
+                        '<p class="text-[10px] text-gray-300 mt-0.5">' + t('proj.est.from.past', 'Tahminler geçmiş verilerden üretilmektedir') + '</p>' +
                         '</div>';
                 }
 
@@ -8425,7 +8440,7 @@
                 const mainValue = isOwner ? (apt.ownerShare || 0) : apt.lagirio;
                 const summaryLine = isOwner
                     ? t('proj.summary.brut', 'Brüt') + ' \u20ac' + apt.gross.toFixed(2) + ' | ' + t('proj.summary.deduction', 'Kesinti') + ' -\u20ac' + ((apt.gross || 0) - (apt.ownerShare || 0)).toFixed(2)
-                    : t('proj.summary.brut', 'Brüt') + ' \u20ac' + apt.gross.toFixed(2) + ' | ' + t('proj.summary.expense', 'Gdr') + ' \u20ac' + apt.expenses.toFixed(2) + ' | KDV \u20ac' + apt.kdv.toFixed(2) + ' | Plt \u20ac' + apt.platComm.toFixed(2);
+                    : t('proj.summary.brut', 'Brüt') + ' \u20ac' + apt.gross.toFixed(2) + ' | ' + t('proj.summary.expense', 'Gdr') + ' \u20ac' + apt.expenses.toFixed(2) + ' | ' + t('proj.col.vat', 'KDV') + ' \u20ac' + apt.kdv.toFixed(2) + ' | ' + t('proj.col.plt.comm', 'Plt') + ' \u20ac' + apt.platComm.toFixed(2);
 
                 // Owner: gelecek rez badge
                 const futureResBadge = (isOwner && futureResCount > 0)
@@ -8527,7 +8542,7 @@
             } else {
                 html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl flex justify-between items-center">';
                 html += '<div><h3 class="text-lg font-bold">' + aptCode + ' - ' + monthNamesFull[month] + ' ' + year + '</h3>';
-                html += '<p class="text-emerald-100 text-sm mt-1">Hesaplamaya Dahil Edilen Rezervasyonlar</p></div>';
+                html += '<p class="text-emerald-100 text-sm mt-1">' + t('proj.calc.included.res', 'Hesaplamaya Dahil Edilen Rezervasyonlar') + '</p></div>';
                 html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
                 html += '</div>';
             }
@@ -8631,20 +8646,20 @@
             let html = '<div id="projResDetailOverlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">';
             html += '<div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">';
             html += '<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-5 rounded-t-2xl flex justify-between items-center">';
-            html += '<div><h3 class="text-lg font-bold">' + aptCode + ' \u2014 T\u00fcm Gelecek Rezervasyonlar</h3>';
-            html += '<p class="text-emerald-100 text-sm mt-1">' + allRes.length + ' rezervasyon</p></div>';
+            html += '<div><h3 class="text-lg font-bold">' + aptCode + ' \u2014 ' + t('proj.all.future.res', 'Tüm Gelecek Rezervasyonlar') + '</h3>';
+            html += '<p class="text-emerald-100 text-sm mt-1">' + allRes.length + ' ' + t('common.reservation', 'rezervasyon') + '</p></div>';
             html += '<button onclick="document.getElementById(\'projResDetailOverlay\').remove()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>';
             html += '</div>';
 
             html += '<div class="p-5"><div class="overflow-x-auto"><table class="w-full text-xs">';
             html += '<thead class="bg-gray-50"><tr>';
-            html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Misafir</th>';
-            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Giri\u015f</th>';
-            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">\u00c7\u0131k\u0131\u015f</th>';
-            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">Gece</th>';
-            html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">Platform</th>';
-            html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">Tutar</th>';
-            html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">/Gece</th>';
+            html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.guest', 'Misafir') + '</th>';
+            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('proj.col.checkin', 'Giriş') + '</th>';
+            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('proj.col.checkout', 'Çıkış') + '</th>';
+            html += '<th class="py-2 px-3 text-center font-semibold text-gray-500">' + t('common.night', 'Gece') + '</th>';
+            html += '<th class="py-2 px-3 text-left font-semibold text-gray-500">' + t('proj.col.platform', 'Platform') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.amount', 'Tutar') + '</th>';
+            html += '<th class="py-2 px-3 text-right font-semibold text-gray-500">' + t('proj.col.per.night', '/Gece') + '</th>';
             html += '</tr></thead><tbody>';
 
             allRes.forEach(function(res) {
@@ -8670,7 +8685,7 @@
 
             const avgNightly = totalNights > 0 ? totalAmount / totalNights : 0;
             html += '<tr class="border-t-2 border-gray-300 font-bold bg-gray-50">';
-            html += '<td class="py-2 px-3" colspan="2">TOPLAM</td><td></td>';
+            html += '<td class="py-2 px-3" colspan="2">' + t('proj.total', 'TOPLAM') + '</td><td></td>';
             html += '<td class="py-2 px-3 text-center">' + totalNights + '</td><td></td>';
             html += '<td class="py-2 px-3 text-right text-emerald-600">\u20ac' + totalAmount.toFixed(2) + '</td>';
             html += '<td class="py-2 px-3 text-right text-gray-500">\u20ac' + avgNightly.toFixed(2) + '</td>';
@@ -8707,7 +8722,7 @@
                 .sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
 
             if (filtered.length === 0) {
-                el.innerHTML = '<p class="text-center py-8 text-sm text-gray-400">Gelecek rezervasyon yok</p>';
+                el.innerHTML = '<p class="text-center py-8 text-sm text-gray-400">' + t('proj.no.future.res', 'Gelecek rezervasyon yok') + '</p>';
                 return;
             }
 
@@ -8720,14 +8735,14 @@
 
             el.innerHTML = '<table class="w-full text-xs">' +
                 '<thead class="bg-gray-50 sticky top-0"><tr>' +
-                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Daire</th>' +
-                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Platform</th>' +
-                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Misafir</th>' +
-                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Giriş</th>' +
-                '<th class="text-left py-2 px-3 font-semibold text-gray-500">Çıkış</th>' +
-                '<th class="text-right py-2 px-3 font-semibold text-gray-500">Gece</th>' +
-                '<th class="text-right py-2 px-3 font-semibold text-gray-500">Toplam</th>' +
-                '<th class="text-right py-2 px-3 font-semibold text-gray-500">/Gece</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">' + t('proj.th.apt', 'Daire') + '</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">' + t('proj.col.platform', 'Platform') + '</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">' + t('proj.col.guest', 'Misafir') + '</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">' + t('proj.col.checkin', 'Giriş') + '</th>' +
+                '<th class="text-left py-2 px-3 font-semibold text-gray-500">' + t('proj.col.checkout', 'Çıkış') + '</th>' +
+                '<th class="text-right py-2 px-3 font-semibold text-gray-500">' + t('common.night', 'Gece') + '</th>' +
+                '<th class="text-right py-2 px-3 font-semibold text-gray-500">' + t('proj.col.amount', 'Toplam') + '</th>' +
+                '<th class="text-right py-2 px-3 font-semibold text-gray-500">' + t('proj.col.per.night', '/Gece') + '</th>' +
                 '</tr></thead><tbody>' +
                 filtered.map(r =>
                     '<tr class="border-t border-gray-50 hover:bg-gray-50/50">' +
