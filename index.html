@@ -250,20 +250,20 @@
         <div class="bg-white/[0.97] backdrop-blur-2xl rounded-3xl p-12 w-[440px] max-w-[90vw] shadow-[0_32px_64px_rgba(0,0,0,0.2)] text-center relative z-10 border border-white/20">
             <div class="w-[80px] h-[80px] bg-gradient-to-br from-emerald-900 via-emerald-700 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 text-[30px] font-extrabold text-white tracking-tight shadow-[0_8px_24px_rgba(22,101,52,0.3)] rotate-3 hover:rotate-0 transition-transform">L</div>
             <h1 class="text-[26px] font-extrabold bg-gradient-to-r from-emerald-900 to-emerald-600 bg-clip-text text-transparent mb-1.5">Lagirio Analytics</h1>
-            <p class="text-sm text-gray-400 mb-8 font-medium">Gelişmiş Veri Analiz Paneli</p>
+            <p class="text-sm text-gray-400 mb-8 font-medium" data-i18n="login.subtitle">Gelişmiş Veri Analiz Paneli</p>
 
             <div class="mb-5 text-left">
-                <label class="block text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Kullanıcı Adı</label>
+                <label class="block text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider" data-i18n="login.username">Kullanıcı Adı</label>
                 <div class="relative">
-                    <input type="text" id="loginUser" placeholder="Kullanıcı adınız" autocomplete="username"
+                    <input type="text" id="loginUser" placeholder="Kullanıcı adınız" autocomplete="username" data-i18n-placeholder="login.username.ph"
                            class="w-full px-4 py-3.5 border-2 border-gray-100 rounded-xl text-[15px] font-inter bg-[#faf8f4] transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-[4px] focus:ring-emerald-500/10 focus:shadow-lg pl-11">
                     <i data-lucide="user" class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
                 </div>
             </div>
             <div class="mb-5 text-left">
-                <label class="block text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Şifre</label>
+                <label class="block text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider" data-i18n="login.password">Şifre</label>
                 <div class="relative">
-                    <input type="password" id="loginPass" placeholder="Şifreniz" autocomplete="current-password"
+                    <input type="password" id="loginPass" placeholder="Şifreniz" autocomplete="current-password" data-i18n-placeholder="login.password.ph"
                            class="w-full px-4 py-3.5 border-2 border-gray-100 rounded-xl text-[15px] font-inter bg-[#faf8f4] transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-[4px] focus:ring-emerald-500/10 focus:shadow-lg pl-11"
                            onkeydown="if(event.key==='Enter')Auth.login()">
                     <i data-lucide="lock" class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
@@ -273,7 +273,7 @@
             <button id="loginBtn" onclick="Auth.login()"
                     class="w-full py-4 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white border-none rounded-xl text-[15px] font-bold font-inter cursor-pointer transition-all duration-300 mt-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,48,40,0.35)] active:translate-y-0 active:shadow-md flex items-center justify-center gap-2">
                 <i data-lucide="log-in" class="w-4 h-4"></i>
-                Giriş Yap
+                <span data-i18n="login.btn">Giriş Yap</span>
             </button>
             <p id="loginError" class="login-error"></p>
 
@@ -283,7 +283,7 @@
                 <div id="loginDriveConnected" class="hidden">
                     <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
                         <p class="text-xs text-emerald-600 flex items-center justify-center gap-1.5" id="loginDriveConnectedText">
-                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Drive bağlantısı aktif
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> <span data-i18n="login.drive.connected">Drive bağlantısı aktif</span>
                         </p>
                     </div>
                 </div>
@@ -291,7 +291,7 @@
                 <div id="loginDriveConnecting" class="hidden">
                     <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-center">
                         <p class="text-xs text-blue-600 flex items-center justify-center gap-1.5">
-                            <i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Drive'a bağlanılıyor...
+                            <i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> <span data-i18n="login.drive.connecting">Drive'a bağlanılıyor...</span>
                         </p>
                     </div>
                 </div>
@@ -300,11 +300,11 @@
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                         <p class="text-xs text-gray-500 mb-3 font-medium" id="loginDriveFormMsg">Google Drive bağlantısı için Client ID girin:</p>
                         <div class="flex gap-2">
-                            <input type="text" id="loginDriveClientId" placeholder="Client ID yapıştırın"
+                            <input type="text" id="loginDriveClientId" placeholder="Client ID yapıştırın" data-i18n-placeholder="login.drive.clientid.ph"
                                    class="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
                             <button onclick="Auth.loginDriveConnect()" id="loginDriveConnectBtn" class="px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1.5 whitespace-nowrap">
                                 <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"/></svg>
-                                Bağlan
+                                <span data-i18n="login.drive.connect.btn">Bağlan</span>
                             </button>
                         </div>
                         <p id="loginDriveError" class="text-xs text-red-500 mt-2 hidden"></p>
@@ -325,9 +325,9 @@
             </div>
 
             <div class="mt-4 pt-6 border-t border-gray-100 flex items-center justify-center gap-6 text-[11px] text-gray-400 font-medium">
-                <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> Güvenli</span>
-                <span class="flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> Hızlı</span>
-                <span class="flex items-center gap-1"><i data-lucide="bar-chart-2" class="w-3 h-3"></i> Detaylı</span>
+                <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> <span data-i18n="login.footer.secure">Güvenli</span></span>
+                <span class="flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> <span data-i18n="login.footer.fast">Hızlı</span></span>
+                <span class="flex items-center gap-1"><i data-lucide="bar-chart-2" class="w-3 h-3"></i> <span data-i18n="login.footer.detailed">Detaylı</span></span>
             </div>
         </div>
     </div>
@@ -618,20 +618,20 @@
             <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mb-6 shadow-lg">
                 <i data-lucide="cloud-download" class="w-10 h-10 text-white"></i>
             </div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2" id="ownerWelcomeTitle">Hoş Geldiniz</h2>
-            <p class="text-gray-500 text-sm mb-6" id="ownerWelcomeMsg">Google Drive'dan verileriniz otomatik olarak çekilecektir.</p>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2" id="ownerWelcomeTitle" data-i18n="owner.welcome.title">Hoş Geldiniz</h2>
+            <p class="text-gray-500 text-sm mb-6" id="ownerWelcomeMsg" data-i18n="owner.welcome.msg">Google Drive'dan verileriniz otomatik olarak çekilecektir.</p>
 
             <!-- İlk kullanım: Drive henüz bağlı değilse -->
             <div id="ownerDriveSetup" class="hidden mt-2 text-left">
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-                    <p class="text-sm text-amber-700 text-center font-medium">İlk kullanım için Google Drive bağlantısı gerekli.</p>
-                    <p class="text-xs text-amber-500 text-center mt-1">Yöneticinizden aldığınız Client ID'yi girin.</p>
+                    <p class="text-sm text-amber-700 text-center font-medium" data-i18n="owner.drive.required">İlk kullanım için Google Drive bağlantısı gerekli.</p>
+                    <p class="text-xs text-amber-500 text-center mt-1" data-i18n="owner.drive.clientid.hint">Yöneticinizden aldığınız Client ID'yi girin.</p>
                 </div>
-                <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Google Client ID</label>
+                <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider" data-i18n="owner.drive.clientid.label">Google Client ID</label>
                 <input type="text" id="ownerClientId" placeholder="xxxx.apps.googleusercontent.com"
                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm mb-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition">
                 <button onclick="GoogleDrive.ownerConnect()" class="w-full px-4 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
-                    <i data-lucide="link" class="w-4 h-4"></i> Google ile Bağlan
+                    <i data-lucide="link" class="w-4 h-4"></i> <span data-i18n="owner.drive.connect.btn">Google ile Bağlan</span>
                 </button>
             </div>
 
@@ -639,7 +639,7 @@
             <div id="ownerLoadingIndicator" class="hidden mt-4">
                 <div class="flex items-center justify-center gap-2 text-blue-600">
                     <i data-lucide="loader" class="w-5 h-5 animate-spin"></i>
-                    <span class="text-sm font-medium">Veriler yükleniyor...</span>
+                    <span class="text-sm font-medium" data-i18n="owner.loading">Veriler yükleniyor...</span>
                 </div>
             </div>
         </div>
@@ -2122,9 +2122,111 @@
         STORAGE_KEY: 'lagirioLang',
 
         translations: {
-            en: {},
-            ru: {},
-            ar: {}
+            en: {
+                // Login screen
+                'login.subtitle': 'Advanced Data Analytics Panel',
+                'login.username': 'Username',
+                'login.username.ph': 'Your username',
+                'login.password': 'Password',
+                'login.password.ph': 'Your password',
+                'login.btn': 'Sign In',
+                'login.error.empty': 'Please enter username and password',
+                'login.error.invalid': 'Invalid username or password',
+                'login.footer.secure': 'Secure',
+                'login.footer.fast': 'Fast',
+                'login.footer.detailed': 'Detailed',
+                // Login Drive
+                'login.drive.connected': 'Drive connection active',
+                'login.drive.connected.email': 'Drive connection active',
+                'login.drive.configured': 'Drive configuration ready',
+                'login.drive.connecting': 'Connecting to Drive...',
+                'login.drive.form.msg': 'Enter Client ID for Google Drive connection:',
+                'login.drive.clientid.ph': 'Paste Client ID',
+                'login.drive.connect.btn': 'Connect',
+                'login.drive.session.expired': 'Drive session expired. Click to reconnect:',
+                'login.drive.clientid.saved': 'Client ID saved. Connect with Google:',
+                'login.drive.error.empty': 'Enter Client ID',
+                'login.drive.error.api': 'Google API failed to load. Refresh the page.',
+                'login.drive.error.connection': 'Connection error',
+                // Owner Welcome
+                'owner.welcome.title': 'Welcome',
+                'owner.welcome.msg': 'Your data will be automatically fetched from Google Drive.',
+                'owner.drive.required': 'Google Drive connection is required for first use.',
+                'owner.drive.clientid.hint': 'Enter the Client ID you received from your manager.',
+                'owner.drive.clientid.label': 'Google Client ID',
+                'owner.drive.connect.btn': 'Connect with Google',
+                'owner.loading': 'Loading data...'
+            },
+            ru: {
+                // Login screen
+                'login.subtitle': 'Панель анализа данных',
+                'login.username': 'Имя пользователя',
+                'login.username.ph': 'Ваше имя пользователя',
+                'login.password': 'Пароль',
+                'login.password.ph': 'Ваш пароль',
+                'login.btn': 'Войти',
+                'login.error.empty': 'Введите имя пользователя и пароль',
+                'login.error.invalid': 'Неверное имя пользователя или пароль',
+                'login.footer.secure': 'Безопасно',
+                'login.footer.fast': 'Быстро',
+                'login.footer.detailed': 'Подробно',
+                // Login Drive
+                'login.drive.connected': 'Drive подключён',
+                'login.drive.connected.email': 'Drive подключён',
+                'login.drive.configured': 'Drive настроен',
+                'login.drive.connecting': 'Подключение к Drive...',
+                'login.drive.form.msg': 'Введите Client ID для подключения Google Drive:',
+                'login.drive.clientid.ph': 'Вставьте Client ID',
+                'login.drive.connect.btn': 'Подключить',
+                'login.drive.session.expired': 'Сессия Drive истекла. Нажмите для повторного подключения:',
+                'login.drive.clientid.saved': 'Client ID сохранён. Подключитесь через Google:',
+                'login.drive.error.empty': 'Введите Client ID',
+                'login.drive.error.api': 'Google API не загружен. Обновите страницу.',
+                'login.drive.error.connection': 'Ошибка подключения',
+                // Owner Welcome
+                'owner.welcome.title': 'Добро пожаловать',
+                'owner.welcome.msg': 'Ваши данные будут автоматически загружены из Google Drive.',
+                'owner.drive.required': 'Для первого использования необходимо подключение к Google Drive.',
+                'owner.drive.clientid.hint': 'Введите Client ID, полученный от вашего менеджера.',
+                'owner.drive.clientid.label': 'Google Client ID',
+                'owner.drive.connect.btn': 'Подключить через Google',
+                'owner.loading': 'Загрузка данных...'
+            },
+            ar: {
+                // Login screen
+                'login.subtitle': 'لوحة تحليل البيانات المتقدمة',
+                'login.username': 'اسم المستخدم',
+                'login.username.ph': 'اسم المستخدم الخاص بك',
+                'login.password': 'كلمة المرور',
+                'login.password.ph': 'كلمة المرور الخاصة بك',
+                'login.btn': 'تسجيل الدخول',
+                'login.error.empty': 'يرجى إدخال اسم المستخدم وكلمة المرور',
+                'login.error.invalid': 'اسم المستخدم أو كلمة المرور غير صحيحة',
+                'login.footer.secure': 'آمن',
+                'login.footer.fast': 'سريع',
+                'login.footer.detailed': 'مفصّل',
+                // Login Drive
+                'login.drive.connected': 'اتصال Drive نشط',
+                'login.drive.connected.email': 'اتصال Drive نشط',
+                'login.drive.configured': 'إعداد Drive جاهز',
+                'login.drive.connecting': 'جارٍ الاتصال بـ Drive...',
+                'login.drive.form.msg': 'أدخل Client ID للاتصال بـ Google Drive:',
+                'login.drive.clientid.ph': 'الصق Client ID',
+                'login.drive.connect.btn': 'اتصال',
+                'login.drive.session.expired': 'انتهت جلسة Drive. انقر لإعادة الاتصال:',
+                'login.drive.clientid.saved': 'تم حفظ Client ID. اتصل عبر Google:',
+                'login.drive.error.empty': 'أدخل Client ID',
+                'login.drive.error.api': 'فشل تحميل Google API. قم بتحديث الصفحة.',
+                'login.drive.error.connection': 'خطأ في الاتصال',
+                // Owner Welcome
+                'owner.welcome.title': 'مرحباً',
+                'owner.welcome.msg': 'سيتم جلب بياناتك تلقائياً من Google Drive.',
+                'owner.drive.required': 'يلزم الاتصال بـ Google Drive للاستخدام الأول.',
+                'owner.drive.clientid.hint': 'أدخل Client ID الذي حصلت عليه من مديرك.',
+                'owner.drive.clientid.label': 'Google Client ID',
+                'owner.drive.connect.btn': 'الاتصال عبر Google',
+                'owner.loading': 'جارٍ تحميل البيانات...'
+            }
         },
 
         init() {
@@ -2407,14 +2509,14 @@
             const errorEl = document.getElementById('loginError');
 
             if (!username || !password) {
-                errorEl.textContent = 'Lütfen kullanıcı adı ve şifre girin';
+                errorEl.textContent = t('login.error.empty', 'Lütfen kullanıcı adı ve şifre girin');
                 errorEl.style.display = 'block';
                 return;
             }
 
             const user = this.getUsers().find(u => u.username === username && u.password === password);
             if (!user) {
-                errorEl.textContent = 'Geçersiz kullanıcı adı veya şifre';
+                errorEl.textContent = t('login.error.invalid', 'Geçersiz kullanıcı adı veya şifre');
                 errorEl.style.display = 'block';
                 document.getElementById('loginPass').value = '';
                 return;
@@ -2672,9 +2774,9 @@
                 const textEl = document.getElementById('loginDriveConnectedText');
                 if (textEl) {
                     if (email) {
-                        textEl.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Drive bağlantısı aktif (' + email + ')';
+                        textEl.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> ' + t('login.drive.connected.email', 'Drive bağlantısı aktif') + ' (' + email + ')';
                     } else {
-                        textEl.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Drive yapılandırması hazır';
+                        textEl.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> ' + t('login.drive.configured', 'Drive yapılandırması hazır');
                     }
                 }
             } else if (state === 'connecting') {
@@ -2689,11 +2791,11 @@
                 const msgEl = document.getElementById('loginDriveFormMsg');
                 if (msgEl) {
                     if (config.clientId && config.fileId) {
-                        msgEl.textContent = 'Drive oturumu sona erdi. Tekrar bağlanmak için tıklayın:';
+                        msgEl.textContent = t('login.drive.session.expired', 'Drive oturumu sona erdi. Tekrar bağlanmak için tıklayın:');
                     } else if (config.clientId) {
-                        msgEl.textContent = 'Client ID kayıtlı. Google ile bağlanın:';
+                        msgEl.textContent = t('login.drive.clientid.saved', 'Client ID kayıtlı. Google ile bağlanın:');
                     } else {
-                        msgEl.textContent = 'Google Drive bağlantısı için Client ID girin:';
+                        msgEl.textContent = t('login.drive.form.msg', 'Google Drive bağlantısı için Client ID girin:');
                     }
                 }
                 // Hata mesajını temizle
@@ -2701,7 +2803,7 @@
                 if (errorEl) errorEl.classList.add('hidden');
                 // Buton durumunu sıfırla
                 const btn = document.getElementById('loginDriveConnectBtn');
-                if (btn) btn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"/></svg> Bağlan';
+                if (btn) btn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"/></svg> ' + t('login.drive.connect.btn', 'Bağlan');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
@@ -2713,7 +2815,7 @@
             const errorEl = document.getElementById('loginDriveError');
 
             if (!clientId) {
-                if (errorEl) { errorEl.textContent = 'Client ID girin'; errorEl.classList.remove('hidden'); }
+                if (errorEl) { errorEl.textContent = t('login.drive.error.empty', 'Client ID girin'); errorEl.classList.remove('hidden'); }
                 return;
             }
 
@@ -2723,7 +2825,7 @@
             localStorage.setItem(GoogleDrive.STORAGE_KEY, JSON.stringify(config));
 
             if (typeof google === 'undefined' || !google.accounts) {
-                if (errorEl) { errorEl.textContent = 'Google API yüklenemedi. Sayfayı yenileyin.'; errorEl.classList.remove('hidden'); }
+                if (errorEl) { errorEl.textContent = t('login.drive.error.api', 'Google API yüklenemedi. Sayfayı yenileyin.'); errorEl.classList.remove('hidden'); }
                 return;
             }
 
@@ -2738,7 +2840,7 @@
                         if (response.error) {
                             this.updateLoginDriveUI('form');
                             const errEl = document.getElementById('loginDriveError');
-                            if (errEl) { errEl.textContent = 'Bağlantı hatası: ' + response.error; errEl.classList.remove('hidden'); }
+                            if (errEl) { errEl.textContent = t('login.drive.error.connection', 'Bağlantı hatası') + ': ' + response.error; errEl.classList.remove('hidden'); }
                             return;
                         }
 
