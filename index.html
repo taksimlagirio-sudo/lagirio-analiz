@@ -11494,37 +11494,34 @@
         },
 
         // Helper: Calculate apartment metrics
+        // Helper: Tarih string'inden ay/yıl çıkar (timezone-safe)
+        _parseDateMonthYear(dateStr) {
+            if (!dateStr) return null;
+            const parts = String(dateStr).split(/[-T]/);
+            const year = parseInt(parts[0]);
+            const month = parseInt(parts[1]) - 1; // 0-indexed
+            if (isNaN(year) || isNaN(month)) return null;
+            return { year, month, key: year * 12 + month };
+        },
+
         calculateApartmentMetrics(apartment, startDate, endDate) {
-            // DEBUG: Sadece Sistem 2 (Kişi Şirketi) için
-            if (apartment.systemType === '2') {
-                console.log(`\n🔎 calculateApartmentMetrics: ${apartment.code} (${apartment.id})`);
-                console.log(`   Dönem: ${startDate.toISOString()} → ${endDate.toISOString()}`);
-                console.log(`   startDate local: ${startDate.toString()}`);
-                console.log(`   endDate local: ${endDate.toString()}`);
-
-                const allAptExpenses = this.data.expenses?.filter(exp => exp.apartmentId === apartment.id) || [];
-                console.log(`   Bu daireye ait TOPLAM gider sayısı (filtersiz): ${allAptExpenses.length}`);
-
-                allAptExpenses.forEach(exp => {
-                    const date = new Date(exp.date);
-                    const inRange = date >= startDate && date <= endDate;
-                    console.log(`   ${inRange ? '✅' : '❌'} exp.date="${exp.date}" → parsed=${date.toISOString()} (${date.toString()}) | ${exp.amount} ${exp.currency} | >= start: ${date >= startDate}, <= end: ${date <= endDate}`);
-                });
-            }
+            // Ay/yıl bazlı filtreleme (trendlerle tutarlı, timezone-safe)
+            const startKey = startDate.getFullYear() * 12 + startDate.getMonth();
+            const endKey = endDate.getFullYear() * 12 + endDate.getMonth();
 
             const reservations = this.data.reservations?.filter(res => {
-                const checkIn = new Date(res.checkIn);
-                return res.apartmentId === apartment.id &&
-                    checkIn >= startDate && checkIn <= endDate;
+                if (res.apartmentId !== apartment.id) return false;
+                const parsed = this._parseDateMonthYear(res.checkIn);
+                if (!parsed) return false;
+                return parsed.key >= startKey && parsed.key <= endKey;
             }) || [];
 
             const expenses = this.data.expenses?.filter(exp => {
-                const date = new Date(exp.date);
-                return exp.apartmentId === apartment.id &&
-                    date >= startDate && date <= endDate;
+                if (exp.apartmentId !== apartment.id) return false;
+                const parsed = this._parseDateMonthYear(exp.date);
+                if (!parsed) return false;
+                return parsed.key >= startKey && parsed.key <= endKey;
             }) || [];
-
-            console.log(`   Filtrelenmiş gider sayısı: ${expenses.length}`);
             
             // Detaylı kırılım (owner karşılaştırması için)
             const detailed = this.calculateOwnerShareDetailed(apartment, reservations, expenses);
