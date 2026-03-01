@@ -7229,7 +7229,7 @@
             chipsContainer.innerHTML = ownerApts.map(apt =>
                 '<button onclick="Analytics.ownerFilterToggle(\'' + apt.id + '\')" ' +
                 'data-apt-id="' + apt.id + '" ' +
-                'class="owner-filter-chip active px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition cursor-pointer bg-emerald-50 border-emerald-500 text-emerald-700">' +
+                'class="owner-filter-chip px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition cursor-pointer">' +
                 apt.code + '</button>'
             ).join('');
 
@@ -7289,10 +7289,10 @@
                 }
             }
 
-            // Her daire chip'i
+            // Her daire chip'i — Tümü aktifken bireysel chip'ler nötr görünsün
             document.querySelectorAll('#ownerFilterChips .owner-filter-chip').forEach(chip => {
                 const id = chip.dataset.aptId;
-                if (this._ownerSelectedIds.includes(id)) {
+                if (!isAll && this._ownerSelectedIds.includes(id)) {
                     chip.classList.add('active', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
                 } else {
                     chip.classList.remove('active', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
