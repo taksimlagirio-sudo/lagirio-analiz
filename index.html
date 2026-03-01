@@ -218,6 +218,9 @@
         body.owner-mode #topPerformersSection {
             display: none !important;
         }
+        body.owner-mode #revenueTrendSection {
+            grid-column: 1 / -1;
+        }
         body.owner-mode .owner-readonly {
             pointer-events: none;
             opacity: 0.6;
@@ -1116,13 +1119,13 @@
                 <!-- Performance Metrics Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <!-- Revenue Trend Chart -->
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                    <div id="revenueTrendSection" class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                                 <i data-lucide="line-chart" class="w-5 h-5 text-emerald-600"></i>
                                 <span id="dashboardTrendTitle" data-i18n="overview.revenue.trend">Gelir Trendi</span>
                             </h3>
-                            <select id="trendPeriod" class="text-sm px-3 py-1 border border-gray-200 rounded-lg" onchange="Analytics.createRevenueTrendChart()">
+                            <select id="trendPeriod" class="text-sm px-3 py-1 border border-gray-200 rounded-lg admin-only" onchange="Analytics.createRevenueTrendChart()">
                                 <option value="daily">Günlük</option>
                                 <option value="weekly">Haftalık</option>
                                 <option value="monthly" selected>Aylık</option>
@@ -2744,11 +2747,15 @@
                 'proj.expense.detail': 'Apt-based standard (outlier elimination)',
                 'proj.of.gross': '% of gross',
                 'proj.hist.ratio': 'Past ratio:',
+                // Chart labels
+                'chart.bank.label': 'Bank',
+                'chart.cash.label': 'Cash',
                 // Owner Financial Summary
                 'owner.bank': 'Bank:',
                 'owner.cash': 'Cash:',
                 'owner.total.res.nights': 'Total {0} reservations / {1} nights',
                 // Projection reservation section
+                'proj.day.abbr': 'd',
                 'proj.nights.label': 'nights',
                 'proj.no.data.label': 'no data',
                 'proj.past.label': 'past',
@@ -3402,11 +3409,15 @@
                 'proj.expense.detail': 'По квартирам (без выбросов)',
                 'proj.of.gross': '% от валового',
                 'proj.hist.ratio': 'Прошлое соотн.:',
+                // Chart labels
+                'chart.bank.label': 'Банк',
+                'chart.cash.label': 'Наличные',
                 // Owner Financial Summary
                 'owner.bank': 'Банк:',
                 'owner.cash': 'Наличные:',
                 'owner.total.res.nights': 'Всего {0} бронирований / {1} ночей',
                 // Projection reservation section
+                'proj.day.abbr': 'д',
                 'proj.nights.label': 'ночей',
                 'proj.no.data.label': 'нет данных',
                 'proj.past.label': 'прошлый',
@@ -4060,11 +4071,15 @@
                 'proj.expense.detail': 'معيار الشقق (إزالة القيم المتطرفة)',
                 'proj.of.gross': '% من الإجمالي',
                 'proj.hist.ratio': 'النسبة السابقة:',
+                // Chart labels
+                'chart.bank.label': 'بنك',
+                'chart.cash.label': 'نقداً',
                 // Owner Financial Summary
                 'owner.bank': 'بنك:',
                 'owner.cash': 'نقداً:',
                 'owner.total.res.nights': 'إجمالي {0} حجز / {1} ليلة',
                 // Projection reservation section
+                'proj.day.abbr': 'ي',
                 'proj.nights.label': 'ليلة',
                 'proj.no.data.label': 'لا توجد بيانات',
                 'proj.past.label': 'سابق',
@@ -8277,7 +8292,7 @@
                         const adjustInput = d.needsAdjustment
                             ? ' <input type="number" value="' + (d.adjustPct || 0) + '" style="width:45px;font-size:10px;padding:1px 3px;border:1px solid #ddd;border-radius:3px;text-align:center;" onchange="Projection.updateChainAdjust(\'' + d.adjustKey + '\', this.value)" title="% ayarlama">%'
                             : '';
-                        const nightsInfo = d.totalNights > 0 ? d.totalNights + 'g' : '-';
+                        const nightsInfo = d.totalNights > 0 ? d.totalNights + t('proj.day.abbr', 'g') : '-';
                         const isClickable = d.resCount > 0 && d.source !== 'veri-yok';
                         const clickAttr = isClickable ? ' onclick="event.stopPropagation(); Projection.showReservationDetail(\'' + apt.id + '\',' + (parseInt(m)-1) + ',' + y + ')" style="cursor:pointer;" title="Rezervasyon detay\u0131 i\u00e7in t\u0131klay\u0131n"' : '';
 
@@ -11186,7 +11201,7 @@
                     data: [
                         {
                             value: data.bank,
-                            name: 'Banka',
+                            name: t('chart.bank.label', 'Banka'),
                             itemStyle: {
                                 color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
                                     { offset: 0, color: '#3b82f6' },
@@ -11196,7 +11211,7 @@
                         },
                         {
                             value: data.cash,
-                            name: 'Nakit',
+                            name: t('chart.cash.label', 'Nakit'),
                             itemStyle: {
                                 color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
                                     { offset: 0, color: '#10b981' },
