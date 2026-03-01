@@ -11526,29 +11526,31 @@
 
             console.log(`   Filtrelenmiş gider sayısı: ${expenses.length}`);
             
-            const lagirioRevenue = this.calculateLagirioRevenue(apartment, reservations, expenses);
-            const ownerShare = this.calculateOwnerShare(apartment, reservations, expenses);
-            
-            const totalIncome = reservations.reduce((sum, res) => 
-                sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
-            
-            const totalExpenses = expenses.reduce((sum, exp) => 
-                sum + this.convertToEUR(exp.amount, exp.currency), 0);
-            
+            // Detaylı kırılım (owner karşılaştırması için)
+            const detailed = this.calculateOwnerShareDetailed(apartment, reservations, expenses);
+
+            const totalIncome = detailed.grossIncome.total;
+            const totalExpenses = detailed.expenses;
+            const lagirioRevenue = detailed.lagirioCommission;
+            const ownerShare = detailed.netOwnerShare;
+
             const occupancy = this.calculateOccupancyRate(apartment.id, startDate, endDate);
             const avgNightlyRate = this.calculateAvgNightlyRate(reservations);
-            
+
             // Calculate total nights
             const totalNights = reservations.reduce((sum, res) => {
                 const nights = Math.ceil((new Date(res.checkOut) - new Date(res.checkIn)) / (1000 * 60 * 60 * 24));
                 return sum + nights;
             }, 0);
-            
+
             return {
                 lagirioRevenue,
                 ownerShare,
                 totalIncome,
                 totalExpenses,
+                platformCommission: detailed.platformCommission.total,
+                lagirioCommissionAmount: lagirioRevenue,
+                kdv: detailed.kdv,
                 occupancy,
                 avgNightlyRate,
                 reservationCount: reservations.length,
@@ -11565,38 +11567,44 @@
                 ownerShare: 0,
                 totalIncome: 0,
                 totalExpenses: 0,
+                platformCommission: 0,
+                lagirioCommissionAmount: 0,
+                kdv: 0,
                 occupancy: 0,
                 avgNightlyRate: 0,
                 reservationCount: 0,
                 totalNights: 0,
                 apartmentCount: apartmentIds.length
             };
-            
+
             apartmentIds.forEach(apartmentId => {
                 const apartment = this.data.apartments?.find(a => a.id === apartmentId);
                 if (!apartment) return;
-                
+
                 const apartmentMetrics = this.calculateApartmentMetrics(apartment, startDate, endDate);
-                
+
                 metrics.lagirioRevenue += apartmentMetrics.lagirioRevenue;
                 metrics.ownerShare += apartmentMetrics.ownerShare;
                 metrics.totalIncome += apartmentMetrics.totalIncome;
                 metrics.totalExpenses += apartmentMetrics.totalExpenses;
+                metrics.platformCommission += apartmentMetrics.platformCommission;
+                metrics.lagirioCommissionAmount += apartmentMetrics.lagirioCommissionAmount;
+                metrics.kdv += apartmentMetrics.kdv;
                 metrics.occupancy += apartmentMetrics.occupancy;
                 metrics.avgNightlyRate += apartmentMetrics.avgNightlyRate;
                 metrics.reservationCount += apartmentMetrics.reservationCount;
                 metrics.totalNights += apartmentMetrics.totalNights;
             });
-            
+
             // Calculate averages
             if (apartmentIds.length > 0) {
                 metrics.occupancy = metrics.occupancy / apartmentIds.length;
                 metrics.avgNightlyRate = metrics.avgNightlyRate / apartmentIds.length;
             }
-            
+
             metrics.profitMargin = metrics.totalIncome > 0 ? (metrics.lagirioRevenue / metrics.totalIncome * 100) : 0;
             metrics.expenseRatio = metrics.totalIncome > 0 ? (metrics.totalExpenses / metrics.totalIncome * 100) : 0;
-            
+
             return metrics;
         },
 
@@ -11703,17 +11711,31 @@
                             <span>${data.groupA.label} - Detaylar</span>
                         </h4>
                         <div class="space-y-3">
-                            ${isOwner
-                                ? this.renderMetricRow('Ev Sahibi Payı', data.groupA.metrics.ownerShare, 'EUR')
-                                : this.renderMetricRow('Lagirio Kazancı', data.groupA.metrics.lagirioRevenue, 'EUR')}
-                            ${this.renderMetricRow('Toplam Gelir', data.groupA.metrics.totalIncome, 'EUR')}
-                            ${this.renderMetricRow('Toplam Gider', data.groupA.metrics.totalExpenses, 'EUR')}
-                            ${!isOwner ? this.renderMetricRow('Ev Sahibi Payı', data.groupA.metrics.ownerShare, 'EUR') : ''}
-                            ${this.renderMetricRow('Doluluk Oranı', data.groupA.metrics.occupancy, '%')}
-                            ${this.renderMetricRow('Rezervasyon Sayısı', data.groupA.metrics.reservationCount, '')}
-                            ${this.renderMetricRow('Toplam Gece', data.groupA.metrics.totalNights, '')}
-                            ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupA.metrics.avgNightlyRate, 'EUR')}
-                            ${this.renderMetricRow('Gider/Gelir Oranı', data.groupA.metrics.expenseRatio, '%')}
+                            ${isOwner ? `
+                                ${this.renderMetricRow('Toplam Gelir', data.groupA.metrics.totalIncome, 'EUR')}
+                                <div class="border-t border-gray-300 my-1"></div>
+                                ${this.renderMetricRow('Giderler', data.groupA.metrics.totalExpenses, 'EUR', true)}
+                                ${this.renderMetricRow('Platform Komisyonu', data.groupA.metrics.platformCommission, 'EUR', true)}
+                                ${this.renderMetricRow('Lagirio Komisyonu', data.groupA.metrics.lagirioCommissionAmount, 'EUR', true)}
+                                ${this.renderMetricRow('KDV', data.groupA.metrics.kdv, 'EUR', true)}
+                                <div class="border-t-2 border-gray-400 my-1"></div>
+                                ${this.renderMetricRow('Daire Sahibinin Kârı', data.groupA.metrics.ownerShare, 'EUR')}
+                                <div class="border-t border-gray-300 my-1"></div>
+                                ${this.renderMetricRow('Doluluk Oranı', data.groupA.metrics.occupancy, '%')}
+                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupA.metrics.reservationCount, '')}
+                                ${this.renderMetricRow('Toplam Gece', data.groupA.metrics.totalNights, '')}
+                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupA.metrics.avgNightlyRate, 'EUR')}
+                            ` : `
+                                ${this.renderMetricRow('Lagirio Kazancı', data.groupA.metrics.lagirioRevenue, 'EUR')}
+                                ${this.renderMetricRow('Toplam Gelir', data.groupA.metrics.totalIncome, 'EUR')}
+                                ${this.renderMetricRow('Toplam Gider', data.groupA.metrics.totalExpenses, 'EUR')}
+                                ${this.renderMetricRow('Ev Sahibi Payı', data.groupA.metrics.ownerShare, 'EUR')}
+                                ${this.renderMetricRow('Doluluk Oranı', data.groupA.metrics.occupancy, '%')}
+                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupA.metrics.reservationCount, '')}
+                                ${this.renderMetricRow('Toplam Gece', data.groupA.metrics.totalNights, '')}
+                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupA.metrics.avgNightlyRate, 'EUR')}
+                                ${this.renderMetricRow('Gider/Gelir Oranı', data.groupA.metrics.expenseRatio, '%')}
+                            `}
                         </div>
                     </div>
 
@@ -11724,17 +11746,31 @@
                             <span>${data.groupB.label} - Detaylar</span>
                         </h4>
                         <div class="space-y-3">
-                            ${isOwner
-                                ? this.renderMetricRow('Ev Sahibi Payı', data.groupB.metrics.ownerShare, 'EUR')
-                                : this.renderMetricRow('Lagirio Kazancı', data.groupB.metrics.lagirioRevenue, 'EUR')}
-                            ${this.renderMetricRow('Toplam Gelir', data.groupB.metrics.totalIncome, 'EUR')}
-                            ${this.renderMetricRow('Toplam Gider', data.groupB.metrics.totalExpenses, 'EUR')}
-                            ${!isOwner ? this.renderMetricRow('Ev Sahibi Payı', data.groupB.metrics.ownerShare, 'EUR') : ''}
-                            ${this.renderMetricRow('Doluluk Oranı', data.groupB.metrics.occupancy, '%')}
-                            ${this.renderMetricRow('Rezervasyon Sayısı', data.groupB.metrics.reservationCount, '')}
-                            ${this.renderMetricRow('Toplam Gece', data.groupB.metrics.totalNights, '')}
-                            ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupB.metrics.avgNightlyRate, 'EUR')}
-                            ${this.renderMetricRow('Gider/Gelir Oranı', data.groupB.metrics.expenseRatio, '%')}
+                            ${isOwner ? `
+                                ${this.renderMetricRow('Toplam Gelir', data.groupB.metrics.totalIncome, 'EUR')}
+                                <div class="border-t border-gray-300 my-1"></div>
+                                ${this.renderMetricRow('Giderler', data.groupB.metrics.totalExpenses, 'EUR', true)}
+                                ${this.renderMetricRow('Platform Komisyonu', data.groupB.metrics.platformCommission, 'EUR', true)}
+                                ${this.renderMetricRow('Lagirio Komisyonu', data.groupB.metrics.lagirioCommissionAmount, 'EUR', true)}
+                                ${this.renderMetricRow('KDV', data.groupB.metrics.kdv, 'EUR', true)}
+                                <div class="border-t-2 border-gray-400 my-1"></div>
+                                ${this.renderMetricRow('Daire Sahibinin Kârı', data.groupB.metrics.ownerShare, 'EUR')}
+                                <div class="border-t border-gray-300 my-1"></div>
+                                ${this.renderMetricRow('Doluluk Oranı', data.groupB.metrics.occupancy, '%')}
+                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupB.metrics.reservationCount, '')}
+                                ${this.renderMetricRow('Toplam Gece', data.groupB.metrics.totalNights, '')}
+                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupB.metrics.avgNightlyRate, 'EUR')}
+                            ` : `
+                                ${this.renderMetricRow('Lagirio Kazancı', data.groupB.metrics.lagirioRevenue, 'EUR')}
+                                ${this.renderMetricRow('Toplam Gelir', data.groupB.metrics.totalIncome, 'EUR')}
+                                ${this.renderMetricRow('Toplam Gider', data.groupB.metrics.totalExpenses, 'EUR')}
+                                ${this.renderMetricRow('Ev Sahibi Payı', data.groupB.metrics.ownerShare, 'EUR')}
+                                ${this.renderMetricRow('Doluluk Oranı', data.groupB.metrics.occupancy, '%')}
+                                ${this.renderMetricRow('Rezervasyon Sayısı', data.groupB.metrics.reservationCount, '')}
+                                ${this.renderMetricRow('Toplam Gece', data.groupB.metrics.totalNights, '')}
+                                ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupB.metrics.avgNightlyRate, 'EUR')}
+                                ${this.renderMetricRow('Gider/Gelir Oranı', data.groupB.metrics.expenseRatio, '%')}
+                            `}
                         </div>
                     </div>
                 </div>
@@ -11747,19 +11783,28 @@
                     </h4>
                     
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                        ${this.renderDiffCard(isOwner ? 'Ev Sahibi Payı' : 'Lagirio Kazancı', diff.revenue, diff.revenuePercent, 'EUR', true)}
-                        ${this.renderDiffCard('Toplam Gelir', diff.income, diff.incomePercent, 'EUR', true)}
-                        ${this.renderDiffCard('Toplam Gider', diff.expenses, diff.expensesPercent, 'EUR', false)}
-                        ${this.renderDiffCard('Doluluk Oranı', diff.occupancy, diff.occupancyPercent, '%', true)}
-                        ${this.renderDiffCard('Rezervasyon', diff.reservations, diff.reservationsPercent, '', true)}
-                        ${this.renderDiffCard('Gecelik Ücret', diff.nightlyRate, diff.nightlyRatePercent, 'EUR', true)}
+                        ${isOwner ? `
+                            ${this.renderDiffCard('Kâr', diff.revenue, diff.revenuePercent, 'EUR', true)}
+                            ${this.renderDiffCard('Toplam Gelir', diff.income, diff.incomePercent, 'EUR', true)}
+                            ${this.renderDiffCard('Doluluk Oranı', diff.occupancy, diff.occupancyPercent, '%', true)}
+                            ${this.renderDiffCard('Rezervasyon', diff.reservations, diff.reservationsPercent, '', true)}
+                            ${this.renderDiffCard('Gecelik Ücret', diff.nightlyRate, diff.nightlyRatePercent, 'EUR', true)}
+                            ${this.renderDiffCard('Giderler', diff.expenses, diff.expensesPercent, 'EUR', false)}
+                        ` : `
+                            ${this.renderDiffCard('Lagirio Kazancı', diff.revenue, diff.revenuePercent, 'EUR', true)}
+                            ${this.renderDiffCard('Toplam Gelir', diff.income, diff.incomePercent, 'EUR', true)}
+                            ${this.renderDiffCard('Toplam Gider', diff.expenses, diff.expensesPercent, 'EUR', false)}
+                            ${this.renderDiffCard('Doluluk Oranı', diff.occupancy, diff.occupancyPercent, '%', true)}
+                            ${this.renderDiffCard('Rezervasyon', diff.reservations, diff.reservationsPercent, '', true)}
+                            ${this.renderDiffCard('Gecelik Ücret', diff.nightlyRate, diff.nightlyRatePercent, 'EUR', true)}
+                        `}
                     </div>
                 </div>
                 
                 <!-- Comparison Charts -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h4 class="font-semibold text-gray-800 mb-4">Gelir Karşılaştırması</h4>
+                        <h4 class="font-semibold text-gray-800 mb-4">${isOwner ? 'Gelir-Gider Kırılımı' : 'Gelir Karşılaştırması'}</h4>
                         <div class="chart-container-sm" id="comparisonRevenueChart"></div>
                     </div>
                     
@@ -11785,21 +11830,24 @@
         },
 
         // Helper: Render metric row
-        renderMetricRow(label, value, unit) {
+        renderMetricRow(label, value, unit, isDeduction = false) {
             let formattedValue;
-            
+
             if (unit === 'EUR') {
-                formattedValue = `€${value.toFixed(2)}`;
+                formattedValue = isDeduction ? `-€${value.toFixed(2)}` : `€${value.toFixed(2)}`;
             } else if (unit === '%') {
                 formattedValue = `${value.toFixed(1)}%`;
             } else {
                 formattedValue = value.toFixed(2);
             }
-            
+
+            const valueColor = isDeduction ? 'text-red-600' : 'text-gray-900';
+            const labelColor = isDeduction ? 'text-gray-500' : 'text-gray-700';
+
             return `
                 <div class="flex justify-between items-center py-2 border-b border-white/50">
-                    <span class="text-gray-700 text-sm">${label}:</span>
-                    <span class="font-semibold text-gray-900">${formattedValue}</span>
+                    <span class="${labelColor} text-sm">${isDeduction ? '&nbsp;&nbsp;' : ''}${label}:</span>
+                    <span class="font-semibold ${valueColor}">${formattedValue}</span>
                 </div>
             `;
         },
@@ -11857,16 +11905,19 @@
             const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
 
             const categories = isOwner
-                ? ['Ev Sahibi\nPayı', 'Toplam\nGelir', 'Toplam\nGider']
+                ? ['Toplam\nGelir', 'Giderler', 'Platform\nKom.', 'Lagirio\nKom.', 'KDV', 'Kâr']
                 : ['Lagirio\nKazancı', 'Toplam\nGelir', 'Toplam\nGider', 'Ev Sahibi\nPayı'];
 
+            const mA = data.groupA.metrics;
+            const mB = data.groupB.metrics;
+
             const seriesDataA = isOwner
-                ? [data.groupA.metrics.ownerShare, data.groupA.metrics.totalIncome, data.groupA.metrics.totalExpenses]
-                : [data.groupA.metrics.lagirioRevenue, data.groupA.metrics.totalIncome, data.groupA.metrics.totalExpenses, data.groupA.metrics.ownerShare];
+                ? [mA.totalIncome, mA.totalExpenses, mA.platformCommission, mA.lagirioCommissionAmount, mA.kdv, mA.ownerShare]
+                : [mA.lagirioRevenue, mA.totalIncome, mA.totalExpenses, mA.ownerShare];
 
             const seriesDataB = isOwner
-                ? [data.groupB.metrics.ownerShare, data.groupB.metrics.totalIncome, data.groupB.metrics.totalExpenses]
-                : [data.groupB.metrics.lagirioRevenue, data.groupB.metrics.totalIncome, data.groupB.metrics.totalExpenses, data.groupB.metrics.ownerShare];
+                ? [mB.totalIncome, mB.totalExpenses, mB.platformCommission, mB.lagirioCommissionAmount, mB.kdv, mB.ownerShare]
+                : [mB.lagirioRevenue, mB.totalIncome, mB.totalExpenses, mB.ownerShare];
 
             const option = {
                 tooltip: {
