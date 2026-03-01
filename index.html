@@ -6313,7 +6313,7 @@
                     '<span class="text-xs font-bold text-gray-300 w-5">' + (i+1) + '</span>' +
                     '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400 transition-transform" id="projAptChev_' + i + '"></i>' +
                     '<div><p class="text-sm font-semibold text-gray-700">' + apt.code + futureResBadge + '</p>' +
-                    '<p class="text-[10px] text-gray-400">' + (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ' + apt.months + ' ay | \u20ac' + apt.avgNightly.toFixed(2) + '/g</p></div></div>' +
+                    '<p class="text-[10px] text-gray-400">' + (isOwner ? '' : (sysNames[apt.systemType] || 'S?') + ' | %' + apt.commission + ' | ') + apt.months + ' ay | \u20ac' + apt.avgNightly.toFixed(2) + '/g</p></div></div>' +
                     '<div class="text-right">' +
                     '<p class="text-sm font-bold text-emerald-600">\u20ac' + mainValue.toFixed(2) + '</p>' +
                     '<p class="text-[10px] text-gray-400">' + summaryLine + '</p></div></div>' +
@@ -6750,8 +6750,9 @@
             }
 
             // Analytics apt seçenekleri
+            const _isOwner = Auth.currentUser?.role === 'owner';
             const aptOptions = analyticsApts.map(a =>
-                '<option value="' + a.id + '">' + a.code + ' (' + (sysNames[a.systemType] || '?') + ', %' + a.commission + ', KDV %' + a.taxRate + ')</option>'
+                '<option value="' + a.id + '">' + a.code + (_isOwner ? '' : ' (' + (sysNames[a.systemType] || '?') + ', %' + a.commission + ', KDV %' + a.taxRate + ')') + '</option>'
             ).join('');
 
             let matched = 0;
@@ -6765,8 +6766,12 @@
                     : '<span class="w-6 h-6 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-xs font-bold">?</span>';
 
                 const matchInfo = isMatched && matchedApt
-                    ? '<span class="text-[10px] text-emerald-600">' + (sysNames[matchedApt.systemType] || '?') + ' | %' + matchedApt.commission + ' | KDV %' + matchedApt.taxRate + '</span>'
-                    : '<span class="text-[10px] text-red-400">Varsayılan: S3, %15, KDV %8</span>';
+                    ? (_isOwner
+                        ? '<span class="text-[10px] text-emerald-600">' + matchedApt.code + ' ile eşleşti</span>'
+                        : '<span class="text-[10px] text-emerald-600">' + (sysNames[matchedApt.systemType] || '?') + ' | %' + matchedApt.commission + ' | KDV %' + matchedApt.taxRate + '</span>')
+                    : (_isOwner
+                        ? '<span class="text-[10px] text-red-400">Eşleşmedi</span>'
+                        : '<span class="text-[10px] text-red-400">Varsayılan: S3, %15, KDV %8</span>');
 
                 return '<div class="flex items-center gap-3 p-2.5 rounded-lg border ' + (isMatched ? 'border-emerald-100 bg-emerald-50/30' : 'border-red-100 bg-red-50/30') + '">' +
                     statusIcon +
@@ -6817,7 +6822,9 @@
                 const infoSpan = row.querySelector('.text-\\[10px\\]');
                 if (infoSpan && apt) {
                     infoSpan.className = 'text-[10px] text-emerald-600';
-                    infoSpan.textContent = (sysNames[apt.systemType] || '?') + ' | %' + apt.commission + ' | KDV %' + apt.taxRate;
+                    infoSpan.textContent = Auth.currentUser?.role === 'owner'
+                        ? apt.code + ' ile eşleşti'
+                        : (sysNames[apt.systemType] || '?') + ' | %' + apt.commission + ' | KDV %' + apt.taxRate;
                 }
             } else {
                 row.className = row.className.replace(/border-emerald-100 bg-emerald-50\/30/g, 'border-red-100 bg-red-50/30');
@@ -7793,16 +7800,11 @@
                 totalDetail.nights += d.nightCount;
                 totalDetail.reservations += d.reservationCount;
 
-                // Sistem tipi bilgisi
-                const sysInfo = apartment.systemType === '1' ? 'Tümü Lagirio' :
-                    `%${apartment.lagirioCommission || 0} komisyon`;
-
                 apartmentCards += `
                 <div class="bg-gray-50 rounded-lg p-4 mb-3">
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <h4 class="font-semibold text-gray-700">${apartment.code}</h4>
-                            <span class="text-[10px] text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">Sistem ${apartment.systemType} - ${sysInfo}</span>
                         </div>
                         <span class="text-lg font-bold ${d.netOwnerShare >= 0 ? 'text-emerald-600' : 'text-red-600'}">€${d.netOwnerShare.toFixed(2)}</span>
                     </div>
@@ -7823,8 +7825,6 @@
                         <div class="bg-white rounded p-2">
                             <p class="text-gray-400">KDV/Vergiler</p>
                             <p class="font-semibold text-red-500">-€${d.kdv.toFixed(2)}</p>
-                            ${d.incomeTaxRate ? '<p class="text-[10px] text-gray-400">Gelir vergisi: %' + d.incomeTaxRate + '</p>' : ''}
-                            ${d.stopajRate ? '<p class="text-[10px] text-gray-400">Stopaj: %' + d.stopajRate + '</p>' : ''}
                         </div>
                         <div class="bg-white rounded p-2">
                             <p class="text-gray-400">Giderler</p>
@@ -10358,7 +10358,10 @@
             let csvContent = "data:text/csv;charset=utf-8,";
             
             // Headers
-            csvContent += "Daire Kodu,Sahip,Sistem,Toplam Gelir (EUR),Lagirio Komisyonu (EUR),Ev Sahibi Payı (EUR),Giderler (EUR),Doluluk (%),Rezervasyon Sayısı,Platform\n";
+            const isOwner = Auth.currentUser?.role === 'owner';
+            csvContent += isOwner
+                ? "Daire Kodu,Toplam Gelir (EUR),Platform Komisyonu (EUR),Lagirio Komisyonu (EUR),KDV (EUR),Giderler (EUR),Ev Sahibi Payı (EUR),Doluluk (%),Rezervasyon Sayısı,Platform\n"
+                : "Daire Kodu,Sahip,Sistem,Toplam Gelir (EUR),Lagirio Komisyonu (EUR),Ev Sahibi Payı (EUR),Giderler (EUR),Doluluk (%),Rezervasyon Sayısı,Platform\n";
             
             // Data rows
             this.data.apartments?.forEach(apartment => {
@@ -10384,9 +10387,16 @@
                     .map(([p, c]) => `${p}:${c}`)
                     .join(';');
                 
-                csvContent += `${apartment.code},${apartment.ownerName},Sistem ${apartment.systemType},`;
-                csvContent += `${totalIncome.toFixed(2)},${lagirioRevenue.toFixed(2)},${ownerShare.toFixed(2)},`;
-                csvContent += `${totalExpenses.toFixed(2)},${occupancy.toFixed(1)},${reservations.length},"${platformStr}"\n`;
+                if (isOwner) {
+                    const detailed = this.calculateOwnerShareDetailed(apartment, reservations, expenses);
+                    csvContent += `${apartment.code},${totalIncome.toFixed(2)},${detailed.platformCommission.total.toFixed(2)},`;
+                    csvContent += `${lagirioRevenue.toFixed(2)},${detailed.kdv.toFixed(2)},${totalExpenses.toFixed(2)},`;
+                    csvContent += `${ownerShare.toFixed(2)},${occupancy.toFixed(1)},${reservations.length},"${platformStr}"\n`;
+                } else {
+                    csvContent += `${apartment.code},${apartment.ownerName},Sistem ${apartment.systemType},`;
+                    csvContent += `${totalIncome.toFixed(2)},${lagirioRevenue.toFixed(2)},${ownerShare.toFixed(2)},`;
+                    csvContent += `${totalExpenses.toFixed(2)},${occupancy.toFixed(1)},${reservations.length},"${platformStr}"\n`;
+                }
             });
             
             const encodedUri = encodeURI(csvContent);
@@ -10601,8 +10611,9 @@
         // Populate selectors
         populateSelectors() {
             // Apartment selectors
-            const apartmentOptions = this.data.apartments?.map(apt => 
-                `<option value="${apt.id}">${apt.code} - ${apt.ownerName}</option>`
+            const _isOwner = Auth.currentUser?.role === 'owner';
+            const apartmentOptions = this.data.apartments?.map(apt =>
+                `<option value="${apt.id}">${apt.code}${_isOwner ? '' : ' - ' + apt.ownerName}</option>`
             ).join('') || '';
             
             ['reportApartments'].forEach(id => {
@@ -11025,8 +11036,9 @@
 
         // Render: Daire vs Daire (aynı dönem)
         renderApartmentVsApartmentPanel() {
-            const apartmentOptions = this.data.apartments?.map(apt => 
-                `<option value="${apt.id}">${apt.code} - ${apt.ownerName}</option>`
+            const _isOwner = Auth.currentUser?.role === 'owner';
+            const apartmentOptions = this.data.apartments?.map(apt =>
+                `<option value="${apt.id}">${apt.code}${_isOwner ? '' : ' - ' + apt.ownerName}</option>`
             ).join('') || '';
             
             return `
@@ -11085,8 +11097,9 @@
 
         // Render: Daire vs Dönem (bir daire, farklı aylar)
         renderApartmentVsPeriodPanel() {
-            const apartmentOptions = this.data.apartments?.map(apt => 
-                `<option value="${apt.id}">${apt.code} - ${apt.ownerName}</option>`
+            const _isOwner = Auth.currentUser?.role === 'owner';
+            const apartmentOptions = this.data.apartments?.map(apt =>
+                `<option value="${apt.id}">${apt.code}${_isOwner ? '' : ' - ' + apt.ownerName}</option>`
             ).join('') || '';
             
             return `
@@ -11134,8 +11147,9 @@
 
         // Render: Grup vs Grup (çoklu daire)
         renderGroupVsGroupPanel() {
-            const apartmentOptions = this.data.apartments?.map(apt => 
-                `<option value="${apt.id}">${apt.code} - ${apt.ownerName}</option>`
+            const _isOwner = Auth.currentUser?.role === 'owner';
+            const apartmentOptions = this.data.apartments?.map(apt =>
+                `<option value="${apt.id}">${apt.code}${_isOwner ? '' : ' - ' + apt.ownerName}</option>`
             ).join('') || '';
             
             return `
@@ -11288,6 +11302,7 @@
 
         // Compare: Apartment vs Apartment (same period)
         compareApartmentVsApartment() {
+            const isOwner = Auth.currentUser?.role === 'owner';
             const apartmentAId = document.getElementById('compApartmentA')?.value;
             const apartmentBId = document.getElementById('compApartmentB')?.value;
             const period = document.getElementById('compPeriod')?.value;
@@ -11327,13 +11342,13 @@
                 subtitle: period ? `Dönem: ${this.formatMonthYear(periodStart)}` : 'Tüm Zamanlar',
                 groupA: {
                     label: apartmentA.code,
-                    sublabel: apartmentA.ownerName,
+                    sublabel: isOwner ? '' : apartmentA.ownerName,
                     metrics: metricsA,
                     color: 'emerald'
                 },
                 groupB: {
                     label: apartmentB.code,
-                    sublabel: apartmentB.ownerName,
+                    sublabel: isOwner ? '' : apartmentB.ownerName,
                     metrics: metricsB,
                     color: 'blue'
                 }
@@ -11371,10 +11386,11 @@
             const metricsA = this.calculateApartmentMetrics(apartment, periodStartA, periodEndA);
             const metricsB = this.calculateApartmentMetrics(apartment, periodStartB, periodEndB);
             
+            const isOwner = Auth.currentUser?.role === 'owner';
             return {
                 mode: 'apartment-period',
                 title: `${apartment.code} - Dönem Karşılaştırması`,
-                subtitle: apartment.ownerName,
+                subtitle: isOwner ? '' : apartment.ownerName,
                 groupA: {
                     label: this.formatMonthYear(periodStartA),
                     sublabel: 'Dönem A',
@@ -11668,7 +11684,7 @@
                 <div class="bg-white rounded-xl shadow-lg p-6 mb-6 animate-fade-in">
                     <div class="text-center mb-4">
                         <h3 class="text-2xl font-bold text-gray-800">${data.title}</h3>
-                        <p class="text-gray-500">${data.subtitle}</p>
+                        ${data.subtitle ? `<p class="text-gray-500">${data.subtitle}</p>` : ''}
                     </div>
                     
                     <div class="grid grid-cols-3 gap-4 items-center">
@@ -11678,7 +11694,7 @@
                                 <span class="text-2xl font-bold">A</span>
                             </div>
                             <h4 class="font-bold text-lg text-gray-800">${data.groupA.label}</h4>
-                            <p class="text-sm text-gray-600">${data.groupA.sublabel}</p>
+                            ${data.groupA.sublabel ? `<p class="text-sm text-gray-600">${data.groupA.sublabel}</p>` : ''}
                         </div>
                         
                         <!-- VS -->
@@ -11694,7 +11710,7 @@
                                 <span class="text-2xl font-bold">B</span>
                             </div>
                             <h4 class="font-bold text-lg text-gray-800">${data.groupB.label}</h4>
-                            <p class="text-sm text-gray-600">${data.groupB.sublabel}</p>
+                            ${data.groupB.sublabel ? `<p class="text-sm text-gray-600">${data.groupB.sublabel}</p>` : ''}
                         </div>
                     </div>
                 </div>
@@ -12909,7 +12925,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">${apt.code}</div>
-                            <div class="text-xs text-gray-500">${apt.ownerName}</div>
+                            ${Auth.currentUser?.role !== 'owner' ? `<div class="text-xs text-gray-500">${apt.ownerName}</div>` : ''}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
@@ -12975,7 +12991,7 @@
                             <tbody>
                                 ${metrics.topApartments.map(apt => `
                                     <tr class="border-b">
-                                        <td class="px-4 py-2 border">${apt.code}<br/><span class="text-xs text-gray-500">${apt.ownerName}</span></td>
+                                        <td class="px-4 py-2 border">${apt.code}${Auth.currentUser?.role !== 'owner' ? '<br/><span class="text-xs text-gray-500">' + apt.ownerName + '</span>' : ''}</td>
                                         <td class="px-4 py-2 text-right border font-semibold">€${apt.revenue.toLocaleString()}</td>
                                         <td class="px-4 py-2 text-right border">€${apt.ownerShare.toLocaleString()}</td>
                                         <td class="px-4 py-2 text-right border">${apt.occupancy.toFixed(1)}%</td>
