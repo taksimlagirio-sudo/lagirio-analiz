@@ -1335,6 +1335,38 @@
                     </div>
                 </div>
 
+                <!-- Owner: Kazanç Analizi Grafikleri -->
+                <div id="ownerTrendChartsPanel" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="wallet" class="w-5 h-5 text-emerald-600"></i>
+                            <span>Kazanç Analizi</span>
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Aylık Kazanç Kırılımı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">Brüt gelirden net kazanca: kesintilerin aylık dağılımı</p>
+                                <div id="ownerIncomeBreakdownChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Daire Performans Karşılaştırma</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">Her dairenin aylık net kazancı</p>
+                                <div id="ownerAptPerformanceChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Gecelik Fiyat vs Doluluk</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">Fiyat-doluluk dengesi: optimum noktayı bulun</p>
+                                <div id="ownerPriceOccupancyChart" style="height:280px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Platform Gelir Dağılımı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2">Hangi platform daha fazla gelir getiriyor?</p>
+                                <div id="ownerPlatformTrendChart" style="height:280px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Forecast Section -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
@@ -12076,6 +12108,10 @@
             if (Auth.currentUser?.role !== 'owner') {
                 this.createProfitTrendCharts();
             }
+            // Owner: Kazanç analizi grafikleri
+            if (Auth.currentUser?.role === 'owner') {
+                this.createOwnerTrendCharts();
+            }
         },
 
         // Admin kâr trend grafikleri (geçmiş veriden) - trendler sayfasında
@@ -12086,6 +12122,307 @@
             this.createTrendAptProfitChart();
             this.createTrendProfitMarginChart();
             this.createTrendOccupancyProfitChart();
+        },
+
+        // ==================== OWNER TREND CHARTS ====================
+
+        createOwnerTrendCharts() {
+            const panel = document.getElementById('ownerTrendChartsPanel');
+            if (panel) panel.classList.remove('hidden');
+            const ownerData = this._getOwnerHistoricalData();
+            this.createOwnerIncomeBreakdownChart(ownerData);
+            this.createOwnerAptPerformanceChart(ownerData);
+            this.createOwnerPriceOccupancyChart(ownerData);
+            this.createOwnerPlatformTrendChart(ownerData);
+        },
+
+        // Owner: Aylık detaylı kırılım verisi (calculateOwnerShareDetailed kullanarak)
+        _getOwnerHistoricalData() {
+            const now = new Date();
+            const monthNames = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+            const result = {
+                labels: [], grossIncome: [], platformComm: [], lagirioComm: [],
+                kdv: [], expenses: [], netOwner: [], avgNightly: [], occupancy: [],
+                resCounts: [], aptData: {}, platformData: {}
+            };
+
+            for (let i = 11; i >= 0; i--) {
+                const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const label = monthNames[targetDate.getMonth()] + '\'' + String(targetDate.getFullYear()).slice(2);
+                const mStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+                const mEnd = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+
+                let mGross = 0, mPlatComm = 0, mLagComm = 0, mKdv = 0, mExp = 0, mNet = 0;
+                let mNights = 0, mResCount = 0, totalOccupancy = 0, aptCount = 0;
+                const mPlatforms = {};
+
+                this.data.apartments?.forEach(apartment => {
+                    const monthRes = this.data.reservations?.filter(res => {
+                        const d = new Date(res.checkIn);
+                        return res.apartmentId === apartment.id &&
+                            d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                    }) || [];
+                    const monthExp = this.data.expenses?.filter(exp => {
+                        const d = new Date(exp.date);
+                        return exp.apartmentId === apartment.id &&
+                            d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                    }) || [];
+
+                    if (monthRes.length > 0) {
+                        const det = this.calculateOwnerShareDetailed(apartment, monthRes, monthExp);
+                        mGross += det.grossIncome.total;
+                        mPlatComm += det.platformCommission.total;
+                        mLagComm += det.lagirioCommission;
+                        mKdv += det.kdv;
+                        mExp += det.expenses;
+                        mNet += det.netOwnerShare;
+                        mNights += det.nightCount;
+                        mResCount += det.reservationCount;
+                        aptCount++;
+                        totalOccupancy += this.calculateOccupancyRate(apartment.id, mStart, mEnd);
+
+                        // Daire bazlı
+                        if (!result.aptData[apartment.id]) result.aptData[apartment.id] = { code: apartment.code, months: [] };
+                        result.aptData[apartment.id].months.push({ label, net: det.netOwnerShare });
+
+                        // Platform bazlı
+                        monthRes.forEach(res => {
+                            const p = res.platform || 'Direkt';
+                            if (!mPlatforms[p]) mPlatforms[p] = 0;
+                            mPlatforms[p] += this.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                        });
+                    } else {
+                        if (result.aptData[apartment.id]) {
+                            result.aptData[apartment.id].months.push({ label, net: 0 });
+                        }
+                    }
+                });
+
+                result.labels.push(label);
+                result.grossIncome.push(+mGross.toFixed(2));
+                result.platformComm.push(+mPlatComm.toFixed(2));
+                result.lagirioComm.push(+mLagComm.toFixed(2));
+                result.kdv.push(+mKdv.toFixed(2));
+                result.expenses.push(+mExp.toFixed(2));
+                result.netOwner.push(+mNet.toFixed(2));
+                result.avgNightly.push(mNights > 0 ? +(mGross / mNights).toFixed(2) : 0);
+                result.occupancy.push(aptCount > 0 ? +(totalOccupancy / aptCount).toFixed(1) : 0);
+                result.resCounts.push(mResCount);
+
+                Object.entries(mPlatforms).forEach(([p, v]) => {
+                    if (!result.platformData[p]) result.platformData[p] = [];
+                });
+            }
+
+            // Platform verilerini hizala (her ay için değer olsun)
+            const allPlatforms = Object.keys(result.platformData);
+            // Yeniden hesapla
+            result.platformData = {};
+            for (let i = 11; i >= 0; i--) {
+                const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                this.data.apartments?.forEach(apartment => {
+                    const monthRes = this.data.reservations?.filter(res => {
+                        const d = new Date(res.checkIn);
+                        return res.apartmentId === apartment.id &&
+                            d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                    }) || [];
+                    monthRes.forEach(res => {
+                        const p = res.platform || 'Direkt';
+                        if (!result.platformData[p]) result.platformData[p] = new Array(12).fill(0);
+                        result.platformData[p][11 - i] += this.convertToEUR(res.totalAmount, res.currency || 'EUR');
+                    });
+                });
+            }
+
+            return result;
+        },
+
+        // Owner Grafik 1: Aylık Kazanç Kırılımı (Stacked Bar - Waterfall tarzı)
+        createOwnerIncomeBreakdownChart(data) {
+            const container = document.getElementById('ownerIncomeBreakdownChart');
+            if (!container) return;
+            // Sadece veri olan ayları göster
+            const activeIdx = [];
+            data.resCounts.forEach((c, i) => { if (c > 0) activeIdx.push(i); });
+            const showIdx = activeIdx.slice(-6);
+            if (showIdx.length === 0) return;
+
+            const labels = showIdx.map(i => data.labels[i]);
+            const net = showIdx.map(i => data.netOwner[i]);
+            const platComm = showIdx.map(i => data.platformComm[i]);
+            const lagComm = showIdx.map(i => data.lagirioComm[i]);
+            const kdv = showIdx.map(i => data.kdv[i]);
+            const exp = showIdx.map(i => data.expenses[i]);
+
+            const chart = echarts.init(container);
+            this.charts.ownerIncomeBreakdown = chart;
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis', axisPointer: { type: 'shadow' },
+                    backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent', textStyle: { color: '#fff' },
+                    formatter: params => {
+                        let html = params[0].name + '<br/>';
+                        let total = 0;
+                        params.forEach(p => { html += `<span style="color:${p.color}">●</span> ${p.seriesName}: €${p.value.toLocaleString()}<br/>`; total += p.value; });
+                        html += `<b>Brüt Gelir: €${total.toLocaleString()}</b>`;
+                        return html;
+                    }
+                },
+                legend: { bottom: 0, textStyle: { fontSize: 10, color: '#6b7280' } },
+                grid: { left: '3%', right: '4%', bottom: '15%', top: '8%', containLabel: true },
+                xAxis: { type: 'category', data: labels, axisLabel: { color: '#6b7280', fontSize: 11 } },
+                yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: v => `€${(v/1000).toFixed(0)}k` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+                series: [
+                    { name: 'Net Kazanç', type: 'bar', stack: 'total', data: net, itemStyle: { color: '#10b981' }, barWidth: '50%' },
+                    { name: 'Giderler', type: 'bar', stack: 'total', data: exp, itemStyle: { color: '#f59e0b' } },
+                    { name: 'Platform Kom.', type: 'bar', stack: 'total', data: platComm, itemStyle: { color: '#3b82f6' } },
+                    { name: 'Lagirio Kom.', type: 'bar', stack: 'total', data: lagComm, itemStyle: { color: '#8b5cf6' } },
+                    { name: 'KDV', type: 'bar', stack: 'total', data: kdv, itemStyle: { color: '#ef4444' } }
+                ]
+            });
+        },
+
+        // Owner Grafik 2: Daire Performans Karşılaştırma (Line)
+        createOwnerAptPerformanceChart(data) {
+            const container = document.getElementById('ownerAptPerformanceChart');
+            if (!container) return;
+
+            const aptEntries = Object.values(data.aptData);
+            if (aptEntries.length === 0) return;
+
+            // Aktif ayları bul
+            const activeIdx = [];
+            data.resCounts.forEach((c, i) => { if (c > 0) activeIdx.push(i); });
+            const showIdx = activeIdx.slice(-6);
+            if (showIdx.length === 0) return;
+
+            const labels = showIdx.map(i => data.labels[i]);
+            const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+            const series = aptEntries.map((apt, idx) => ({
+                name: apt.code,
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 7,
+                data: showIdx.map(i => apt.months[i] ? +apt.months[i].net.toFixed(2) : 0),
+                lineStyle: { width: 2.5, color: colors[idx % colors.length] },
+                itemStyle: { color: colors[idx % colors.length], borderColor: '#fff', borderWidth: 2 }
+            }));
+
+            const chart = echarts.init(container);
+            this.charts.ownerAptPerformance = chart;
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent', textStyle: { color: '#fff' },
+                    formatter: params => {
+                        let html = params[0].name + '<br/>';
+                        params.forEach(p => { html += `<span style="color:${p.color}">●</span> ${p.seriesName}: €${p.value.toLocaleString()}<br/>`; });
+                        return html;
+                    }
+                },
+                legend: { bottom: 0, textStyle: { fontSize: 10, color: '#6b7280' } },
+                grid: { left: '3%', right: '4%', bottom: '15%', top: '8%', containLabel: true },
+                xAxis: { type: 'category', data: labels, axisLabel: { color: '#6b7280', fontSize: 11 } },
+                yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: v => `€${(v/1000).toFixed(0)}k` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+                series
+            });
+        },
+
+        // Owner Grafik 3: Gecelik Fiyat vs Doluluk (Dual Axis)
+        createOwnerPriceOccupancyChart(data) {
+            const container = document.getElementById('ownerPriceOccupancyChart');
+            if (!container) return;
+
+            const activeIdx = [];
+            data.resCounts.forEach((c, i) => { if (c > 0) activeIdx.push(i); });
+            const showIdx = activeIdx.slice(-6);
+            if (showIdx.length === 0) return;
+
+            const labels = showIdx.map(i => data.labels[i]);
+            const nightly = showIdx.map(i => data.avgNightly[i]);
+            const occ = showIdx.map(i => data.occupancy[i]);
+
+            const chart = echarts.init(container);
+            this.charts.ownerPriceOccupancy = chart;
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent', textStyle: { color: '#fff' },
+                    formatter: params => {
+                        let html = params[0].name + '<br/>';
+                        params.forEach(p => {
+                            const unit = p.seriesIndex === 0 ? '€' : '%';
+                            html += `<span style="color:${p.color}">●</span> ${p.seriesName}: ${p.seriesIndex === 0 ? '€' : ''}${p.value.toLocaleString()}${p.seriesIndex === 1 ? '%' : ''}<br/>`;
+                        });
+                        return html;
+                    }
+                },
+                legend: { bottom: 0, textStyle: { fontSize: 10, color: '#6b7280' } },
+                grid: { left: '3%', right: '4%', bottom: '15%', top: '8%', containLabel: true },
+                xAxis: { type: 'category', data: labels, axisLabel: { color: '#6b7280', fontSize: 11 } },
+                yAxis: [
+                    { type: 'value', name: 'Gecelik (€)', nameTextStyle: { color: '#6b7280', fontSize: 10 }, axisLabel: { color: '#6b7280', formatter: v => `€${v}` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+                    { type: 'value', name: 'Doluluk (%)', nameTextStyle: { color: '#6b7280', fontSize: 10 }, axisLabel: { color: '#6b7280', formatter: v => `${v}%` }, splitLine: { show: false }, max: 100 }
+                ],
+                series: [
+                    { name: 'Ort. Gecelik', type: 'bar', data: nightly, barWidth: '40%', itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
+                    { name: 'Doluluk', type: 'line', yAxisIndex: 1, data: occ, smooth: true, symbol: 'circle', symbolSize: 8,
+                      lineStyle: { width: 2.5, color: '#3b82f6' }, itemStyle: { color: '#3b82f6', borderColor: '#fff', borderWidth: 2 },
+                      areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.2)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } }
+                ]
+            });
+        },
+
+        // Owner Grafik 4: Platform Gelir Dağılımı Trendi (Stacked Area)
+        createOwnerPlatformTrendChart(data) {
+            const container = document.getElementById('ownerPlatformTrendChart');
+            if (!container) return;
+
+            const platforms = Object.keys(data.platformData);
+            if (platforms.length === 0) return;
+
+            const activeIdx = [];
+            data.resCounts.forEach((c, i) => { if (c > 0) activeIdx.push(i); });
+            const showIdx = activeIdx.slice(-6);
+            if (showIdx.length === 0) return;
+
+            const labels = showIdx.map(i => data.labels[i]);
+            const platformColors = { 'Airbnb': '#FF5A5F', 'Booking.com': '#003580', 'Direkt': '#10b981', 'Expedia': '#FBAF00' };
+            const fallbackColors = ['#6366f1', '#ec4899', '#14b8a6', '#f97316'];
+
+            const series = platforms.map((p, idx) => ({
+                name: p,
+                type: 'line',
+                stack: 'platform',
+                smooth: true,
+                areaStyle: { opacity: 0.6 },
+                data: showIdx.map(i => +(data.platformData[p][i] || 0).toFixed(2)),
+                lineStyle: { width: 1.5, color: platformColors[p] || fallbackColors[idx % fallbackColors.length] },
+                itemStyle: { color: platformColors[p] || fallbackColors[idx % fallbackColors.length] }
+            }));
+
+            const chart = echarts.init(container);
+            this.charts.ownerPlatformTrend = chart;
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent', textStyle: { color: '#fff' },
+                    formatter: params => {
+                        let html = params[0].name + '<br/>';
+                        let total = 0;
+                        params.forEach(p => { html += `<span style="color:${p.color}">●</span> ${p.seriesName}: €${p.value.toLocaleString()}<br/>`; total += p.value; });
+                        html += `<b>Toplam: €${total.toLocaleString()}</b>`;
+                        return html;
+                    }
+                },
+                legend: { bottom: 0, textStyle: { fontSize: 10, color: '#6b7280' } },
+                grid: { left: '3%', right: '4%', bottom: '15%', top: '8%', containLabel: true },
+                xAxis: { type: 'category', data: labels, axisLabel: { color: '#6b7280', fontSize: 11 } },
+                yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: v => `€${(v/1000).toFixed(0)}k` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+                series
+            });
         },
 
         // Geçmiş veriden aylık Lagirio kazancı + şirket gideri tahmini hesapla
