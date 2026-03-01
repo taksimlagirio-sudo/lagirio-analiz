@@ -11625,34 +11625,36 @@
         displayComparisonResults(data) {
             const container = document.getElementById('comparisonResults');
             if (!container) return;
-            
+
             const colorA = data.groupA.color;
             const colorB = data.groupB.color;
-            
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
             // Calculate differences
+            const primaryA = isOwner ? data.groupA.metrics.ownerShare : data.groupA.metrics.lagirioRevenue;
+            const primaryB = isOwner ? data.groupB.metrics.ownerShare : data.groupB.metrics.lagirioRevenue;
             const diff = {
-                revenue: data.groupA.metrics.lagirioRevenue - data.groupB.metrics.lagirioRevenue,
-                revenuePercent: data.groupB.metrics.lagirioRevenue > 0 ? 
-                    ((data.groupA.metrics.lagirioRevenue - data.groupB.metrics.lagirioRevenue) / data.groupB.metrics.lagirioRevenue * 100) : 0,
-                
+                revenue: primaryA - primaryB,
+                revenuePercent: primaryB > 0 ? ((primaryA - primaryB) / primaryB * 100) : 0,
+
                 income: data.groupA.metrics.totalIncome - data.groupB.metrics.totalIncome,
-                incomePercent: data.groupB.metrics.totalIncome > 0 ? 
+                incomePercent: data.groupB.metrics.totalIncome > 0 ?
                     ((data.groupA.metrics.totalIncome - data.groupB.metrics.totalIncome) / data.groupB.metrics.totalIncome * 100) : 0,
-                
+
                 expenses: data.groupA.metrics.totalExpenses - data.groupB.metrics.totalExpenses,
-                expensesPercent: data.groupB.metrics.totalExpenses > 0 ? 
+                expensesPercent: data.groupB.metrics.totalExpenses > 0 ?
                     ((data.groupA.metrics.totalExpenses - data.groupB.metrics.totalExpenses) / data.groupB.metrics.totalExpenses * 100) : 0,
-                
+
                 occupancy: data.groupA.metrics.occupancy - data.groupB.metrics.occupancy,
-                occupancyPercent: data.groupB.metrics.occupancy > 0 ? 
+                occupancyPercent: data.groupB.metrics.occupancy > 0 ?
                     ((data.groupA.metrics.occupancy - data.groupB.metrics.occupancy) / data.groupB.metrics.occupancy * 100) : 0,
-                
+
                 reservations: data.groupA.metrics.reservationCount - data.groupB.metrics.reservationCount,
-                reservationsPercent: data.groupB.metrics.reservationCount > 0 ? 
+                reservationsPercent: data.groupB.metrics.reservationCount > 0 ?
                     ((data.groupA.metrics.reservationCount - data.groupB.metrics.reservationCount) / data.groupB.metrics.reservationCount * 100) : 0,
-                
+
                 nightlyRate: data.groupA.metrics.avgNightlyRate - data.groupB.metrics.avgNightlyRate,
-                nightlyRatePercent: data.groupB.metrics.avgNightlyRate > 0 ? 
+                nightlyRatePercent: data.groupB.metrics.avgNightlyRate > 0 ?
                     ((data.groupA.metrics.avgNightlyRate - data.groupB.metrics.avgNightlyRate) / data.groupB.metrics.avgNightlyRate * 100) : 0
             };
             
@@ -11701,19 +11703,20 @@
                             <span>${data.groupA.label} - Detaylar</span>
                         </h4>
                         <div class="space-y-3">
-                            ${this.renderMetricRow('Lagirio Kazancı', data.groupA.metrics.lagirioRevenue, 'EUR')}
+                            ${isOwner
+                                ? this.renderMetricRow('Ev Sahibi Payı', data.groupA.metrics.ownerShare, 'EUR')
+                                : this.renderMetricRow('Lagirio Kazancı', data.groupA.metrics.lagirioRevenue, 'EUR')}
                             ${this.renderMetricRow('Toplam Gelir', data.groupA.metrics.totalIncome, 'EUR')}
                             ${this.renderMetricRow('Toplam Gider', data.groupA.metrics.totalExpenses, 'EUR')}
-                            ${this.renderMetricRow('Ev Sahibi Payı', data.groupA.metrics.ownerShare, 'EUR')}
+                            ${!isOwner ? this.renderMetricRow('Ev Sahibi Payı', data.groupA.metrics.ownerShare, 'EUR') : ''}
                             ${this.renderMetricRow('Doluluk Oranı', data.groupA.metrics.occupancy, '%')}
                             ${this.renderMetricRow('Rezervasyon Sayısı', data.groupA.metrics.reservationCount, '')}
                             ${this.renderMetricRow('Toplam Gece', data.groupA.metrics.totalNights, '')}
                             ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupA.metrics.avgNightlyRate, 'EUR')}
-                            ${this.renderMetricRow('Kâr Marjı', data.groupA.metrics.profitMargin, '%')}
                             ${this.renderMetricRow('Gider/Gelir Oranı', data.groupA.metrics.expenseRatio, '%')}
                         </div>
                     </div>
-                    
+
                     <!-- Group B Metrics -->
                     <div class="bg-${colorB}-50 rounded-xl shadow-lg p-6">
                         <h4 class="font-semibold text-${colorB}-900 mb-4 flex items-center space-x-2">
@@ -11721,15 +11724,16 @@
                             <span>${data.groupB.label} - Detaylar</span>
                         </h4>
                         <div class="space-y-3">
-                            ${this.renderMetricRow('Lagirio Kazancı', data.groupB.metrics.lagirioRevenue, 'EUR')}
+                            ${isOwner
+                                ? this.renderMetricRow('Ev Sahibi Payı', data.groupB.metrics.ownerShare, 'EUR')
+                                : this.renderMetricRow('Lagirio Kazancı', data.groupB.metrics.lagirioRevenue, 'EUR')}
                             ${this.renderMetricRow('Toplam Gelir', data.groupB.metrics.totalIncome, 'EUR')}
                             ${this.renderMetricRow('Toplam Gider', data.groupB.metrics.totalExpenses, 'EUR')}
-                            ${this.renderMetricRow('Ev Sahibi Payı', data.groupB.metrics.ownerShare, 'EUR')}
+                            ${!isOwner ? this.renderMetricRow('Ev Sahibi Payı', data.groupB.metrics.ownerShare, 'EUR') : ''}
                             ${this.renderMetricRow('Doluluk Oranı', data.groupB.metrics.occupancy, '%')}
                             ${this.renderMetricRow('Rezervasyon Sayısı', data.groupB.metrics.reservationCount, '')}
                             ${this.renderMetricRow('Toplam Gece', data.groupB.metrics.totalNights, '')}
                             ${this.renderMetricRow('Ort. Gecelik Ücret', data.groupB.metrics.avgNightlyRate, 'EUR')}
-                            ${this.renderMetricRow('Kâr Marjı', data.groupB.metrics.profitMargin, '%')}
                             ${this.renderMetricRow('Gider/Gelir Oranı', data.groupB.metrics.expenseRatio, '%')}
                         </div>
                     </div>
@@ -11743,7 +11747,7 @@
                     </h4>
                     
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                        ${this.renderDiffCard('Lagirio Kazancı', diff.revenue, diff.revenuePercent, 'EUR', true)}
+                        ${this.renderDiffCard(isOwner ? 'Ev Sahibi Payı' : 'Lagirio Kazancı', diff.revenue, diff.revenuePercent, 'EUR', true)}
                         ${this.renderDiffCard('Toplam Gelir', diff.income, diff.incomePercent, 'EUR', true)}
                         ${this.renderDiffCard('Toplam Gider', diff.expenses, diff.expensesPercent, 'EUR', false)}
                         ${this.renderDiffCard('Doluluk Oranı', diff.occupancy, diff.occupancyPercent, '%', true)}
@@ -11848,9 +11852,22 @@
         createComparisonRevenueChart(data) {
             const container = document.getElementById('comparisonRevenueChart');
             if (!container) return;
-            
+
             const chart = echarts.init(container);
-            
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
+            const categories = isOwner
+                ? ['Ev Sahibi\nPayı', 'Toplam\nGelir', 'Toplam\nGider']
+                : ['Lagirio\nKazancı', 'Toplam\nGelir', 'Toplam\nGider', 'Ev Sahibi\nPayı'];
+
+            const seriesDataA = isOwner
+                ? [data.groupA.metrics.ownerShare, data.groupA.metrics.totalIncome, data.groupA.metrics.totalExpenses]
+                : [data.groupA.metrics.lagirioRevenue, data.groupA.metrics.totalIncome, data.groupA.metrics.totalExpenses, data.groupA.metrics.ownerShare];
+
+            const seriesDataB = isOwner
+                ? [data.groupB.metrics.ownerShare, data.groupB.metrics.totalIncome, data.groupB.metrics.totalExpenses]
+                : [data.groupB.metrics.lagirioRevenue, data.groupB.metrics.totalIncome, data.groupB.metrics.totalExpenses, data.groupB.metrics.ownerShare];
+
             const option = {
                 tooltip: {
                     trigger: 'axis',
@@ -11869,7 +11886,7 @@
                 },
                 xAxis: {
                     type: 'category',
-                    data: ['Lagirio\nKazancı', 'Toplam\nGelir', 'Toplam\nGider', 'Ev Sahibi\nPayı']
+                    data: categories
                 },
                 yAxis: {
                     type: 'value',
@@ -11881,12 +11898,7 @@
                     {
                         name: data.groupA.label,
                         type: 'bar',
-                        data: [
-                            data.groupA.metrics.lagirioRevenue,
-                            data.groupA.metrics.totalIncome,
-                            data.groupA.metrics.totalExpenses,
-                            data.groupA.metrics.ownerShare
-                        ],
+                        data: seriesDataA,
                         itemStyle: {
                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                                 { offset: 0, color: data.groupA.color === 'emerald' ? '#10b981' : '#3b82f6' },
@@ -11898,12 +11910,7 @@
                     {
                         name: data.groupB.label,
                         type: 'bar',
-                        data: [
-                            data.groupB.metrics.lagirioRevenue,
-                            data.groupB.metrics.totalIncome,
-                            data.groupB.metrics.totalExpenses,
-                            data.groupB.metrics.ownerShare
-                        ],
+                        data: seriesDataB,
                         itemStyle: {
                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                                 { offset: 0, color: data.groupB.color === 'blue' ? '#3b82f6' : '#10b981' },
@@ -11923,14 +11930,17 @@
         createComparisonRadarChart(data) {
             const container = document.getElementById('comparisonRadarChart');
             if (!container) return;
-            
+
             const chart = echarts.init(container);
-            
+            const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
+
             // Normalize values for radar (0-100 scale)
-            const maxRevenue = Math.max(data.groupA.metrics.lagirioRevenue, data.groupB.metrics.lagirioRevenue);
+            const revenueA = isOwner ? data.groupA.metrics.ownerShare : data.groupA.metrics.lagirioRevenue;
+            const revenueB = isOwner ? data.groupB.metrics.ownerShare : data.groupB.metrics.lagirioRevenue;
+            const maxRevenue = Math.max(revenueA, revenueB);
             const maxReservations = Math.max(data.groupA.metrics.reservationCount, data.groupB.metrics.reservationCount);
             const maxNightlyRate = Math.max(data.groupA.metrics.avgNightlyRate, data.groupB.metrics.avgNightlyRate);
-            
+
             const option = {
                 tooltip: {},
                 legend: {
@@ -11939,11 +11949,11 @@
                 },
                 radar: {
                     indicator: [
-                        { name: 'Kazanç', max: 100 },
+                        { name: isOwner ? 'Ev Sahibi Payı' : 'Kazanç', max: 100 },
                         { name: 'Doluluk', max: 100 },
                         { name: 'Rezervasyon', max: 100 },
                         { name: 'Gecelik Ücret', max: 100 },
-                        { name: 'Kâr Marjı', max: 100 }
+                        { name: 'Gider/Gelir', max: 100 }
                     ],
                     radius: '60%'
                 },
@@ -11952,11 +11962,11 @@
                     data: [
                         {
                             value: [
-                                maxRevenue > 0 ? (data.groupA.metrics.lagirioRevenue / maxRevenue * 100) : 0,
+                                maxRevenue > 0 ? (revenueA / maxRevenue * 100) : 0,
                                 data.groupA.metrics.occupancy,
                                 maxReservations > 0 ? (data.groupA.metrics.reservationCount / maxReservations * 100) : 0,
                                 maxNightlyRate > 0 ? (data.groupA.metrics.avgNightlyRate / maxNightlyRate * 100) : 0,
-                                data.groupA.metrics.profitMargin
+                                data.groupA.metrics.expenseRatio
                             ],
                             name: data.groupA.label,
                             areaStyle: {
@@ -11968,11 +11978,11 @@
                         },
                         {
                             value: [
-                                maxRevenue > 0 ? (data.groupB.metrics.lagirioRevenue / maxRevenue * 100) : 0,
+                                maxRevenue > 0 ? (revenueB / maxRevenue * 100) : 0,
                                 data.groupB.metrics.occupancy,
                                 maxReservations > 0 ? (data.groupB.metrics.reservationCount / maxReservations * 100) : 0,
                                 maxNightlyRate > 0 ? (data.groupB.metrics.avgNightlyRate / maxNightlyRate * 100) : 0,
-                                data.groupB.metrics.profitMargin
+                                data.groupB.metrics.expenseRatio
                             ],
                             name: data.groupB.label,
                             areaStyle: {
