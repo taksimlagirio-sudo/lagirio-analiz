@@ -1062,7 +1062,7 @@
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span data-i18n="tab.overview">Genel Bakış</span>
                     </button>
-                    <button onclick="Analytics.switchMainTab('analysis')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="analysis">
+                    <button onclick="Analytics.switchMainTab('analysis')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2 hidden" data-tab="analysis">
                         <i data-lucide="pie-chart" class="w-4 h-4"></i>
                         <span data-i18n="tab.analysis">Detaylı Analiz</span>
                     </button>
@@ -10232,27 +10232,47 @@
                 stats.monthlyRevenue += this.getRelevantRevenue(apartment, monthlyReservations, monthlyExpenses);
             });
             
-            // Calculate average occupancy — sadece rez olan ayı baz al
-            let totalOccupancy = 0;
-            let occupancyCount = 0;
-            const occStart = new Date(targetYear, targetMonth, 1);
-            const occEnd = new Date(targetYear, targetMonth + 1, 0);
-
-            this.data.apartments?.forEach(apartment => {
-                const hasRes = this.data.reservations?.some(res => {
+            // Calculate average occupancy — en az 1 rezervasyonu olan tüm ayların ortalaması
+            {
+                // Tüm rezervasyonlardan benzersiz ay-yıl çiftlerini bul
+                const monthSet = new Set();
+                const relevantReservations = this.filteredData.reservations || this.data.reservations || [];
+                relevantReservations.forEach(res => {
                     const d = new Date(res.checkIn);
-                    return res.apartmentId === apartment.id && d.getMonth() === targetMonth && d.getFullYear() === targetYear;
+                    monthSet.add(`${d.getFullYear()}-${d.getMonth()}`);
                 });
-                if (hasRes) {
-                    const occupancy = this.calculateOccupancyRate(apartment.id, occStart, occEnd);
-                    if (occupancy > 0) {
-                        totalOccupancy += occupancy;
-                        occupancyCount++;
-                    }
-                }
-            });
 
-            stats.avgOccupancy = occupancyCount > 0 ? totalOccupancy / occupancyCount : 0;
+                let totalMonthlyOccupancy = 0;
+                let monthCount = 0;
+
+                monthSet.forEach(key => {
+                    const [year, month] = key.split('-').map(Number);
+                    const mStart = new Date(year, month, 1);
+                    const mEnd = new Date(year, month + 1, 0);
+
+                    let monthOccTotal = 0;
+                    let aptCount = 0;
+
+                    this.data.apartments?.forEach(apartment => {
+                        const hasRes = relevantReservations.some(res =>
+                            res.apartmentId === apartment.id &&
+                            new Date(res.checkIn).getMonth() === month &&
+                            new Date(res.checkIn).getFullYear() === year
+                        );
+                        if (hasRes) {
+                            monthOccTotal += this.calculateOccupancyRate(apartment.id, mStart, mEnd);
+                            aptCount++;
+                        }
+                    });
+
+                    if (aptCount > 0) {
+                        totalMonthlyOccupancy += monthOccTotal / aptCount;
+                        monthCount++;
+                    }
+                });
+
+                stats.avgOccupancy = monthCount > 0 ? totalMonthlyOccupancy / monthCount : 0;
+            }
             
             // Find best performing system
             const systemRevenues = {};
