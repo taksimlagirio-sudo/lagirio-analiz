@@ -247,6 +247,13 @@
 
         /* ========= MOBILE RESPONSIVE ========= */
 
+        /* --- Hide mobile-only elements by default (shown via media query) --- */
+        .mobile-header-menu,
+        .mobile-more-sheet-overlay,
+        .mobile-more-sheet {
+            display: none;
+        }
+
         /* --- Mobile Bottom Tab Bar --- */
         .mobile-bottom-nav {
             display: none;
@@ -320,6 +327,7 @@
 
             /* Mobile "More" sheet overlay */
             .mobile-more-sheet-overlay {
+                display: block;
                 position: fixed;
                 inset: 0;
                 background: rgba(0,0,0,0.4);
@@ -334,6 +342,7 @@
             }
 
             .mobile-more-sheet {
+                display: block;
                 position: fixed;
                 bottom: 0;
                 left: 0;
@@ -395,6 +404,7 @@
 
             /* Mobile header dropdown */
             .mobile-header-menu {
+                display: block;
                 position: absolute;
                 top: 100%;
                 right: 8px;
