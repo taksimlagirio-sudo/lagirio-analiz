@@ -238,6 +238,248 @@
             border-color: #9ca3af;
             background: #f9fafb;
         }
+
+        /* ========= MOBILE RESPONSIVE ========= */
+
+        /* --- Mobile Bottom Tab Bar --- */
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 767px) {
+            /* Bottom navigation */
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+                background: rgba(0, 77, 64, 0.95);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(255,255,255,0.1);
+                padding: 4px 0 calc(4px + env(safe-area-inset-bottom));
+                justify-content: space-around;
+                align-items: stretch;
+            }
+
+            .mobile-bottom-nav button {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                padding: 6px 2px;
+                color: rgba(255,255,255,0.55);
+                font-size: 10px;
+                font-weight: 500;
+                border: none;
+                background: none;
+                transition: color 0.2s;
+                position: relative;
+            }
+
+            .mobile-bottom-nav button.active {
+                color: #fff;
+            }
+
+            .mobile-bottom-nav button.active::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 25%;
+                right: 25%;
+                height: 2px;
+                background: #fb923c;
+                border-radius: 0 0 2px 2px;
+            }
+
+            .mobile-bottom-nav button svg,
+            .mobile-bottom-nav button i {
+                width: 20px;
+                height: 20px;
+            }
+
+            /* Hide desktop tab nav on mobile */
+            .desktop-tab-nav {
+                display: none !important;
+            }
+
+            /* Body bottom padding for bottom nav */
+            body {
+                padding-bottom: 68px;
+            }
+
+            /* Mobile "More" sheet overlay */
+            .mobile-more-sheet-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 49;
+                opacity: 0;
+                transition: opacity 0.25s;
+                pointer-events: none;
+            }
+            .mobile-more-sheet-overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .mobile-more-sheet {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 51;
+                background: white;
+                border-radius: 16px 16px 0 0;
+                padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+            }
+            .mobile-more-sheet.active {
+                transform: translateY(0);
+            }
+            .mobile-more-sheet .sheet-handle {
+                width: 36px;
+                height: 4px;
+                border-radius: 2px;
+                background: #d1d5db;
+                margin: 0 auto 12px;
+            }
+            .mobile-more-sheet button {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                padding: 14px 12px;
+                border: none;
+                background: none;
+                font-size: 15px;
+                color: #374151;
+                border-radius: 10px;
+                transition: background 0.15s;
+            }
+            .mobile-more-sheet button:active {
+                background: #f3f4f6;
+            }
+            .mobile-more-sheet button svg,
+            .mobile-more-sheet button i {
+                width: 20px;
+                height: 20px;
+                color: #6b7280;
+            }
+
+            /* --- Header compact on mobile --- */
+            .header-actions-desktop {
+                display: none !important;
+            }
+            .header-mobile-trigger {
+                display: flex !important;
+            }
+            .header-brand-subtitle {
+                display: none;
+            }
+            .header-brand-title {
+                font-size: 16px;
+            }
+
+            /* Mobile header dropdown */
+            .mobile-header-menu {
+                position: absolute;
+                top: 100%;
+                right: 8px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                padding: 6px;
+                min-width: 200px;
+                z-index: 60;
+                opacity: 0;
+                transform: translateY(-8px) scale(0.97);
+                pointer-events: none;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .mobile-header-menu.active {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                pointer-events: auto;
+            }
+            .mobile-header-menu button,
+            .mobile-header-menu a {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                padding: 10px 12px;
+                border: none;
+                background: none;
+                font-size: 14px;
+                color: #374151;
+                border-radius: 8px;
+                transition: background 0.15s;
+                cursor: pointer;
+                text-decoration: none;
+            }
+            .mobile-header-menu button:active,
+            .mobile-header-menu a:active {
+                background: #f3f4f6;
+            }
+            .mobile-header-menu button svg,
+            .mobile-header-menu button i,
+            .mobile-header-menu a svg,
+            .mobile-header-menu a i {
+                width: 18px;
+                height: 18px;
+                color: #6b7280;
+            }
+            .mobile-header-menu .menu-separator {
+                height: 1px;
+                background: #e5e7eb;
+                margin: 4px 8px;
+            }
+
+            /* --- Analysis sub-tabs horizontal scroll --- */
+            .analysis-subtabs-nav {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .analysis-subtabs-nav::-webkit-scrollbar {
+                display: none;
+            }
+            .analysis-subtabs-nav button {
+                flex: 0 0 auto !important;
+                white-space: nowrap;
+            }
+
+            /* --- FAB & Toast above bottom nav --- */
+            .fab-container {
+                bottom: 80px !important;
+            }
+            #toastContainer {
+                bottom: 80px !important;
+            }
+        }
+
+        /* Desktop: hide mobile-only elements */
+        @media (min-width: 768px) {
+            .header-mobile-trigger {
+                display: none !important;
+            }
+        }
+
+        /* Owner mode: hide tabs in mobile bottom nav too */
+        body.owner-mode .mobile-bottom-nav [data-tab="efficiency"],
+        body.owner-mode .mobile-bottom-nav [data-tab="reports"],
+        body.owner-mode .mobile-more-sheet [data-tab="efficiency"],
+        body.owner-mode .mobile-more-sheet [data-tab="reports"] {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-[#faf6f0] via-[#fdfcfa] to-[#faf6f0] font-inter min-h-screen">
@@ -342,7 +584,7 @@
     <div class="fixed inset-0 gradient-mesh pointer-events-none"></div>
 
     <!-- Header -->
-    <header class="glass-dark shadow-xl sticky top-0 z-50">
+    <header class="glass-dark shadow-xl sticky top-0 z-50 relative">
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
@@ -353,8 +595,8 @@
                         </span>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-white">Analytics Pro</h1>
-                        <p class="text-emerald-200 text-xs" data-i18n="header.subtitle">Gelişmiş Veri Analizi Platformu</p>
+                        <h1 class="text-xl font-bold text-white header-brand-title">Analytics Pro</h1>
+                        <p class="text-emerald-200 text-xs header-brand-subtitle" data-i18n="header.subtitle">Gelişmiş Veri Analizi Platformu</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -370,52 +612,105 @@
                         </div>
                     </div>
                     
-                    <!-- Action Buttons -->
-                    <button onclick="Analytics.showNotifications()" class="relative bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
-                        <i data-lucide="bell" class="w-5 h-5"></i>
-                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="notificationCount">0</span>
-                    </button>
-                    
-                    <button onclick="Analytics.exportPDF()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
-                        <i data-lucide="file-text" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">PDF</span>
-                    </button>
-                    
-                    <button onclick="Analytics.exportExcel()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
-                        <i data-lucide="table" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Excel</span>
-                    </button>
-                    
-                    <button onclick="GoogleDrive.headerDriveAction()" id="headerDriveBtn" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition relative" title="Google Drive">
-                        <i data-lucide="hard-drive" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline" id="headerDriveText">Drive</span>
-                        <span id="headerDriveDot" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-gray-400 border-2 border-emerald-900"></span>
-                    </button>
+                    <!-- Action Buttons (Desktop) -->
+                    <div class="header-actions-desktop flex items-center space-x-3">
+                        <button onclick="Analytics.showNotifications()" class="relative bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="notificationCount">0</span>
+                        </button>
 
-                    <button onclick="DataManager.open()" class="admin-only bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Veri Yönetimi">
-                        <i data-lucide="database" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Veri</span>
-                    </button>
+                        <button onclick="Analytics.exportPDF()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">PDF</span>
+                        </button>
 
-                    <button onclick="Analytics.showSettings()" class="admin-only bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
-                        <i data-lucide="settings" class="w-5 h-5"></i>
-                    </button>
+                        <button onclick="Analytics.exportExcel()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
+                            <i data-lucide="table" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Excel</span>
+                        </button>
 
-                    <div class="w-px h-8 bg-white/10"></div>
+                        <button onclick="GoogleDrive.headerDriveAction()" id="headerDriveBtn" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition relative" title="Google Drive">
+                            <i data-lucide="hard-drive" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline" id="headerDriveText">Drive</span>
+                            <span id="headerDriveDot" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-gray-400 border-2 border-emerald-900"></span>
+                        </button>
 
-                    <!-- Header Language Selector -->
-                    <select id="headerLangSelector" onchange="I18n.setLang(this.value)"
-                            class="bg-white/10 hover:bg-white/20 text-white text-sm px-2 py-2 rounded-lg border-none cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
-                        <option value="tr" class="text-gray-800">TR</option>
-                        <option value="en" class="text-gray-800">EN</option>
-                        <option value="ru" class="text-gray-800">RU</option>
-                        <option value="ar" class="text-gray-800">AR</option>
-                    </select>
+                        <button onclick="DataManager.open()" class="admin-only bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Veri Yönetimi">
+                            <i data-lucide="database" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Veri</span>
+                        </button>
 
-                    <button onclick="Auth.logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 px-3 py-2 rounded-lg flex items-center space-x-2 transition text-sm">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline" data-i18n="header.logout">Çıkış</span>
-                    </button>
+                        <button onclick="Analytics.showSettings()" class="admin-only bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                        </button>
+
+                        <div class="w-px h-8 bg-white/10"></div>
+
+                        <!-- Header Language Selector -->
+                        <select id="headerLangSelector" onchange="I18n.setLang(this.value)"
+                                class="bg-white/10 hover:bg-white/20 text-white text-sm px-2 py-2 rounded-lg border-none cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
+                            <option value="tr" class="text-gray-800">TR</option>
+                            <option value="en" class="text-gray-800">EN</option>
+                            <option value="ru" class="text-gray-800">RU</option>
+                            <option value="ar" class="text-gray-800">AR</option>
+                        </select>
+
+                        <button onclick="Auth.logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 px-3 py-2 rounded-lg flex items-center space-x-2 transition text-sm">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline" data-i18n="header.logout">Çıkış</span>
+                        </button>
+                    </div>
+
+                    <!-- Action Buttons (Mobile) -->
+                    <div class="header-mobile-trigger flex items-center space-x-2" style="display:none;">
+                        <button onclick="Analytics.showNotifications()" class="relative bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="notificationCountMobile">0</span>
+                        </button>
+                        <button onclick="MobileUI.toggleHeaderMenu()" class="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Header Dropdown -->
+                    <div class="mobile-header-menu" id="mobileHeaderMenu">
+                        <button onclick="Analytics.exportPDF(); MobileUI.closeHeaderMenu();">
+                            <i data-lucide="file-text"></i>
+                            <span>PDF Export</span>
+                        </button>
+                        <button onclick="Analytics.exportExcel(); MobileUI.closeHeaderMenu();">
+                            <i data-lucide="table"></i>
+                            <span>Excel Export</span>
+                        </button>
+                        <button onclick="GoogleDrive.headerDriveAction(); MobileUI.closeHeaderMenu();">
+                            <i data-lucide="hard-drive"></i>
+                            <span>Google Drive</span>
+                        </button>
+                        <button onclick="DataManager.open(); MobileUI.closeHeaderMenu();" class="admin-only">
+                            <i data-lucide="database"></i>
+                            <span data-i18n="header.mobile.data">Veri Yönetimi</span>
+                        </button>
+                        <button onclick="Analytics.showSettings(); MobileUI.closeHeaderMenu();" class="admin-only">
+                            <i data-lucide="settings"></i>
+                            <span data-i18n="header.mobile.settings">Ayarlar</span>
+                        </button>
+                        <div class="menu-separator"></div>
+                        <div class="flex items-center gap-2 px-3 py-2">
+                            <i data-lucide="globe" class="w-4 h-4 text-gray-400"></i>
+                            <select id="headerLangSelectorMobile" onchange="I18n.setLang(this.value)"
+                                    class="flex-1 text-sm px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 bg-white text-gray-700">
+                                <option value="tr">Türkçe</option>
+                                <option value="en">English</option>
+                                <option value="ru">Русский</option>
+                                <option value="ar">العربية</option>
+                            </select>
+                        </div>
+                        <div class="menu-separator"></div>
+                        <button onclick="Auth.logout(); MobileUI.closeHeaderMenu();" class="text-red-500">
+                            <i data-lucide="log-out" class="text-red-400"></i>
+                            <span data-i18n="header.logout">Çıkış</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1057,7 +1352,7 @@
         <!-- Main Navigation Tabs -->
         <div class="glass rounded-xl shadow-lg overflow-hidden mb-6">
             <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-1">
-                <nav class="flex flex-wrap">
+                <nav class="flex flex-wrap desktop-tab-nav">
                     <button onclick="Analytics.switchMainTab('overview')" class="main-tab active flex-1 px-4 py-3 text-sm font-semibold text-white bg-white/20 rounded-t-lg transition hover:bg-white/30 flex items-center justify-center space-x-2" data-tab="overview">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span data-i18n="tab.overview">Genel Bakış</span>
@@ -1172,7 +1467,7 @@
             <div id="analysis-content" class="tab-content hidden bg-white/95 p-6">
                 <!-- Analysis Sub-tabs -->
                 <div class="bg-gray-50 rounded-lg p-1 mb-6">
-                    <nav class="flex flex-wrap">
+                    <nav class="flex flex-wrap analysis-subtabs-nav">
                         <button onclick="Analytics.switchAnalysisTab('system')" class="analysis-tab active flex-1 px-4 py-2 text-sm font-medium bg-white rounded-lg shadow-sm" data-analysis="system">
                             <span data-i18n="tab.analysis.system">Sistem Analizi</span>
                         </button>
@@ -2080,8 +2375,50 @@
         </div>
     </div>
     
+    <!-- Mobile Bottom Tab Bar -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <button onclick="Analytics.switchMainTab('overview')" data-tab="overview" class="active">
+            <i data-lucide="layout-dashboard"></i>
+            <span data-i18n="tab.mobile.overview">Genel</span>
+        </button>
+        <button onclick="Analytics.switchMainTab('analysis')" data-tab="analysis">
+            <i data-lucide="pie-chart"></i>
+            <span data-i18n="tab.mobile.analysis">Analiz</span>
+        </button>
+        <button onclick="Analytics.switchMainTab('trends')" data-tab="trends">
+            <i data-lucide="trending-up"></i>
+            <span data-i18n="tab.mobile.trends">Trendler</span>
+        </button>
+        <button onclick="Analytics.switchMainTab('projection')" data-tab="projection">
+            <i data-lucide="telescope"></i>
+            <span data-i18n="tab.mobile.projection">Proje.</span>
+        </button>
+        <button onclick="MobileUI.toggleMoreSheet()" data-tab="more" id="mobileMoreBtn">
+            <i data-lucide="more-horizontal"></i>
+            <span data-i18n="tab.mobile.more">Diğer</span>
+        </button>
+    </nav>
+
+    <!-- Mobile More Sheet (Overlay + Panel) -->
+    <div class="mobile-more-sheet-overlay" id="mobileMoreOverlay" onclick="MobileUI.closeMoreSheet()"></div>
+    <div class="mobile-more-sheet" id="mobileMoreSheet">
+        <div class="sheet-handle"></div>
+        <button onclick="Analytics.switchMainTab('comparison'); MobileUI.closeMoreSheet();" data-tab="comparison">
+            <i data-lucide="git-compare" class="text-emerald-600"></i>
+            <span data-i18n="tab.comparison">Genel Karşılaştırma</span>
+        </button>
+        <button onclick="Analytics.switchMainTab('efficiency'); MobileUI.closeMoreSheet();" data-tab="efficiency">
+            <i data-lucide="gauge" class="text-amber-600"></i>
+            <span data-i18n="tab.efficiency">Verimlilik</span>
+        </button>
+        <button onclick="Analytics.switchMainTab('reports'); MobileUI.closeMoreSheet();" data-tab="reports">
+            <i data-lucide="file-bar-chart" class="text-blue-600"></i>
+            <span data-i18n="tab.reports">Raporlar</span>
+        </button>
+    </div>
+
     <!-- Floating Action Button -->
-    <div class="fixed bottom-6 right-6 z-40">
+    <div class="fixed bottom-6 right-6 z-40 fab-container">
         <button onclick="Analytics.toggleQuickActions()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110">
             <i data-lucide="plus" class="w-6 h-6"></i>
         </button>
@@ -2126,6 +2463,104 @@
     </div>
     
     <script>
+    // ============================================================
+    // MOBILE UI MODULE - Mobil Arayüz Yönetimi
+    // ============================================================
+    const MobileUI = {
+        moreSheetOpen: false,
+        headerMenuOpen: false,
+
+        // Bottom nav active state sync
+        updateBottomNav(tab) {
+            const nav = document.getElementById('mobileBottomNav');
+            if (!nav) return;
+            const moreBtn = document.getElementById('mobileMoreBtn');
+            const moreTabs = ['comparison', 'efficiency', 'reports'];
+            nav.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+            // If active tab is in "more" sheet, highlight the more button
+            if (moreTabs.includes(tab) && moreBtn) {
+                moreBtn.classList.add('active');
+            }
+            // Re-render icons in bottom nav
+            requestAnimationFrame(() => lucide.createIcons());
+        },
+
+        // More sheet toggle
+        toggleMoreSheet() {
+            this.moreSheetOpen ? this.closeMoreSheet() : this.openMoreSheet();
+        },
+
+        openMoreSheet() {
+            this.moreSheetOpen = true;
+            const overlay = document.getElementById('mobileMoreOverlay');
+            const sheet = document.getElementById('mobileMoreSheet');
+            if (overlay) overlay.classList.add('active');
+            if (sheet) {
+                sheet.classList.add('active');
+                requestAnimationFrame(() => lucide.createIcons());
+            }
+        },
+
+        closeMoreSheet() {
+            this.moreSheetOpen = false;
+            const overlay = document.getElementById('mobileMoreOverlay');
+            const sheet = document.getElementById('mobileMoreSheet');
+            if (overlay) overlay.classList.remove('active');
+            if (sheet) sheet.classList.remove('active');
+        },
+
+        // Header menu toggle
+        toggleHeaderMenu() {
+            this.headerMenuOpen ? this.closeHeaderMenu() : this.openHeaderMenu();
+        },
+
+        openHeaderMenu() {
+            this.headerMenuOpen = true;
+            const menu = document.getElementById('mobileHeaderMenu');
+            if (menu) {
+                menu.classList.add('active');
+                requestAnimationFrame(() => lucide.createIcons());
+            }
+            // Sync mobile language selector
+            const desktopSel = document.getElementById('headerLangSelector');
+            const mobileSel = document.getElementById('headerLangSelectorMobile');
+            if (desktopSel && mobileSel) mobileSel.value = desktopSel.value;
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', MobileUI._headerMenuOutsideClick, { once: true });
+            }, 10);
+        },
+
+        closeHeaderMenu() {
+            this.headerMenuOpen = false;
+            const menu = document.getElementById('mobileHeaderMenu');
+            if (menu) menu.classList.remove('active');
+            document.removeEventListener('click', MobileUI._headerMenuOutsideClick);
+        },
+
+        _headerMenuOutsideClick(e) {
+            const menu = document.getElementById('mobileHeaderMenu');
+            const trigger = document.querySelector('.header-mobile-trigger');
+            if (menu && !menu.contains(e.target) && trigger && !trigger.contains(e.target)) {
+                MobileUI.closeHeaderMenu();
+            }
+        },
+
+        // Sync notification count to mobile badge
+        syncNotificationCount() {
+            const desktop = document.getElementById('notificationCount');
+            const mobile = document.getElementById('notificationCountMobile');
+            if (desktop && mobile) mobile.textContent = desktop.textContent;
+        },
+
+        // Init: render lucide icons in mobile elements
+        init() {
+            requestAnimationFrame(() => lucide.createIcons());
+        }
+    };
+
     // ============================================================
     // I18N MODULE - Çoklu Dil Desteği
     // ============================================================
@@ -4569,6 +5004,7 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appWrapper').classList.add('active');
             lucide.createIcons();
+            MobileUI.init();
 
             // Owner modunu uygula
             if (this.currentUser && this.currentUser.role === 'owner') {
@@ -9919,6 +10355,7 @@
 
             // Notification count
             document.getElementById('notificationCount').textContent = this.notifications.length;
+            MobileUI.syncNotificationCount();
         },
 
         // Owner finansal özet kartı render
@@ -11899,6 +12336,7 @@
             
             // Update notification count
             document.getElementById('notificationCount').textContent = this.notifications.length;
+            MobileUI.syncNotificationCount();
         },
         
         // Show notifications modal
@@ -12661,6 +13099,9 @@
             });
             
             this.currentMainTab = tab;
+
+            // Update mobile bottom nav active state
+            MobileUI.updateBottomNav(tab);
 
             // Initialize specific tab content if needed
             if (tab === 'analysis') {
