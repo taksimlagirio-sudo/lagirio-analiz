@@ -514,6 +514,30 @@
                 color: #374151;
             }
 
+            /* --- Modals fullscreen on mobile --- */
+            .modal-mobile-full {
+                max-width: 100% !important;
+                max-height: 100vh !important;
+                height: 100vh;
+                border-radius: 0 !important;
+                animation: none !important;
+            }
+            .modal-mobile-full .max-h-\[70vh\],
+            .modal-mobile-full .max-h-\[80vh\],
+            .modal-mobile-full .max-h-\[85vh\],
+            .modal-mobile-full .max-h-\[90vh\] {
+                max-height: calc(100vh - 120px) !important;
+            }
+
+            /* --- Font size minimums --- */
+            .text-\[10px\] { font-size: 11px !important; }
+            .text-\[11px\] { font-size: 12px !important; }
+
+            /* --- Report modal grid stacking --- */
+            .report-grid-responsive {
+                grid-template-columns: 1fr !important;
+            }
+
             /* --- FAB & Toast above bottom nav --- */
             .fab-container {
                 bottom: 80px !important;
@@ -537,6 +561,15 @@
         body.owner-mode .mobile-more-sheet [data-tab="reports"] {
             display: none !important;
         }
+
+        /* Touch feedback for touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            button:active, a:active, [role="button"]:active {
+                opacity: 0.85;
+                transform: scale(0.98);
+                transition: transform 0.1s, opacity 0.1s;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-[#faf6f0] via-[#fdfcfa] to-[#faf6f0] font-inter min-h-screen">
@@ -549,7 +582,7 @@
             <div class="absolute bottom-[20%] left-[8%] w-16 h-16 bg-emerald-400/[0.05] rounded-full" style="animation: loginFloat 7s ease-in-out 2s infinite;"></div>
         </div>
 
-        <div class="bg-white/[0.97] backdrop-blur-2xl rounded-3xl p-12 w-[440px] max-w-[90vw] shadow-[0_32px_64px_rgba(0,0,0,0.2)] text-center relative z-10 border border-white/20">
+        <div class="bg-white/[0.97] backdrop-blur-2xl rounded-3xl p-6 sm:p-12 w-[440px] max-w-[90vw] shadow-[0_32px_64px_rgba(0,0,0,0.2)] text-center relative z-10 border border-white/20">
             <div class="w-[80px] h-[80px] bg-gradient-to-br from-emerald-900 via-emerald-700 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 text-[30px] font-extrabold text-white tracking-tight shadow-[0_8px_24px_rgba(22,101,52,0.3)] rotate-3 hover:rotate-0 transition-transform">L</div>
             <h1 class="text-[26px] font-extrabold bg-gradient-to-r from-emerald-900 to-emerald-600 bg-clip-text text-transparent mb-1.5">Lagirio Analytics</h1>
             <p class="text-sm text-gray-400 mb-8 font-medium" data-i18n="login.subtitle">Gelişmiş Veri Analiz Paneli</p>
@@ -2190,7 +2223,7 @@
     
     <!-- Settings Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-slide-up">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-slide-up modal-mobile-full">
             <div class="bg-gradient-to-r from-gray-700 to-gray-800 p-6 text-white">
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
@@ -2311,7 +2344,7 @@
 
     <!-- Apartment Matching Modal -->
     <div id="aptMatchingModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden animate-slide-up">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden animate-slide-up modal-mobile-full">
             <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-white">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold flex items-center space-x-2">
@@ -2344,7 +2377,7 @@
 
     <!-- Custom Report Modal -->
     <div id="customReportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slide-up modal-mobile-full">
             <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 text-white">
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-bold flex items-center space-x-2">
@@ -2361,7 +2394,7 @@
                     <!-- Report Sections Selection -->
                     <div>
                         <h3 class="font-semibold text-gray-700 mb-3">Rapor Bölümleri</h3>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <label class="flex items-center space-x-2">
                                 <input type="checkbox" value="summary" checked class="report-section w-4 h-4 text-purple-600 rounded">
                                 <span class="text-sm">Özet</span>
@@ -2615,9 +2648,58 @@
             if (desktop && mobile) mobile.textContent = desktop.textContent;
         },
 
-        // Init: render lucide icons in mobile elements
+        // Tab order for swipe navigation
+        _tabOrder: ['overview', 'analysis', 'trends', 'projection', 'comparison', 'efficiency', 'reports'],
+
+        // Init: render lucide icons + swipe listeners
         init() {
             requestAnimationFrame(() => lucide.createIcons());
+            this._initSwipe();
+        },
+
+        // Swipe navigation between tabs
+        _initSwipe() {
+            let startX = 0, startY = 0, startTime = 0;
+            const minSwipe = 60, maxY = 80, maxTime = 400;
+
+            const target = document.getElementById('mainContent') || document.body;
+
+            target.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                startTime = Date.now();
+            }, { passive: true });
+
+            target.addEventListener('touchend', (e) => {
+                if (window.innerWidth >= 768) return;
+                const dx = e.changedTouches[0].clientX - startX;
+                const dy = Math.abs(e.changedTouches[0].clientY - startY);
+                const dt = Date.now() - startTime;
+
+                if (Math.abs(dx) < minSwipe || dy > maxY || dt > maxTime) return;
+
+                const isRTL = document.documentElement.dir === 'rtl' || (typeof I18n !== 'undefined' && I18n.currentLang === 'ar');
+                const direction = isRTL ? -dx : dx;
+
+                const isOwner = document.body.classList.contains('owner-mode');
+                const tabs = this._tabOrder.filter(t => {
+                    if (isOwner && (t === 'efficiency' || t === 'reports')) return false;
+                    return true;
+                });
+
+                const current = Analytics.currentMainTab;
+                const idx = tabs.indexOf(current);
+                if (idx === -1) return;
+
+                let next;
+                if (direction < 0 && idx < tabs.length - 1) {
+                    next = tabs[idx + 1];
+                } else if (direction > 0 && idx > 0) {
+                    next = tabs[idx - 1];
+                }
+
+                if (next) Analytics.switchMainTab(next);
+            }, { passive: true });
         }
     };
 
