@@ -116,13 +116,19 @@
         .chart-container {
             height: 320px;
         }
-        
+
         .chart-container-lg {
             height: 420px;
         }
-        
+
         .chart-container-sm {
             height: 250px;
+        }
+
+        @media (max-width: 767px) {
+            .chart-container { height: 240px; }
+            .chart-container-lg { height: 280px; }
+            .chart-container-sm { height: 200px; }
         }
         
         /* Tab transitions */
@@ -1259,9 +1265,9 @@
         </div>
         
         <!-- Quick Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
             <!-- Portfolio Value Card -->
-            <div class="glass rounded-xl p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.1s">
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.1s">
                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 group-hover:from-emerald-500/20 group-hover:to-emerald-600/20 transition"></div>
                 <div class="relative">
                     <div class="flex items-center justify-between mb-2">
@@ -1271,15 +1277,15 @@
                         <span class="text-xs text-emerald-600 font-semibold" id="portfolioTrend">+0%</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-1" id="portfolioLabel" data-i18n="kpi.portfolio">Toplam Portföy</p>
-                    <p class="text-2xl font-bold text-gray-800" id="totalPortfolioValue">€0</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="totalPortfolioValue">€0</p>
                     <div class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
                         <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-500" id="portfolioProgress" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Monthly Revenue Card -->
-            <div class="glass rounded-xl p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.2s">
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.2s">
                 <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/10 group-hover:from-blue-500/20 group-hover:to-blue-600/20 transition"></div>
                 <div class="relative">
                     <div class="flex items-center justify-between mb-2">
@@ -1289,13 +1295,13 @@
                         <span class="text-xs text-blue-600 font-semibold" id="monthlyTrend">→</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-1" id="revenueLabel" data-i18n="kpi.monthly.revenue">Bu Ay Kazanç</p>
-                    <p class="text-2xl font-bold text-gray-800" id="monthlyRevenue">€0</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="monthlyRevenue">€0</p>
                     <p class="text-xs text-gray-400 mt-2" id="monthlyChange" data-i18n="kpi.vs.last">vs geçen dönem</p>
                 </div>
             </div>
-            
+
             <!-- Active Properties Card -->
-            <div class="glass rounded-xl p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.3s">
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.3s">
                 <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/10 group-hover:from-purple-500/20 group-hover:to-purple-600/20 transition"></div>
                 <div class="relative">
                     <div class="flex items-center justify-between mb-2">
@@ -1305,13 +1311,13 @@
                         <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full" id="activePercentage">0%</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-1" data-i18n="kpi.active.apartments">Aktif Daireler</p>
-                    <p class="text-2xl font-bold text-gray-800" id="activeProperties">0/0</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="activeProperties">0/0</p>
                     <p class="text-xs text-gray-400 mt-2" data-i18n="kpi.with.reservation">Rezervasyonlu</p>
                 </div>
             </div>
-            
+
             <!-- Average Occupancy Card -->
-            <div class="glass rounded-xl p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.4s">
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.4s">
                 <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-orange-600/10 group-hover:from-orange-500/20 group-hover:to-orange-600/20 transition"></div>
                 <div class="relative">
                     <div class="flex items-center justify-between mb-2">
@@ -1321,7 +1327,7 @@
                         <span class="text-xs text-orange-600" id="occupancyIndicator">→</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-1" data-i18n="kpi.avg.occupancy">Ortalama Doluluk</p>
-                    <p class="text-2xl font-bold text-gray-800" id="avgOccupancy">0%</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="avgOccupancy">0%</p>
                     <div class="mt-2 flex space-x-1">
                         <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
                         <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
@@ -1331,9 +1337,9 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Best System Card -->
-            <div class="glass rounded-xl p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.5s">
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up col-span-2 lg:col-span-1" style="animation-delay: 0.5s">
                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-teal-600/10 group-hover:from-emerald-500/20 group-hover:to-teal-600/20 transition"></div>
                 <div class="relative">
                     <div class="flex items-center justify-between mb-2">
@@ -1399,7 +1405,7 @@
             </div>
 
             <!-- Overview Tab Content -->
-            <div id="overview-content" class="tab-content active bg-white/95 p-6">
+            <div id="overview-content" class="tab-content active bg-white/95 p-3 sm:p-6">
                 <!-- Owner Financial Summary - sadece owner modunda görünür -->
                 <div id="ownerFinancialSummary" class="hidden mb-6">
                     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -1464,7 +1470,7 @@
             </div>
             
             <!-- Analysis Tab Content -->
-            <div id="analysis-content" class="tab-content hidden bg-white/95 p-6">
+            <div id="analysis-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
                 <!-- Analysis Sub-tabs -->
                 <div class="bg-gray-50 rounded-lg p-1 mb-6">
                     <nav class="flex flex-wrap analysis-subtabs-nav">
@@ -1505,16 +1511,16 @@
             </div>
             
             <!-- Comparison Tab Content -->
-            <div id="comparison-content" class="tab-content hidden bg-white/95 p-6">
+            <div id="comparison-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
                 <!-- Advanced Comparison Controls -->
                 <!-- Advanced Comparison Controls -->
-                <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                <div class="bg-gray-50 rounded-xl p-3 sm:p-6 mb-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4" data-i18n="comparison.params">Genel Karşılaştırma Parametreleri</h3>
 
                     <!-- Comparison Mode Selection -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-3" data-i18n="comparison.mode">Karşılaştırma Modu</label>
-                        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                             <button onclick="Analytics.setComparisonMode('apartment-apartment')"
                                     class="comparison-mode-btn active px-4 py-3 bg-white border-2 border-emerald-500 rounded-lg hover:bg-emerald-50 transition text-left">
                                 <div class="font-semibold text-emerald-700" data-i18n="comparison.apt.vs.apt">Daire vs Daire</div>
@@ -1583,7 +1589,7 @@
             </div>
             
             <!-- Trends Tab Content -->
-            <div id="trends-content" class="tab-content hidden bg-white/95 p-6">
+            <div id="trends-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Revenue Trends -->
                     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -1713,7 +1719,7 @@
             </div>
             
             <!-- Efficiency Tab Content -->
-            <div id="efficiency-content" class="tab-content hidden bg-white/95 p-6">
+            <div id="efficiency-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Cost Efficiency -->
                     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -1763,7 +1769,7 @@
             </div>
             
             <!-- Reports Tab Content -->
-            <div id="reports-content" class="tab-content hidden bg-white/95 p-6">
+            <div id="reports-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
                 <!-- Report Type Selection -->
                 <div class="bg-gray-50 rounded-xl p-6 mb-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4" data-i18n="reports.create">Rapor Oluştur</h3>
@@ -1875,7 +1881,7 @@
             </div>
 
             <!-- ===== PROJEKSIYON TAB ===== -->
-            <div id="projection-content" class="tab-content hidden bg-white/95 p-6">
+            <div id="projection-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
 
                 <!-- PMS HTML Import Section (inside dashboard) - admin only -->
                 <div class="admin-only bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -9710,6 +9716,11 @@
                 resizeTimeout = setTimeout(() => {
                     this.resizeAllCharts();
                 }, 250);
+            });
+
+            // Orientation change handler (mobile rotation)
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => this.resizeAllCharts(), 300);
             });
         },
         
