@@ -9975,6 +9975,33 @@
                     if (Auth.currentUser?.role === 'owner') {
                         this.renderOwnerFinancialSummary();
                     }
+
+                    // Projeksiyon sekmesi aktifse yeniden hesapla
+                    if (this.currentMainTab === 'projection') {
+                        Projection.init();
+                        const hasPmsRes = Projection.reservations && Projection.reservations.length > 0;
+                        const hasAnalyticsRes = Analytics.data?.reservations?.length > 0;
+                        const hasApartments = Analytics.data?.apartments?.length > 0;
+                        if (hasApartments && (hasPmsRes || hasAnalyticsRes)) {
+                            Projection.calculate();
+                        }
+                    }
+
+                    // Trend sekmesi aktifse grafikleri güncelle
+                    if (this.currentMainTab === 'trends') {
+                        if (this.charts.revenueTrendAnalysis) {
+                            this.createTrendAnalysisCharts();
+                        }
+                        this.updateForecastCards();
+                    }
+
+                    // Verimlilik sekmesi aktifse grafikleri güncelle
+                    if (this.currentMainTab === 'efficiency') {
+                        if (this.charts.costEfficiency) {
+                            this.createEfficiencyCharts();
+                        }
+                    }
+
                     lucide.createIcons();
                 });
             });
