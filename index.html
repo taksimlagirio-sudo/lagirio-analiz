@@ -4152,7 +4152,7 @@
             if (typeof Analytics !== 'undefined' && Analytics.data) {
                 try { Analytics.processData(); } catch(e) {}
             }
-            if (typeof Projection !== 'undefined' && Projection._lastCalcResult) {
+            if (typeof Projection !== 'undefined' && Projection._lastMonthlyData) {
                 try { Projection.calculate(); } catch(e) {}
             }
         },
@@ -6870,8 +6870,14 @@
             const chartTitle = document.getElementById('projChartTitle');
             const tableTitle = document.getElementById('projTableTitle');
             const tableSubtitle = document.getElementById('projTableSubtitle');
-            if (chartTitle) chartTitle.textContent = isOwner ? t('proj.owner.monthly.title', 'Aylık Projeksiyon (Net Kazancınız)') : t('proj.monthly.title', 'Aylık Projeksiyon (Lagirio Kazancı)');
-            if (tableTitle) tableTitle.textContent = isOwner ? t('proj.owner.monthly.detail', 'Aylık Kazanç Detayı') : t('proj.monthly.detail', 'Aylık Lagirio Kazanç Detayı');
+            if (chartTitle) {
+                chartTitle.textContent = isOwner ? t('proj.owner.monthly.title', 'Aylık Projeksiyon (Net Kazancınız)') : t('proj.monthly.title', 'Aylık Projeksiyon (Lagirio Kazancı)');
+                if (isOwner) chartTitle.removeAttribute('data-i18n');
+            }
+            if (tableTitle) {
+                tableTitle.textContent = isOwner ? t('proj.owner.monthly.detail', 'Aylık Kazanç Detayı') : t('proj.monthly.detail', 'Aylık Lagirio Kazanç Detayı');
+                if (isOwner) tableTitle.removeAttribute('data-i18n');
+            }
             if (tableSubtitle) tableSubtitle.textContent = isOwner ? t('proj.owner.all.total', '(tüm daireleriniz toplam)') : t('proj.all.apts.total', '(tüm daireler toplam)');
             if (!isOwner) {
                 document.getElementById('projResTableSection')?.classList.remove('hidden');
@@ -6953,7 +6959,8 @@
             document.getElementById('projGrossDetail').textContent = aptCount + ' ' + t('common.apartment', 'daire') + ' | 12 ' + t('proj.col.month', 'ay').toLowerCase() + ' | ' + t('proj.blend', 'Karma tahmin');
 
             if (isOwner) {
-                document.getElementById('projMainLabel').textContent = t('proj.est.net.income', 'Tahmini Net Kazancınız');
+                const mainLabel = document.getElementById('projMainLabel');
+                if (mainLabel) { mainLabel.textContent = t('proj.est.net.income', 'Tahmini Net Kazancınız'); mainLabel.removeAttribute('data-i18n'); }
                 document.getElementById('projLagirioNet').textContent = '\u20ac' + ownerNet.toFixed(2);
                 const ownerRatio = estGross > 0 ? Math.round((ownerNet / estGross) * 100) : 0;
                 document.getElementById('projLagirioDetail').textContent = t('proj.gross.pct', 'Brüt gelirin %') + ownerRatio + (I18n.currentLang === 'tr' ? '\'i' : '%');
