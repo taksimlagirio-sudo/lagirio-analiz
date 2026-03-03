@@ -1,0 +1,8 @@
+{
+  "name": "lagirio-functions",
+  "version": "1.0.0",
+  "description": "Lagirio Analiz - Netlify Functions",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  }
+}
