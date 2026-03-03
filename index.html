@@ -2602,32 +2602,24 @@
     </div>
     
     <script>
-    /* TEST: Bu satır görünüyorsa main script en azından başlıyor */
-    window.__dbgLogs = window.__dbgLogs || [];
-    window.__dbgLogs.push({type:'log', msg:'▶ MAIN SCRIPT BASLIYOR (direct push)', ts:new Date().toLocaleTimeString('tr-TR')});
-    </script>
-    <script>
-    __dbgAdd('log', 'SCRIPT BASLIYOR');
     // ============================================================
     // SUPABASE CONFIG
     // ============================================================
     const SUPABASE_URL = 'https://yrjrokmncqpicsoakdsa.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyanJva21uY3FwaWNzb2FrZHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NTA1MjIsImV4cCI6MjA4ODEyNjUyMn0.BldowPhQirAzXseAYYoQeNF4OG3m-sKMPDXB32_KiFw';
-    let supabase;
+    // Safari uyumluluk: window.supabase CDN global ile çakışmaması için let/var kullanmıyoruz
     try {
-        if (!window.supabase) throw new Error('Supabase CDN yüklenemedi');
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        if (!window.supabase || !window.supabase.createClient) throw new Error('Supabase CDN yüklenemedi');
+        window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        __dbgAdd('log', 'Supabase init tamam');
     } catch(e) {
-        document.addEventListener('DOMContentLoaded', () => {
-            const el = document.getElementById('loginError');
+        window.supabase = null;
+        __dbgAdd('error', 'Supabase init HATA: ' + e.message);
+        document.addEventListener('DOMContentLoaded', function() {
+            var el = document.getElementById('loginError');
             if (el) { el.textContent = 'KRITIK HATA: ' + e.message + ' — Sayfayı yenileyin'; el.style.display = 'block'; el.style.color = '#ef4444'; el.style.fontWeight = 'bold'; }
         });
     }
-    __dbgAdd('log', 'Supabase init tamam, supabase=' + (supabase ? 'OK' : 'NULL'));
-    __dbgAdd('log', '=== ONALTI-1 TAMAM (Supabase config) ===');
-    </script>
-    <script>
-    __dbgAdd('log', '=== ONALTI-2 BASLIYOR (MobileUI) ===');
     // ============================================================
     // MOBILE UI MODULE - Mobil Arayüz Yönetimi
     // ============================================================
@@ -2776,10 +2768,6 @@
     };
 
     __dbgAdd('log', 'MobileUI tamam');
-    __dbgAdd('log', '=== SEKIZ-1 TAMAM (MobileUI e kadar) ===');
-    </script>
-    <script>
-    __dbgAdd('log', '=== SEKIZ-2 BASLIYOR (I18n+) ===');
     // ============================================================
     // I18N MODULE - Çoklu Dil Desteği
     // ============================================================
@@ -4873,10 +4861,6 @@
     });
 
     __dbgAdd('log', 'I18n tamam');
-    __dbgAdd('log', '=== 1A-ILKDORT TAMAM (I18n e kadar) ===');
-    </script>
-    <script>
-    __dbgAdd('log', '=== 1A-IKINDORT BASLIYOR (DataManager+) ===');
     // ============================================================
     // DATA MANAGER MODULE - Veri Yönetimi Sayfası
     // ============================================================
@@ -5427,10 +5411,6 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     };
-    __dbgAdd('log', '=== CEYR-1A TAMAM (Auth e kadar) ===');
-    </script>
-    <script>
-    __dbgAdd('log', '=== CEYR-1B BASLIYOR (GoogleDrive+) ===');
     // ============================================================
     // GOOGLE DRIVE - Otomatik Bağlantı & Veri Senkronizasyonu
     // ============================================================
@@ -9571,10 +9551,6 @@
             }
         }
     };
-    __dbgAdd('log', '=== YARI-1 TAMAM (Projection\'e kadar) ===');
-    </script>
-    <script>
-    __dbgAdd('log', '=== YARI-2 BASLIYOR (Analytics+) ===');
     const Analytics = {
         // Data properties
         data: null,
