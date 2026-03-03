@@ -2583,7 +2583,16 @@
     // ============================================================
     const SUPABASE_URL = 'https://yrjrokmncqpicsoakdsa.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyanJva21uY3FwaWNzb2FrZHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NTA1MjIsImV4cCI6MjA4ODEyNjUyMn0.BldowPhQirAzXseAYYoQeNF4OG3m-sKMPDXB32_KiFw';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let supabase;
+    try {
+        if (!window.supabase) throw new Error('Supabase CDN yüklenemedi');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) {
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('loginError');
+            if (el) { el.textContent = 'KRITIK HATA: ' + e.message + ' — Sayfayı yenileyin'; el.style.display = 'block'; el.style.color = '#ef4444'; el.style.fontWeight = 'bold'; }
+        });
+    }
 
     // ============================================================
     // MOBILE UI MODULE - Mobil Arayüz Yönetimi
