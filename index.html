@@ -2602,6 +2602,11 @@
     </div>
     
     <script>
+    /* TEST: Bu satır görünüyorsa main script en azından başlıyor */
+    window.__dbgLogs = window.__dbgLogs || [];
+    window.__dbgLogs.push({type:'log', msg:'▶ MAIN SCRIPT BASLIYOR (direct push)', ts:new Date().toLocaleTimeString('tr-TR')});
+    </script>
+    <script>
     __dbgAdd('log', 'SCRIPT BASLIYOR');
     // ============================================================
     // SUPABASE CONFIG
