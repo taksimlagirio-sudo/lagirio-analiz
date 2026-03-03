@@ -3,6 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    // ERKEN HATA YAKALAYICI - Debug panel kurulmadan önce çalışır
+    window.__dbgLogs = [];
+    function __dbgAdd(type, msg) {
+        window.__dbgLogs.push({type, msg, ts: new Date().toLocaleTimeString('tr-TR')});
+        var p = document.getElementById('dbg-log');
+        var c = document.getElementById('dbg-count');
+        if (p) {
+            var n = p.children.length + 1;
+            if (c) c.textContent = n;
+            var d = document.createElement('div');
+            d.style.cssText = 'padding:2px 0;border-bottom:1px solid #1e293b;word-break:break-all;color:' + ({log:'#94a3b8',warn:'#fbbf24',error:'#f87171',info:'#60a5fa'}[type]||'#94a3b8');
+            d.textContent = '[' + window.__dbgLogs[window.__dbgLogs.length-1].ts + '] [' + type.toUpperCase() + '] ' + msg;
+            p.appendChild(d);
+            p.scrollTop = p.scrollHeight;
+        }
+    }
+    window.onerror = function(msg, src, line, col, err) {
+        __dbgAdd('error', msg + ' (' + (src||'').split('/').pop() + ':' + line + ')');
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+        __dbgAdd('error', 'Promise: ' + (e.reason && e.reason.message || e.reason || 'unknown'));
+    });
+    </script>
     <title>Lagirio Analytics Pro - Gelişmiş Veri Analizi</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d3028'/><text x='50' y='68' font-size='60' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>L</text></svg>">
     
@@ -2578,6 +2602,7 @@
     </div>
     
     <script>
+    __dbgAdd('log', 'SCRIPT BASLIYOR');
     // ============================================================
     // SUPABASE CONFIG
     // ============================================================
@@ -2593,6 +2618,7 @@
             if (el) { el.textContent = 'KRITIK HATA: ' + e.message + ' — Sayfayı yenileyin'; el.style.display = 'block'; el.style.color = '#ef4444'; el.style.fontWeight = 'bold'; }
         });
     }
+    __dbgAdd('log', 'Supabase init tamam, supabase=' + (supabase ? 'OK' : 'NULL'));
 
     // ============================================================
     // MOBILE UI MODULE - Mobil Arayüz Yönetimi
@@ -2741,6 +2767,7 @@
         }
     };
 
+    __dbgAdd('log', 'MobileUI tamam');
     // ============================================================
     // I18N MODULE - Çoklu Dil Desteği
     // ============================================================
@@ -4833,6 +4860,7 @@
         I18n.init();
     });
 
+    __dbgAdd('log', 'I18n tamam');
     // ============================================================
     // DATA MANAGER MODULE - Veri Yönetimi Sayfası
     // ============================================================
@@ -4970,6 +4998,7 @@
         }
     };
 
+    __dbgAdd('log', 'DataManager tamam');
     // ============================================================
     // AUTH MODULE - Supabase tabanlı kimlik doğrulama
     // ============================================================
@@ -16405,6 +16434,18 @@
     <script>
     (function(){
         var panel=document.getElementById('dbg-log'), count=document.getElementById('dbg-count'), n=0;
+        // Erken yakalanan logları flush et
+        if (window.__dbgLogs && window.__dbgLogs.length) {
+            window.__dbgLogs.forEach(function(l){ addRaw(l.type, l.ts, l.msg); });
+        }
+        function addRaw(type, ts, msg) {
+            n++; if(count) count.textContent=n;
+            var colors={log:'#94a3b8',warn:'#fbbf24',error:'#f87171',info:'#60a5fa'};
+            var d=document.createElement('div');
+            d.style.cssText='padding:2px 0;border-bottom:1px solid #1e293b;word-break:break-all;color:'+(colors[type]||'#94a3b8');
+            d.textContent='['+ts+'] ['+type.toUpperCase()+'] '+msg;
+            panel.appendChild(d); panel.scrollTop=panel.scrollHeight;
+        }
         function add(type,args){
             n++; count.textContent=n;
             var msg=Array.from(args).map(function(a){try{return typeof a==='object'?JSON.stringify(a,null,2):String(a);}catch(e){return String(a);}}).join(' ');
