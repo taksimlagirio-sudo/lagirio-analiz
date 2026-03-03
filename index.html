@@ -630,6 +630,7 @@
                         <p class="text-xs text-emerald-600 flex items-center justify-center gap-1.5" id="loginDriveConnectedText">
                             <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> <span data-i18n="login.drive.connected">Drive bağlantısı aktif</span>
                         </p>
+                        <button onclick="Auth.resetDriveLogin()" class="mt-2 text-xs text-gray-400 hover:text-red-500 transition underline underline-offset-2" data-i18n="login.drive.change.account">Hesabı Değiştir</button>
                     </div>
                 </div>
                 <!-- Durum: Bağlanıyor -->
@@ -2744,6 +2745,7 @@
                 'login.drive.connect.btn': 'Connect',
                 'login.drive.session.expired': 'Drive session expired. Click to reconnect:',
                 'login.drive.clientid.saved': 'Client ID saved. Connect with Google:',
+                'login.drive.change.account': 'Change Account',
                 'login.drive.error.empty': 'Enter Client ID',
                 'login.drive.error.api': 'Google API failed to load. Refresh the page.',
                 'login.drive.error.connection': 'Connection error',
@@ -3411,6 +3413,7 @@
                 'login.drive.connect.btn': 'Подключить',
                 'login.drive.session.expired': 'Сессия Drive истекла. Нажмите для повторного подключения:',
                 'login.drive.clientid.saved': 'Client ID сохранён. Подключитесь через Google:',
+                'login.drive.change.account': 'Сменить аккаунт',
                 'login.drive.error.empty': 'Введите Client ID',
                 'login.drive.error.api': 'Google API не загружен. Обновите страницу.',
                 'login.drive.error.connection': 'Ошибка подключения',
@@ -4078,6 +4081,7 @@
                 'login.drive.connect.btn': 'اتصال',
                 'login.drive.session.expired': 'انتهت جلسة Drive. انقر لإعادة الاتصال:',
                 'login.drive.clientid.saved': 'تم حفظ Client ID. اتصل عبر Google:',
+                'login.drive.change.account': 'تغيير الحساب',
                 'login.drive.error.empty': 'أدخل Client ID',
                 'login.drive.error.api': 'فشل تحميل Google API. قم بتحديث الصفحة.',
                 'login.drive.error.connection': 'خطأ في الاتصال',
@@ -5061,6 +5065,19 @@
             document.getElementById('loginError').style.display = 'none';
             // Owner welcome ekranını gizle
             document.getElementById('ownerWelcome')?.classList.add('hidden');
+        },
+
+        // Login ekranında Drive hesabını sıfırla (yanlış hesapla bağlanınca kurtarma)
+        resetDriveLogin() {
+            // Drive token ve bağlantı bilgilerini temizle
+            GoogleDrive.clearToken();
+            // Cached kullanıcı listesini temizle (yanlış hesaptan gelen veri)
+            localStorage.removeItem(this.USERS_STORAGE_KEY);
+            // Auth session'ı da temizle
+            localStorage.removeItem(this.STORAGE_KEY);
+            this.currentUser = null;
+            // Login Drive UI'ı form durumuna döndür
+            this.updateLoginDriveUI('form');
         },
 
         checkSession() {
