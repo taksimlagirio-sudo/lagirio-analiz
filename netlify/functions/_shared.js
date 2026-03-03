@@ -1,0 +1,44 @@
+const { createClient } = require('@supabase/supabase-js');
+
+const adminClient = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+);
+
+async function verifyAdmin(authHeader) {
+    const token = authHeader?.replace('Bearer ', '');
+    if (!token) throw Object.assign(new Error('Token gerekli'), { status: 401 });
+
+    const { data: { user }, error } = await adminClient.auth.getUser(token);
+    if (error || !user) throw Object.assign(new Error('Geçersiz token'), { status: 401 });
+
+    const { data: profile } = await adminClient
+        .from('user_profiles')
+        .select('role, is_active')
+        .eq('id', user.id)
+        .single();
+
+    if (profile?.role !== 'admin' || !profile?.is_active) {
+        throw Object.assign(new Error('Yalnızca adminler bu işlemi yapabilir'), { status: 403 });
+    }
+    return user;
+}
+
+function ok(body) {
+    return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify(body)
+    };
+}
+
+function err(message, status = 500) {
+    return {
+        statusCode: status,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ success: false, error: message })
+    };
+}
+
+module.exports = { adminClient, verifyAdmin, ok, err };
