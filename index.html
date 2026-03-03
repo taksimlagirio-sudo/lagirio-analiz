@@ -4972,9 +4972,16 @@
             const password = document.getElementById('loginPass').value.trim();
             const errorEl  = document.getElementById('loginError');
 
+            const showDebug = (msg) => {
+                errorEl.textContent = msg;
+                errorEl.style.display = 'block';
+                errorEl.style.color = '#f97316';
+            };
+
             if (!email || !password) {
                 errorEl.textContent = t('login.error.empty', 'Lütfen email ve şifre girin');
                 errorEl.style.display = 'block';
+                errorEl.style.color = '#ef4444';
                 return;
             }
 
@@ -4983,11 +4990,23 @@
             btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin inline mr-2"></i><span>Giriş yapılıyor...</span>';
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            showDebug('1/3 Supabase bağlanıyor...');
+
+            let data, error;
+            try {
+                ({ data, error } = await supabase.auth.signInWithPassword({ email, password }));
+            } catch(e) {
+                showDebug('HATA (exception): ' + e.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4 inline mr-2"></i><span>Giriş Yap</span>';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
 
             if (error) {
-                errorEl.textContent = t('login.error.invalid', 'Geçersiz email veya şifre');
+                errorEl.textContent = 'Auth hatası: ' + error.message + ' (status: ' + error.status + ')';
                 errorEl.style.display = 'block';
+                errorEl.style.color = '#ef4444';
                 document.getElementById('loginPass').value = '';
                 btn.disabled = false;
                 btn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4 inline mr-2"></i><span data-i18n="login.btn">Giriş Yap</span>';
@@ -4995,8 +5014,15 @@
                 return;
             }
 
-            errorEl.style.display = 'none';
-            await this._loadProfileAndShowApp(data.user);
+            showDebug('2/3 Profil yükleniyor... (uid: ' + data.user.id.slice(0,8) + ')');
+            try {
+                await this._loadProfileAndShowApp(data.user);
+            } catch(e) {
+                showDebug('Profil hatası: ' + e.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4 inline mr-2"></i><span>Giriş Yap</span>';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
         },
 
         async logout() {
@@ -5025,20 +5051,29 @@
                 supabase.from('user_apartment_assignments').select('apartment_id').eq('user_id', user.id)
             ]);
 
+            const errorEl = document.getElementById('loginError');
+            const btn = document.getElementById('loginBtn');
+
+            if (profileResult.error) {
+                await supabase.auth.signOut();
+                if (errorEl) {
+                    errorEl.textContent = 'Profil sorgu hatası: ' + profileResult.error.message + ' (code: ' + profileResult.error.code + ')';
+                    errorEl.style.display = 'block';
+                    errorEl.style.color = '#ef4444';
+                }
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4 inline mr-2"></i><span>Giriş Yap</span>'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
+                return;
+            }
+
             const profile = profileResult.data;
             if (!profile || !profile.is_active) {
                 await supabase.auth.signOut();
-                const errorEl = document.getElementById('loginError');
                 if (errorEl) {
-                    errorEl.textContent = t('login.error.inactive', 'Hesabınız devre dışı bırakılmış');
+                    errorEl.textContent = profile ? 'Hesabınız devre dışı bırakılmış' : 'Profil bulunamadı (user_profiles boş)';
                     errorEl.style.display = 'block';
+                    errorEl.style.color = '#ef4444';
                 }
-                const btn = document.getElementById('loginBtn');
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4 inline mr-2"></i><span data-i18n="login.btn">Giriş Yap</span>';
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
-                }
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4 inline mr-2"></i><span>Giriş Yap</span>'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
                 return;
             }
 
