@@ -103,7 +103,7 @@ VALUES ('<ADMIN_UUID>', 'Lagirio Admin', 'admin@lagirio.com', 'admin', true);
 
 ---
 
-## Faz 2: daire-uygulamasi Supabase Entegrasyonu (Sonraki Adım)
+## Faz 2: daire-uygulamasi Supabase Entegrasyonu ✅ (Tamamlandı)
 
 **Hedef:** Tüm veri localStorage yerine Supabase'e yazılsın.
 
@@ -111,7 +111,94 @@ VALUES ('<ADMIN_UUID>', 'Lagirio Admin', 'admin@lagirio.com', 'admin', true);
 - JSON import: mevcut localStorage verilerini Supabase'e aktarmak için
 - JSON export: yedek almak için
 
-**Tablolar:** `apartments`, `reservations`, `expenses`, `capital_expenses`, `lagirio_expenses`, `expense_categories`
+### Yapılanlar
+
+- Supabase CDN eklendi (`index.html` `<head>`)
+- Login ekranı eklendi (email + password, admin kontrolü)
+- Logout butonu eklendi (sidebar)
+- `DB` modülü eklendi (`loadAll`, `sync`, `del`)
+- `Storage` modülü Supabase tabanlıya dönüştürüldü
+- Tüm delete fonksiyonlarına `DB.del()` çağrısı eklendi
+- `init()` async yapıldı
+- `DOMContentLoaded` auth-aware async handler'a dönüştürüldü
+- Google Drive sync kaldırıldı, yerini Supabase aldı
+
+### Supabase'de Manuel Yapılacaklar
+
+**SQL Schema** (Dashboard > SQL Editor):
+
+```sql
+-- JSONB pattern: JS objeleri olduğu gibi saklanır, field mapping yok
+CREATE TABLE public.apartments (
+  id         TEXT        PRIMARY KEY,
+  data       JSONB       NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE public.reservations (
+  id         TEXT        PRIMARY KEY,
+  data       JSONB       NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE public.expenses (
+  id         TEXT        PRIMARY KEY,
+  data       JSONB       NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE public.capital_expenses (
+  id         TEXT        PRIMARY KEY,
+  data       JSONB       NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE public.lagirio_expenses (
+  id         TEXT        PRIMARY KEY,
+  data       JSONB       NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE public.expense_categories (
+  id   TEXT PRIMARY KEY,
+  name TEXT NOT NULL
+);
+
+-- updated_at trigger (apartments, reservations, expenses, capital_expenses, lagirio_expenses için)
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER apartments_updated_at       BEFORE UPDATE ON public.apartments       FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER reservations_updated_at     BEFORE UPDATE ON public.reservations     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER expenses_updated_at         BEFORE UPDATE ON public.expenses         FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER capital_expenses_updated_at BEFORE UPDATE ON public.capital_expenses FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER lagirio_expenses_updated_at BEFORE UPDATE ON public.lagirio_expenses FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- RLS: yalnızca admin rolü erişebilir
+ALTER TABLE public.apartments         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reservations       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expenses           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.capital_expenses   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lagirio_expenses   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expense_categories ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "admin_apartments"         ON public.apartments         FOR ALL USING ((auth.jwt() ->> 'user_role') = 'admin');
+CREATE POLICY "admin_reservations"       ON public.reservations       FOR ALL USING ((auth.jwt() ->> 'user_role') = 'admin');
+CREATE POLICY "admin_expenses"           ON public.expenses           FOR ALL USING ((auth.jwt() ->> 'user_role') = 'admin');
+CREATE POLICY "admin_capital_expenses"   ON public.capital_expenses   FOR ALL USING ((auth.jwt() ->> 'user_role') = 'admin');
+CREATE POLICY "admin_lagirio_expenses"   ON public.lagirio_expenses   FOR ALL USING ((auth.jwt() ->> 'user_role') = 'admin');
+CREATE POLICY "admin_expense_categories" ON public.expense_categories FOR ALL USING ((auth.jwt() ->> 'user_role') = 'admin');
+```
+
+### Netlify Env Vars (daire-uygulamasi sitesi)
+
+Netlify Dashboard > Site Settings > Environment Variables:
+- `SUPABASE_URL` = `https://yrjrokmncqpicsoakdsa.supabase.co`
+- `SUPABASE_ANON_KEY` = (anon public key)
+
+Not: Bu değerler `index.html` içine hardcode edildi (public anon key olduğu için güvenli).
 
 ---
 
