@@ -16389,5 +16389,41 @@
         }
     });
     </script>
+
+    <!-- DEBUG PANEL -->
+    <div id="dbg-panel" style="display:none;position:fixed;bottom:0;left:0;right:0;height:55vh;background:#0f172a;color:#e2e8f0;font-family:monospace;font-size:12px;z-index:99999;border-top:2px solid #ef4444;flex-direction:column;">
+        <div style="display:flex;align-items:center;padding:6px 10px;background:#1e293b;gap:8px;">
+            <span style="font-weight:bold;color:#ef4444;">DEBUG KONSOL</span>
+            <span id="dbg-count" style="background:#ef4444;color:white;border-radius:9px;padding:1px 6px;font-size:11px;">0</span>
+            <button onclick="document.getElementById('dbg-log').innerHTML='';document.getElementById('dbg-count').textContent='0';" style="margin-left:auto;background:#374151;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Temizle</button>
+            <button onclick="document.getElementById('dbg-panel').style.display='none';" style="background:#ef4444;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Kapat ✕</button>
+        </div>
+        <div id="dbg-log" style="overflow-y:auto;flex:1;padding:6px 10px;"></div>
+    </div>
+    <button id="dbg-toggle" onclick="var p=document.getElementById('dbg-panel');p.style.display=p.style.display==='none'?'flex':'none';" style="position:fixed;bottom:16px;right:16px;background:#ef4444;color:white;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;font-weight:bold;cursor:pointer;z-index:100000;box-shadow:0 4px 12px rgba(0,0,0,0.4);">🐛</button>
+
+    <script>
+    (function(){
+        var panel=document.getElementById('dbg-log'), count=document.getElementById('dbg-count'), n=0;
+        function add(type,args){
+            n++; count.textContent=n;
+            var msg=Array.from(args).map(function(a){try{return typeof a==='object'?JSON.stringify(a,null,2):String(a);}catch(e){return String(a);}}).join(' ');
+            var colors={log:'#94a3b8',warn:'#fbbf24',error:'#f87171',info:'#60a5fa'};
+            var ts=new Date().toLocaleTimeString('tr-TR');
+            var div=document.createElement('div');
+            div.style.cssText='padding:2px 0;border-bottom:1px solid #1e293b;word-break:break-all;color:'+( colors[type]||'#94a3b8');
+            div.textContent='['+ts+'] ['+type.toUpperCase()+'] '+msg;
+            panel.appendChild(div);
+            panel.scrollTop=panel.scrollHeight;
+        }
+        ['log','warn','error','info'].forEach(function(m){
+            var orig=console[m].bind(console);
+            console[m]=function(){add(m,arguments);orig.apply(console,arguments);};
+        });
+        window.addEventListener('error',function(e){add('error',[e.message+' ('+e.filename+':'+e.lineno+')']);});
+        window.addEventListener('unhandledrejection',function(e){add('error',['Unhandled Promise: '+(e.reason||'')]);});
+        console.log('DEBUG PANEL AKTIF - v'+new Date().toISOString().slice(0,19));
+    })();
+    </script>
 </body>
 </html>
