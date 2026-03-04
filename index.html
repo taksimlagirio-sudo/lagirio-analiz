@@ -14867,6 +14867,7 @@
             <span style="font-weight:bold;color:#ef4444;">DEBUG KONSOL</span>
             <span id="dbg-count" style="background:#ef4444;color:white;border-radius:9px;padding:1px 6px;font-size:11px;">0</span>
             <button onclick="document.getElementById('dbg-log').innerHTML='';document.getElementById('dbg-count').textContent='0';" style="margin-left:auto;background:#374151;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Temizle</button>
+            <button onclick="dbgAuthTest(this)" style="background:#7c3aed;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">🔑 Auth Test</button>
             <button id="dbg-copy" onclick="dbgCopy(this)" style="background:#1d4ed8;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Kopyala</button>
             <button onclick="document.getElementById('dbg-panel').style.display='none';" style="background:#ef4444;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;">Kapat ✕</button>
         </div>
@@ -14875,6 +14876,39 @@
     <button id="dbg-toggle" onclick="var p=document.getElementById('dbg-panel');p.style.display=p.style.display==='none'?'flex':'none';" style="position:fixed;bottom:16px;right:16px;background:#ef4444;color:white;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;font-weight:bold;cursor:pointer;z-index:100000;box-shadow:0 4px 12px rgba(0,0,0,0.4);">🐛</button>
 
     <script>
+    async function dbgAuthTest(btn) {
+        btn.textContent = '⏳ Test ediliyor...';
+        btn.disabled = true;
+        var log = document.getElementById('dbg-log');
+        var sep = document.createElement('div');
+        sep.style.cssText = 'padding:4px 0;color:#fbbf24;border-bottom:1px solid #334155;font-weight:bold;';
+        sep.textContent = '=== AUTH TEST ' + new Date().toLocaleTimeString('tr-TR') + ' ===';
+        log.appendChild(sep);
+        log.scrollTop = log.scrollHeight;
+        try {
+            var token = null;
+            if (typeof supabase !== 'undefined') {
+                var s = await supabase.auth.getSession();
+                token = s?.data?.session?.access_token;
+            }
+            if (!token) { __dbgAdd('error', 'TOKEN YOK — supabase session boş'); btn.textContent='🔑 Auth Test'; btn.disabled=false; return; }
+            __dbgAdd('info', 'Token uzunluğu: ' + token.length + ', başlangıç: ' + token.slice(0,20) + '...');
+            var res = await fetch('/.netlify/functions/debug-auth', { headers: { 'Authorization': 'Bearer ' + token } });
+            var json = await res.json();
+            __dbgAdd('info', 'HTTP: ' + res.status);
+            function flatLog(obj, prefix) {
+                for (var k in obj) {
+                    var v = obj[k];
+                    if (v !== null && typeof v === 'object') flatLog(v, prefix + k + '.');
+                    else __dbgAdd(String(v).includes('false') || String(v).includes('error') || String(v).includes('Error') ? 'error' : 'log', prefix + k + ': ' + v);
+                }
+            }
+            flatLog(json, '');
+        } catch(e) {
+            __dbgAdd('error', 'Fetch hatası: ' + e.message);
+        }
+        btn.textContent = '🔑 Auth Test'; btn.disabled = false;
+    }
     function dbgCopy(btn) {
         var lines = Array.from(document.getElementById('dbg-log').children).map(function(d){ return d.textContent; });
         var text = lines.join('\n');
