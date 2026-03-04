@@ -4782,6 +4782,8 @@
                 Analytics.showToast('Veri yüklenemedi: ' + e.message, 'error');
             } finally {
                 Analytics.hideLoading();
+                // Kur değerlerini her zaman yükle (sekme bağımsız)
+                if (typeof Projection !== 'undefined') Projection._loadFromSupabase();
             }
         },
 
