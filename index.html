@@ -8049,9 +8049,9 @@
         
         // Setup all event listeners
         setupEventListeners() {
-            
+
             // Date preset change handler
-            document.getElementById('datePreset').addEventListener('change', (e) => {
+            document.getElementById('datePreset')?.addEventListener('change', (e) => {
                 if (e.target.value === 'custom') {
                     document.getElementById('customDateRange').classList.remove('hidden');
                 } else {
@@ -8059,13 +8059,13 @@
                     this.applyDatePreset(e.target.value);
                 }
             });
-            
+
             // Exchange rate change handlers
-            document.getElementById('exchangeRateTL').addEventListener('change', () => {
+            document.getElementById('exchangeRateTL')?.addEventListener('change', () => {
                 if (this.data) this.refreshData();
             });
-            
-            document.getElementById('exchangeRateUSD').addEventListener('change', () => {
+
+            document.getElementById('exchangeRateUSD')?.addEventListener('change', () => {
                 if (this.data) this.refreshData();
             });
             
@@ -14825,10 +14825,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
         lucide.createIcons();
         I18n.init();
-        const found = await Auth.checkSession();
-        if (!found) {
-            Auth.updateLoginDriveUI('form');
-        }
+        await Auth.checkSession();
     });
     </script>
 
