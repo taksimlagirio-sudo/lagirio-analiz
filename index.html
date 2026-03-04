@@ -620,11 +620,11 @@
             <p class="text-sm text-gray-400 mb-8 font-medium" data-i18n="login.subtitle">Gelişmiş Veri Analiz Paneli</p>
 
             <div class="mb-5 text-left">
-                <label class="block text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Email</label>
+                <label class="block text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Email / Kullanıcı Adı</label>
                 <div class="relative">
-                    <input type="email" id="loginUser" placeholder="Email adresiniz" autocomplete="email"
+                    <input type="text" id="loginUser" placeholder="Email veya kullanıcı adı" autocomplete="username"
                            class="w-full px-4 py-3.5 border-2 border-gray-100 rounded-xl text-[15px] font-inter bg-[#faf8f4] transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-[4px] focus:ring-emerald-500/10 focus:shadow-lg pl-11">
-                    <i data-lucide="mail" class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                    <i data-lucide="user" class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
                 </div>
             </div>
             <div class="mb-5 text-left">
@@ -906,8 +906,8 @@
                                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
                         </div>
                         <div>
-                            <label class="block text-[11px] text-gray-400 mb-1">Email (giriş için) *</label>
-                            <input type="email" id="dmNewOwnerEmail" placeholder="ali@example.com"
+                            <label class="block text-[11px] text-gray-400 mb-1">Kullanıcı Adı *</label>
+                            <input type="text" id="dmNewOwnerUsername" placeholder="aliYilmaz"
                                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
                         </div>
                     </div>
@@ -4593,7 +4593,8 @@
         currentUser: null, // { id, email, name, role, apartmentIds }
 
         async login() {
-            const email    = document.getElementById('loginUser').value.trim();
+            const loginInput = document.getElementById('loginUser').value.trim();
+            const email = loginInput.includes('@') ? loginInput : loginInput + '@lagirio.app';
             const password = document.getElementById('loginPass').value.trim();
             const errorEl  = document.getElementById('loginError');
 
@@ -5225,14 +5226,12 @@
         uploadedFiles: [],
 
         init() {
-            try {
-                const saved = localStorage.getItem(this.STORAGE_KEY);
-                if (saved) this.reservations = JSON.parse(saved);
-            } catch(e) {}
-            try {
-                const saved = localStorage.getItem(this.FILES_KEY);
-                if (saved) this.uploadedFiles = JSON.parse(saved);
-            } catch(e) {}
+            // localStorage'dan hemen yükle (sync, ilk render için)
+            try { const s = localStorage.getItem(this.STORAGE_KEY); if (s) this.reservations = JSON.parse(s); } catch(e) {}
+            try { const s = localStorage.getItem(this.FILES_KEY); if (s) this.uploadedFiles = JSON.parse(s); } catch(e) {}
+
+            // Supabase'den arka planda güncelle
+            this._loadFromSupabase();
 
             // Drag & drop
             const area = document.getElementById('projHtmlUploadArea');
@@ -5251,9 +5250,38 @@
             setTimeout(() => this.checkMatchingStatus(), 500);
         },
 
-        save() {
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
-            localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
+        async _loadFromSupabase() {
+            try {
+                const { data } = await supabase.from('pms_data').select('reservations, uploaded_files').eq('id', 'singleton').maybeSingle();
+                if (data) {
+                    this.reservations = data.reservations || [];
+                    this.uploadedFiles = data.uploaded_files || [];
+                    // localStorage'ı da güncelle (fallback için)
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
+                    localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
+                    this.updateFilesUI();
+                    setTimeout(() => this.checkMatchingStatus(), 200);
+                    if (this.reservations.length > 0) { try { this.calculate(); } catch(e) {} }
+                }
+            } catch(e) { console.warn('PMS Supabase yüklenemedi:', e); }
+        },
+
+        async save() {
+            try {
+                await supabase.from('pms_data').upsert({
+                    id: 'singleton',
+                    reservations: this.reservations,
+                    uploaded_files: this.uploadedFiles,
+                    updated_at: new Date().toISOString()
+                });
+                // localStorage'ı da güncelle
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
+                localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
+            } catch(e) {
+                console.error('PMS Supabase kayıt hatası, localStorage fallback:', e);
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
+                localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
+            }
         },
 
         handleHTMLFiles(event) {
@@ -5293,7 +5321,7 @@
                 } catch(e) { console.error('Projection HTML parse error:', e); }
             }
 
-            this.save();
+            await this.save();
             this.updateFilesUI();
             this.checkMatchingStatus();
             this.calculate();
@@ -14739,10 +14767,11 @@
                     const badge = u.is_active
                         ? '<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Aktif</span>'
                         : '<span class="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">Pasif</span>';
+                    const displayLogin = u.email?.endsWith('@lagirio.app') ? u.email.replace('@lagirio.app', '') : (u.email || '');
                     return '<div class="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 shadow-sm">' +
                         '<div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center"><i data-lucide="user" class="w-4 h-4 text-purple-600"></i></div>' +
                         '<div><div class="flex items-center gap-2"><span class="text-sm font-semibold text-gray-800">' + u.name + '</span>' + badge + '</div>' +
-                        '<p class="text-[11px] text-gray-400">' + (u.email ? u.email + ' — ' : '') + (aptNames || 'Daire atanmamış') + '</p></div></div>' +
+                        '<p class="text-[11px] text-gray-400">' + (displayLogin ? displayLogin + ' — ' : '') + (aptNames || 'Daire atanmamış') + '</p></div></div>' +
                         '<div class="flex items-center gap-1">' +
                         '<button onclick="UserManager.resetPassword(\'' + u.id + '\', \'' + u.name.replace(/'/g, "\\'") + '\')" class="p-1.5 hover:bg-blue-50 rounded-lg transition text-blue-400 hover:text-blue-600" title="Şifre Sıfırla"><i data-lucide="key" class="w-4 h-4"></i></button>' +
                         '<button onclick="UserManager.deleteUser(\'' + u.id + '\', \'' + u.name.replace(/'/g, "\\'") + '\')" class="p-1.5 hover:bg-red-50 rounded-lg transition text-red-400 hover:text-red-600" title="Sil"><i data-lucide="trash-2" class="w-4 h-4"></i></button>' +
@@ -14786,14 +14815,18 @@
         },
 
         async createUser(event) {
-            const name  = document.getElementById('dmNewOwnerName')?.value?.trim();
-            const email = document.getElementById('dmNewOwnerEmail')?.value?.trim();
+            const name     = document.getElementById('dmNewOwnerName')?.value?.trim();
+            const username = document.getElementById('dmNewOwnerUsername')?.value?.trim();
             const password = document.getElementById('dmNewOwnerPass')?.value?.trim();
             const aptSelect = document.getElementById('dmNewOwnerApt');
             const apartmentIds = aptSelect ? [...aptSelect.selectedOptions].map(o => o.value) : [];
 
-            if (!name || !email || !password || !apartmentIds.length) {
+            if (!name || !username || !password || !apartmentIds.length) {
                 if (typeof Analytics !== 'undefined') Analytics.showToast('Tüm alanları doldurun ve en az bir daire seçin!', 'error');
+                return;
+            }
+            if (username.includes('@')) {
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Kullanıcı adında @ kullanmayın!', 'error');
                 return;
             }
 
@@ -14806,14 +14839,14 @@
                 const response = await fetch('/.netlify/functions/create-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ name, email, password, apartmentIds })
+                    body: JSON.stringify({ name, username, password, apartmentIds })
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.error || 'Sunucu hatası');
 
-                if (typeof Analytics !== 'undefined') Analytics.showToast('Kullanıcı oluşturuldu: ' + email, 'success');
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Kullanıcı oluşturuldu: ' + username, 'success');
                 document.getElementById('dmNewOwnerName').value = '';
-                document.getElementById('dmNewOwnerEmail').value = '';
+                document.getElementById('dmNewOwnerUsername').value = '';
                 document.getElementById('dmNewOwnerPass').value = '';
                 if (aptSelect) [...aptSelect.options].forEach(o => o.selected = false);
                 await this.loadUsers();
