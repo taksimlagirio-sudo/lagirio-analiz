@@ -4507,7 +4507,10 @@
                 if (el) el.classList.toggle('hidden', panel !== tabName);
             });
 
-            if (tabName === 'users') this.renderOwnerAccounts();
+            if (tabName === 'users') {
+                this.renderOwnerAccounts();
+                UserManager._populateApartmentSelect();
+            }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
@@ -14742,14 +14745,18 @@
 
             // Analytics henüz yüklenmediyse Supabase'den doğrudan çek
             if (!apartments.length) {
-                const { data } = await supabase.from('apartments').select('data').order('data->code');
+                const { data, error } = await supabase.from('apartments').select('data');
+                if (error) console.error('Daireler yüklenemedi:', error);
                 apartments = (data || []).map(r => r.data).filter(Boolean);
             }
 
             if (apartments.length) {
-                aptSelect.innerHTML = apartments.map(a =>
-                    '<option value="' + a.id + '">' + a.code + ' - ' + (a.ownerName || a.code) + '</option>'
-                ).join('');
+                aptSelect.innerHTML = apartments
+                    .sort((a, b) => (a.code || '').localeCompare(b.code || ''))
+                    .map(a => '<option value="' + a.id + '">' + a.code + ' - ' + (a.ownerName || a.code) + '</option>')
+                    .join('');
+            } else {
+                console.warn('Hiç daire bulunamadı, Analytics.data:', typeof Analytics !== 'undefined' && Analytics.data?.apartments?.length);
             }
         },
 
