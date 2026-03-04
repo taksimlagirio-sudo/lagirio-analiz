@@ -2007,10 +2007,7 @@
                 <span class="text-xs text-gray-400" id="aptMatchingSummary"></span>
                 <div class="flex gap-2">
                     <button onclick="Analytics.closeModal('aptMatchingModal')" class="px-3 py-1.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-100 transition" data-i18n="btn.cancel">İptal</button>
-                    <button onclick="Projection.saveMatching()" class="px-4 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition" data-i18n="btn.save.local">Sadece Lokal Kaydet</button>
-                    <button id="aptMatchDriveBtn" onclick="Projection.saveMatchingToDrive()" class="px-4 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition hidden">
-                        <span class="flex items-center gap-1"><i data-lucide="cloud-upload" class="w-3 h-3"></i> <span data-i18n="btn.save.drive">Drive'a Kaydet</span></span>
-                    </button>
+                    <button onclick="Projection.saveMatching()" class="px-4 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">Kaydet</button>
                 </div>
             </div>
         </div>
@@ -5256,11 +5253,15 @@
 
         async _loadFromSupabase() {
             try {
-                const { data } = await supabase.from('pms_data').select('reservations, uploaded_files').eq('id', 'singleton').maybeSingle();
+                const { data } = await supabase.from('pms_data').select('reservations, uploaded_files, apt_mapping').eq('id', 'singleton').maybeSingle();
                 if (data) {
                     this.reservations = data.reservations || [];
                     this.uploadedFiles = data.uploaded_files || [];
-                    // localStorage'ı da güncelle (fallback için)
+                    // apt_mapping'i memory ve localStorage'a yaz
+                    if (data.apt_mapping && Object.keys(data.apt_mapping).length > 0) {
+                        if (Analytics.data) Analytics.data.aptMapping = data.apt_mapping;
+                        localStorage.setItem(this.MAPPING_KEY, JSON.stringify(data.apt_mapping));
+                    }
                     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
                     localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
                     this.updateFilesUI();
@@ -5271,14 +5272,15 @@
         },
 
         async save() {
+            const aptMapping = (Analytics.data?.aptMapping) || JSON.parse(localStorage.getItem(this.MAPPING_KEY) || '{}');
             try {
                 await supabase.from('pms_data').upsert({
                     id: 'singleton',
                     reservations: this.reservations,
                     uploaded_files: this.uploadedFiles,
+                    apt_mapping: aptMapping,
                     updated_at: new Date().toISOString()
                 });
-                // localStorage'ı da güncelle
                 localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
                 localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
             } catch(e) {
@@ -8006,10 +8008,9 @@
             });
             this.saveMapping(mapping);
             Analytics.closeModal('aptMatchingModal');
-
-            // Yeniden hesapla
             this.calculate();
-
+            // Supabase'e de kaydet (apt_mapping dahil)
+            this.save();
             if (typeof Analytics.showToast === 'function') {
                 const count = Object.keys(mapping).length;
                 Analytics.showToast(count + t('toast.matching.count', ' daire eşleştirmesi kaydedildi!'), 'success');
