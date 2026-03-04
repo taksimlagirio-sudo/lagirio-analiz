@@ -8136,12 +8136,14 @@
             });
 
             // Exchange rate change handlers
-            document.getElementById('exchangeRateTL')?.addEventListener('change', () => {
+            document.getElementById('exchangeRateTL')?.addEventListener('change', (e) => {
+                localStorage.setItem('exchangeRateTL', e.target.value);
                 if (this.data) this.refreshData();
                 Projection.save();
             });
 
-            document.getElementById('exchangeRateUSD')?.addEventListener('change', () => {
+            document.getElementById('exchangeRateUSD')?.addEventListener('change', (e) => {
+                localStorage.setItem('exchangeRateUSD', e.target.value);
                 if (this.data) this.refreshData();
                 Projection.save();
             });
@@ -11526,6 +11528,16 @@
                 adminStatus.textContent = Projection.adminAuthenticated ? 'Admin oturumu aktif' : 'Admin girişi yapılmadı';
                 adminStatus.className = 'text-xs ' + (Projection.adminAuthenticated ? 'text-emerald-600 font-semibold' : 'text-gray-400');
             }
+            // Form'u mevcut ayarlarla doldur
+            const s = this.settings;
+            const el = (id) => document.getElementById(id);
+            if (el('darkMode')) el('darkMode').checked = !!s.darkMode;
+            if (el('animations')) el('animations').checked = s.animations !== false;
+            if (el('compactView')) el('compactView').checked = !!s.compactView;
+            if (el('defaultCurrency')) el('defaultCurrency').value = s.defaultCurrency || 'EUR';
+            if (el('dateFormat')) el('dateFormat').value = s.dateFormat || 'DD/MM/YYYY';
+            if (el('lowOccupancyThreshold')) el('lowOccupancyThreshold').value = s.lowOccupancyThreshold ?? 30;
+            if (el('highExpenseThreshold')) el('highExpenseThreshold').value = s.highExpenseThreshold ?? 500;
             // Daire sahibi hesaplarını render et
             if (typeof UserManager !== 'undefined') UserManager.loadUsers();
             this.showModal('settingsModal');
@@ -11537,6 +11549,11 @@
                 this.settings = { ...this.settings, ...JSON.parse(saved) };
                 this.applySettings();
             }
+            // Kur değerlerini localStorage'dan yükle (Supabase'den önce hızlı fallback)
+            const savedTL = localStorage.getItem('exchangeRateTL');
+            const savedUSD = localStorage.getItem('exchangeRateUSD');
+            if (savedTL) { const el = document.getElementById('exchangeRateTL'); if (el) el.value = savedTL; }
+            if (savedUSD) { const el = document.getElementById('exchangeRateUSD'); if (el) el.value = savedUSD; }
         },
         
         saveSettings() {
