@@ -14686,7 +14686,7 @@
 
             const { data: profiles, error } = await supabase
                 .from('user_profiles')
-                .select('id, name, email, role, is_active, created_at, user_apartment_assignments(apartment_id)')
+                .select('id, name, email, role, is_active, created_at')
                 .order('created_at', { ascending: true });
 
             if (error) {
@@ -14694,13 +14694,23 @@
                 return;
             }
 
+            const { data: assignments } = await supabase
+                .from('user_apartment_assignments')
+                .select('user_id, apartment_id');
+
+            const assignMap = {};
+            (assignments || []).forEach(a => {
+                if (!assignMap[a.user_id]) assignMap[a.user_id] = [];
+                assignMap[a.user_id].push(a.apartment_id);
+            });
+
             this._users = (profiles || []).map(p => ({
                 id:           p.id,
                 name:         p.name,
                 email:        p.email || '',
                 role:         p.role,
                 is_active:    p.is_active,
-                apartmentIds: (p.user_apartment_assignments || []).map(a => a.apartment_id)
+                apartmentIds: assignMap[p.id] || []
             }));
 
             this.renderUsers();
@@ -14761,8 +14771,13 @@
         },
 
         async _getToken() {
-            const { data: { session } } = await supabase.auth.getSession();
-            return session?.access_token;
+            let { data: { session } } = await supabase.auth.getSession();
+            // Token süresi dolmuş ya da yoksa yenile
+            if (!session?.access_token || (session.expires_at && session.expires_at < Date.now() / 1000 + 30)) {
+                const { data: refreshed } = await supabase.auth.refreshSession();
+                session = refreshed?.session;
+            }
+            return session?.access_token || null;
         },
 
         async createUser(event) {
@@ -14781,6 +14796,7 @@
 
             try {
                 const token = await this._getToken();
+                if (!token) throw new Error('Oturum süresi dolmuş. Lütfen sayfayı yenileyip tekrar giriş yapın.');
                 const response = await fetch('/.netlify/functions/create-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
