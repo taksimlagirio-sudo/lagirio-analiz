@@ -4782,9 +4782,25 @@
                 Analytics.showToast('Veri yüklenemedi: ' + e.message, 'error');
             } finally {
                 Analytics.hideLoading();
-                // Kur değerlerini her zaman yükle (sekme bağımsız)
-                if (typeof Projection !== 'undefined') Projection._loadFromSupabase();
             }
+
+            // Kur değerlerini doğrudan Supabase'den yükle (Projeksiyon sekmesinden bağımsız)
+            try {
+                const { data: kurData } = await sb.from('pms_data')
+                    .select('exchange_rate_tl, exchange_rate_usd')
+                    .eq('id', 'singleton').maybeSingle();
+                if (kurData?.exchange_rate_tl) {
+                    const el = document.getElementById('exchangeRateTL');
+                    if (el) el.value = kurData.exchange_rate_tl;
+                    localStorage.setItem('exchangeRateTL', kurData.exchange_rate_tl);
+                }
+                if (kurData?.exchange_rate_usd) {
+                    const el = document.getElementById('exchangeRateUSD');
+                    if (el) el.value = kurData.exchange_rate_usd;
+                    localStorage.setItem('exchangeRateUSD', kurData.exchange_rate_usd);
+                }
+                if (kurData && Analytics.data) Analytics.refreshData();
+            } catch(e) { console.warn('Kur verileri yüklenemedi:', e); }
         },
 
     };
@@ -8137,17 +8153,28 @@
                 }
             });
 
-            // Exchange rate change handlers
-            document.getElementById('exchangeRateTL')?.addEventListener('change', (e) => {
-                localStorage.setItem('exchangeRateTL', e.target.value);
+            // Exchange rate change handlers — doğrudan Supabase'e kaydet
+            const saveExchangeRates = async () => {
+                const tl = parseFloat(document.getElementById('exchangeRateTL')?.value) || 48.5;
+                const usd = parseFloat(document.getElementById('exchangeRateUSD')?.value) || 0.86;
+                localStorage.setItem('exchangeRateTL', tl);
+                localStorage.setItem('exchangeRateUSD', usd);
+                try {
+                    await window.supabase.from('pms_data').upsert(
+                        { id: 'singleton', exchange_rate_tl: tl, exchange_rate_usd: usd },
+                        { onConflict: 'id' }
+                    );
+                } catch(e) { console.warn('Kur kaydedilemedi:', e); }
+            };
+
+            document.getElementById('exchangeRateTL')?.addEventListener('change', () => {
                 if (this.data) this.refreshData();
-                Projection.save();
+                saveExchangeRates();
             });
 
-            document.getElementById('exchangeRateUSD')?.addEventListener('change', (e) => {
-                localStorage.setItem('exchangeRateUSD', e.target.value);
+            document.getElementById('exchangeRateUSD')?.addEventListener('change', () => {
                 if (this.data) this.refreshData();
-                Projection.save();
+                saveExchangeRates();
             });
             
             // Trend period change handler
