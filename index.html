@@ -893,11 +893,11 @@
                     </div>
                 </div>
 
-                <!-- Yeni kullanıcı davet formu -->
+                <!-- Yeni kullanıcı oluşturma formu -->
                 <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
                     <h4 class="text-sm font-semibold text-gray-600 mb-4 flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-4 h-4 text-purple-500"></i>
-                        Yeni Kullanıcı Davet Et
+                        Yeni Kullanıcı Ekle
                     </h4>
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
@@ -906,10 +906,15 @@
                                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
                         </div>
                         <div>
-                            <label class="block text-[11px] text-gray-400 mb-1">Email Adresi *</label>
+                            <label class="block text-[11px] text-gray-400 mb-1">Email (giriş için) *</label>
                             <input type="email" id="dmNewOwnerEmail" placeholder="ali@example.com"
                                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-[11px] text-gray-400 mb-1">Şifre *</label>
+                        <input type="text" id="dmNewOwnerPass" placeholder="En az 6 karakter"
+                               class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
                     </div>
                     <div class="mb-4">
                         <label class="block text-[11px] text-gray-400 mb-1">Erişim verilecek daireler (Ctrl+Click ile çoklu seçim) *</label>
@@ -919,15 +924,15 @@
                     </div>
                     <button id="dmInviteBtn" onclick="UserManager.createUser(event)"
                             class="w-full px-3 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition shadow-sm flex items-center justify-center gap-1.5">
-                        <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-                        Davet Gönder
+                        <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                        Kullanıcı Oluştur
                     </button>
                 </div>
 
                 <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <p class="text-xs text-blue-600 flex items-center gap-1.5">
                         <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                        Kullanıcı davet emailine tıklayarak kendi şifresini belirler. Şifre burada saklanmaz.
+                        Kullanıcıya email ve şifreyi doğrudan bildirin. Şifreyi sonradan 🔑 butonuyla değiştirebilirsiniz.
                     </p>
                 </div>
             </div>
@@ -14783,16 +14788,17 @@
         async createUser(event) {
             const name  = document.getElementById('dmNewOwnerName')?.value?.trim();
             const email = document.getElementById('dmNewOwnerEmail')?.value?.trim();
+            const password = document.getElementById('dmNewOwnerPass')?.value?.trim();
             const aptSelect = document.getElementById('dmNewOwnerApt');
             const apartmentIds = aptSelect ? [...aptSelect.selectedOptions].map(o => o.value) : [];
 
-            if (!name || !email || !apartmentIds.length) {
+            if (!name || !email || !password || !apartmentIds.length) {
                 if (typeof Analytics !== 'undefined') Analytics.showToast('Tüm alanları doldurun ve en az bir daire seçin!', 'error');
                 return;
             }
 
             const btn = document.getElementById('dmInviteBtn');
-            if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin inline mr-1"></i> Gönderiliyor...'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin inline mr-1"></i> Oluşturuluyor...'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
 
             try {
                 const token = await this._getToken();
@@ -14800,20 +14806,21 @@
                 const response = await fetch('/.netlify/functions/create-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ name, email, apartmentIds })
+                    body: JSON.stringify({ name, email, password, apartmentIds })
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.error || 'Sunucu hatası');
 
-                if (typeof Analytics !== 'undefined') Analytics.showToast('Davet emaili gönderildi: ' + email, 'success');
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Kullanıcı oluşturuldu: ' + email, 'success');
                 document.getElementById('dmNewOwnerName').value = '';
                 document.getElementById('dmNewOwnerEmail').value = '';
+                document.getElementById('dmNewOwnerPass').value = '';
                 if (aptSelect) [...aptSelect.options].forEach(o => o.selected = false);
                 await this.loadUsers();
             } catch (e) {
                 if (typeof Analytics !== 'undefined') Analytics.showToast('Hata: ' + e.message, 'error');
             } finally {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="mail" class="w-3.5 h-3.5 inline mr-1"></i> Davet Gönder'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="user-check" class="w-3.5 h-3.5 inline mr-1"></i> Kullanıcı Oluştur'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
             }
         },
 
@@ -14836,17 +14843,22 @@
         },
 
         async resetPassword(userId, userName) {
-            if (!confirm(userName + ' kullanıcısına şifre sıfırlama emaili gönderilsin mi?')) return;
+            const newPassword = prompt(userName + ' için yeni şifre belirleyin (en az 6 karakter):');
+            if (!newPassword) return;
+            if (newPassword.length < 6) {
+                if (typeof Analytics !== 'undefined') Analytics.showToast('Şifre en az 6 karakter olmalı!', 'error');
+                return;
+            }
             try {
                 const token = await this._getToken();
                 const response = await fetch('/.netlify/functions/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ userId })
+                    body: JSON.stringify({ userId, newPassword })
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.error || 'Sunucu hatası');
-                if (typeof Analytics !== 'undefined') Analytics.showToast(userName + ' için şifre sıfırlama emaili gönderildi', 'success');
+                if (typeof Analytics !== 'undefined') Analytics.showToast(userName + ' şifresi güncellendi', 'success');
             } catch (e) {
                 if (typeof Analytics !== 'undefined') Analytics.showToast('Hata: ' + e.message, 'error');
             }
