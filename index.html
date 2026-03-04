@@ -283,9 +283,6 @@
 
         @media (max-width: 767px) {
             /* Bottom navigation */
-            .app-wrapper:not(.active) .mobile-bottom-nav {
-                display: none !important;
-            }
             .mobile-bottom-nav {
                 display: flex;
                 position: fixed;
@@ -2120,7 +2117,7 @@
     </div>
     
     <!-- Mobile Bottom Tab Bar -->
-    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" style="display:none">
         <button onclick="Analytics.switchMainTab('overview')" data-tab="overview" class="active">
             <i data-lucide="layout-dashboard"></i>
             <span data-i18n="tab.mobile.overview">Genel</span>
@@ -4671,6 +4668,7 @@
             document.body.classList.remove('owner-mode');
             document.getElementById('appWrapper').classList.remove('active');
             document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mobileBottomNav').style.display = 'none';
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
             document.getElementById('loginError').style.display = 'none';
@@ -4729,6 +4727,7 @@
         async showApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appWrapper').classList.add('active');
+            document.getElementById('mobileBottomNav').style.display = '';
             lucide.createIcons();
             MobileUI.init();
 
