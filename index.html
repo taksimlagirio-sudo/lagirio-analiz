@@ -4594,7 +4594,11 @@
 
         async login() {
             const loginInput = document.getElementById('loginUser').value.trim();
-            const email = loginInput.includes('@') ? loginInput : loginInput + '@lagirio.app';
+            const email = loginInput.includes('@') ? loginInput : loginInput.toLowerCase()
+                .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+                .replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c')
+                .replace(/[^a-z0-9._-]/g,'_').replace(/^[._-]+|[._-]+$/g,'').replace(/_+/g,'_')
+                + '@lagirio.app';
             const password = document.getElementById('loginPass').value.trim();
             const errorEl  = document.getElementById('loginError');
 
