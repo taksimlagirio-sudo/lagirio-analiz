@@ -14734,12 +14734,21 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
-        _populateApartmentSelect() {
+        async _populateApartmentSelect() {
             const aptSelect = document.getElementById('dmNewOwnerApt');
-            const apartments = (typeof Analytics !== 'undefined' && Analytics.data?.apartments) || [];
-            if (aptSelect && apartments.length) {
+            if (!aptSelect) return;
+
+            let apartments = (typeof Analytics !== 'undefined' && Analytics.data?.apartments) || [];
+
+            // Analytics henüz yüklenmediyse Supabase'den doğrudan çek
+            if (!apartments.length) {
+                const { data } = await supabase.from('apartments').select('data').order('data->code');
+                apartments = (data || []).map(r => r.data).filter(Boolean);
+            }
+
+            if (apartments.length) {
                 aptSelect.innerHTML = apartments.map(a =>
-                    '<option value="' + a.id + '">' + a.code + ' - ' + (a.ownerName || a.id) + '</option>'
+                    '<option value="' + a.id + '">' + a.code + ' - ' + (a.ownerName || a.code) + '</option>'
                 ).join('');
             }
         },
