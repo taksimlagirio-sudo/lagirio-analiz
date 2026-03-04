@@ -5132,131 +5132,59 @@
             this.updateLoginDriveUI('form');
         },
 
-        showApp() {
+        async showApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appWrapper').classList.add('active');
             lucide.createIcons();
             MobileUI.init();
 
-            // Owner modunu uygula
-            if (this.currentUser && this.currentUser.role === 'owner') {
-                document.body.classList.add('owner-mode');
-                document.getElementById('uploadSection')?.classList.add('hidden');
+            const isOwner = this.currentUser && this.currentUser.role === 'owner';
+            if (isOwner) document.body.classList.add('owner-mode');
+            else document.body.classList.remove('owner-mode');
 
-                const driveConfig = GoogleDrive.getConfig();
-
-                // 1) Cache'de veri var mı? (Daha önce Drive'dan çekilmiş)
-                let hasCachedData = false;
-                try {
-                    const savedData = localStorage.getItem('lagirioAnalyticsData');
-                    if (savedData) {
-                        const parsed = JSON.parse(savedData);
-                        if (parsed && (parsed.apartments?.length || parsed.reservations?.length)) {
-                            hasCachedData = true;
-                            // Cache'den yükle → direkt dashboard'a geç
-                            Analytics.data = parsed;
-                            // Owner filtresi uygula
-                            if (this.currentUser.apartmentIds) {
-                                Analytics.applyOwnerFilter(this.currentUser.apartmentIds);
-                            }
-                            Analytics.filteredData = Analytics.data;
-                            Analytics.init();
-                            Analytics.processData();
-                            // Owner welcome'u gösterme, dashboard'u göster
-                            document.getElementById('ownerWelcome')?.classList.add('hidden');
-                            document.getElementById('mainDashboard')?.classList.remove('hidden');
-                        }
-                    }
-                } catch(e) {}
-
-                if (hasCachedData) {
-                    // Cache'den yüklendi — arka planda Drive sync dene (popup AÇMADAN)
-                    GoogleDrive.updateUI();
-                    GoogleDrive.updateHeaderUI();
-                    if (GoogleDrive.accessToken && driveConfig.fileId) {
-                        // Token zaten var → sessiz sync
-                        GoogleDrive.updateHeaderUI('connected');
-                        GoogleDrive.loadFromDrive(true);
-                    } else {
-                        // Token yok → arka planda sessiz dene, popup açma
-                        const tryAuto = () => {
-                            if (typeof google !== 'undefined' && google.accounts) {
-                                GoogleDrive.tryAutoConnect();
-                            } else {
-                                setTimeout(tryAuto, 500);
-                            }
-                        };
-                        setTimeout(tryAuto, 300);
-                    }
-                    return;
-                }
-
-                // Cache yok — owner welcome ekranını göster
-                document.getElementById('ownerWelcome')?.classList.remove('hidden');
-
-                if (!driveConfig.clientId) {
-                    // Drive config yok → setup ekranını göster
-                    document.getElementById('ownerDriveSetup')?.classList.remove('hidden');
-                    document.getElementById('ownerLoadingIndicator')?.classList.add('hidden');
-                } else if (GoogleDrive.accessToken && driveConfig.fileId) {
-                    // Token zaten var → direkt veri çek
-                    document.getElementById('ownerDriveSetup')?.classList.add('hidden');
-                    document.getElementById('ownerLoadingIndicator')?.classList.remove('hidden');
-                    GoogleDrive.updateHeaderUI('connected');
-                    GoogleDrive.loadFromDrive(false);
-                    return;
-                } else {
-                    document.getElementById('ownerDriveSetup')?.classList.add('hidden');
-                    document.getElementById('ownerLoadingIndicator')?.classList.remove('hidden');
-                }
-            } else {
-                document.body.classList.remove('owner-mode');
-                document.getElementById('ownerWelcome')?.classList.add('hidden');
-
-                // localStorage'da kayıtlı veri varsa direkt dashboard'a geç
-                try {
-                    const savedData = localStorage.getItem('lagirioAnalyticsData');
-                    if (savedData) {
-                        const parsed = JSON.parse(savedData);
-                        if (parsed && (parsed.apartments?.length || parsed.reservations?.length)) {
-                            document.getElementById('uploadSection')?.classList.add('hidden');
-                            Analytics.data = parsed;
-                            Analytics.init();
-                            Analytics.processData();
-                            // Drive bağlantısını dene
-                            GoogleDrive.updateUI();
-                            GoogleDrive.updateHeaderUI();
-                            const tryAuto = () => {
-                                if (typeof google !== 'undefined' && google.accounts) {
-                                    GoogleDrive.tryAutoConnect();
-                                } else {
-                                    setTimeout(tryAuto, 500);
-                                }
-                            };
-                            setTimeout(tryAuto, 300);
-                            return; // showApp'tan erken çık
-                        }
-                    }
-                } catch(e) {}
-
-                document.getElementById('uploadSection')?.classList.remove('hidden');
-            }
+            document.getElementById('uploadSection')?.classList.add('hidden');
+            document.getElementById('ownerWelcome')?.classList.add('hidden');
 
             Analytics.init();
 
-            // Google Drive: UI'ı güncelle ve otomatik bağlanmayı dene
-            GoogleDrive.updateUI();
-            GoogleDrive.updateHeaderUI();
-            // Google API yüklenmesini bekleyip otomatik bağlan
-            const tryAuto = () => {
-                if (typeof google !== 'undefined' && google.accounts) {
-                    GoogleDrive.tryAutoConnect();
-                } else {
-                    // API henüz yüklenmediyse kısa süre sonra tekrar dene
-                    setTimeout(tryAuto, 500);
+            // Supabase'den verileri yükle
+            const sb = window.supabase;
+            if (!sb) return;
+
+            Analytics.showLoading();
+            try {
+                const [apts, rsvs, exps, caps, lags, cats] = await Promise.all([
+                    sb.from('apartments').select('data'),
+                    sb.from('reservations').select('data'),
+                    sb.from('expenses').select('data'),
+                    sb.from('capital_expenses').select('data'),
+                    sb.from('lagirio_expenses').select('data'),
+                    sb.from('expense_categories').select('name'),
+                ]);
+
+                const firstErr = [apts, rsvs, exps, caps, lags, cats].find(r => r.error);
+                if (firstErr) throw new Error(firstErr.error.message);
+
+                Analytics.data = {
+                    apartments:      (apts.data || []).map(r => r.data),
+                    reservations:    (rsvs.data || []).map(r => r.data),
+                    expenses:        (exps.data || []).map(r => r.data),
+                    capitalExpenses: (caps.data || []).map(r => r.data),
+                    lagirioExpenses: (lags.data || []).map(r => r.data),
+                    categories:      (cats.data || []).map(r => r.name),
+                };
+
+                if (isOwner && this.currentUser.apartmentIds?.length) {
+                    Analytics.applyOwnerFilter(this.currentUser.apartmentIds);
                 }
-            };
-            setTimeout(tryAuto, 300);
+                Analytics.filteredData = Analytics.data;
+                Analytics.processData();
+            } catch(e) {
+                console.error('Supabase veri yükleme hatası:', e.message);
+                Analytics.showToast('Veri yüklenemedi: ' + e.message, 'error');
+            } finally {
+                Analytics.hideLoading();
+            }
         },
 
         // Login ekranındaki Drive durumunu güncelle
