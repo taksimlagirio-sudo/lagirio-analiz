@@ -11,22 +11,26 @@ exports.handler = async (event) => {
         await verifyAdmin(event.headers.authorization);
 
         step = 'parse';
-        const { name, email, password, apartmentIds = [] } = JSON.parse(event.body || '{}');
-        if (!name || !email || !password) return err('Ad, email ve şifre zorunludur', 400);
+        const { name, username, password, apartmentIds = [] } = JSON.parse(event.body || '{}');
+        if (!name || !username || !password) return err('Ad, kullanıcı adı ve şifre zorunludur', 400);
+        if (username.includes('@')) return err('Kullanıcı adında @ kullanmayın', 400);
         if (password.length < 6) return err('Şifre en az 6 karakter olmalı', 400);
         if (!apartmentIds.length) return err('En az bir daire seçilmelidir', 400);
+
+        // Kullanıcı adından Supabase email üret
+        const email = username.toLowerCase().replace(/\s+/g, '_') + '@lagirio.app';
 
         step = 'createUser';
         const { data: userData, error: createErr } = await adminClient.auth.admin.createUser({
             email,
             password,
             email_confirm: true,
-            user_metadata: { name }
+            user_metadata: { name, username }
         });
 
         if (createErr) {
             if (createErr.message?.includes('already registered') || createErr.status === 422) {
-                return err('Bu email zaten kayıtlı', 409);
+                return err('Bu kullanıcı adı zaten alınmış', 409);
             }
             throw new Error('createUser: ' + createErr.message);
         }
@@ -47,7 +51,7 @@ exports.handler = async (event) => {
         const { error: assignErr } = await adminClient.from('user_apartment_assignments').insert(assignments);
         if (assignErr) throw new Error('apartments: ' + assignErr.message);
 
-        return ok({ success: true, userId });
+        return ok({ success: true, userId, email });
     } catch (e) {
         console.error('create-user [' + step + '] error:', e);
         return err('[' + step + '] ' + (e.message || 'Sunucu hatası'), e.status || 500);
