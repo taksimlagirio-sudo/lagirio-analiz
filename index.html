@@ -1671,7 +1671,7 @@
                             <label class="text-xs text-gray-500">Veri olmayan aylar için ayarlama (%):</label>
                             <input type="number" id="projDefaultAdjust" value="0" step="1"
                                 class="w-20 text-sm border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-300 focus:border-purple-400"
-                                onchange="Projection.calculate()">
+                                onchange="Projection.calculate(); Projection.save();">
                         </div>
                         <div class="flex items-center gap-3 ml-auto text-[10px] text-gray-400">
                             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span> <span data-i18n="proj.current.res">Mevcut Rez.</span></span>
@@ -5253,7 +5253,7 @@
 
         async _loadFromSupabase() {
             try {
-                const { data } = await supabase.from('pms_data').select('reservations, uploaded_files, apt_mapping').eq('id', 'singleton').maybeSingle();
+                const { data } = await supabase.from('pms_data').select('reservations, uploaded_files, apt_mapping, chain_adjustments, proj_default_adjust, exchange_rate_tl, exchange_rate_usd').eq('id', 'singleton').maybeSingle();
                 if (data) {
                     this.reservations = data.reservations || [];
                     this.uploadedFiles = data.uploaded_files || [];
@@ -5261,6 +5261,22 @@
                     if (data.apt_mapping && Object.keys(data.apt_mapping).length > 0) {
                         if (Analytics.data) Analytics.data.aptMapping = data.apt_mapping;
                         localStorage.setItem(this.MAPPING_KEY, JSON.stringify(data.apt_mapping));
+                    }
+                    // zincir ayarlamalarını geri yükle
+                    if (data.chain_adjustments) this.chainAdjustments = data.chain_adjustments;
+                    // projeksiyon varsayılan ayarını geri yükle
+                    if (data.proj_default_adjust !== null && data.proj_default_adjust !== undefined) {
+                        const el = document.getElementById('projDefaultAdjust');
+                        if (el) el.value = data.proj_default_adjust;
+                    }
+                    // kur verilerini geri yükle
+                    if (data.exchange_rate_tl) {
+                        const el = document.getElementById('exchangeRateTL');
+                        if (el) el.value = data.exchange_rate_tl;
+                    }
+                    if (data.exchange_rate_usd) {
+                        const el = document.getElementById('exchangeRateUSD');
+                        if (el) el.value = data.exchange_rate_usd;
                     }
                     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
                     localStorage.setItem(this.FILES_KEY, JSON.stringify(this.uploadedFiles));
@@ -5273,12 +5289,19 @@
 
         async save() {
             const aptMapping = (Analytics.data?.aptMapping) || JSON.parse(localStorage.getItem(this.MAPPING_KEY) || '{}');
+            const projDefaultAdjust = parseFloat(document.getElementById('projDefaultAdjust')?.value) || 0;
+            const exchangeRateTL = parseFloat(document.getElementById('exchangeRateTL')?.value) || 48.5;
+            const exchangeRateUSD = parseFloat(document.getElementById('exchangeRateUSD')?.value) || 0.86;
             try {
                 await supabase.from('pms_data').upsert({
                     id: 'singleton',
                     reservations: this.reservations,
                     uploaded_files: this.uploadedFiles,
                     apt_mapping: aptMapping,
+                    chain_adjustments: this.chainAdjustments,
+                    proj_default_adjust: projDefaultAdjust,
+                    exchange_rate_tl: exchangeRateTL,
+                    exchange_rate_usd: exchangeRateUSD,
                     updated_at: new Date().toISOString()
                 });
                 localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.reservations));
@@ -5575,6 +5598,7 @@
         updateChainAdjust(key, value) {
             this.chainAdjustments[key] = parseFloat(value) || 0;
             this.calculate();
+            this.save();
         },
 
         calculate() {
@@ -8104,10 +8128,12 @@
             // Exchange rate change handlers
             document.getElementById('exchangeRateTL')?.addEventListener('change', () => {
                 if (this.data) this.refreshData();
+                Projection.save();
             });
 
             document.getElementById('exchangeRateUSD')?.addEventListener('change', () => {
                 if (this.data) this.refreshData();
+                Projection.save();
             });
             
             // Trend period change handler
