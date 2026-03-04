@@ -5154,12 +5154,12 @@
             Analytics.showLoading();
             try {
                 const [apts, rsvs, exps, caps, lags, cats] = await Promise.all([
-                    sb.from('apartments').select('data'),
-                    sb.from('reservations').select('data'),
-                    sb.from('expenses').select('data'),
-                    sb.from('capital_expenses').select('data'),
-                    sb.from('lagirio_expenses').select('data'),
-                    sb.from('expense_categories').select('name'),
+                    sb.from('apartments').select('data').limit(10000),
+                    sb.from('reservations').select('data').limit(10000),
+                    sb.from('expenses').select('data').limit(10000),
+                    sb.from('capital_expenses').select('data').limit(10000),
+                    sb.from('lagirio_expenses').select('data').limit(10000),
+                    sb.from('expense_categories').select('name').limit(10000),
                 ]);
 
                 const firstErr = [apts, rsvs, exps, caps, lags, cats].find(r => r.error);
