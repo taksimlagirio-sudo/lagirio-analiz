@@ -11,7 +11,7 @@ async function verifyAdmin(authHeader) {
     if (!token) throw Object.assign(new Error('Token gerekli'), { status: 401 });
 
     const { data: { user }, error } = await adminClient.auth.getUser(token);
-    if (error || !user) throw Object.assign(new Error('Geçersiz token'), { status: 401 });
+    if (error || !user) throw Object.assign(new Error('Geçersiz token: ' + (error?.message || 'user null')), { status: 401 });
 
     const { data: profile } = await adminClient
         .from('user_profiles')
