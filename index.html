@@ -3023,6 +3023,17 @@
                 'comparison.owner.share': 'Owner Share',
                 'comparison.expense.ratio': 'Expense/Revenue Ratio',
                 'comparison.details': '- Details',
+                'comparison.summary.title': 'Comparison Summary (A - B)',
+                'comparison.chart.income.expense': 'Income-Expense Breakdown',
+                'comparison.chart.revenue': 'Revenue Comparison',
+                'comparison.chart.radar': 'Performance Radar',
+                'comparison.chart.cat.income': 'Total\nIncome',
+                'comparison.chart.cat.platform': 'Platform\nCom.',
+                'comparison.chart.cat.lagirio': 'Lagirio\nCom.',
+                'comparison.chart.cat.profit': 'Profit',
+                'comparison.chart.cat.lagirio.income': 'Lagirio\nIncome',
+                'comparison.chart.cat.expense': 'Total\nExpense',
+                'comparison.chart.cat.owner.share': 'Owner\nShare',
                 // Chart series
                 'chart.platform.comm.short': 'Platform Com.',
                 'chart.lagirio.comm.short': 'Lagirio Com.',
@@ -3691,6 +3702,17 @@
                 'comparison.owner.share': 'Доля владельца',
                 'comparison.expense.ratio': 'Расход/Доход',
                 'comparison.details': '- Детали',
+                'comparison.summary.title': 'Сводка сравнения (A - B)',
+                'comparison.chart.income.expense': 'Доходы-Расходы',
+                'comparison.chart.revenue': 'Сравнение доходов',
+                'comparison.chart.radar': 'Радар производительности',
+                'comparison.chart.cat.income': 'Общий\nдоход',
+                'comparison.chart.cat.platform': 'Ком.\nплатф.',
+                'comparison.chart.cat.lagirio': 'Ком.\nLagirio',
+                'comparison.chart.cat.profit': 'Прибыль',
+                'comparison.chart.cat.lagirio.income': 'Доход\nLagirio',
+                'comparison.chart.cat.expense': 'Общий\nрасход',
+                'comparison.chart.cat.owner.share': 'Доля\nвладельца',
                 // Chart series
                 'chart.platform.comm.short': 'Ком. платф.',
                 'chart.lagirio.comm.short': 'Ком. Lagirio',
@@ -4359,6 +4381,17 @@
                 'comparison.owner.share': 'حصة المالك',
                 'comparison.expense.ratio': 'نسبة المصاريف/الدخل',
                 'comparison.details': '- تفاصيل',
+                'comparison.summary.title': 'ملخص المقارنة (أ - ب)',
+                'comparison.chart.income.expense': 'تفصيل الدخل والمصاريف',
+                'comparison.chart.revenue': 'مقارنة الإيرادات',
+                'comparison.chart.radar': 'رادار الأداء',
+                'comparison.chart.cat.income': 'إجمالي\nالدخل',
+                'comparison.chart.cat.platform': 'عمولة\nالمنصة',
+                'comparison.chart.cat.lagirio': 'عمولة\nLagirio',
+                'comparison.chart.cat.profit': 'الربح',
+                'comparison.chart.cat.lagirio.income': 'دخل\nLagirio',
+                'comparison.chart.cat.expense': 'إجمالي\nالمصاريف',
+                'comparison.chart.cat.owner.share': 'حصة\nالمالك',
                 // Chart series
                 'chart.platform.comm.short': 'عمولة المنصة',
                 'chart.lagirio.comm.short': 'عمولة Lagirio',
@@ -12983,24 +13016,24 @@
                 <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                     <h4 class="font-semibold text-gray-800 mb-4 flex items-center space-x-2">
                         <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600"></i>
-                        <span>Karşılaştırma Özeti (A - B)</span>
+                        <span>${t('comparison.summary.title', 'Karşılaştırma Özeti (A - B)')}</span>
                     </h4>
-                    
+
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
                         ${isOwner ? `
-                            ${this.renderDiffCard('Kâr', diff.revenue, diff.revenuePercent, 'EUR', true)}
-                            ${this.renderDiffCard('Toplam Gelir', diff.income, diff.incomePercent, 'EUR', true)}
-                            ${this.renderDiffCard('Doluluk Oranı', diff.occupancy, diff.occupancyPercent, '%', true)}
-                            ${this.renderDiffCard('Rezervasyon', diff.reservations, diff.reservationsPercent, '', true)}
-                            ${this.renderDiffCard('Gecelik Ücret', diff.nightlyRate, diff.nightlyRatePercent, 'EUR', true)}
-                            ${this.renderDiffCard('Giderler', diff.expenses, diff.expensesPercent, 'EUR', false)}
+                            ${this.renderDiffCard(t('comparison.owner.profit', 'Kâr'), diff.revenue, diff.revenuePercent, 'EUR', true)}
+                            ${this.renderDiffCard(t('comparison.total.income', 'Toplam Gelir'), diff.income, diff.incomePercent, 'EUR', true)}
+                            ${this.renderDiffCard(t('comparison.occupancy', 'Doluluk Oranı'), diff.occupancy, diff.occupancyPercent, '%', true)}
+                            ${this.renderDiffCard(t('comparison.reservation', 'Rezervasyon'), diff.reservations, diff.reservationsPercent, '', true)}
+                            ${this.renderDiffCard(t('comparison.avg.nightly', 'Gecelik Ücret'), diff.nightlyRate, diff.nightlyRatePercent, 'EUR', true)}
+                            ${this.renderDiffCard(t('owner.expenses', 'Giderler'), diff.expenses, diff.expensesPercent, 'EUR', false)}
                         ` : `
-                            ${this.renderDiffCard('Lagirio Kazancı', diff.revenue, diff.revenuePercent, 'EUR', true)}
-                            ${this.renderDiffCard('Toplam Gelir', diff.income, diff.incomePercent, 'EUR', true)}
-                            ${this.renderDiffCard('Toplam Gider', diff.expenses, diff.expensesPercent, 'EUR', false)}
-                            ${this.renderDiffCard('Doluluk Oranı', diff.occupancy, diff.occupancyPercent, '%', true)}
-                            ${this.renderDiffCard('Rezervasyon', diff.reservations, diff.reservationsPercent, '', true)}
-                            ${this.renderDiffCard('Gecelik Ücret', diff.nightlyRate, diff.nightlyRatePercent, 'EUR', true)}
+                            ${this.renderDiffCard(t('comparison.lagirio.income', 'Lagirio Kazancı'), diff.revenue, diff.revenuePercent, 'EUR', true)}
+                            ${this.renderDiffCard(t('comparison.total.income', 'Toplam Gelir'), diff.income, diff.incomePercent, 'EUR', true)}
+                            ${this.renderDiffCard(t('comparison.total.expense', 'Toplam Gider'), diff.expenses, diff.expensesPercent, 'EUR', false)}
+                            ${this.renderDiffCard(t('comparison.occupancy', 'Doluluk Oranı'), diff.occupancy, diff.occupancyPercent, '%', true)}
+                            ${this.renderDiffCard(t('comparison.reservation', 'Rezervasyon'), diff.reservations, diff.reservationsPercent, '', true)}
+                            ${this.renderDiffCard(t('comparison.avg.nightly', 'Gecelik Ücret'), diff.nightlyRate, diff.nightlyRatePercent, 'EUR', true)}
                         `}
                     </div>
                 </div>
@@ -13008,12 +13041,12 @@
                 <!-- Comparison Charts -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h4 class="font-semibold text-gray-800 mb-4">${isOwner ? 'Gelir-Gider Kırılımı' : 'Gelir Karşılaştırması'}</h4>
+                        <h4 class="font-semibold text-gray-800 mb-4">${isOwner ? t('comparison.chart.income.expense', 'Gelir-Gider Kırılımı') : t('comparison.chart.revenue', 'Gelir Karşılaştırması')}</h4>
                         <div class="chart-container-sm" id="comparisonRevenueChart"></div>
                     </div>
-                    
+
                     <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h4 class="font-semibold text-gray-800 mb-4">Performans Radarı</h4>
+                        <h4 class="font-semibold text-gray-800 mb-4">${t('comparison.chart.radar', 'Performans Radarı')}</h4>
                         <div class="chart-container-sm" id="comparisonRadarChart"></div>
                     </div>
                 </div>
@@ -13109,8 +13142,8 @@
             const isOwner = Auth.currentUser && Auth.currentUser.role === 'owner';
 
             const categories = isOwner
-                ? ['Toplam\nGelir', 'Giderler', 'Platform\nKom.', 'Lagirio\nKom.', 'KDV', 'Kâr']
-                : ['Lagirio\nKazancı', 'Toplam\nGelir', 'Toplam\nGider', 'Ev Sahibi\nPayı'];
+                ? [t('comparison.chart.cat.income', 'Toplam\nGelir'), t('owner.expenses', 'Giderler'), t('comparison.chart.cat.platform', 'Platform\nKom.'), t('comparison.chart.cat.lagirio', 'Lagirio\nKom.'), t('chart.vat', 'KDV'), t('comparison.chart.cat.profit', 'Kâr')]
+                : [t('comparison.chart.cat.lagirio.income', 'Lagirio\nKazancı'), t('comparison.chart.cat.income', 'Toplam\nGelir'), t('comparison.chart.cat.expense', 'Toplam\nGider'), t('comparison.chart.cat.owner.share', 'Ev Sahibi\nPayı')];
 
             const mA = data.groupA.metrics;
             const mB = data.groupB.metrics;
@@ -13204,11 +13237,11 @@
                 },
                 radar: {
                     indicator: [
-                        { name: isOwner ? 'Ev Sahibi Payı' : 'Kazanç', max: 100 },
-                        { name: 'Doluluk', max: 100 },
-                        { name: 'Rezervasyon', max: 100 },
-                        { name: 'Gecelik Ücret', max: 100 },
-                        { name: 'Gider/Gelir', max: 100 }
+                        { name: isOwner ? t('comparison.owner.share', 'Ev Sahibi Payı') : t('comparison.revenue', 'Kazanç'), max: 100 },
+                        { name: t('comparison.occupancy', 'Doluluk'), max: 100 },
+                        { name: t('comparison.reservation', 'Rezervasyon'), max: 100 },
+                        { name: t('comparison.avg.nightly', 'Gecelik Ücret'), max: 100 },
+                        { name: t('comparison.expense.ratio', 'Gider/Gelir'), max: 100 }
                     ],
                     radius: '60%'
                 },
