@@ -1437,7 +1437,7 @@
                         <div class="bg-indigo-50 rounded-lg p-4">
                             <h4 class="font-medium text-indigo-900 mb-2" data-i18n="trends.next.month">Sonraki Ay Tahmini</h4>
                             <p class="text-2xl font-bold text-indigo-600" id="nextMonthForecast">€0</p>
-                            <p class="text-sm text-indigo-700 mt-1">Geçmiş verilere dayalı</p>
+                            <p class="text-sm text-indigo-700 mt-1" data-i18n="forecast.past.data">Geçmiş verilere dayalı</p>
                         </div>
                         <div class="bg-emerald-50 rounded-lg p-4">
                             <h4 class="font-medium text-emerald-900 mb-2" data-i18n="trends.3month">3 Aylık Projeksiyon</h4>
@@ -1447,7 +1447,7 @@
                         <div class="bg-purple-50 rounded-lg p-4">
                             <h4 class="font-medium text-purple-900 mb-2" data-i18n="trends.annual">Yıllık Hedef</h4>
                             <p class="text-2xl font-bold text-purple-600" id="yearlyTarget">€0</p>
-                            <p class="text-sm text-purple-700 mt-1">Mevcut performansa göre</p>
+                            <p class="text-sm text-purple-700 mt-1" data-i18n="forecast.current.perf">Mevcut performansa göre</p>
                         </div>
                     </div>
                 </div>
@@ -2508,6 +2508,19 @@
                 'trends.3month': '3 Month Projection',
                 'trends.annual': 'Annual Target',
                 'trends.based.on': 'Based on trend analysis',
+                'trends.revenue.owner': 'Earnings Trend',
+                'trends.revenue.admin': 'Revenue Trend Analysis',
+                // Forecast labels
+                'forecast.estimation': 'Forecast',
+                'forecast.projection': 'projection',
+                'forecast.projection.title': 'Projection',
+                'forecast.net.earning': 'Net earnings',
+                'forecast.real.profit': 'Real profit',
+                'forecast.total.3m': 'total (3 months)',
+                'forecast.total.12m': 'total (12 months)',
+                'forecast.no.data': 'No reservation data found',
+                'forecast.past.data': 'Based on historical data',
+                'forecast.current.perf': 'Based on current performance',
                 // Chart labels
                 'chart.gross.income': 'Gross Income',
                 'chart.real.profit': 'Real Profit',
@@ -3187,6 +3200,19 @@
                 'trends.3month': '3-месячная проекция',
                 'trends.annual': 'Годовая цель',
                 'trends.based.on': 'На основе трендового анализа',
+                'trends.revenue.owner': 'Тренд доходов',
+                'trends.revenue.admin': 'Анализ тренда доходов',
+                // Forecast labels
+                'forecast.estimation': 'Прогноз',
+                'forecast.projection': 'проекция',
+                'forecast.projection.title': 'Проекция',
+                'forecast.net.earning': 'Чистый доход',
+                'forecast.real.profit': 'Реальная прибыль',
+                'forecast.total.3m': 'итого (3 мес.)',
+                'forecast.total.12m': 'итого (12 мес.)',
+                'forecast.no.data': 'Данные бронирований не найдены',
+                'forecast.past.data': 'На основе исторических данных',
+                'forecast.current.perf': 'На основе текущей эффективности',
                 // Chart labels
                 'chart.gross.income': 'Валовый доход',
                 'chart.real.profit': 'Реальная прибыль',
@@ -3866,6 +3892,19 @@
                 'trends.3month': 'إسقاط 3 أشهر',
                 'trends.annual': 'الهدف السنوي',
                 'trends.based.on': 'بناءً على تحليل الاتجاهات',
+                'trends.revenue.owner': 'اتجاه الأرباح',
+                'trends.revenue.admin': 'تحليل اتجاه الإيرادات',
+                // Forecast labels
+                'forecast.estimation': 'توقع',
+                'forecast.projection': 'إسقاط',
+                'forecast.projection.title': 'الإسقاط',
+                'forecast.net.earning': 'صافي الأرباح',
+                'forecast.real.profit': 'الربح الفعلي',
+                'forecast.total.3m': 'الإجمالي (3 أشهر)',
+                'forecast.total.12m': 'الإجمالي (12 شهر)',
+                'forecast.no.data': 'لم يتم العثور على بيانات الحجز',
+                'forecast.past.data': 'بناءً على البيانات التاريخية',
+                'forecast.current.perf': 'بناءً على الأداء الحالي',
                 // Chart labels
                 'chart.gross.income': 'الدخل الإجمالي',
                 'chart.real.profit': 'الربح الفعلي',
@@ -13747,7 +13786,7 @@
             this.charts._trendProfitMargin = chart;
 
             chart.setOption({
-                tooltip: { trigger: 'axis', formatter: function(p) { return p[0].name + '<br/>Kâr Marjı: <b>%' + p[0].value + '</b>'; } },
+                tooltip: { trigger: 'axis', formatter: function(p) { return p[0].name + '<br/>' + t('chart.margin', 'Kâr Marjı') + ': <b>%' + p[0].value + '</b>'; } },
                 grid: { top: 20, right: 20, bottom: 40, left: 50 },
                 xAxis: { type: 'category', data: d.labels, axisLabel: { fontSize: 10 } },
                 yAxis: { type: 'value', axisLabel: { formatter: '%{value}', fontSize: 10 }, min: function(v) { return Math.floor(v.min - 5); } },
@@ -13807,12 +13846,12 @@
 
             chart.setOption({
                 tooltip: { trigger: 'item', formatter: function(p) {
-                    return p.name + '<br/>Doluluk: %' + p.value[0] + '<br/>Daire Başı Kâr: €' + p.value[1] + '<br/>Aktif Daire: ' + (p.data.aptCount || '');
+                    return p.name + '<br/>' + t('chart.occupancy', 'Doluluk') + ': %' + p.value[0] + '<br/>' + t('chart.per.apt.profit', 'Daire Başı Kâr') + ': €' + p.value[1] + '<br/>' + t('chart.active.apt', 'Aktif Daire') + ': ' + (p.data.aptCount || '');
                 } },
                 grid: { top: 30, right: 20, bottom: 40, left: 60 },
-                xAxis: { type: 'value', name: 'Ort. Doluluk (%)', nameLocation: 'center', nameGap: 25, axisLabel: { fontSize: 10, formatter: '%{value}' } },
-                yAxis: { type: 'value', name: 'Daire Başı Kâr (€)', nameLocation: 'center', nameGap: 45, axisLabel: { formatter: '€{value}', fontSize: 10 } },
-                graphic: [{ type: 'text', left: 'center', top: 5, style: { text: 'Korelasyon: r=' + corr, fontSize: 11, fill: '#6366f1', fontWeight: 'bold' } }],
+                xAxis: { type: 'value', name: t('chart.avg.occ.pct', 'Ort. Doluluk (%)'), nameLocation: 'center', nameGap: 25, axisLabel: { fontSize: 10, formatter: '%{value}' } },
+                yAxis: { type: 'value', name: t('chart.per.apt.eur', 'Daire Başı Kâr (€)'), nameLocation: 'center', nameGap: 45, axisLabel: { formatter: '€{value}', fontSize: 10 } },
+                graphic: [{ type: 'text', left: 'center', top: 5, style: { text: t('chart.correlation', 'Korelasyon') + ': r=' + corr, fontSize: 11, fill: '#6366f1', fontWeight: 'bold' } }],
                 series: [
                     { type: 'scatter', data: points.map(p => ({ value: p.value, name: p.name, symbolSize: p.symbolSize, aptCount: p.aptCount })), itemStyle: { color: '#6366f1' } },
                     { type: 'line', data: [[minX, slope * minX + intercept], [maxX, slope * maxX + intercept]], lineStyle: { color: '#f59e0b', type: 'dashed', width: 2 }, symbol: 'none', silent: true }
@@ -13831,7 +13870,7 @@
 
             // Başlığı güncelle
             const titleEl = document.getElementById('revenueTrendTitle');
-            if (titleEl) titleEl.textContent = isOwner ? 'Kazanç Trendi' : 'Gelir Trend Analizi';
+            if (titleEl) titleEl.textContent = isOwner ? t('trends.revenue.owner', 'Kazanç Trendi') : t('trends.revenue.admin', 'Gelir Trend Analizi');
 
             if (isOwner) {
                 // Owner: Brüt Gelir vs Net Kazanç
@@ -13890,7 +13929,7 @@
                         { name: t('proj.gross.income', 'Brüt Gelir'), type: 'line', data: d.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
                           lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6,
                           areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.15)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } },
-                        { name: 'Brüt Kazanç', type: 'bar', data: d.lagirio, itemStyle: {
+                        { name: t('chart.gross.profit', 'Brüt Kazanç'), type: 'bar', data: d.lagirio, itemStyle: {
                             color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
                         { name: t('chart.company.exp', 'Şirket Gideri'), type: 'line', data: d.compExp, smooth: true, itemStyle: { color: '#f59e0b' },
                           lineStyle: { width: 2, type: 'dashed' }, symbol: 'circle', symbolSize: 5 },
@@ -13945,7 +13984,7 @@
             const option = {
                 tooltip: {
                     trigger: 'axis',
-                    formatter: params => `${params[0].name}<br/>Doluluk: ${params[0].value.toFixed(1)}%`
+                    formatter: params => `${params[0].name}<br/>${t('chart.occupancy', 'Doluluk')}: ${params[0].value.toFixed(1)}%`
                 },
                 grid: {
                     left: '3%',
@@ -13967,7 +14006,7 @@
                     }
                 },
                 series: [{
-                    name: 'Doluluk',
+                    name: t('chart.occupancy', 'Doluluk'),
                     type: 'line',
                     data: data.occupancy,
                     smooth: true,
@@ -14118,7 +14157,7 @@
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir', 'Büyüme %'],
+                    data: [Auth.currentUser?.role === 'owner' ? t('chart.net.profit', 'Net Kazanç') : t('chart.revenue', 'Gelir'), t('chart.growth.pct', 'Büyüme %')],
                     bottom: 0
                 },
                 grid: {
@@ -14135,7 +14174,7 @@
                 yAxis: [
                     {
                         type: 'value',
-                        name: Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir',
+                        name: Auth.currentUser?.role === 'owner' ? t('chart.net.profit', 'Net Kazanç') : t('chart.revenue', 'Gelir'),
                         position: 'left',
                         axisLabel: {
                             formatter: value => `€${(value / 1000).toFixed(0)}k`
@@ -14143,7 +14182,7 @@
                     },
                     {
                         type: 'value',
-                        name: 'Büyüme %',
+                        name: t('chart.growth.pct', 'Büyüme %'),
                         position: 'right',
                         axisLabel: {
                             formatter: '{value}%'
@@ -14152,7 +14191,7 @@
                 ],
                 series: [
                     {
-                        name: Auth.currentUser?.role === 'owner' ? 'Net Kazanç' : 'Gelir',
+                        name: Auth.currentUser?.role === 'owner' ? t('chart.net.profit', 'Net Kazanç') : t('chart.revenue', 'Gelir'),
                         type: 'bar',
                         data: revenues,
                         itemStyle: {
@@ -14163,7 +14202,7 @@
                         }
                     },
                     {
-                        name: 'Büyüme %',
+                        name: t('chart.growth.pct', 'Büyüme %'),
                         type: 'line',
                         yAxisIndex: 1,
                         data: growth,
@@ -14231,21 +14270,21 @@
                 // Etiketleri güncelle
                 const monthNames = I18n.getMonthNames('short');
                 const [fy, fm] = firstKey.split('-');
-                const profitLabel = isOwner ? 'Net kazanç' : 'Gerçek kâr';
+                const profitLabel = isOwner ? t('forecast.net.earning', 'Net kazanç') : t('forecast.real.profit', 'Gerçek kâr');
 
                 // Sonraki ay etiketi (mevcut ay = sonraki ay, çünkü ay sonunda veri girilir)
                 const nextLabel = document.querySelector('#nextMonthForecast')?.closest('.bg-indigo-50')?.querySelector('h4');
-                if (nextLabel) nextLabel.textContent = monthNames[parseInt(fm)-1] + ' ' + fy + ' Tahmini';
+                if (nextLabel) nextLabel.textContent = monthNames[parseInt(fm)-1] + ' ' + fy + ' ' + t('forecast.estimation', 'Tahmini');
                 const nextSub = document.querySelector('#nextMonthForecast')?.closest('.bg-indigo-50')?.querySelector('.text-sm');
-                if (nextSub) nextSub.textContent = profitLabel + ' projeksiyon';
+                if (nextSub) nextSub.textContent = profitLabel + ' ' + t('forecast.projection', 'projeksiyon');
 
                 // 3 aylık etiket: ilk 3 ayın aralığı
                 const thirdKey = keys[Math.min(2, keys.length - 1)];
                 const [ty, tm] = thirdKey.split('-');
                 const q3Label = document.querySelector('#quarterForecast')?.closest('.bg-emerald-50')?.querySelector('h4');
-                if (q3Label) q3Label.textContent = monthNames[parseInt(fm)-1] + ' – ' + monthNames[parseInt(tm)-1] + ' Projeksiyon';
+                if (q3Label) q3Label.textContent = monthNames[parseInt(fm)-1] + ' – ' + monthNames[parseInt(tm)-1] + ' ' + t('forecast.projection.title', 'Projeksiyon');
                 const q3Sub = document.querySelector('#quarterForecast')?.closest('.bg-emerald-50')?.querySelector('.text-sm');
-                if (q3Sub) q3Sub.textContent = profitLabel + ' toplamı (3 ay)';
+                if (q3Sub) q3Sub.textContent = profitLabel + ' ' + t('forecast.total.3m', 'toplamı (3 ay)');
 
                 // 12 aylık etiket
                 const lastKey = keys[keys.length - 1];
@@ -14253,7 +14292,7 @@
                 const yearLabel = document.querySelector('#yearlyTarget')?.closest('.bg-purple-50')?.querySelector('h4');
                 if (yearLabel) yearLabel.textContent = monthNames[parseInt(fm)-1] + ' ' + fy + ' – ' + monthNames[parseInt(lm)-1] + ' ' + ly;
                 const yearSub = document.querySelector('#yearlyTarget')?.closest('.bg-purple-50')?.querySelector('.text-sm');
-                if (yearSub) yearSub.textContent = profitLabel + ' toplamı (12 ay)';
+                if (yearSub) yearSub.textContent = profitLabel + ' ' + t('forecast.total.12m', 'toplamı (12 ay)');
 
                 return;
             }
@@ -14270,7 +14309,7 @@
             [nextMonthForecast, quarterForecast, yearlyTarget].forEach(el => {
                 if (!el) return;
                 const sub = el.closest('[class*="bg-"]')?.querySelector('.text-sm');
-                if (sub) sub.textContent = 'Rezervasyon verisi bulunamadı';
+                if (sub) sub.textContent = t('forecast.no.data', 'Rezervasyon verisi bulunamadı');
             });
         },
 
@@ -14322,9 +14361,9 @@
                     formatter: params => {
                         const data = apartmentData[params[0].dataIndex];
                         return `${data.name}<br/>
-                                Gider: €${data.expenses.toLocaleString()}<br/>
-                                Gelir: €${data.income.toLocaleString()}<br/>
-                                Oran: ${data.ratio.toFixed(1)}%`;
+                                ${t('eff.chart.expense', 'Gider')}: €${data.expenses.toLocaleString()}<br/>
+                                ${t('eff.chart.revenue', 'Gelir')}: €${data.income.toLocaleString()}<br/>
+                                ${t('eff.chart.ratio', 'Oran')}: ${data.ratio.toFixed(1)}%`;
                     }
                 },
                 grid: {
@@ -14341,7 +14380,7 @@
                 },
                 yAxis: {
                     type: 'value',
-                    name: 'Gider/Gelir Oranı (%)',
+                    name: t('eff.chart.ratio.label', 'Gider/Gelir Oranı (%)'),
                     axisLabel: {
                         formatter: '{value}%'
                     }
