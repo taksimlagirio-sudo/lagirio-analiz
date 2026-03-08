@@ -5772,15 +5772,21 @@
             const today = new Date(); today.setHours(0,0,0,0);
             const defaultAdjust = parseFloat(document.getElementById('projDefaultAdjust')?.value) || 0;
 
-            // Daire verisi yoksa çık — son 3 ayda veri girilmemiş daireler inaktif sayılır
-            const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+            // Daire verisi yoksa çık — son 3 takvim ayında veri girilmemiş daireler inaktif sayılır
+            const _projNow = new Date();
+            const _activeMonthKeys = new Set();
+            for (let i = 0; i < 3; i++) {
+                const d = new Date(_projNow.getFullYear(), _projNow.getMonth() - i, 1);
+                _activeMonthKeys.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+            }
+            const _monthKey = ds => { if (!ds) return ''; const d = new Date(ds); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
             const allApartments = Analytics.data?.apartments || [];
             const apartments = allApartments.filter(apt => {
                 const hasRecentRes = (Analytics.data?.reservations || []).some(r =>
-                    r.apartmentId === apt.id && r.checkIn && new Date(r.checkIn) >= threeMonthsAgo
+                    r.apartmentId === apt.id && _activeMonthKeys.has(_monthKey(r.checkIn))
                 );
                 const hasRecentExp = (Analytics.data?.expenses || []).some(e =>
-                    e.apartmentId === apt.id && e.date && new Date(e.date) >= threeMonthsAgo
+                    e.apartmentId === apt.id && _activeMonthKeys.has(_monthKey(e.date))
                 );
                 return hasRecentRes || hasRecentExp;
             });
@@ -9281,8 +9287,13 @@
             };
 
             // Calculate total portfolio value
-            const _dashNow = new Date(); _dashNow.setHours(0,0,0,0);
-            const _dashThreeMonthsAgo = new Date(_dashNow.getFullYear(), _dashNow.getMonth() - 3, 1);
+            const _dashNow = new Date();
+            const _dashActiveKeys = new Set();
+            for (let i = 0; i < 3; i++) {
+                const d = new Date(_dashNow.getFullYear(), _dashNow.getMonth() - i, 1);
+                _dashActiveKeys.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+            }
+            const _dashMk = ds => { if (!ds) return ''; const d = new Date(ds); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
             this.data.apartments?.forEach(apartment => {
                 const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                 const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
@@ -9292,10 +9303,10 @@
                     sum + this.convertToEUR(exp.amount, exp.currency), 0);
 
                 const hasRecentRes = this.data.reservations?.some(r =>
-                    r.apartmentId === apartment.id && r.checkIn && new Date(r.checkIn) >= _dashThreeMonthsAgo
+                    r.apartmentId === apartment.id && _dashActiveKeys.has(_dashMk(r.checkIn))
                 );
                 const hasRecentExp = this.data.expenses?.some(e =>
-                    e.apartmentId === apartment.id && e.date && new Date(e.date) >= _dashThreeMonthsAgo
+                    e.apartmentId === apartment.id && _dashActiveKeys.has(_dashMk(e.date))
                 );
                 if (hasRecentRes || hasRecentExp) {
                     stats.activeProperties++;
@@ -11940,31 +11951,31 @@
         applyDatePreset(preset) {
             const now = new Date();
             let startDate, endDate;
-            
+
             switch(preset) {
                 case 'this-month':
                     startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
                     break;
                 case 'last-month':
                     startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                    endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
                     break;
                 case 'last-3-months':
                     startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-                    endDate = now;
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
                     break;
                 case 'last-6-months':
                     startDate = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-                    endDate = now;
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
                     break;
                 case 'this-year':
                     startDate = new Date(now.getFullYear(), 0, 1);
-                    endDate = now;
+                    endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
                     break;
                 case 'last-year':
                     startDate = new Date(now.getFullYear() - 1, 0, 1);
-                    endDate = new Date(now.getFullYear() - 1, 11, 31);
+                    endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999);
                     break;
                 case 'all':
                     this.dateFilter = { start: null, end: null };
@@ -11972,38 +11983,44 @@
                     this.refreshData();
                     return;
             }
-            
+
             this.dateFilter = { start: startDate, end: endDate };
-            this.applyDateFilter();
+            this._applyDateFilterWithDates(startDate, endDate);
         },
-        
+
         applyDateFilter() {
             const startInput = document.getElementById('startDate')?.value;
             const endInput = document.getElementById('endDate')?.value;
-            
-            if (startInput && endInput) {
-                this.dateFilter.start = new Date(startInput);
-                this.dateFilter.end = new Date(endInput);
-            }
-            
-            if (!this.dateFilter.start && !this.dateFilter.end) {
+
+            if (!startInput || !endInput) return;
+
+            const startDate = new Date(startInput);
+            const endDate = new Date(endInput);
+            endDate.setHours(23, 59, 59, 999);
+
+            this.dateFilter = { start: startDate, end: endDate };
+            this._applyDateFilterWithDates(startDate, endDate);
+        },
+
+        _applyDateFilterWithDates(startDate, endDate) {
+            if (!startDate && !endDate) {
                 this.filteredData = this.data;
             } else {
                 this.filteredData = {
                     ...this.data,
                     reservations: this.data.reservations?.filter(res => {
                         const date = new Date(res.checkIn);
-                        return (!this.dateFilter.start || date >= this.dateFilter.start) &&
-                               (!this.dateFilter.end || date <= this.dateFilter.end);
+                        return (!startDate || date >= startDate) &&
+                               (!endDate || date <= endDate);
                     }) || [],
                     expenses: this.data.expenses?.filter(exp => {
                         const date = new Date(exp.date);
-                        return (!this.dateFilter.start || date >= this.dateFilter.start) &&
-                               (!this.dateFilter.end || date <= this.dateFilter.end);
+                        return (!startDate || date >= startDate) &&
+                               (!endDate || date <= endDate);
                     }) || []
                 };
             }
-            
+
             this.refreshData();
         },
         
