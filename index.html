@@ -5772,15 +5772,21 @@
             const today = new Date(); today.setHours(0,0,0,0);
             const defaultAdjust = parseFloat(document.getElementById('projDefaultAdjust')?.value) || 0;
 
-            // Daire verisi yoksa çık — son 3 ayda veri girilmemiş daireler inaktif sayılır
-            const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+            // Daire verisi yoksa çık — son 3 takvim ayında veri girilmemiş daireler inaktif sayılır
+            const _projNow = new Date();
+            const _activeMonthKeys = new Set();
+            for (let i = 0; i < 3; i++) {
+                const d = new Date(_projNow.getFullYear(), _projNow.getMonth() - i, 1);
+                _activeMonthKeys.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+            }
+            const _monthKey = ds => { if (!ds) return ''; const d = new Date(ds); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
             const allApartments = Analytics.data?.apartments || [];
             const apartments = allApartments.filter(apt => {
                 const hasRecentRes = (Analytics.data?.reservations || []).some(r =>
-                    r.apartmentId === apt.id && r.checkIn && new Date(r.checkIn) >= threeMonthsAgo
+                    r.apartmentId === apt.id && _activeMonthKeys.has(_monthKey(r.checkIn))
                 );
                 const hasRecentExp = (Analytics.data?.expenses || []).some(e =>
-                    e.apartmentId === apt.id && e.date && new Date(e.date) >= threeMonthsAgo
+                    e.apartmentId === apt.id && _activeMonthKeys.has(_monthKey(e.date))
                 );
                 return hasRecentRes || hasRecentExp;
             });
@@ -9281,8 +9287,13 @@
             };
 
             // Calculate total portfolio value
-            const _dashNow = new Date(); _dashNow.setHours(0,0,0,0);
-            const _dashThreeMonthsAgo = new Date(_dashNow.getFullYear(), _dashNow.getMonth() - 3, 1);
+            const _dashNow = new Date();
+            const _dashActiveKeys = new Set();
+            for (let i = 0; i < 3; i++) {
+                const d = new Date(_dashNow.getFullYear(), _dashNow.getMonth() - i, 1);
+                _dashActiveKeys.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+            }
+            const _dashMk = ds => { if (!ds) return ''; const d = new Date(ds); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
             this.data.apartments?.forEach(apartment => {
                 const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                 const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
@@ -9292,10 +9303,10 @@
                     sum + this.convertToEUR(exp.amount, exp.currency), 0);
 
                 const hasRecentRes = this.data.reservations?.some(r =>
-                    r.apartmentId === apartment.id && r.checkIn && new Date(r.checkIn) >= _dashThreeMonthsAgo
+                    r.apartmentId === apartment.id && _dashActiveKeys.has(_dashMk(r.checkIn))
                 );
                 const hasRecentExp = this.data.expenses?.some(e =>
-                    e.apartmentId === apartment.id && e.date && new Date(e.date) >= _dashThreeMonthsAgo
+                    e.apartmentId === apartment.id && _dashActiveKeys.has(_dashMk(e.date))
                 );
                 if (hasRecentRes || hasRecentExp) {
                     stats.activeProperties++;
