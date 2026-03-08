@@ -1111,8 +1111,8 @@
                         <span data-i18n="tab.trends">Trendler</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('efficiency')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="efficiency">
-                        <i data-lucide="gauge" class="w-4 h-4"></i>
-                        <span data-i18n="tab.efficiency">Verimlilik</span>
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span data-i18n="tab.efficiency">Daire Kazançları</span>
                     </button>
                     <button onclick="Analytics.switchMainTab('reports')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="reports">
                         <i data-lucide="file-bar-chart" class="w-4 h-4"></i>
@@ -1255,58 +1255,36 @@
                     <!-- Comparison Mode Selection -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-3" data-i18n="comparison.mode">Karşılaştırma Modu</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <button onclick="Analytics.setComparisonMode('apartment-apartment')"
                                     class="comparison-mode-btn active px-4 py-3 bg-white border-2 border-emerald-500 rounded-lg hover:bg-emerald-50 transition text-left">
                                 <div class="font-semibold text-emerald-700" data-i18n="comparison.apt.vs.apt">Daire vs Daire</div>
                                 <div class="text-xs text-gray-500 mt-1">Aynı dönemde</div>
                             </button>
-                            
-                            <button onclick="Analytics.setComparisonMode('apartment-period')" 
+
+                            <button onclick="Analytics.setComparisonMode('apartment-period')"
                                     class="comparison-mode-btn px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-500 transition text-left">
                                 <div class="font-semibold text-gray-700" data-i18n="comparison.apt.vs.period">Daire vs Dönem</div>
                                 <div class="text-xs text-gray-500 mt-1">Bir daire, farklı aylar</div>
                             </button>
-                            
-                            <button onclick="Analytics.setComparisonMode('group-group')" 
+
+                            <button onclick="Analytics.setComparisonMode('group-group')"
                                     class="comparison-mode-btn px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-purple-50 hover:border-purple-500 transition text-left">
                                 <div class="font-semibold text-gray-700">Grup vs Grup</div>
                                 <div class="text-xs text-gray-500 mt-1">Çoklu daire karşılaştır</div>
                             </button>
-                            
+
                             <button onclick="Analytics.setComparisonMode('system-system')"
                                     class="comparison-mode-btn admin-only px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-500 transition text-left">
                                 <div class="font-semibold text-gray-700" data-i18n="comparison.sys.vs.sys">Sistem vs Sistem</div>
                                 <div class="text-xs text-gray-500 mt-1">Sistem karşılaştır</div>
                             </button>
-                            <button onclick="Analytics.setComparisonMode('temporal')"
-                                    class="comparison-mode-btn admin-only px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-500 transition text-left">
-                                <div class="font-semibold text-gray-700" data-i18n="comparison.temporal">Zamansal Karşılaştırma</div>
-                                <div class="text-xs text-gray-500 mt-1" data-i18n="comparison.temporal.desc">Dönem vs Dönem kârlılık</div>
-                            </button>
                         </div>
                     </div>
-                    
+
                     <!-- Dynamic Comparison Panels -->
                     <div id="comparisonPanels">
                         <!-- Will be filled dynamically -->
-                    </div>
-
-                    <!-- Temporal Comparison Controls (admin only) -->
-                    <div id="temporalComparisonControls" class="hidden mt-4">
-                        <div class="flex gap-4 flex-wrap items-end">
-                            <div>
-                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem A (çoklu seçim)</label>
-                                <select id="temporalCompareA" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
-                            </div>
-                            <span class="text-lg text-gray-300 self-center">vs</span>
-                            <div>
-                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem B (çoklu seçim)</label>
-                                <select id="temporalCompareB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
-                            </div>
-                            <button onclick="Analytics.runTemporalComparison()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end" data-i18n="btn.compare">Karşılaştır</button>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile çoklu ay seçebilirsiniz. Farklı yıllardan aylar karşılaştırılabilir.</p>
                     </div>
 
                     <button id="comparisonRunBtn" onclick="Analytics.runAdvancedComparison()"
@@ -1455,54 +1433,141 @@
             
             <!-- Efficiency Tab Content -->
             <div id="efficiency-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Cost Efficiency -->
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                            <i data-lucide="coins" class="w-5 h-5 text-yellow-600"></i>
-                            <span data-i18n="eff.cost">Maliyet Verimliliği</span>
-                        </h3>
-                        <div class="chart-container" id="costEfficiencyChart"></div>
+                <!-- Alt-sekme Navigasyonu -->
+                <div class="bg-gray-50 rounded-lg p-1 mb-6">
+                    <nav class="flex flex-wrap">
+                        <button onclick="Analytics.switchEarningsSubTab('earnings-list')" class="earnings-subtab active bg-white text-gray-900 shadow-sm flex-1 px-4 py-2.5 text-sm font-semibold rounded-md transition flex items-center justify-center space-x-2" data-subtab="earnings-list">
+                            <i data-lucide="list" class="w-4 h-4"></i>
+                            <span>Kazanç Listesi</span>
+                        </button>
+                        <button onclick="Analytics.switchEarningsSubTab('performance')" class="earnings-subtab flex-1 px-4 py-2.5 text-sm font-semibold text-gray-500 rounded-md transition hover:bg-gray-100 flex items-center justify-center space-x-2" data-subtab="performance">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                            <span>Performans Grafikleri</span>
+                        </button>
+                        <button onclick="Analytics.switchEarningsSubTab('temporal')" class="earnings-subtab flex-1 px-4 py-2.5 text-sm font-semibold text-gray-500 rounded-md transition hover:bg-gray-100 flex items-center justify-center space-x-2" data-subtab="temporal">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                            <span>Zamansal Karşılaştırma</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Kazanç Listesi Alt-Sekmesi -->
+                <div id="earnings-list-content" class="earnings-content">
+                    <!-- Ay Seçici -->
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <label class="text-sm font-medium text-gray-700">Dönem:</label>
+                        <select id="earningsMonthSelector" onchange="Analytics.onEarningsMonthChange()" class="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="all">Tüm Zamanlar</option>
+                        </select>
                     </div>
-                    
-                    <!-- System Efficiency -->
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                            <i data-lucide="gauge" class="w-5 h-5 text-red-600"></i>
-                            <span data-i18n="eff.system">Sistem Verimliliği</span>
-                        </h3>
-                        <div class="chart-container" id="systemEfficiencyChart"></div>
+
+                    <!-- KPI Kartları -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6" id="earningsKpiCards">
+                        <!-- Dinamik içerik -->
+                    </div>
+
+                    <!-- Daire Kazanç Tablosu -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                <i data-lucide="building-2" class="w-5 h-5 text-emerald-600"></i>
+                                <span>Daire Bazlı Lagirio Kazançları</span>
+                            </h3>
+                        </div>
+                        <!-- Desktop tablo -->
+                        <div class="overflow-x-auto" id="earningsTableDesktop">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Daire</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sistem</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Brüt Gelir</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Lagirio Kazanç</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Oran</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Rez.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="earningsTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Dinamik içerik -->
+                                </tbody>
+                                <tfoot id="earningsTableFoot" class="bg-emerald-50 font-semibold">
+                                    <!-- Dinamik toplam satırı -->
+                                </tfoot>
+                            </table>
+                        </div>
+                        <!-- Mobil kart görünümü -->
+                        <div class="eff-mobile-cards hidden" id="earningsCardsMobile"></div>
                     </div>
                 </div>
-                
-                <!-- Efficiency Metrics Table -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
-                            <i data-lucide="table" class="w-5 h-5 text-gray-600"></i>
-                            <span data-i18n="eff.detailed">Detaylı Verimlilik Metrikleri</span>
+
+                <!-- Performans Grafikleri Alt-Sekmesi -->
+                <div id="performance-content" class="earnings-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                                <i data-lucide="coins" class="w-5 h-5 text-yellow-600"></i>
+                                <span data-i18n="eff.cost">Maliyet Verimliliği</span>
+                            </h3>
+                            <div class="chart-container" id="costEfficiencyChart"></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                                <i data-lucide="gauge" class="w-5 h-5 text-red-600"></i>
+                                <span data-i18n="eff.system">Sistem Verimliliği</span>
+                            </h3>
+                            <div class="chart-container" id="systemEfficiencyChart"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                <i data-lucide="table" class="w-5 h-5 text-gray-600"></i>
+                                <span data-i18n="eff.detailed">Detaylı Verimlilik Metrikleri</span>
+                            </h3>
+                        </div>
+                        <div class="overflow-x-auto" id="efficiencyTableDesktop">
+                            <table class="w-full responsive-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.apartment">Daire</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.expense.ratio">Gider/Gelir</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.margin">Net Kar Marjı</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.per.night">€/Gece</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.idle.cost">Boş Gün Maliyeti</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.score">Verimlilik Skoru</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="efficiencyMetricsTable" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                        <div class="eff-mobile-cards hidden" id="efficiencyCardsMobile"></div>
+                    </div>
+                </div>
+
+                <!-- Zamansal Karşılaştırma Alt-Sekmesi -->
+                <div id="temporal-content" class="earnings-content hidden">
+                    <div class="bg-gray-50 rounded-xl p-4 sm:p-6 mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="clock" class="w-5 h-5 text-indigo-600"></i>
+                            <span>Zamansal Karşılaştırma</span>
                         </h3>
+                        <div class="flex gap-4 flex-wrap items-end">
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem A (çoklu seçim)</label>
+                                <select id="earningsTemporalA" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <span class="text-lg text-gray-300 self-center">vs</span>
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem B (çoklu seçim)</label>
+                                <select id="earningsTemporalB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <button onclick="Analytics.runEarningsTemporalComparison()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end">Karşılaştır</button>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile çoklu ay seçebilirsiniz. Farklı yıllardan aylar karşılaştırılabilir.</p>
                     </div>
-                    <!-- Desktop table view -->
-                    <div class="overflow-x-auto" id="efficiencyTableDesktop">
-                        <table class="w-full responsive-table">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.apartment">Daire</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.expense.ratio">Gider/Gelir</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.margin">Net Kar Marjı</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.per.night">€/Gece</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.idle.cost">Boş Gün Maliyeti</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.score">Verimlilik Skoru</th>
-                                </tr>
-                            </thead>
-                            <tbody id="efficiencyMetricsTable" class="bg-white divide-y divide-gray-200">
-                                <!-- Dynamic content -->
-                            </tbody>
-                        </table>
+                    <div id="earningsTemporalResults">
+                        <!-- Dinamik sonuçlar -->
                     </div>
-                    <!-- Mobile card view -->
-                    <div class="eff-mobile-cards hidden" id="efficiencyCardsMobile"></div>
                 </div>
             </div>
             
@@ -2149,8 +2214,8 @@
             <span data-i18n="tab.comparison">Genel Karşılaştırma</span>
         </button>
         <button onclick="Analytics.switchMainTab('efficiency'); MobileUI.closeMoreSheet();" data-tab="efficiency">
-            <i data-lucide="gauge" class="text-amber-600"></i>
-            <span data-i18n="tab.efficiency">Verimlilik</span>
+            <i data-lucide="building-2" class="text-amber-600"></i>
+            <span data-i18n="tab.efficiency">Daire Kazançları</span>
         </button>
         <button onclick="Analytics.switchMainTab('reports'); MobileUI.closeMoreSheet();" data-tab="reports">
             <i data-lucide="file-bar-chart" class="text-blue-600"></i>
@@ -2425,7 +2490,7 @@
                 'tab.analysis': 'Detailed Analysis',
                 'tab.comparison': 'Comparison',
                 'tab.trends': 'Trends',
-                'tab.efficiency': 'Efficiency',
+                'tab.efficiency': 'Apartment Earnings',
                 'tab.reports': 'Reports',
                 'tab.projection': 'Projection',
                 // Analysis subtabs
@@ -3117,7 +3182,7 @@
                 'tab.analysis': 'Детальный анализ',
                 'tab.comparison': 'Сравнение',
                 'tab.trends': 'Тренды',
-                'tab.efficiency': 'Эффективность',
+                'tab.efficiency': 'Доходы квартир',
                 'tab.reports': 'Отчёты',
                 'tab.projection': 'Прогноз',
                 // Analysis subtabs
@@ -3809,7 +3874,7 @@
                 'tab.analysis': 'تحليل مفصّل',
                 'tab.comparison': 'مقارنة',
                 'tab.trends': 'الاتجاهات',
-                'tab.efficiency': 'الكفاءة',
+                'tab.efficiency': 'أرباح الشقق',
                 'tab.reports': 'التقارير',
                 'tab.projection': 'التوقعات',
                 // Analysis subtabs
@@ -11781,9 +11846,7 @@
             if (tab === 'efficiency') {
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        if (!this.charts.costEfficiency) {
-                            this.createEfficiencyCharts();
-                        }
+                        this.renderEarningsTab();
                         this.resizeAllCharts();
                     });
                 });
@@ -12009,24 +12072,12 @@
                 'apartment-apartment': 'border-emerald-500',
                 'apartment-period': 'border-blue-500',
                 'group-group': 'border-purple-500',
-                'system-system': 'border-orange-500',
-                'temporal': 'border-indigo-500'
+                'system-system': 'border-orange-500'
             };
             event.target.closest('.comparison-mode-btn').classList.add(colorMap[mode] || 'border-gray-500');
 
-            // Temporal mod: özel kontrolleri göster/gizle
-            const temporalCtrl = document.getElementById('temporalComparisonControls');
-            const runBtn = document.getElementById('comparisonRunBtn');
-            if (temporalCtrl) temporalCtrl.classList.toggle('hidden', mode !== 'temporal');
-            if (runBtn) runBtn.classList.toggle('hidden', mode === 'temporal');
-
-            if (mode === 'temporal') {
-                this.populateTemporalSelectors();
-                document.getElementById('comparisonPanels').innerHTML = '';
-            } else {
-                // Render appropriate panels
-                this.renderComparisonPanels();
-            }
+            // Render appropriate panels
+            this.renderComparisonPanels();
         },
 
         // Render comparison panels based on mode
@@ -14311,6 +14362,432 @@
                 const sub = el.closest('[class*="bg-"]')?.querySelector('.text-sm');
                 if (sub) sub.textContent = t('forecast.no.data', 'Rezervasyon verisi bulunamadı');
             });
+        },
+
+        // ==================== DAIRE KAZANÇLARI (EARNINGS TAB) ====================
+
+        _earningsTabInitialized: false,
+
+        renderEarningsTab() {
+            if (!this._earningsTabInitialized) {
+                this.populateEarningsMonthSelector();
+                this._earningsTabInitialized = true;
+            }
+            this.renderEarningsList();
+            // Alt-sekme aktif durumunu ayarla
+            const activeBtn = document.querySelector('.earnings-subtab.active');
+            if (activeBtn) {
+                const activeTab = activeBtn.dataset.subtab || 'earnings-list';
+                this.switchEarningsSubTab(activeTab);
+            }
+        },
+
+        switchEarningsSubTab(subTab) {
+            // Alt-sekme butonlarını güncelle
+            document.querySelectorAll('.earnings-subtab').forEach(btn => {
+                const isActive = btn.dataset.subtab === subTab;
+                if (isActive) {
+                    btn.classList.add('active', 'bg-white', 'text-gray-900', 'shadow-sm');
+                    btn.classList.remove('text-gray-500', 'hover:bg-gray-100');
+                } else {
+                    btn.classList.remove('active', 'bg-white', 'text-gray-900', 'shadow-sm');
+                    btn.classList.add('text-gray-500', 'hover:bg-gray-100');
+                }
+            });
+
+            // İçerikleri göster/gizle
+            document.querySelectorAll('.earnings-content').forEach(c => c.classList.add('hidden'));
+            const target = document.getElementById(subTab + '-content');
+            if (target) target.classList.remove('hidden');
+
+            // Alt-sekmeye özel init
+            if (subTab === 'performance') {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        if (!this.charts.costEfficiency) {
+                            this.createEfficiencyCharts();
+                        }
+                        this.resizeAllCharts();
+                    });
+                });
+            } else if (subTab === 'temporal') {
+                this.populateEarningsTemporalSelectors();
+            }
+        },
+
+        populateEarningsMonthSelector() {
+            const sel = document.getElementById('earningsMonthSelector');
+            if (!sel) return;
+
+            const monthNames = I18n.getMonthNames('short');
+            const now = new Date();
+            let html = '<option value="all">Tüm Zamanlar</option>';
+
+            for (let i = 0; i < 24; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                html += '<option value="' + mk + '">' + monthNames[d.getMonth()] + ' ' + d.getFullYear() + '</option>';
+            }
+            sel.innerHTML = html;
+        },
+
+        onEarningsMonthChange() {
+            this.renderEarningsList();
+        },
+
+        renderEarningsList() {
+            const sel = document.getElementById('earningsMonthSelector');
+            const selectedMonth = sel ? sel.value : 'all';
+            const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
+            const sysNames = { '1': 'S1 Net', '2': 'S2 Brüt', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
+
+            const apartments = this.data?.apartments || [];
+            const allReservations = this.data?.reservations || [];
+            const allExpenses = this.data?.expenses || [];
+
+            const aptData = [];
+            let totalGross = 0, totalLagirio = 0, totalResCount = 0;
+
+            apartments.forEach(apt => {
+                let filteredRes, filteredExp;
+
+                if (selectedMonth === 'all') {
+                    filteredRes = allReservations.filter(r => r.apartmentId === apt.id);
+                    filteredExp = allExpenses.filter(e => e.apartmentId === apt.id);
+                } else {
+                    const [y, m] = selectedMonth.split('-');
+                    const yr = parseInt(y), mo = parseInt(m) - 1;
+                    filteredRes = allReservations.filter(r => {
+                        const rd = new Date(r.checkIn);
+                        return r.apartmentId === apt.id && rd.getMonth() === mo && rd.getFullYear() === yr;
+                    });
+                    filteredExp = allExpenses.filter(e => {
+                        const ed = new Date(e.date);
+                        return e.apartmentId === apt.id && ed.getMonth() === mo && ed.getFullYear() === yr;
+                    });
+                }
+
+                const gross = filteredRes.reduce((s, r) => s + convertEUR(r.totalAmount || 0, r.currency || 'EUR'), 0);
+                const lagirioEarning = this.calculateLagirioRevenue ? this.calculateLagirioRevenue(apt, filteredRes, filteredExp) : 0;
+                const ratio = gross > 0 ? (lagirioEarning / gross * 100) : 0;
+
+                aptData.push({
+                    code: apt.code || apt.id,
+                    systemType: apt.systemType || '1',
+                    gross: gross,
+                    lagirio: lagirioEarning,
+                    ratio: ratio,
+                    resCount: filteredRes.length
+                });
+
+                totalGross += gross;
+                totalLagirio += lagirioEarning;
+                totalResCount += filteredRes.length;
+            });
+
+            // Lagirio kazancına göre sırala (yüksekten düşüğe)
+            aptData.sort((a, b) => b.lagirio - a.lagirio);
+
+            const activeApts = aptData.filter(a => a.resCount > 0).length;
+            const avgPerApt = activeApts > 0 ? totalLagirio / activeApts : 0;
+
+            // KPI Kartları
+            const kpiContainer = document.getElementById('earningsKpiCards');
+            if (kpiContainer) {
+                kpiContainer.innerHTML = `
+                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 border border-emerald-200">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
+                            <span class="text-xs text-emerald-700 font-medium">Toplam Lagirio Kazancı</span>
+                        </div>
+                        <div class="text-2xl font-bold text-emerald-800">€${totalLagirio.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                        <div class="text-xs text-emerald-600 mt-1">Brüt Gelir: €${totalGross.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <i data-lucide="building" class="w-4 h-4 text-blue-600"></i>
+                            <span class="text-xs text-blue-700 font-medium">Ort. Kazanç / Daire</span>
+                        </div>
+                        <div class="text-2xl font-bold text-blue-800">€${avgPerApt.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                        <div class="text-xs text-blue-600 mt-1">Aktif: ${activeApts} / ${apartments.length} daire</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <i data-lucide="calendar-check" class="w-4 h-4 text-purple-600"></i>
+                            <span class="text-xs text-purple-700 font-medium">Toplam Rezervasyon</span>
+                        </div>
+                        <div class="text-2xl font-bold text-purple-800">${totalResCount}</div>
+                        <div class="text-xs text-purple-600 mt-1">Kazanç Oranı: %${totalGross > 0 ? (totalLagirio / totalGross * 100).toFixed(1) : '0'}</div>
+                    </div>`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            // Desktop tablo
+            const isMobile = window.innerWidth < 768;
+            const desktopTable = document.getElementById('earningsTableDesktop');
+            const mobileCards = document.getElementById('earningsCardsMobile');
+            if (desktopTable) desktopTable.classList.toggle('hidden', isMobile);
+            if (mobileCards) mobileCards.classList.toggle('hidden', !isMobile);
+
+            const tbody = document.getElementById('earningsTableBody');
+            if (tbody) {
+                tbody.innerHTML = aptData.map(apt => {
+                    const lagirioColor = apt.lagirio > 0 ? 'text-emerald-700' : 'text-gray-400';
+                    return `<tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${apt.code}</div>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${sysNames[apt.systemType] || 'S' + apt.systemType}</span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right text-sm text-gray-700">€${apt.gross.toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right">
+                            <span class="text-sm font-semibold ${lagirioColor}">€${apt.lagirio.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right text-sm text-gray-600">${apt.ratio.toFixed(1)}%</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right text-sm text-gray-600">${apt.resCount}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Toplam satırı
+            const tfoot = document.getElementById('earningsTableFoot');
+            if (tfoot) {
+                tfoot.innerHTML = `<tr>
+                    <td class="px-4 py-3 text-sm font-bold text-gray-900" colspan="2">TOPLAM</td>
+                    <td class="px-4 py-3 text-right text-sm font-bold text-gray-900">€${totalGross.toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                    <td class="px-4 py-3 text-right text-sm font-bold text-emerald-700">€${totalLagirio.toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+                    <td class="px-4 py-3 text-right text-sm font-bold text-gray-700">${totalGross > 0 ? (totalLagirio / totalGross * 100).toFixed(1) : '0'}%</td>
+                    <td class="px-4 py-3 text-right text-sm font-bold text-gray-700">${totalResCount}</td>
+                </tr>`;
+            }
+
+            // Mobil kart görünümü
+            if (mobileCards) {
+                mobileCards.innerHTML = aptData.map(apt => {
+                    const lagirioColor = apt.lagirio > 0 ? 'color:#047857' : 'color:#9ca3af';
+                    return `<div class="eff-card">
+                        <div class="eff-card-header">${apt.code} <span style="font-weight:400;font-size:11px;color:#6b7280">${sysNames[apt.systemType] || 'S' + apt.systemType}</span></div>
+                        <div class="eff-card-grid">
+                            <div class="eff-metric">
+                                <div class="eff-metric-label">Brüt Gelir</div>
+                                <div class="eff-metric-value">€${apt.gross.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                            </div>
+                            <div class="eff-metric">
+                                <div class="eff-metric-label">Lagirio Kazanç</div>
+                                <div class="eff-metric-value" style="${lagirioColor}">€${apt.lagirio.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                            </div>
+                            <div class="eff-metric">
+                                <div class="eff-metric-label">Oran</div>
+                                <div class="eff-metric-value">${apt.ratio.toFixed(1)}%</div>
+                            </div>
+                            <div class="eff-metric">
+                                <div class="eff-metric-label">Rez.</div>
+                                <div class="eff-metric-value">${apt.resCount}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        },
+
+        // Zamansal karşılaştırma - Daire Kazançları sekmesi versiyonu
+        populateEarningsTemporalSelectors() {
+            const selA = document.getElementById('earningsTemporalA');
+            const selB = document.getElementById('earningsTemporalB');
+            if (!selA || !selB) return;
+            if (selA.options.length > 0) return;
+
+            const monthNames = I18n.getMonthNames('short');
+            const now = new Date();
+            const allKeys = [];
+            for (let i = 23; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                allKeys.push(mk);
+            }
+
+            [selA, selB].forEach((sel, si) => {
+                sel.innerHTML = allKeys.map(k => {
+                    const [y, m] = k.split('-');
+                    return '<option value="' + k + '">' + monthNames[parseInt(m) - 1] + ' ' + y + '</option>';
+                }).join('');
+                if (si === 0) { for (let i = allKeys.length - 6; i < allKeys.length - 3; i++) if (sel.options[i]) sel.options[i].selected = true; }
+                else { for (let i = allKeys.length - 3; i < allKeys.length; i++) if (sel.options[i]) sel.options[i].selected = true; }
+            });
+        },
+
+        runEarningsTemporalComparison() {
+            const selA = document.getElementById('earningsTemporalA');
+            const selB = document.getElementById('earningsTemporalB');
+            if (!selA || !selB) return;
+
+            const keysA = Array.from(selA.selectedOptions).map(o => o.value);
+            const keysB = Array.from(selB.selectedOptions).map(o => o.value);
+
+            const resultsContainer = document.getElementById('earningsTemporalResults');
+            if (!resultsContainer) return;
+
+            if (keysA.length === 0 || keysB.length === 0) {
+                resultsContainer.innerHTML = '<div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-700">Her iki dönemden de en az bir ay seçin.</div>';
+                return;
+            }
+
+            const monthNames = I18n.getMonthNames('short');
+            const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
+
+            const lagirioExps = this.data?.lagirioExpenses || [];
+            const expByMonth = {};
+            lagirioExps.forEach(e => {
+                const dd = new Date(e.date);
+                const mk = dd.getFullYear() + '-' + String(dd.getMonth() + 1).padStart(2, '0');
+                if (!expByMonth[mk]) expByMonth[mk] = 0;
+                expByMonth[mk] += convertEUR(e.amount, e.currency);
+            });
+            const expMs = Object.keys(expByMonth);
+            const baseCompExp = expMs.length > 0 ? Object.values(expByMonth).reduce((s, v) => s + v, 0) / expMs.length : 0;
+
+            const getMonthMetrics = (mk) => {
+                const [y, m] = mk.split('-');
+                let gross = 0, lagirio = 0, expenses = 0, count = 0, aptCount = 0;
+                (this.data?.apartments || []).forEach(apt => {
+                    const monthRes = (this.data?.reservations || []).filter(r => {
+                        const rd = new Date(r.checkIn);
+                        return r.apartmentId === apt.id && rd.getMonth() === parseInt(m) - 1 && rd.getFullYear() === parseInt(y);
+                    });
+                    const monthExp = (this.data?.expenses || []).filter(e => {
+                        const ed = new Date(e.date);
+                        return e.apartmentId === apt.id && ed.getMonth() === parseInt(m) - 1 && ed.getFullYear() === parseInt(y);
+                    });
+                    if (monthRes.length > 0) {
+                        gross += monthRes.reduce((s, r) => s + convertEUR(r.totalAmount || 0, r.currency || 'EUR'), 0);
+                        lagirio += this.calculateLagirioRevenue ? this.calculateLagirioRevenue(apt, monthRes, monthExp) : 0;
+                        expenses += monthExp.reduce((s, e) => s + convertEUR(e.amount, e.currency), 0);
+                        count += monthRes.length;
+                        aptCount++;
+                    }
+                });
+                return { gross, lagirio, expenses, count, aptCount, compExp: baseCompExp, realProfit: lagirio - baseCompExp };
+            };
+
+            const aggregate = (keys) => {
+                let tot = { gross: 0, lagirio: 0, expenses: 0, count: 0, months: 0, aptCount: 0 };
+                keys.forEach(k => {
+                    const d = getMonthMetrics(k);
+                    tot.gross += d.gross; tot.lagirio += d.lagirio; tot.expenses += d.expenses; tot.count += d.count; tot.months++; tot.aptCount += d.aptCount;
+                });
+                tot.compExp = baseCompExp * tot.months;
+                tot.realProfit = tot.lagirio - tot.compExp;
+                tot.margin = tot.lagirio > 0 ? ((tot.realProfit / tot.lagirio) * 100) : 0;
+                return tot;
+            };
+
+            const a = aggregate(keysA);
+            const b = aggregate(keysB);
+
+            const labelA = keysA.map(k => { const [y, m] = k.split('-'); return monthNames[parseInt(m) - 1] + '\'' + y.slice(2); }).join(', ');
+            const labelB = keysB.map(k => { const [y, m] = k.split('-'); return monthNames[parseInt(m) - 1] + '\'' + y.slice(2); }).join(', ');
+
+            const diff = (va, vb) => { const d2 = va - vb; const pct = vb !== 0 ? ((d2 / Math.abs(vb)) * 100).toFixed(1) : (va > 0 ? '+∞' : '0'); return { val: d2, pct }; };
+            const arrow = (d2) => d2 > 0 ? '↑' : d2 < 0 ? '↓' : '→';
+            const arrowColor = (d2) => d2 > 0 ? 'text-emerald-600' : d2 < 0 ? 'text-red-600' : 'text-gray-500';
+
+            let html = '<div class="mt-2">';
+            html += '<h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2"><i data-lucide="clock" class="w-5 h-5 text-indigo-600"></i><span>Zamansal Karşılaştırma Sonuçları</span></h3>';
+
+            html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">';
+            html += '<div class="bg-blue-50 border border-blue-200 rounded-xl p-4">';
+            html += '<h4 class="text-sm font-bold text-blue-700 mb-2">Dönem A: ' + labelA + '</h4>';
+            html += '<div class="space-y-1 text-xs">';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Gelir</span><span class="font-medium">€' + a.gross.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Kazanç (Lagirio)</span><span class="font-bold text-blue-600">€' + a.lagirio.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Şirket Gideri</span><span class="text-amber-600">€' + a.compExp.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between border-t border-blue-200 pt-1"><span class="text-gray-600 font-medium">Gerçek Kâr</span><span class="font-bold ' + (a.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">€' + a.realProfit.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Kâr Marjı</span><span class="text-indigo-600">%' + a.margin.toFixed(1) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Rez. Sayısı</span><span>' + a.count + '</span></div>';
+            html += '</div></div>';
+
+            html += '<div class="bg-purple-50 border border-purple-200 rounded-xl p-4">';
+            html += '<h4 class="text-sm font-bold text-purple-700 mb-2">Dönem B: ' + labelB + '</h4>';
+            html += '<div class="space-y-1 text-xs">';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Gelir</span><span class="font-medium">€' + b.gross.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Brüt Kazanç (Lagirio)</span><span class="font-bold text-blue-600">€' + b.lagirio.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Şirket Gideri</span><span class="text-amber-600">€' + b.compExp.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between border-t border-purple-200 pt-1"><span class="text-gray-600 font-medium">Gerçek Kâr</span><span class="font-bold ' + (b.realProfit >= 0 ? 'text-emerald-600' : 'text-red-600') + '">€' + b.realProfit.toFixed(0) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Kâr Marjı</span><span class="text-indigo-600">%' + b.margin.toFixed(1) + '</span></div>';
+            html += '<div class="flex justify-between"><span class="text-gray-500">Rez. Sayısı</span><span>' + b.count + '</span></div>';
+            html += '</div></div>';
+            html += '</div>';
+
+            // Fark
+            const dLagirio = diff(a.lagirio, b.lagirio);
+            const dReal = diff(a.realProfit, b.realProfit);
+            const dMargin = { val: a.margin - b.margin };
+            const dGross = diff(a.gross, b.gross);
+            const dCount = diff(a.count, b.count);
+
+            html += '<div class="bg-gray-50 rounded-xl p-4 mb-4">';
+            html += '<h4 class="text-xs font-bold text-gray-600 mb-2">FARK (A − B)</h4>';
+            html += '<div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">';
+            html += '<div><p class="text-[10px] text-gray-500">Brüt Gelir</p><p class="font-bold ' + arrowColor(dGross.val) + '">' + arrow(dGross.val) + ' €' + Math.abs(dGross.val).toFixed(0) + '</p><p class="text-[10px] ' + arrowColor(dGross.val) + '">' + (dGross.val >= 0 ? '+' : '') + dGross.pct + '%</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Brüt Kazanç</p><p class="font-bold ' + arrowColor(dLagirio.val) + '">' + arrow(dLagirio.val) + ' €' + Math.abs(dLagirio.val).toFixed(0) + '</p><p class="text-[10px] ' + arrowColor(dLagirio.val) + '">' + (dLagirio.val >= 0 ? '+' : '') + dLagirio.pct + '%</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Gerçek Kâr</p><p class="font-bold ' + arrowColor(dReal.val) + '">' + arrow(dReal.val) + ' €' + Math.abs(dReal.val).toFixed(0) + '</p><p class="text-[10px] ' + arrowColor(dReal.val) + '">' + (dReal.val >= 0 ? '+' : '') + dReal.pct + '%</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Kâr Marjı</p><p class="font-bold ' + arrowColor(dMargin.val) + '">' + arrow(dMargin.val) + ' ' + (dMargin.val >= 0 ? '+' : '') + dMargin.val.toFixed(1) + 'pp</p></div>';
+            html += '<div><p class="text-[10px] text-gray-500">Rez. Sayısı</p><p class="font-bold ' + arrowColor(dCount.val) + '">' + arrow(dCount.val) + ' ' + Math.abs(dCount.val) + '</p></div>';
+            html += '</div></div>';
+
+            // Daire bazlı karşılaştırma
+            const aptCompare = {};
+            const collectAptPeriodData = (keys, period) => {
+                keys.forEach(mk => {
+                    const [y, m] = mk.split('-');
+                    (this.data?.apartments || []).forEach(apt => {
+                        const monthRes = (this.data?.reservations || []).filter(r => {
+                            const rd = new Date(r.checkIn);
+                            return r.apartmentId === apt.id && rd.getMonth() === parseInt(m) - 1 && rd.getFullYear() === parseInt(y);
+                        });
+                        const monthExp = (this.data?.expenses || []).filter(e2 => {
+                            const ed = new Date(e2.date);
+                            return e2.apartmentId === apt.id && ed.getMonth() === parseInt(m) - 1 && ed.getFullYear() === parseInt(y);
+                        });
+                        if (monthRes.length > 0 && this.calculateLagirioRevenue) {
+                            const l = this.calculateLagirioRevenue(apt, monthRes, monthExp);
+                            if (!aptCompare[apt.id]) aptCompare[apt.id] = { code: apt.code || apt.id, a: 0, b: 0 };
+                            aptCompare[apt.id][period] += l;
+                        }
+                    });
+                });
+            };
+            collectAptPeriodData(keysA, 'a');
+            collectAptPeriodData(keysB, 'b');
+
+            const aptList = Object.values(aptCompare).sort((x, y2) => (y2.a - y2.b) - (x.a - x.b));
+            if (aptList.length > 0) {
+                html += '<h4 class="text-xs font-bold text-gray-600 mb-2">Daire Bazlı Karşılaştırma (Brüt Kazanç)</h4>';
+                html += '<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-gray-50"><tr>';
+                html += '<th class="py-2 px-3 text-left">Daire</th>';
+                html += '<th class="py-2 px-3 text-right text-blue-600">Dönem A</th>';
+                html += '<th class="py-2 px-3 text-right text-purple-600">Dönem B</th>';
+                html += '<th class="py-2 px-3 text-right">Fark</th>';
+                html += '<th class="py-2 px-3 text-right">Değişim</th>';
+                html += '</tr></thead><tbody>';
+                aptList.forEach(ap => {
+                    const d2 = ap.a - ap.b;
+                    const pct2 = ap.b !== 0 ? ((d2 / Math.abs(ap.b)) * 100).toFixed(1) : (ap.a > 0 ? '+∞' : '0');
+                    html += '<tr class="border-t border-gray-100">';
+                    html += '<td class="py-1.5 px-3 font-medium text-gray-700">' + ap.code + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right">€' + ap.a.toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right">€' + ap.b.toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right font-medium ' + arrowColor(d2) + '">' + arrow(d2) + ' €' + Math.abs(d2).toFixed(0) + '</td>';
+                    html += '<td class="py-1.5 px-3 text-right ' + arrowColor(d2) + '">' + (d2 >= 0 ? '+' : '') + pct2 + '%</td>';
+                    html += '</tr>';
+                });
+                html += '</tbody></table></div>';
+            }
+
+            html += '</div>';
+            resultsContainer.innerHTML = html;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
         // ==================== EFFICIENCY CHARTS ====================
