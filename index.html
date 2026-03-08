@@ -8877,9 +8877,9 @@
                 const avgCompExp = compExpEnteredMonths.length > 0
                     ? Object.values(compExpByMonth).reduce((s,v) => s+v, 0) / compExpEnteredMonths.length : 0;
 
-                // Rez olan ayları bul
+                // Rez olan ayları bul — filtreye göre (sadece görüntülenen dönem)
                 const resMonths = new Set();
-                (this.data?.reservations || []).forEach(r => {
+                (this.filteredData?.reservations || []).forEach(r => {
                     const d = new Date(r.checkIn);
                     resMonths.add(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
                 });
