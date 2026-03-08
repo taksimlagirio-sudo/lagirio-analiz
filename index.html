@@ -5772,8 +5772,18 @@
             const today = new Date(); today.setHours(0,0,0,0);
             const defaultAdjust = parseFloat(document.getElementById('projDefaultAdjust')?.value) || 0;
 
-            // Daire verisi yoksa çık
-            const apartments = Analytics.data?.apartments || [];
+            // Daire verisi yoksa çık — son 3 ayda veri girilmemiş daireler inaktif sayılır
+            const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+            const allApartments = Analytics.data?.apartments || [];
+            const apartments = allApartments.filter(apt => {
+                const hasRecentRes = (Analytics.data?.reservations || []).some(r =>
+                    r.apartmentId === apt.id && r.checkIn && new Date(r.checkIn) >= threeMonthsAgo
+                );
+                const hasRecentExp = (Analytics.data?.expenses || []).some(e =>
+                    e.apartmentId === apt.id && e.date && new Date(e.date) >= threeMonthsAgo
+                );
+                return hasRecentRes || hasRecentExp;
+            });
             if (apartments.length === 0) {
                 document.getElementById('projSummaryCards')?.classList.add('hidden');
                 document.getElementById('projMonthlySection')?.classList.add('hidden');
@@ -9271,6 +9281,8 @@
             };
 
             // Calculate total portfolio value
+            const _dashNow = new Date(); _dashNow.setHours(0,0,0,0);
+            const _dashThreeMonthsAgo = new Date(_dashNow.getFullYear(), _dashNow.getMonth() - 3, 1);
             this.data.apartments?.forEach(apartment => {
                 const reservations = this.filteredData.reservations?.filter(r => r.apartmentId === apartment.id) || [];
                 const expenses = this.filteredData.expenses?.filter(e => e.apartmentId === apartment.id) || [];
@@ -9279,7 +9291,13 @@
                 stats.totalExpenses += expenses.reduce((sum, exp) =>
                     sum + this.convertToEUR(exp.amount, exp.currency), 0);
 
-                if (reservations.length > 0) {
+                const hasRecentRes = this.data.reservations?.some(r =>
+                    r.apartmentId === apartment.id && r.checkIn && new Date(r.checkIn) >= _dashThreeMonthsAgo
+                );
+                const hasRecentExp = this.data.expenses?.some(e =>
+                    e.apartmentId === apartment.id && e.date && new Date(e.date) >= _dashThreeMonthsAgo
+                );
+                if (hasRecentRes || hasRecentExp) {
                     stats.activeProperties++;
                 }
             });
@@ -14420,14 +14438,29 @@
             if (!sel) return;
 
             const monthNames = I18n.getMonthNames('short');
-            const now = new Date();
-            let html = '<option value="all">Tüm Zamanlar</option>';
+            const reservations = this.data?.reservations || [];
+            const expenses = this.data?.expenses || [];
 
-            for (let i = 0; i < 24; i++) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-                html += '<option value="' + mk + '">' + monthNames[d.getMonth()] + ' ' + d.getFullYear() + '</option>';
-            }
+            const monthsWithData = new Set();
+            reservations.forEach(r => {
+                if (r.checkIn) {
+                    const d = new Date(r.checkIn);
+                    monthsWithData.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+                }
+            });
+            expenses.forEach(e => {
+                if (e.date) {
+                    const d = new Date(e.date);
+                    monthsWithData.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+                }
+            });
+
+            const sortedMonths = Array.from(monthsWithData).sort().reverse();
+            let html = '<option value="all">Tüm Zamanlar</option>';
+            sortedMonths.forEach(mk => {
+                const [y, m] = mk.split('-');
+                html += '<option value="' + mk + '">' + monthNames[parseInt(m) - 1] + ' ' + y + '</option>';
+            });
             sel.innerHTML = html;
         },
 
@@ -14599,13 +14632,24 @@
             if (selA.options.length > 0) return;
 
             const monthNames = I18n.getMonthNames('short');
-            const now = new Date();
-            const allKeys = [];
-            for (let i = 23; i >= 0; i--) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-                allKeys.push(mk);
-            }
+            const reservations = this.data?.reservations || [];
+            const expenses = this.data?.expenses || [];
+
+            const monthsWithData = new Set();
+            reservations.forEach(r => {
+                if (r.checkIn) {
+                    const d = new Date(r.checkIn);
+                    monthsWithData.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+                }
+            });
+            expenses.forEach(e => {
+                if (e.date) {
+                    const d = new Date(e.date);
+                    monthsWithData.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+                }
+            });
+
+            const allKeys = Array.from(monthsWithData).sort();
 
             [selA, selB].forEach((sel, si) => {
                 sel.innerHTML = allKeys.map(k => {
