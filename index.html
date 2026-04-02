@@ -16290,7 +16290,7 @@
             if (!sel) return;
             const apartments = Analytics.data?.apartments || [];
             const ownerApts = apartments.filter(a => a.homesbergListingId);
-            sel.innerHTML = '<option value="">' + (I18n.t('cal.all.apartments') || 'Tüm Daireler') + '</option>';
+            sel.innerHTML = '<option value="">' + I18n.t('cal.all.apartments', 'Tüm Daireler') + '</option>';
             ownerApts.forEach(a => {
                 sel.innerHTML += `<option value="${a.id}">${a.code || a.id}${a.name ? ' - ' + a.name : ''}</option>`;
             });
