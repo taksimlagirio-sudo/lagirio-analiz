@@ -253,13 +253,25 @@
         body.owner-mode #calendar-content.owner-only-tab { display: none !important; }
         body.owner-mode #calendar-content.owner-only-tab.active { display: block !important; }
 
-        /* Calendar cell styling */
-        .cal-cell { min-height: 80px; border: 1px solid #f3f4f6; position: relative; transition: background 0.15s; }
-        .cal-cell:hover { background: #f9fafb; }
-        .cal-cell.cal-today { background: #ecfdf5; }
-        .cal-cell.cal-outside { background: #fafafa; opacity: 0.5; }
-        .cal-res-bar { font-size: 10px; padding: 1px 4px; border-radius: 3px; color: #fff; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; line-height: 1.4; }
-        .cal-res-bar:hover { filter: brightness(0.9); transform: scale(1.02); }
+        /* Airbnb-style Calendar */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .cal-cell { min-height: 90px; border-bottom: 1px solid #f0f0f0; border-right: 1px solid #f0f0f0; position: relative; padding: 6px 8px; }
+        .cal-cell:nth-child(7n) { border-right: none; }
+        .cal-day-num { font-size: 13px; font-weight: 500; color: #484848; display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; }
+        .cal-cell.cal-today .cal-day-num { background: #222; color: #fff; font-weight: 700; }
+        .cal-cell.cal-outside { opacity: 0.35; }
+        .cal-cell.cal-outside .cal-day-num { color: #b0b0b0; }
+        .cal-cell.cal-blocked .cal-day-num { text-decoration: line-through; color: #ccc; }
+        .cal-res-row { position: relative; height: 28px; margin-top: 2px; }
+        .cal-bar { position: absolute; top: 0; height: 28px; border-radius: 20px; display: flex; align-items: center; padding: 0 10px; cursor: pointer; transition: filter 0.15s, transform 0.1s; overflow: hidden; white-space: nowrap; z-index: 2; }
+        .cal-bar:hover { filter: brightness(0.92); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .cal-bar-label { font-size: 11px; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .cal-bar-cont { background: #222; }
+        .cal-bar-start { border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .cal-bar-end { border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .cal-bar-mid { border-radius: 0; }
+        .cal-bar-solo { border-radius: 20px; }
+        .cal-weekday-header { font-size: 12px; font-weight: 600; color: #717171; text-align: center; padding: 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
 
         body.owner-mode #revenueTrendSection {
             grid-column: 1 / -1;
@@ -1996,80 +2008,73 @@
             <!-- ===== TAKVIM TAB (owner-only) ===== -->
             <div id="calendar-content" class="tab-content hidden bg-white/95 p-3 sm:p-6 owner-only-tab">
 
-                <!-- Takvim Üst Kontrolleri -->
-                <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                            <button onclick="CalendarView.prevMonth()" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-600"></i>
-                            </button>
-                            <h2 id="calMonthTitle" class="text-lg font-bold text-gray-800 min-w-[180px] text-center">-</h2>
-                            <button onclick="CalendarView.nextMonth()" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
-                            </button>
-                            <button onclick="CalendarView.goToday()" class="text-xs px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition font-medium" data-i18n="cal.today">Bugün</button>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <select id="calApartmentSelect" onchange="CalendarView.onApartmentChange()" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <option value="" data-i18n="cal.all.apartments">Tüm Daireler</option>
-                            </select>
-                            <button onclick="CalendarView.refresh()" class="p-2 hover:bg-gray-100 rounded-lg transition" title="Yenile">
-                                <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i>
-                            </button>
-                        </div>
+                <!-- Takvim Üst Kontroller -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <div class="flex items-center gap-2">
+                        <button onclick="CalendarView.prevMonth()" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full transition">
+                            <i data-lucide="chevron-left" class="w-5 h-5 text-gray-600"></i>
+                        </button>
+                        <h2 id="calMonthTitle" class="text-xl font-bold text-gray-900 min-w-[180px] text-center">-</h2>
+                        <button onclick="CalendarView.nextMonth()" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full transition">
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
+                        </button>
+                        <button onclick="CalendarView.goToday()" class="text-xs px-3 py-1.5 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition font-medium ml-2" data-i18n="cal.today">Bugün</button>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <select id="calApartmentSelect" onchange="CalendarView.onApartmentChange()" class="px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white">
+                            <option value="" data-i18n="cal.all.apartments">Tüm Daireler</option>
+                        </select>
+                        <button onclick="CalendarView.refresh()" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full transition" title="Yenile">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Takvim Grid -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6">
                     <!-- Gün başlıkları -->
-                    <div class="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
-                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.mon">Pzt</div>
-                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.tue">Sal</div>
-                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.wed">Çar</div>
-                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.thu">Per</div>
-                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.fri">Cum</div>
-                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.sat">Cmt</div>
-                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.sun">Paz</div>
+                    <div class="cal-grid border-b border-gray-200">
+                        <div class="cal-weekday-header" data-i18n="cal.mon">P</div>
+                        <div class="cal-weekday-header" data-i18n="cal.tue">S</div>
+                        <div class="cal-weekday-header" data-i18n="cal.wed">Ç</div>
+                        <div class="cal-weekday-header" data-i18n="cal.thu">P</div>
+                        <div class="cal-weekday-header" data-i18n="cal.fri">C</div>
+                        <div class="cal-weekday-header" data-i18n="cal.sat">C</div>
+                        <div class="cal-weekday-header" data-i18n="cal.sun">P</div>
                     </div>
                     <!-- Takvim hücreleri -->
-                    <div id="calGrid" class="grid grid-cols-7 min-h-[480px]">
-                        <div class="col-span-7 flex items-center justify-center py-12">
+                    <div id="calGrid" class="cal-grid">
+                        <div class="col-span-7 flex items-center justify-center py-16" style="grid-column: 1 / -1">
                             <p class="text-sm text-gray-400" data-i18n="cal.loading">Takvim yükleniyor...</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Takvim Özet İstatistikleri -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white rounded-xl shadow p-4 text-center">
-                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.occupancy">Doluluk</p>
-                        <p class="text-2xl font-bold text-emerald-600" id="calOccupancy">-</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center">
+                        <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1" data-i18n="cal.occupancy">Doluluk</p>
+                        <p class="text-2xl font-bold text-gray-900" id="calOccupancy">-</p>
                     </div>
-                    <div class="bg-white rounded-xl shadow p-4 text-center">
-                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.total.nights">Dolu Gece</p>
-                        <p class="text-2xl font-bold text-blue-600" id="calBookedNights">-</p>
+                    <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center">
+                        <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1" data-i18n="cal.total.nights">Dolu Gece</p>
+                        <p class="text-2xl font-bold text-gray-900" id="calBookedNights">-</p>
                     </div>
-                    <div class="bg-white rounded-xl shadow p-4 text-center">
-                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.avg.rate">Ort. Gecelik</p>
-                        <p class="text-2xl font-bold text-purple-600" id="calAvgRate">-</p>
+                    <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center">
+                        <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1" data-i18n="cal.avg.rate">Ort. Gecelik</p>
+                        <p class="text-2xl font-bold text-gray-900" id="calAvgRate">-</p>
                     </div>
-                    <div class="bg-white rounded-xl shadow p-4 text-center">
-                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.expected.revenue">Tahmini Gelir</p>
-                        <p class="text-2xl font-bold text-amber-600" id="calExpRevenue">-</p>
+                    <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center">
+                        <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-1" data-i18n="cal.expected.revenue">Tahmini Gelir</p>
+                        <p class="text-2xl font-bold text-gray-900" id="calExpRevenue">-</p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Takvim Kanal Göstergesi -->
-                <div class="bg-white rounded-xl shadow-lg p-4">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <span class="text-xs font-semibold text-gray-500" data-i18n="cal.legend">Platform Renkleri:</span>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#FF5A5F"></span><span class="text-xs text-gray-600">Airbnb</span></div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#003580"></span><span class="text-xs text-gray-600">Booking.com</span></div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#10B981"></span><span class="text-xs text-gray-600">Direkt</span></div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#8B5CF6"></span><span class="text-xs text-gray-600" data-i18n="cal.other">Diğer</span></div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-gray-200 border border-gray-300"></span><span class="text-xs text-gray-600" data-i18n="cal.available">Müsait</span></div>
-                    </div>
+            <!-- Reservation Detail Modal -->
+            <div id="calResModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)CalendarView.closeModal()">
+                <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up">
+                    <div id="calResModalContent"></div>
                 </div>
             </div>
 
@@ -16231,11 +16236,18 @@
     // ============================================================
     const CalendarView = {
         _currentYear: new Date().getFullYear(),
-        _currentMonth: new Date().getMonth(), // 0-indexed
+        _currentMonth: new Date().getMonth(),
         _reservations: [],
         _selectedAptId: '',
         _loading: false,
         _initialized: false,
+
+        COLORS: {
+            'airbnb': '#222222', 'Airbnb': '#222222',
+            'booking.com': '#003580', 'Booking.com': '#003580', 'bookingCom': '#003580',
+            'direct': '#008A05', 'Direct': '#008A05', 'Direkt': '#008A05',
+            '_default': '#484848'
+        },
 
         async init() {
             if (this._initialized) return;
@@ -16265,13 +16277,11 @@
             if (this._currentMonth < 0) { this._currentMonth = 11; this._currentYear--; }
             this.render();
         },
-
         nextMonth() {
             this._currentMonth++;
             if (this._currentMonth > 11) { this._currentMonth = 0; this._currentYear++; }
             this.render();
         },
-
         goToday() {
             this._currentYear = new Date().getFullYear();
             this._currentMonth = new Date().getMonth();
@@ -16281,49 +16291,41 @@
         async refresh() {
             HomesbergAPI.clearCache();
             this._reservations = [];
-            await this.loadData();
+            this._initialized = false;
+            await this.init();
         },
 
         async loadData() {
             if (this._loading) return;
             this._loading = true;
-
             const apartments = Analytics.data?.apartments || [];
             const mappedApts = apartments.filter(a => a.homesbergListingId);
-
-            if (mappedApts.length === 0) {
-                this._loading = false;
-                this._showNoMapping();
-                return;
-            }
-
+            if (mappedApts.length === 0) { this._loading = false; this._showNoMapping(); return; }
             try {
                 const allRes = [];
                 for (const apt of mappedApts) {
                     const reservations = await HomesbergAPI.getReservations(apt.homesbergListingId);
-                    reservations.forEach(r => {
-                        allRes.push(HomesbergAPI.toProjectionFormat(r, apt.id));
-                    });
+                    reservations.forEach(r => allRes.push(HomesbergAPI.toProjectionFormat(r, apt.id)));
                 }
-                this._reservations = allRes.filter(r => r.status !== 2); // Exclude canceled
+                this._reservations = allRes.filter(r => r.status !== 2);
                 this.render();
-            } catch (e) {
-                Analytics.showToast('Takvim verisi yüklenemedi: ' + e.message, 'error');
-            }
+            } catch (e) { Analytics.showToast('Takvim verisi yüklenemedi: ' + e.message, 'error'); }
             this._loading = false;
         },
 
         _showNoMapping() {
             const grid = document.getElementById('calGrid');
             if (grid) {
-                grid.innerHTML = `
-                    <div class="col-span-7 flex flex-col items-center justify-center py-12">
-                        <i data-lucide="link-2-off" class="w-10 h-10 text-gray-300 mb-3"></i>
-                        <p class="text-sm text-gray-500">Henüz Homesberg eşleştirmesi yapılmamış.</p>
-                        <p class="text-xs text-gray-400 mt-1">Yöneticinizden dairenizi Homesberg'e bağlamasını isteyin.</p>
-                    </div>`;
+                grid.innerHTML = `<div style="grid-column:1/-1" class="flex flex-col items-center justify-center py-16">
+                    <i data-lucide="link-2-off" class="w-12 h-12 text-gray-200 mb-4"></i>
+                    <p class="text-sm text-gray-500 font-medium">Henüz Homesberg eşleştirmesi yapılmamış</p>
+                    <p class="text-xs text-gray-400 mt-1">Yöneticinizden dairenizi bağlamasını isteyin</p></div>`;
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
+        },
+
+        _getColor(platform) {
+            return this.COLORS[platform] || this.COLORS._default;
         },
 
         render() {
@@ -16333,150 +16335,230 @@
         },
 
         _renderTitle() {
-            const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-                            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            const months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
             const el = document.getElementById('calMonthTitle');
             if (el) el.textContent = months[this._currentMonth] + ' ' + this._currentYear;
         },
 
+        // Build all calendar cells grouped by week rows, with spanning reservation bars
         _renderGrid() {
             const grid = document.getElementById('calGrid');
             if (!grid) return;
 
-            const year = this._currentYear;
-            const month = this._currentMonth;
+            const year = this._currentYear, month = this._currentMonth;
             const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startDow = (firstDay.getDay() + 6) % 7; // Monday = 0
-            const daysInMonth = lastDay.getDate();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const startDow = (firstDay.getDay() + 6) % 7;
+            const today = new Date(); today.setHours(0,0,0,0);
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            // Filtrelenmiş rezervasyonlar
             const filteredRes = this._selectedAptId
-                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId)
-                : this._reservations;
+                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId) : this._reservations;
 
-            let html = '';
-
-            // Önceki ayın günleri
+            // Build flat cell array with dates
+            const cells = [];
+            // Previous month padding
             for (let i = 0; i < startDow; i++) {
                 const d = new Date(year, month, -(startDow - 1 - i));
-                html += `<div class="cal-cell cal-outside p-1"><span class="text-[10px] text-gray-400">${d.getDate()}</span></div>`;
+                cells.push({ date: d, day: d.getDate(), outside: true });
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                cells.push({ date: new Date(year, month, d), day: d, outside: false });
+            }
+            // Next month padding
+            while (cells.length % 7 !== 0) {
+                const d = new Date(year, month + 1, cells.length - startDow - daysInMonth + 1);
+                cells.push({ date: d, day: d.getDate(), outside: true });
             }
 
-            // Bu ayın günleri
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const cellDate = new Date(year, month, day);
-                const isToday = cellDate.getTime() === today.getTime();
-
-                // Bu güne denk gelen rezervasyonları bul
-                const dayRes = filteredRes.filter(r => {
-                    const ci = new Date(r.checkIn);
-                    const co = new Date(r.checkOut);
-                    ci.setHours(0, 0, 0, 0);
-                    co.setHours(0, 0, 0, 0);
-                    return cellDate >= ci && cellDate < co;
+            // For each cell, find which reservations are active
+            cells.forEach(cell => {
+                cell.reservations = filteredRes.filter(r => {
+                    const ci = new Date(r.checkIn); ci.setHours(0,0,0,0);
+                    const co = new Date(r.checkOut); co.setHours(0,0,0,0);
+                    return cell.date >= ci && cell.date < co;
                 });
+            });
 
-                html += `<div class="cal-cell ${isToday ? 'cal-today' : ''} p-1">`;
-                html += `<span class="text-[10px] font-medium ${isToday ? 'text-emerald-700 font-bold' : 'text-gray-500'}">${day}</span>`;
+            // Render week by week
+            let html = '';
+            for (let weekStart = 0; weekStart < cells.length; weekStart += 7) {
+                const week = cells.slice(weekStart, weekStart + 7);
 
-                // Maksimum 3 rezervasyon göster
-                dayRes.slice(0, 3).forEach(r => {
-                    const color = HomesbergAPI.getChannelColor(r.platform);
-                    const aptCode = (Analytics.data?.apartments?.find(a => a.id === r.apartmentId))?.code || '';
-                    const label = this._selectedAptId ? (r.guestName || r.platform) : (aptCode || r.platform);
-                    html += `<div class="cal-res-bar" style="background:${color}" title="${r.guestName || ''} | ${r.platform} | ${aptCode} | ${r.checkIn} → ${r.checkOut} | €${r.totalAmount}" onclick="CalendarView.showReservation('${r.id}')">${label}</div>`;
+                // Day number row
+                html += '<div class="cal-grid" style="grid-template-columns:repeat(7,1fr)">';
+                week.forEach(cell => {
+                    const isToday = cell.date.getTime() === today.getTime();
+                    html += `<div class="cal-cell ${cell.outside ? 'cal-outside' : ''} ${isToday ? 'cal-today' : ''}">
+                        <span class="cal-day-num">${cell.day}</span>`;
+
+                    // Reservation bars - find unique reservations that touch this week
+                    // We render bars at the week level to span columns
+                    html += '</div>';
                 });
-                if (dayRes.length > 3) {
-                    html += `<div class="text-[9px] text-gray-400 text-center">+${dayRes.length - 3}</div>`;
-                }
-
                 html += '</div>';
-            }
 
-            // Sonraki ayın günleri (toplam 42 hücreye tamamla)
-            const totalCells = startDow + daysInMonth;
-            const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-            for (let i = 1; i <= remaining; i++) {
-                html += `<div class="cal-cell cal-outside p-1"><span class="text-[10px] text-gray-400">${i}</span></div>`;
+                // Collect unique reservations touching this week
+                const weekResSet = new Map();
+                week.forEach((cell, colIdx) => {
+                    cell.reservations.forEach(r => {
+                        if (!weekResSet.has(r.id)) {
+                            weekResSet.set(r.id, { res: r, startCol: colIdx, endCol: colIdx });
+                        } else {
+                            weekResSet.get(r.id).endCol = colIdx;
+                        }
+                    });
+                });
+
+                if (weekResSet.size > 0) {
+                    // Render bar overlay row
+                    html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);position:relative;margin-top:-36px;pointer-events:none;height:32px;margin-bottom:4px">';
+                    weekResSet.forEach(({ res, startCol, endCol }) => {
+                        const color = this._getColor(res.platform);
+                        const ci = new Date(res.checkIn); ci.setHours(0,0,0,0);
+                        const co = new Date(res.checkOut); co.setHours(0,0,0,0);
+                        const isStart = week[startCol].date.getTime() === ci.getTime();
+                        const isEnd = week[endCol].date.getTime() === new Date(co.getTime() - 86400000).getTime();
+
+                        let radiusClass = '';
+                        if (isStart && isEnd) radiusClass = 'cal-bar-solo';
+                        else if (isStart) radiusClass = 'cal-bar-start';
+                        else if (isEnd) radiusClass = 'cal-bar-end';
+                        else radiusClass = 'cal-bar-mid';
+
+                        const span = endCol - startCol + 1;
+                        const label = res.guestName || res.platform;
+                        const aptCode = (Analytics.data?.apartments?.find(a => a.id === res.apartmentId))?.code || '';
+                        const guests = res.nights ? ` +${res.nights}` : '';
+
+                        html += `<div class="cal-bar ${radiusClass}" style="grid-column:${startCol + 1}/span ${span};background:${color};pointer-events:auto" onclick="CalendarView.showReservation('${res.id}')">
+                            <span class="cal-bar-label">${isStart ? label : ''}</span>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
             }
 
             grid.innerHTML = html;
         },
 
         _renderStats() {
-            const year = this._currentYear;
-            const month = this._currentMonth;
+            const year = this._currentYear, month = this._currentMonth;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-
             const filteredRes = this._selectedAptId
-                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId)
-                : this._reservations;
+                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId) : this._reservations;
 
-            // Dolu gece sayısı (bu ay)
             const bookedDays = new Set();
-            let totalRevenue = 0;
-            let totalNights = 0;
+            let totalRevenue = 0, totalNights = 0;
 
             filteredRes.forEach(r => {
-                const ci = new Date(r.checkIn);
-                const co = new Date(r.checkOut);
-                ci.setHours(0, 0, 0, 0);
-                co.setHours(0, 0, 0, 0);
-
+                const ci = new Date(r.checkIn); ci.setHours(0,0,0,0);
+                const co = new Date(r.checkOut); co.setHours(0,0,0,0);
                 for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
-                    if (d.getFullYear() === year && d.getMonth() === month) {
-                        bookedDays.add(d.getDate() + '-' + r.apartmentId);
-                    }
+                    if (d.getFullYear() === year && d.getMonth() === month) bookedDays.add(d.getDate() + '-' + r.apartmentId);
                 }
-                // Bu aya düşen gelir
-                const resNights = Math.max(1, Math.round((co - ci) / (1000 * 60 * 60 * 24)));
-                const nightsInMonth = this._nightsInMonth(ci, co, year, month);
-                if (nightsInMonth > 0) {
-                    totalRevenue += (r.totalAmount / resNights) * nightsInMonth;
-                    totalNights += nightsInMonth;
-                }
+                const resNights = Math.max(1, Math.round((co - ci) / 86400000));
+                const nim = this._nightsInMonth(ci, co, year, month);
+                if (nim > 0) { totalRevenue += (r.totalAmount / resNights) * nim; totalNights += nim; }
             });
 
-            // Kaç daire hesapta
-            const aptCount = this._selectedAptId ? 1 : new Set(filteredRes.map(r => r.apartmentId)).size || 1;
+            const aptCount = this._selectedAptId ? 1 : Math.max(1, new Set(filteredRes.map(r => r.apartmentId)).size);
             const occupancy = Math.round((bookedDays.size / (daysInMonth * aptCount)) * 100);
             const avgRate = totalNights > 0 ? Math.round(totalRevenue / totalNights) : 0;
-
             const fmt = v => '€' + v.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
 
-            const occ = document.getElementById('calOccupancy');
-            const bn = document.getElementById('calBookedNights');
-            const ar = document.getElementById('calAvgRate');
-            const er = document.getElementById('calExpRevenue');
-
-            if (occ) occ.textContent = '%' + occupancy;
-            if (bn) bn.textContent = bookedDays.size;
-            if (ar) ar.textContent = fmt(avgRate);
-            if (er) er.textContent = fmt(Math.round(totalRevenue));
+            const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+            set('calOccupancy', '%' + occupancy);
+            set('calBookedNights', bookedDays.size);
+            set('calAvgRate', fmt(avgRate));
+            set('calExpRevenue', fmt(Math.round(totalRevenue)));
         },
 
-        _nightsInMonth(checkIn, checkOut, year, month) {
-            const monthStart = new Date(year, month, 1);
-            const monthEnd = new Date(year, month + 1, 0, 23, 59, 59);
-            const start = checkIn > monthStart ? checkIn : monthStart;
-            const end = checkOut <= monthEnd ? checkOut : new Date(year, month + 1, 1);
-            const diff = Math.round((end - start) / (1000 * 60 * 60 * 24));
-            return Math.max(0, diff);
+        _nightsInMonth(ci, co, year, month) {
+            const ms = new Date(year, month, 1);
+            const me = new Date(year, month + 1, 1);
+            const s = ci > ms ? ci : ms;
+            const e = co < me ? co : me;
+            return Math.max(0, Math.round((e - s) / 86400000));
         },
 
+        // Modal
         showReservation(resId) {
-            const res = this._reservations.find(r => r.id === resId);
-            if (!res) return;
-            const aptCode = (Analytics.data?.apartments?.find(a => a.id === res.apartmentId))?.code || '-';
-            Analytics.showToast(
-                `${aptCode} | ${res.guestName || '-'} | ${res.platform}\n${res.checkIn} → ${res.checkOut} | €${res.totalAmount}`,
-                'info'
-            );
+            const r = this._reservations.find(x => x.id === resId);
+            if (!r) return;
+            const apt = Analytics.data?.apartments?.find(a => a.id === r.apartmentId);
+            const color = this._getColor(r.platform);
+            const ci = new Date(r.checkIn);
+            const co = new Date(r.checkOut);
+            const fmtDate = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const content = document.getElementById('calResModalContent');
+            if (!content) return;
+
+            content.innerHTML = `
+                <div style="background:${color}" class="px-6 py-5 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white/70 text-xs font-medium mb-1">${r.platform}</p>
+                            <h3 class="text-lg font-bold">${r.guestName || 'Misafir'}</h3>
+                        </div>
+                        <button onclick="CalendarView.closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition">
+                            <i data-lucide="x" class="w-4 h-4 text-white"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
+                        <div class="flex-1 text-center">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Giriş</p>
+                            <p class="text-sm font-bold text-gray-800 mt-1">${fmtDate(ci)}</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i data-lucide="arrow-right" class="w-4 h-4 text-gray-300"></i>
+                            <span class="text-[10px] text-gray-400 mt-0.5">${r.nights} gece</span>
+                        </div>
+                        <div class="flex-1 text-center">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Çıkış</p>
+                            <p class="text-sm font-bold text-gray-800 mt-1">${fmtDate(co)}</p>
+                        </div>
+                    </div>
+
+                    ${apt ? `<div class="flex items-center gap-3 px-1">
+                        <i data-lucide="home" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-sm text-gray-600">${apt.code}${apt.name ? ' — ' + apt.name : ''}</span>
+                    </div>` : ''}
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 rounded-xl p-3 text-center">
+                            <p class="text-[10px] text-gray-400 uppercase">Toplam</p>
+                            <p class="text-lg font-bold text-gray-900 mt-0.5">€${r.totalAmount?.toLocaleString('tr-TR') || '0'}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3 text-center">
+                            <p class="text-[10px] text-gray-400 uppercase">Gecelik</p>
+                            <p class="text-lg font-bold text-gray-900 mt-0.5">€${r.pricePerNight?.toLocaleString('tr-TR') || '0'}</p>
+                        </div>
+                    </div>
+
+                    ${r.confirmationCode ? `<div class="flex items-center gap-3 px-1">
+                        <i data-lucide="hash" class="w-4 h-4 text-gray-400"></i>
+                        <span class="text-sm text-gray-500">${r.confirmationCode}</span>
+                    </div>` : ''}
+
+                    ${r.cleaningFee > 0 || r.platformCommission > 0 ? `
+                    <div class="border-t border-gray-100 pt-3 space-y-2 px-1">
+                        ${r.cleaningFee > 0 ? `<div class="flex justify-between text-xs"><span class="text-gray-400">Temizlik</span><span class="text-gray-600">€${r.cleaningFee}</span></div>` : ''}
+                        ${r.platformCommission > 0 ? `<div class="flex justify-between text-xs"><span class="text-gray-400">Platform komisyonu</span><span class="text-gray-600">€${r.platformCommission}</span></div>` : ''}
+                        ${r.hostPayout > 0 ? `<div class="flex justify-between text-xs font-medium"><span class="text-gray-500">Net ödeme</span><span class="text-gray-800">€${r.hostPayout}</span></div>` : ''}
+                    </div>` : ''}
+                </div>`;
+
+            const modal = document.getElementById('calResModal');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        closeModal() {
+            const modal = document.getElementById('calResModal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
         }
     };
 
