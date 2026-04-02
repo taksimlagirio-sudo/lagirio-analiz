@@ -246,6 +246,21 @@
         body.owner-mode #topPerformersSection {
             display: none !important;
         }
+        /* Calendar tab: sadece owner'da görünür */
+        .owner-only-tab { display: none !important; }
+        body.owner-mode .owner-only-tab { display: flex !important; }
+        body.owner-mode [data-tab="calendar"].owner-only-tab { display: flex !important; }
+        body.owner-mode #calendar-content.owner-only-tab { display: none !important; }
+        body.owner-mode #calendar-content.owner-only-tab.active { display: block !important; }
+
+        /* Calendar cell styling */
+        .cal-cell { min-height: 80px; border: 1px solid #f3f4f6; position: relative; transition: background 0.15s; }
+        .cal-cell:hover { background: #f9fafb; }
+        .cal-cell.cal-today { background: #ecfdf5; }
+        .cal-cell.cal-outside { background: #fafafa; opacity: 0.5; }
+        .cal-res-bar { font-size: 10px; padding: 1px 4px; border-radius: 3px; color: #fff; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; line-height: 1.4; }
+        .cal-res-bar:hover { filter: brightness(0.9); transform: scale(1.02); }
+
         body.owner-mode #revenueTrendSection {
             grid-column: 1 / -1;
         }
@@ -861,6 +876,9 @@
                 <button onclick="DataManager.switchTab('users')" id="dmTab-users" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600">
                     <i data-lucide="users" class="w-4 h-4"></i> Kullanıcılar
                 </button>
+                <button onclick="DataManager.switchTab('homesberg')" id="dmTab-homesberg" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600">
+                    <i data-lucide="link" class="w-4 h-4"></i> Homesberg
+                </button>
             </div>
 
             <!-- ===== Upload Panel ===== -->
@@ -944,6 +962,48 @@
                         <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
                         Kullanıcıya email ve şifreyi doğrudan bildirin. Şifreyi sonradan 🔑 butonuyla değiştirebilirsiniz.
                     </p>
+                </div>
+            </div>
+
+            <!-- ===== Homesberg Mapping Panel ===== -->
+            <div id="dmPanel-homesberg" class="glass rounded-2xl shadow-2xl p-8 hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                        <i data-lucide="link" class="w-8 h-8 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="dm.homesberg.title">Homesberg Eslestirme</h3>
+                    <p class="text-sm text-gray-500" data-i18n="dm.homesberg.desc">Daireleri Homesberg PMS listing'leriyle eslestirin. Bu eslestirme takvim ve projeksiyon verisi icin kullanilir.</p>
+                </div>
+
+                <!-- Bağlantı durumu -->
+                <div id="hbConnectionStatus" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div id="hbStatusDot" class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <span id="hbStatusText" class="text-sm text-gray-500">Bağlantı kontrol ediliyor...</span>
+                        </div>
+                        <button onclick="HomesbergMapping.testConnection()" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
+                            <i data-lucide="wifi" class="w-3 h-3"></i> Bağlantıyı Test Et
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Eşleştirme tablosu -->
+                <div id="hbMappingTable" class="space-y-3">
+                    <div class="text-center py-8">
+                        <i data-lucide="loader" class="w-6 h-6 text-gray-300 animate-spin mx-auto mb-2"></i>
+                        <p class="text-sm text-gray-400">Yükleniyor...</p>
+                    </div>
+                </div>
+
+                <!-- Kaydet butonu -->
+                <div class="mt-6 flex items-center justify-between">
+                    <button onclick="HomesbergMapping.refreshListings()" class="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center gap-1.5">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Listing'leri Yenile
+                    </button>
+                    <button onclick="HomesbergMapping.saveAll()" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i> Eslestirmeleri Kaydet
+                    </button>
                 </div>
             </div>
         </div>
@@ -1121,6 +1181,10 @@
                     <button onclick="Analytics.switchMainTab('projection')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="projection">
                         <i data-lucide="telescope" class="w-4 h-4"></i>
                         <span data-i18n="tab.projection">Projeksiyon</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('calendar')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2 owner-only-tab" data-tab="calendar">
+                        <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                        <span data-i18n="tab.calendar">Takvim</span>
                     </button>
                 </nav>
             </div>
@@ -1733,6 +1797,21 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Homesberg'den Çek -->
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="cloud-download" class="w-4 h-4 text-blue-500"></i>
+                                <span class="text-sm font-medium text-gray-700" data-i18n="proj.homesberg.pull">Homesberg'den Gelecek Rezervasyonları Çek</span>
+                            </div>
+                            <button onclick="Projection.fetchFromHomesberg()" id="projHbFetchBtn" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                <span data-i18n="proj.homesberg.fetch">Homesberg'den Çek</span>
+                            </button>
+                        </div>
+                        <div id="projHbStatus" class="mt-2 hidden text-xs text-gray-500"></div>
+                    </div>
                 </div>
 
                 <!-- Karma Tahmin Ayarları - admin only -->
@@ -1913,6 +1992,87 @@
                 </div>
 
             </div>
+
+            <!-- ===== TAKVIM TAB (owner-only) ===== -->
+            <div id="calendar-content" class="tab-content hidden bg-white/95 p-3 sm:p-6 owner-only-tab">
+
+                <!-- Takvim Üst Kontrolleri -->
+                <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <button onclick="CalendarView.prevMonth()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-600"></i>
+                            </button>
+                            <h2 id="calMonthTitle" class="text-lg font-bold text-gray-800 min-w-[180px] text-center">-</h2>
+                            <button onclick="CalendarView.nextMonth()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
+                            </button>
+                            <button onclick="CalendarView.goToday()" class="text-xs px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition font-medium" data-i18n="cal.today">Bugün</button>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select id="calApartmentSelect" onchange="CalendarView.onApartmentChange()" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="" data-i18n="cal.all.apartments">Tüm Daireler</option>
+                            </select>
+                            <button onclick="CalendarView.refresh()" class="p-2 hover:bg-gray-100 rounded-lg transition" title="Yenile">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Takvim Grid -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <!-- Gün başlıkları -->
+                    <div class="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.mon">Pzt</div>
+                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.tue">Sal</div>
+                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.wed">Çar</div>
+                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.thu">Per</div>
+                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.fri">Cum</div>
+                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.sat">Cmt</div>
+                        <div class="py-3 text-center text-xs font-semibold text-gray-500" data-i18n="cal.sun">Paz</div>
+                    </div>
+                    <!-- Takvim hücreleri -->
+                    <div id="calGrid" class="grid grid-cols-7 min-h-[480px]">
+                        <div class="col-span-7 flex items-center justify-center py-12">
+                            <p class="text-sm text-gray-400" data-i18n="cal.loading">Takvim yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Takvim Özet İstatistikleri -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-xl shadow p-4 text-center">
+                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.occupancy">Doluluk</p>
+                        <p class="text-2xl font-bold text-emerald-600" id="calOccupancy">-</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-4 text-center">
+                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.total.nights">Dolu Gece</p>
+                        <p class="text-2xl font-bold text-blue-600" id="calBookedNights">-</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-4 text-center">
+                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.avg.rate">Ort. Gecelik</p>
+                        <p class="text-2xl font-bold text-purple-600" id="calAvgRate">-</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-4 text-center">
+                        <p class="text-xs text-gray-500 mb-1" data-i18n="cal.expected.revenue">Tahmini Gelir</p>
+                        <p class="text-2xl font-bold text-amber-600" id="calExpRevenue">-</p>
+                    </div>
+                </div>
+
+                <!-- Takvim Kanal Göstergesi -->
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <span class="text-xs font-semibold text-gray-500" data-i18n="cal.legend">Platform Renkleri:</span>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#FF5A5F"></span><span class="text-xs text-gray-600">Airbnb</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#003580"></span><span class="text-xs text-gray-600">Booking.com</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#10B981"></span><span class="text-xs text-gray-600">Direkt</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm" style="background:#8B5CF6"></span><span class="text-xs text-gray-600" data-i18n="cal.other">Diğer</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-gray-200 border border-gray-300"></span><span class="text-xs text-gray-600" data-i18n="cal.available">Müsait</span></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <!-- Notification Modal -->
@@ -2198,6 +2358,10 @@
         <button onclick="Analytics.switchMainTab('projection')" data-tab="projection">
             <i data-lucide="telescope"></i>
             <span data-i18n="tab.mobile.projection">Proje.</span>
+        </button>
+        <button onclick="Analytics.switchMainTab('calendar')" data-tab="calendar" class="owner-only-tab" style="display:none">
+            <i data-lucide="calendar-range"></i>
+            <span data-i18n="tab.mobile.calendar">Takvim</span>
         </button>
         <button onclick="MobileUI.toggleMoreSheet()" data-tab="more" id="mobileMoreBtn">
             <i data-lucide="more-horizontal"></i>
@@ -2493,6 +2657,25 @@
                 'tab.efficiency': 'Apartment Earnings',
                 'tab.reports': 'Reports',
                 'tab.projection': 'Projection',
+                'tab.calendar': 'Calendar',
+                'tab.mobile.calendar': 'Calendar',
+                // Calendar
+                'cal.today': 'Today',
+                'cal.all.apartments': 'All Apartments',
+                'cal.loading': 'Loading calendar...',
+                'cal.occupancy': 'Occupancy',
+                'cal.total.nights': 'Booked Nights',
+                'cal.avg.rate': 'Avg. Nightly',
+                'cal.expected.revenue': 'Expected Revenue',
+                'cal.legend': 'Platform Colors:',
+                'cal.other': 'Other',
+                'cal.available': 'Available',
+                'cal.mon': 'Mon', 'cal.tue': 'Tue', 'cal.wed': 'Wed', 'cal.thu': 'Thu', 'cal.fri': 'Fri', 'cal.sat': 'Sat', 'cal.sun': 'Sun',
+                // Homesberg
+                'dm.homesberg.title': 'Homesberg Mapping',
+                'dm.homesberg.desc': 'Map apartments to Homesberg PMS listings. This mapping is used for calendar and projection data.',
+                'proj.homesberg.pull': 'Pull Future Reservations from Homesberg',
+                'proj.homesberg.fetch': 'Pull from Homesberg',
                 // Analysis subtabs
                 'tab.analysis.system': 'System Analysis',
                 'tab.analysis.apartment': 'Apartment Analysis',
@@ -3185,6 +3368,23 @@
                 'tab.efficiency': 'Доходы квартир',
                 'tab.reports': 'Отчёты',
                 'tab.projection': 'Прогноз',
+                'tab.calendar': 'Календарь',
+                'tab.mobile.calendar': 'Календ.',
+                'cal.today': 'Сегодня',
+                'cal.all.apartments': 'Все квартиры',
+                'cal.loading': 'Загрузка календаря...',
+                'cal.occupancy': 'Заполняемость',
+                'cal.total.nights': 'Забронировано ночей',
+                'cal.avg.rate': 'Ср. за ночь',
+                'cal.expected.revenue': 'Ожидаемый доход',
+                'cal.legend': 'Цвета платформ:',
+                'cal.other': 'Другое',
+                'cal.available': 'Свободно',
+                'cal.mon': 'Пн', 'cal.tue': 'Вт', 'cal.wed': 'Ср', 'cal.thu': 'Чт', 'cal.fri': 'Пт', 'cal.sat': 'Сб', 'cal.sun': 'Вс',
+                'dm.homesberg.title': 'Привязка Homesberg',
+                'dm.homesberg.desc': 'Привяжите квартиры к листингам PMS Homesberg.',
+                'proj.homesberg.pull': 'Получить будущие бронирования из Homesberg',
+                'proj.homesberg.fetch': 'Получить из Homesberg',
                 // Analysis subtabs
                 'tab.analysis.system': 'Системный анализ',
                 'tab.analysis.apartment': 'Анализ квартир',
@@ -3877,6 +4077,23 @@
                 'tab.efficiency': 'أرباح الشقق',
                 'tab.reports': 'التقارير',
                 'tab.projection': 'التوقعات',
+                'tab.calendar': 'التقويم',
+                'tab.mobile.calendar': 'التقويم',
+                'cal.today': 'اليوم',
+                'cal.all.apartments': 'جميع الشقق',
+                'cal.loading': 'جاري تحميل التقويم...',
+                'cal.occupancy': 'الإشغال',
+                'cal.total.nights': 'الليالي المحجوزة',
+                'cal.avg.rate': 'متوسط الليلة',
+                'cal.expected.revenue': 'الإيرادات المتوقعة',
+                'cal.legend': 'ألوان المنصات:',
+                'cal.other': 'أخرى',
+                'cal.available': 'متاح',
+                'cal.mon': 'اثن', 'cal.tue': 'ثلا', 'cal.wed': 'أرب', 'cal.thu': 'خمي', 'cal.fri': 'جمع', 'cal.sat': 'سبت', 'cal.sun': 'أحد',
+                'dm.homesberg.title': 'ربط Homesberg',
+                'dm.homesberg.desc': 'اربط الشقق بقوائم Homesberg PMS.',
+                'proj.homesberg.pull': 'جلب الحجوزات المستقبلية من Homesberg',
+                'proj.homesberg.fetch': 'جلب من Homesberg',
                 // Analysis subtabs
                 'tab.analysis.system': 'تحليل النظام',
                 'tab.analysis.apartment': 'تحليل الشقق',
@@ -4643,7 +4860,7 @@
                 btn.className = 'dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200';
             });
 
-            const colors = { upload: 'emerald', drive: 'blue', users: 'purple' };
+            const colors = { upload: 'emerald', drive: 'blue', users: 'purple', homesberg: 'blue' };
             const color = colors[tabName] || 'emerald';
             const activeTab = document.getElementById('dmTab-' + tabName);
             if (activeTab) {
@@ -4651,7 +4868,7 @@
             }
 
             // Panelleri göster/gizle
-            ['upload', 'drive', 'users'].forEach(panel => {
+            ['upload', 'drive', 'users', 'homesberg'].forEach(panel => {
                 const el = document.getElementById('dmPanel-' + panel);
                 if (el) el.classList.toggle('hidden', panel !== tabName);
             });
@@ -4659,6 +4876,10 @@
             if (tabName === 'users') {
                 this.renderOwnerAccounts();
                 UserManager._populateApartmentSelect();
+            }
+
+            if (tabName === 'homesberg') {
+                HomesbergMapping.init();
             }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -5385,6 +5606,181 @@
     };
 
     // ============================================================
+    // HOMESBERG API CLIENT
+    // ============================================================
+    const HomesbergAPI = {
+        CACHE_TTL: 60 * 60 * 1000, // 1 saat
+        _cache: {},
+
+        // Proxy üzerinden Homesberg API çağrısı
+        async call(action, params = {}) {
+            const cacheKey = JSON.stringify({ action, params });
+            const cached = this._getCached(cacheKey);
+            if (cached) return cached;
+
+            const session = await supabase.auth.getSession();
+            const token = session?.data?.session?.access_token;
+            if (!token) throw new Error('Oturum bulunamadı');
+
+            const res = await fetch('/.netlify/functions/homesberg-proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ action, params })
+            });
+
+            if (res.status === 429) {
+                throw new Error('Rate limit aşıldı, lütfen biraz bekleyin');
+            }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || `API hatası: ${res.status}`);
+            }
+
+            const data = await res.json();
+            this._setCache(cacheKey, data);
+            return data;
+        },
+
+        // Tüm sayfalı veriyi çek (pagination)
+        async callPaginated(action, params = {}, maxPages = 20) {
+            const allResults = [];
+            let offset = 0;
+            const limit = 100;
+
+            for (let page = 0; page < maxPages; page++) {
+                const data = await this.call(action, { ...params, limit, offset });
+
+                if (data.results && Array.isArray(data.results)) {
+                    allResults.push(...data.results);
+                    if (!data.next || data.results.length < limit) break;
+                    offset += limit;
+                    // Sonraki sayfa için cache bypass
+                    const nextKey = JSON.stringify({ action, params: { ...params, limit, offset } });
+                    delete this._cache[nextKey];
+                } else if (Array.isArray(data)) {
+                    // channel-types, currencies gibi liste endpoint'leri
+                    return data;
+                } else {
+                    break;
+                }
+            }
+            return allResults;
+        },
+
+        // Listing'leri getir (admin eşleştirme için)
+        async getListings() {
+            return this.callPaginated('listings');
+        },
+
+        // Rezervasyonları getir (tarih filtreli)
+        async getReservations(listingId, fromDate, toDate) {
+            const params = { listing__id: listingId };
+            if (fromDate) params.check_in__gte = fromDate;
+            if (toDate) params.check_in__lte = toDate;
+            params.ordering = 'check_in';
+            return this.callPaginated('reservations', params);
+        },
+
+        // Tek rezervasyon detayı
+        async getReservation(id) {
+            return this.call('reservation-detail', { _id: id });
+        },
+
+        // Takvim verisi (360 gün ileri)
+        async getCalendar(listingId) {
+            return this.callPaginated('calendar', { listing__id: listingId });
+        },
+
+        // Kanal tipleri
+        async getChannelTypes() {
+            return this.call('channel-types');
+        },
+
+        // Para birimleri
+        async getCurrencies() {
+            return this.call('currencies');
+        },
+
+        // Platform renk eşleştirmesi
+        CHANNEL_COLORS: {
+            'airbnb': '#FF5A5F',
+            'Airbnb': '#FF5A5F',
+            'booking.com': '#003580',
+            'Booking.com': '#003580',
+            'bookingCom': '#003580',
+            'direct': '#10B981',
+            'Direct': '#10B981',
+            'Direkt': '#10B981'
+        },
+        DEFAULT_COLOR: '#8B5CF6',
+
+        getChannelColor(channelName) {
+            if (!channelName) return this.DEFAULT_COLOR;
+            return this.CHANNEL_COLORS[channelName] || this.DEFAULT_COLOR;
+        },
+
+        // Homesberg reservation → Projeksiyon formatına dönüştür
+        toProjectionFormat(hbRes, apartmentId) {
+            const checkIn = new Date(hbRes.check_in);
+            const checkOut = new Date(hbRes.check_out);
+            const nights = Math.max(1, Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+            const total = parseFloat(hbRes.accommodation_fare) || 0;
+            return {
+                id: 'hb-' + hbRes.id,
+                apartmentId,
+                guestName: hbRes.guests?.[0] ? `${hbRes.guests[0].first_name || ''} ${hbRes.guests[0].last_name || ''}`.trim() : '',
+                checkIn: hbRes.check_in,
+                checkOut: hbRes.check_out,
+                nights,
+                platform: hbRes.channel_name || 'Bilinmiyor',
+                totalAmount: total,
+                pricePerNight: nights > 0 ? Math.round(total / nights * 100) / 100 : 0,
+                cleaningFee: parseFloat(hbRes.cleaning_fee) || 0,
+                platformCommission: parseFloat(hbRes.channel_commission) || 0,
+                hostPayout: parseFloat(hbRes.host_payout) || 0,
+                currency: hbRes.currency_code || 'EUR',
+                confirmationCode: hbRes.confirmation_code || '',
+                status: hbRes.status, // 1=Confirmed, 2=Canceled
+                statusName: hbRes.status_name || '',
+                source: 'homesberg'
+            };
+        },
+
+        // Apartment ID ↔ Homesberg Listing ID eşleştirmesi
+        getListingIdForApartment(apartmentId) {
+            const apt = Analytics.data?.apartments?.find(a => a.id === apartmentId);
+            return apt?.homesbergListingId || null;
+        },
+
+        getApartmentIdForListing(listingId) {
+            const apt = Analytics.data?.apartments?.find(a => a.homesbergListingId === String(listingId));
+            return apt?.id || null;
+        },
+
+        // Cache yönetimi
+        _getCached(key) {
+            const entry = this._cache[key];
+            if (!entry) return null;
+            if (Date.now() - entry.ts > this.CACHE_TTL) {
+                delete this._cache[key];
+                return null;
+            }
+            return entry.data;
+        },
+
+        _setCache(key, data) {
+            this._cache[key] = { data, ts: Date.now() };
+        },
+
+        clearCache() {
+            this._cache = {};
+        }
+    };
+
+    // ============================================================
     // PROJECTION - Gelecek Rezervasyon Projeksiyonu & Lagirio Kazancı
     // ============================================================
     const Projection = {
@@ -5560,6 +5956,58 @@
             this.save();
             this.updateFilesUI();
             this.calculate();
+        },
+
+        async fetchFromHomesberg() {
+            const btn = document.getElementById('projHbFetchBtn');
+            const status = document.getElementById('projHbStatus');
+            if (btn) btn.disabled = true;
+            if (status) { status.classList.remove('hidden'); status.textContent = 'Homesberg\'den veri çekiliyor...'; }
+
+            try {
+                const apartments = Analytics.data?.apartments || [];
+                const mappedApts = apartments.filter(a => a.homesbergListingId);
+
+                if (mappedApts.length === 0) {
+                    Analytics.showToast('Homesberg eşleştirmesi yapılmış daire bulunamadı. Veri Yönetimi > Homesberg sekmesinden eşleştirme yapın.', 'warning');
+                    return;
+                }
+
+                const today = new Date();
+                const fromDate = today.toISOString().split('T')[0];
+
+                const allRes = [];
+                for (const apt of mappedApts) {
+                    const reservations = await HomesbergAPI.getReservations(apt.homesbergListingId, fromDate);
+                    reservations.forEach(r => {
+                        if (r.status !== 2) { // Canceled hariç
+                            allRes.push(HomesbergAPI.toProjectionFormat(r, apt.id));
+                        }
+                    });
+                }
+
+                // Mevcut PMS rezervasyonlarından Homesberg olanları çıkar, yenileri ekle
+                this.reservations = this.reservations.filter(r => r.source !== 'homesberg');
+                this.reservations.push(...allRes);
+
+                this.save();
+                this.updateFilesUI();
+                this.calculate();
+
+                if (status) {
+                    status.textContent = `${allRes.length} gelecek rezervasyon Homesberg'den çekildi (${mappedApts.length} daire).`;
+                    status.className = 'mt-2 text-xs text-green-600';
+                }
+                Analytics.showToast(`Homesberg: ${allRes.length} gelecek rezervasyon yüklendi`, 'success');
+            } catch (e) {
+                if (status) {
+                    status.textContent = 'Hata: ' + e.message;
+                    status.className = 'mt-2 text-xs text-red-600';
+                }
+                Analytics.showToast('Homesberg hatası: ' + e.message, 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         },
 
         clearAll() {
@@ -11900,8 +12348,16 @@
                     });
                 });
             }
+
+            if (tab === 'calendar') {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        CalendarView.init();
+                    });
+                });
+            }
         },
-        
+
         switchAnalysisTab(tab) {
             // Hide all analysis contents
             document.querySelectorAll('.analysis-content').forEach(content => {
@@ -15594,6 +16050,399 @@
             } catch (e) {
                 if (typeof Analytics !== 'undefined') Analytics.showToast('Hata: ' + e.message, 'error');
             }
+        }
+    };
+
+    // ============================================================
+    // HOMESBERG MAPPING - Admin Daire ↔ Listing Eşleştirme
+    // ============================================================
+    const HomesbergMapping = {
+        _listings: [],
+        _initialized: false,
+
+        async init() {
+            if (this._initialized) {
+                this.render();
+                return;
+            }
+            this._initialized = true;
+            await this.testConnection();
+            await this.loadListings();
+            this.render();
+        },
+
+        async testConnection() {
+            const dot = document.getElementById('hbStatusDot');
+            const text = document.getElementById('hbStatusText');
+            if (!dot || !text) return;
+
+            dot.className = 'w-3 h-3 rounded-full bg-yellow-400 animate-pulse';
+            text.textContent = 'Test ediliyor...';
+
+            try {
+                await HomesbergAPI.call('channel-types');
+                dot.className = 'w-3 h-3 rounded-full bg-green-500';
+                text.textContent = 'Homesberg bağlantısı aktif';
+                text.className = 'text-sm text-green-600';
+            } catch (e) {
+                dot.className = 'w-3 h-3 rounded-full bg-red-500';
+                text.textContent = 'Bağlantı hatası: ' + e.message;
+                text.className = 'text-sm text-red-600';
+            }
+        },
+
+        async loadListings() {
+            try {
+                this._listings = await HomesbergAPI.getListings();
+            } catch (e) {
+                this._listings = [];
+                Analytics.showToast('Listing\'ler yüklenemedi: ' + e.message, 'error');
+            }
+        },
+
+        async refreshListings() {
+            HomesbergAPI.clearCache();
+            this._listings = [];
+            await this.loadListings();
+            this.render();
+            Analytics.showToast('Listing\'ler yenilendi', 'success');
+        },
+
+        render() {
+            const container = document.getElementById('hbMappingTable');
+            if (!container) return;
+
+            const apartments = Analytics.data?.apartments || [];
+            if (apartments.length === 0) {
+                container.innerHTML = '<div class="text-center py-8"><p class="text-sm text-gray-400">Henüz daire verisi yok. Önce veri yükleyin.</p></div>';
+                return;
+            }
+
+            const listingOptions = this._listings.map(l =>
+                `<option value="${l.id}">${l.title || l.name || 'Listing #' + l.id}</option>`
+            ).join('');
+
+            container.innerHTML = apartments.map(apt => {
+                const currentListingId = apt.homesbergListingId || '';
+                const matchedListing = this._listings.find(l => String(l.id) === String(currentListingId));
+                const statusClass = currentListingId ? 'border-green-200 bg-green-50/50' : 'border-gray-200';
+
+                return `
+                <div class="flex items-center gap-4 p-4 rounded-xl border ${statusClass} transition-all">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-gray-800">${apt.code || apt.id}</span>
+                            ${apt.name ? `<span class="text-xs text-gray-400">${apt.name}</span>` : ''}
+                            ${currentListingId ? '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <select data-apt-id="${apt.id}" class="hb-listing-select w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                            <option value="">-- Listing Seç --</option>
+                            ${listingOptions}
+                        </select>
+                    </div>
+                    ${matchedListing ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedListing.title || matchedListing.name || ''}</span>` : ''}
+                </div>`;
+            }).join('');
+
+            // Mevcut eşleştirmeleri seç
+            apartments.forEach(apt => {
+                if (apt.homesbergListingId) {
+                    const sel = container.querySelector(`select[data-apt-id="${apt.id}"]`);
+                    if (sel) sel.value = apt.homesbergListingId;
+                }
+            });
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        },
+
+        async saveAll() {
+            const selects = document.querySelectorAll('.hb-listing-select');
+            const apartments = Analytics.data?.apartments || [];
+            let changed = 0;
+
+            selects.forEach(sel => {
+                const aptId = sel.dataset.aptId;
+                const listingId = sel.value;
+                const apt = apartments.find(a => a.id === aptId);
+                if (apt) {
+                    const oldVal = apt.homesbergListingId || '';
+                    if (oldVal !== listingId) {
+                        apt.homesbergListingId = listingId || undefined;
+                        changed++;
+                    }
+                }
+            });
+
+            if (changed === 0) {
+                Analytics.showToast('Değişiklik yok', 'info');
+                return;
+            }
+
+            // Veriyi kaydet (Supabase + localStorage)
+            if (typeof DataManager !== 'undefined' && DataManager.saveCurrentData) {
+                await DataManager.saveCurrentData();
+            } else {
+                localStorage.setItem('lagirioData', JSON.stringify(Analytics.data));
+            }
+
+            this.render();
+            Analytics.showToast(changed + ' eşleştirme kaydedildi', 'success');
+        }
+    };
+
+    // ============================================================
+    // CALENDAR VIEW - Owner Takvim Görünümü (Homesberg verisiyle)
+    // ============================================================
+    const CalendarView = {
+        _currentYear: new Date().getFullYear(),
+        _currentMonth: new Date().getMonth(), // 0-indexed
+        _reservations: [],
+        _selectedAptId: '',
+        _loading: false,
+        _initialized: false,
+
+        async init() {
+            if (this._initialized) return;
+            this._initialized = true;
+            this._populateApartmentSelect();
+            await this.loadData();
+        },
+
+        _populateApartmentSelect() {
+            const sel = document.getElementById('calApartmentSelect');
+            if (!sel) return;
+            const apartments = Analytics.data?.apartments || [];
+            const ownerApts = apartments.filter(a => a.homesbergListingId);
+            sel.innerHTML = '<option value="">' + (I18n.t('cal.all.apartments') || 'Tüm Daireler') + '</option>';
+            ownerApts.forEach(a => {
+                sel.innerHTML += `<option value="${a.id}">${a.code || a.id}${a.name ? ' - ' + a.name : ''}</option>`;
+            });
+        },
+
+        onApartmentChange() {
+            this._selectedAptId = document.getElementById('calApartmentSelect')?.value || '';
+            this.render();
+        },
+
+        prevMonth() {
+            this._currentMonth--;
+            if (this._currentMonth < 0) { this._currentMonth = 11; this._currentYear--; }
+            this.render();
+        },
+
+        nextMonth() {
+            this._currentMonth++;
+            if (this._currentMonth > 11) { this._currentMonth = 0; this._currentYear++; }
+            this.render();
+        },
+
+        goToday() {
+            this._currentYear = new Date().getFullYear();
+            this._currentMonth = new Date().getMonth();
+            this.render();
+        },
+
+        async refresh() {
+            HomesbergAPI.clearCache();
+            this._reservations = [];
+            await this.loadData();
+        },
+
+        async loadData() {
+            if (this._loading) return;
+            this._loading = true;
+
+            const apartments = Analytics.data?.apartments || [];
+            const mappedApts = apartments.filter(a => a.homesbergListingId);
+
+            if (mappedApts.length === 0) {
+                this._loading = false;
+                this._showNoMapping();
+                return;
+            }
+
+            try {
+                const allRes = [];
+                for (const apt of mappedApts) {
+                    const reservations = await HomesbergAPI.getReservations(apt.homesbergListingId);
+                    reservations.forEach(r => {
+                        allRes.push(HomesbergAPI.toProjectionFormat(r, apt.id));
+                    });
+                }
+                this._reservations = allRes.filter(r => r.status !== 2); // Exclude canceled
+                this.render();
+            } catch (e) {
+                Analytics.showToast('Takvim verisi yüklenemedi: ' + e.message, 'error');
+            }
+            this._loading = false;
+        },
+
+        _showNoMapping() {
+            const grid = document.getElementById('calGrid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div class="col-span-7 flex flex-col items-center justify-center py-12">
+                        <i data-lucide="link-2-off" class="w-10 h-10 text-gray-300 mb-3"></i>
+                        <p class="text-sm text-gray-500">Henüz Homesberg eşleştirmesi yapılmamış.</p>
+                        <p class="text-xs text-gray-400 mt-1">Yöneticinizden dairenizi Homesberg'e bağlamasını isteyin.</p>
+                    </div>`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        },
+
+        render() {
+            this._renderTitle();
+            this._renderGrid();
+            this._renderStats();
+        },
+
+        _renderTitle() {
+            const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            const el = document.getElementById('calMonthTitle');
+            if (el) el.textContent = months[this._currentMonth] + ' ' + this._currentYear;
+        },
+
+        _renderGrid() {
+            const grid = document.getElementById('calGrid');
+            if (!grid) return;
+
+            const year = this._currentYear;
+            const month = this._currentMonth;
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDow = (firstDay.getDay() + 6) % 7; // Monday = 0
+            const daysInMonth = lastDay.getDate();
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Filtrelenmiş rezervasyonlar
+            const filteredRes = this._selectedAptId
+                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId)
+                : this._reservations;
+
+            let html = '';
+
+            // Önceki ayın günleri
+            for (let i = 0; i < startDow; i++) {
+                const d = new Date(year, month, -(startDow - 1 - i));
+                html += `<div class="cal-cell cal-outside p-1"><span class="text-[10px] text-gray-400">${d.getDate()}</span></div>`;
+            }
+
+            // Bu ayın günleri
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const cellDate = new Date(year, month, day);
+                const isToday = cellDate.getTime() === today.getTime();
+
+                // Bu güne denk gelen rezervasyonları bul
+                const dayRes = filteredRes.filter(r => {
+                    const ci = new Date(r.checkIn);
+                    const co = new Date(r.checkOut);
+                    ci.setHours(0, 0, 0, 0);
+                    co.setHours(0, 0, 0, 0);
+                    return cellDate >= ci && cellDate < co;
+                });
+
+                html += `<div class="cal-cell ${isToday ? 'cal-today' : ''} p-1">`;
+                html += `<span class="text-[10px] font-medium ${isToday ? 'text-emerald-700 font-bold' : 'text-gray-500'}">${day}</span>`;
+
+                // Maksimum 3 rezervasyon göster
+                dayRes.slice(0, 3).forEach(r => {
+                    const color = HomesbergAPI.getChannelColor(r.platform);
+                    const aptCode = (Analytics.data?.apartments?.find(a => a.id === r.apartmentId))?.code || '';
+                    const label = this._selectedAptId ? (r.guestName || r.platform) : (aptCode || r.platform);
+                    html += `<div class="cal-res-bar" style="background:${color}" title="${r.guestName || ''} | ${r.platform} | ${aptCode} | ${r.checkIn} → ${r.checkOut} | €${r.totalAmount}" onclick="CalendarView.showReservation('${r.id}')">${label}</div>`;
+                });
+                if (dayRes.length > 3) {
+                    html += `<div class="text-[9px] text-gray-400 text-center">+${dayRes.length - 3}</div>`;
+                }
+
+                html += '</div>';
+            }
+
+            // Sonraki ayın günleri (toplam 42 hücreye tamamla)
+            const totalCells = startDow + daysInMonth;
+            const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let i = 1; i <= remaining; i++) {
+                html += `<div class="cal-cell cal-outside p-1"><span class="text-[10px] text-gray-400">${i}</span></div>`;
+            }
+
+            grid.innerHTML = html;
+        },
+
+        _renderStats() {
+            const year = this._currentYear;
+            const month = this._currentMonth;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const filteredRes = this._selectedAptId
+                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId)
+                : this._reservations;
+
+            // Dolu gece sayısı (bu ay)
+            const bookedDays = new Set();
+            let totalRevenue = 0;
+            let totalNights = 0;
+
+            filteredRes.forEach(r => {
+                const ci = new Date(r.checkIn);
+                const co = new Date(r.checkOut);
+                ci.setHours(0, 0, 0, 0);
+                co.setHours(0, 0, 0, 0);
+
+                for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
+                    if (d.getFullYear() === year && d.getMonth() === month) {
+                        bookedDays.add(d.getDate() + '-' + r.apartmentId);
+                    }
+                }
+                // Bu aya düşen gelir
+                const resNights = Math.max(1, Math.round((co - ci) / (1000 * 60 * 60 * 24)));
+                const nightsInMonth = this._nightsInMonth(ci, co, year, month);
+                if (nightsInMonth > 0) {
+                    totalRevenue += (r.totalAmount / resNights) * nightsInMonth;
+                    totalNights += nightsInMonth;
+                }
+            });
+
+            // Kaç daire hesapta
+            const aptCount = this._selectedAptId ? 1 : new Set(filteredRes.map(r => r.apartmentId)).size || 1;
+            const occupancy = Math.round((bookedDays.size / (daysInMonth * aptCount)) * 100);
+            const avgRate = totalNights > 0 ? Math.round(totalRevenue / totalNights) : 0;
+
+            const fmt = v => '€' + v.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
+
+            const occ = document.getElementById('calOccupancy');
+            const bn = document.getElementById('calBookedNights');
+            const ar = document.getElementById('calAvgRate');
+            const er = document.getElementById('calExpRevenue');
+
+            if (occ) occ.textContent = '%' + occupancy;
+            if (bn) bn.textContent = bookedDays.size;
+            if (ar) ar.textContent = fmt(avgRate);
+            if (er) er.textContent = fmt(Math.round(totalRevenue));
+        },
+
+        _nightsInMonth(checkIn, checkOut, year, month) {
+            const monthStart = new Date(year, month, 1);
+            const monthEnd = new Date(year, month + 1, 0, 23, 59, 59);
+            const start = checkIn > monthStart ? checkIn : monthStart;
+            const end = checkOut <= monthEnd ? checkOut : new Date(year, month + 1, 1);
+            const diff = Math.round((end - start) / (1000 * 60 * 60 * 24));
+            return Math.max(0, diff);
+        },
+
+        showReservation(resId) {
+            const res = this._reservations.find(r => r.id === resId);
+            if (!res) return;
+            const aptCode = (Analytics.data?.apartments?.find(a => a.id === res.apartmentId))?.code || '-';
+            Analytics.showToast(
+                `${aptCode} | ${res.guestName || '-'} | ${res.platform}\n${res.checkIn} → ${res.checkOut} | €${res.totalAmount}`,
+                'info'
+            );
         }
     };
 
