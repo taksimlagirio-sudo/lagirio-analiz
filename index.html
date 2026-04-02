@@ -254,24 +254,22 @@
         body.owner-mode #calendar-content.owner-only-tab.active { display: block !important; }
 
         /* Airbnb-style Calendar */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
-        .cal-cell { min-height: 90px; border-bottom: 1px solid #f0f0f0; border-right: 1px solid #f0f0f0; position: relative; padding: 6px 8px; }
-        .cal-cell:nth-child(7n) { border-right: none; }
-        .cal-day-num { font-size: 13px; font-weight: 500; color: #484848; display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; }
-        .cal-cell.cal-today .cal-day-num { background: #222; color: #fff; font-weight: 700; }
-        .cal-cell.cal-outside { opacity: 0.35; }
-        .cal-cell.cal-outside .cal-day-num { color: #b0b0b0; }
-        .cal-cell.cal-blocked .cal-day-num { text-decoration: line-through; color: #ccc; }
-        .cal-res-row { position: relative; height: 28px; margin-top: 2px; }
-        .cal-bar { position: absolute; top: 0; height: 28px; border-radius: 20px; display: flex; align-items: center; padding: 0 10px; cursor: pointer; transition: filter 0.15s, transform 0.1s; overflow: hidden; white-space: nowrap; z-index: 2; }
-        .cal-bar:hover { filter: brightness(0.92); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-        .cal-bar-label { font-size: 11px; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-        .cal-bar-cont { background: #222; }
-        .cal-bar-start { border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 0; border-bottom-right-radius: 0; }
-        .cal-bar-end { border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-top-left-radius: 0; border-bottom-left-radius: 0; }
-        .cal-bar-mid { border-radius: 0; }
-        .cal-bar-solo { border-radius: 20px; }
-        .cal-weekday-header { font-size: 12px; font-weight: 600; color: #717171; text-align: center; padding: 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .cal-day { min-height: 44px; padding: 4px 0; text-align: center; position: relative; }
+        .cal-day-num { font-size: 14px; font-weight: 500; color: #484848; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; }
+        .cal-day.cal-today .cal-day-num { background: #222; color: #fff; font-weight: 700; }
+        .cal-day.cal-outside .cal-day-num { color: #ccc; }
+        .cal-day.cal-booked .cal-day-num { color: #999; }
+        .cal-bar-row { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 3px; }
+        .cal-bar { height: 30px; display: flex; align-items: center; padding: 0 12px; cursor: pointer; transition: filter 0.15s; overflow: hidden; white-space: nowrap; }
+        .cal-bar:hover { filter: brightness(0.88); }
+        .cal-bar-label { font-size: 12px; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; }
+        .cal-bar.cal-start { border-top-left-radius: 20px; border-bottom-left-radius: 20px; margin-left: 4px; }
+        .cal-bar.cal-end { border-top-right-radius: 20px; border-bottom-right-radius: 20px; margin-right: 4px; }
+        .cal-bar.cal-solo { border-radius: 20px; margin: 0 4px; }
+        .cal-bar.cal-mid { border-radius: 0; }
+        .cal-sep { border-bottom: 1px solid #f0f0f0; grid-column: 1 / -1; }
+        .cal-weekday-header { font-size: 12px; font-weight: 600; color: #717171; text-align: center; padding: 14px 0; text-transform: uppercase; letter-spacing: 0.5px; }
 
         body.owner-mode #revenueTrendSection {
             grid-column: 1 / -1;
@@ -5711,20 +5709,28 @@
 
         // Platform renk eşleştirmesi
         CHANNEL_COLORS: {
-            'airbnb': '#FF5A5F',
-            'Airbnb': '#FF5A5F',
-            'booking.com': '#003580',
-            'Booking.com': '#003580',
-            'bookingCom': '#003580',
-            'direct': '#10B981',
-            'Direct': '#10B981',
-            'Direkt': '#10B981'
+            'airbnb': '#FF385C', 'Airbnb': '#FF385C',
+            'booking.com': '#003580', 'Booking.com': '#003580', 'bookingCom': '#003580',
+            'vrbo': '#3C6EE5', 'VRBO': '#3C6EE5', 'Vrbo': '#3C6EE5',
+            'expedia': '#FBAF17', 'Expedia': '#FBAF17',
+            'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222',
+            'google': '#4285F4', 'Google': '#4285F4',
+            'tripadvisor': '#34E0A1', 'TripAdvisor': '#34E0A1'
         },
-        DEFAULT_COLOR: '#8B5CF6',
+        DEFAULT_COLOR: '#717171',
 
         getChannelColor(channelName) {
             if (!channelName) return this.DEFAULT_COLOR;
-            return this.CHANNEL_COLORS[channelName] || this.DEFAULT_COLOR;
+            if (this.CHANNEL_COLORS[channelName]) return this.CHANNEL_COLORS[channelName];
+            const p = channelName.toLowerCase();
+            if (p.includes('airbnb')) return '#FF385C';
+            if (p.includes('booking')) return '#003580';
+            if (p.includes('vrbo')) return '#3C6EE5';
+            if (p.includes('expedia')) return '#FBAF17';
+            if (p.includes('direct') || p.includes('direkt')) return '#222222';
+            if (p.includes('google')) return '#4285F4';
+            if (p.includes('tripadvisor')) return '#34E0A1';
+            return this.DEFAULT_COLOR;
         },
 
         // Homesberg reservation → Projeksiyon formatına dönüştür
@@ -16242,11 +16248,32 @@
         _loading: false,
         _initialized: false,
 
+        // Platform renkleri
         COLORS: {
-            'airbnb': '#222222', 'Airbnb': '#222222',
+            'airbnb': '#FF385C', 'Airbnb': '#FF385C',
             'booking.com': '#003580', 'Booking.com': '#003580', 'bookingCom': '#003580',
-            'direct': '#008A05', 'Direct': '#008A05', 'Direkt': '#008A05',
-            '_default': '#484848'
+            'vrbo': '#3C6EE5', 'VRBO': '#3C6EE5', 'Vrbo': '#3C6EE5',
+            'expedia': '#FBAF17', 'Expedia': '#FBAF17',
+            'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222',
+            'google': '#4285F4', 'Google': '#4285F4',
+            'tripadvisor': '#34E0A1', 'TripAdvisor': '#34E0A1', 'Tripadvisor': '#34E0A1',
+            '_default': '#717171'
+        },
+
+        _getColor(platform) {
+            if (!platform) return this.COLORS._default;
+            // Exact match first
+            if (this.COLORS[platform]) return this.COLORS[platform];
+            // Fuzzy match
+            const p = platform.toLowerCase();
+            if (p.includes('airbnb')) return '#FF385C';
+            if (p.includes('booking')) return '#003580';
+            if (p.includes('vrbo')) return '#3C6EE5';
+            if (p.includes('expedia')) return '#FBAF17';
+            if (p.includes('direct') || p.includes('direkt') || p.includes('kapi')) return '#222222';
+            if (p.includes('google')) return '#4285F4';
+            if (p.includes('tripadvisor')) return '#34E0A1';
+            return this.COLORS._default;
         },
 
         async init() {
@@ -16271,22 +16298,9 @@
             this._selectedAptId = document.getElementById('calApartmentSelect')?.value || '';
             this.render();
         },
-
-        prevMonth() {
-            this._currentMonth--;
-            if (this._currentMonth < 0) { this._currentMonth = 11; this._currentYear--; }
-            this.render();
-        },
-        nextMonth() {
-            this._currentMonth++;
-            if (this._currentMonth > 11) { this._currentMonth = 0; this._currentYear++; }
-            this.render();
-        },
-        goToday() {
-            this._currentYear = new Date().getFullYear();
-            this._currentMonth = new Date().getMonth();
-            this.render();
-        },
+        prevMonth() { this._currentMonth--; if (this._currentMonth < 0) { this._currentMonth = 11; this._currentYear--; } this.render(); },
+        nextMonth() { this._currentMonth++; if (this._currentMonth > 11) { this._currentMonth = 0; this._currentYear++; } this.render(); },
+        goToday() { this._currentYear = new Date().getFullYear(); this._currentMonth = new Date().getMonth(); this.render(); },
 
         async refresh() {
             HomesbergAPI.clearCache();
@@ -16316,16 +16330,12 @@
         _showNoMapping() {
             const grid = document.getElementById('calGrid');
             if (grid) {
-                grid.innerHTML = `<div style="grid-column:1/-1" class="flex flex-col items-center justify-center py-16">
+                grid.innerHTML = `<div class="flex flex-col items-center justify-center py-16">
                     <i data-lucide="link-2-off" class="w-12 h-12 text-gray-200 mb-4"></i>
                     <p class="text-sm text-gray-500 font-medium">Henüz Homesberg eşleştirmesi yapılmamış</p>
                     <p class="text-xs text-gray-400 mt-1">Yöneticinizden dairenizi bağlamasını isteyin</p></div>`;
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
-        },
-
-        _getColor(platform) {
-            return this.COLORS[platform] || this.COLORS._default;
         },
 
         render() {
@@ -16340,101 +16350,120 @@
             if (el) el.textContent = months[this._currentMonth] + ' ' + this._currentYear;
         },
 
-        // Build all calendar cells grouped by week rows, with spanning reservation bars
         _renderGrid() {
             const grid = document.getElementById('calGrid');
             if (!grid) return;
 
             const year = this._currentYear, month = this._currentMonth;
-            const firstDay = new Date(year, month, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const startDow = (firstDay.getDay() + 6) % 7;
+            const startDow = (new Date(year, month, 1).getDay() + 6) % 7; // Monday=0
             const today = new Date(); today.setHours(0,0,0,0);
 
             const filteredRes = this._selectedAptId
                 ? this._reservations.filter(r => r.apartmentId === this._selectedAptId) : this._reservations;
 
-            // Build flat cell array with dates
+            // Build cell array
             const cells = [];
-            // Previous month padding
             for (let i = 0; i < startDow; i++) {
                 const d = new Date(year, month, -(startDow - 1 - i));
-                cells.push({ date: d, day: d.getDate(), outside: true });
+                cells.push({ date: new Date(d), day: d.getDate(), outside: true });
             }
             for (let d = 1; d <= daysInMonth; d++) {
                 cells.push({ date: new Date(year, month, d), day: d, outside: false });
             }
-            // Next month padding
             while (cells.length % 7 !== 0) {
-                const d = new Date(year, month + 1, cells.length - startDow - daysInMonth + 1);
-                cells.push({ date: d, day: d.getDate(), outside: true });
+                const idx = cells.length - startDow - daysInMonth + 1;
+                const d = new Date(year, month + 1, idx);
+                cells.push({ date: new Date(d), day: d.getDate(), outside: true });
             }
 
-            // For each cell, find which reservations are active
-            cells.forEach(cell => {
-                cell.reservations = filteredRes.filter(r => {
+            // For each cell, find reservations
+            cells.forEach(c => {
+                c.reservations = filteredRes.filter(r => {
                     const ci = new Date(r.checkIn); ci.setHours(0,0,0,0);
                     const co = new Date(r.checkOut); co.setHours(0,0,0,0);
-                    return cell.date >= ci && cell.date < co;
+                    return c.date >= ci && c.date < co;
                 });
             });
 
-            // Render week by week
             let html = '';
-            for (let weekStart = 0; weekStart < cells.length; weekStart += 7) {
-                const week = cells.slice(weekStart, weekStart + 7);
 
-                // Day number row
-                html += '<div class="cal-grid" style="grid-template-columns:repeat(7,1fr)">';
-                week.forEach(cell => {
-                    const isToday = cell.date.getTime() === today.getTime();
-                    html += `<div class="cal-cell ${cell.outside ? 'cal-outside' : ''} ${isToday ? 'cal-today' : ''}">
-                        <span class="cal-day-num">${cell.day}</span>`;
+            // Render week by week
+            for (let wi = 0; wi < cells.length; wi += 7) {
+                const week = cells.slice(wi, wi + 7);
 
-                    // Reservation bars - find unique reservations that touch this week
-                    // We render bars at the week level to span columns
-                    html += '</div>';
+                // --- Day number row ---
+                html += '<div class="cal-week">';
+                week.forEach(c => {
+                    const isToday = c.date.getTime() === today.getTime();
+                    const booked = c.reservations.length > 0;
+                    html += `<div class="cal-day ${c.outside ? 'cal-outside' : ''} ${isToday ? 'cal-today' : ''} ${booked && !c.outside ? 'cal-booked' : ''}">
+                        <span class="cal-day-num">${c.day}</span></div>`;
                 });
                 html += '</div>';
 
-                // Collect unique reservations touching this week
-                const weekResSet = new Map();
-                week.forEach((cell, colIdx) => {
-                    cell.reservations.forEach(r => {
-                        if (!weekResSet.has(r.id)) {
-                            weekResSet.set(r.id, { res: r, startCol: colIdx, endCol: colIdx });
-                        } else {
-                            weekResSet.get(r.id).endCol = colIdx;
-                        }
+                // --- Reservation bar rows ---
+                // Collect unique reservations in this week
+                const weekRes = new Map();
+                week.forEach((c, col) => {
+                    c.reservations.forEach(r => {
+                        if (!weekRes.has(r.id)) weekRes.set(r.id, { res: r, startCol: col, endCol: col });
+                        else weekRes.get(r.id).endCol = col;
                     });
                 });
 
-                if (weekResSet.size > 0) {
-                    // Render bar overlay row
-                    html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);position:relative;margin-top:-36px;pointer-events:none;height:32px;margin-bottom:4px">';
-                    weekResSet.forEach(({ res, startCol, endCol }) => {
-                        const color = this._getColor(res.platform);
+                // Sort by startCol, then by length (longer first)
+                const barList = [...weekRes.values()].sort((a, b) => a.startCol - b.startCol || (b.endCol - b.startCol) - (a.endCol - a.startCol));
+
+                // Simple lane allocation to avoid overlaps
+                const lanes = [];
+                barList.forEach(bar => {
+                    let lane = lanes.findIndex(l => l <= bar.startCol);
+                    if (lane === -1) { lane = lanes.length; lanes.push(0); }
+                    lanes[lane] = bar.endCol + 1;
+                    bar.lane = lane;
+                });
+
+                const maxLanes = Math.max(lanes.length, 0);
+                for (let lane = 0; lane < maxLanes; lane++) {
+                    html += '<div class="cal-bar-row">';
+                    const laneBars = barList.filter(b => b.lane === lane);
+
+                    // Fill gaps with empty cells
+                    let col = 0;
+                    laneBars.forEach(bar => {
+                        // Empty spacer before this bar
+                        if (bar.startCol > col) {
+                            html += `<div style="grid-column:${col + 1}/span ${bar.startCol - col}"></div>`;
+                        }
+
+                        const { res, startCol, endCol } = bar;
                         const ci = new Date(res.checkIn); ci.setHours(0,0,0,0);
                         const co = new Date(res.checkOut); co.setHours(0,0,0,0);
+                        const lastNight = new Date(co.getTime() - 86400000);
                         const isStart = week[startCol].date.getTime() === ci.getTime();
-                        const isEnd = week[endCol].date.getTime() === new Date(co.getTime() - 86400000).getTime();
+                        const isEnd = week[endCol].date.getTime() === lastNight.getTime();
 
-                        let radiusClass = '';
-                        if (isStart && isEnd) radiusClass = 'cal-bar-solo';
-                        else if (isStart) radiusClass = 'cal-bar-start';
-                        else if (isEnd) radiusClass = 'cal-bar-end';
-                        else radiusClass = 'cal-bar-mid';
+                        let cls = 'cal-mid';
+                        if (isStart && isEnd) cls = 'cal-solo';
+                        else if (isStart) cls = 'cal-start';
+                        else if (isEnd) cls = 'cal-end';
 
                         const span = endCol - startCol + 1;
+                        const color = this._getColor(res.platform);
                         const label = res.guestName || res.platform;
-                        const aptCode = (Analytics.data?.apartments?.find(a => a.id === res.apartmentId))?.code || '';
-                        const guests = res.nights ? ` +${res.nights}` : '';
 
-                        html += `<div class="cal-bar ${radiusClass}" style="grid-column:${startCol + 1}/span ${span};background:${color};pointer-events:auto" onclick="CalendarView.showReservation('${res.id}')">
-                            <span class="cal-bar-label">${isStart ? label : ''}</span>
-                        </div>`;
+                        html += `<div class="cal-bar ${cls}" style="grid-column:${startCol + 1}/span ${span};background:${color}" onclick="CalendarView.showReservation('${res.id}')">
+                            <span class="cal-bar-label">${isStart ? label : ''}</span></div>`;
+
+                        col = endCol + 1;
                     });
                     html += '</div>';
+                }
+
+                // Week separator line
+                if (wi + 7 < cells.length) {
+                    html += '<div class="cal-week"><div class="cal-sep"></div></div>';
                 }
             }
 
@@ -16449,23 +16478,21 @@
 
             const bookedDays = new Set();
             let totalRevenue = 0, totalNights = 0;
-
             filteredRes.forEach(r => {
                 const ci = new Date(r.checkIn); ci.setHours(0,0,0,0);
                 const co = new Date(r.checkOut); co.setHours(0,0,0,0);
                 for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
                     if (d.getFullYear() === year && d.getMonth() === month) bookedDays.add(d.getDate() + '-' + r.apartmentId);
                 }
-                const resNights = Math.max(1, Math.round((co - ci) / 86400000));
+                const rn = Math.max(1, Math.round((co - ci) / 86400000));
                 const nim = this._nightsInMonth(ci, co, year, month);
-                if (nim > 0) { totalRevenue += (r.totalAmount / resNights) * nim; totalNights += nim; }
+                if (nim > 0) { totalRevenue += (r.totalAmount / rn) * nim; totalNights += nim; }
             });
 
             const aptCount = this._selectedAptId ? 1 : Math.max(1, new Set(filteredRes.map(r => r.apartmentId)).size);
             const occupancy = Math.round((bookedDays.size / (daysInMonth * aptCount)) * 100);
             const avgRate = totalNights > 0 ? Math.round(totalRevenue / totalNights) : 0;
             const fmt = v => '€' + v.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
-
             const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
             set('calOccupancy', '%' + occupancy);
             set('calBookedNights', bookedDays.size);
@@ -16474,14 +16501,11 @@
         },
 
         _nightsInMonth(ci, co, year, month) {
-            const ms = new Date(year, month, 1);
-            const me = new Date(year, month + 1, 1);
-            const s = ci > ms ? ci : ms;
-            const e = co < me ? co : me;
+            const s = ci > new Date(year, month, 1) ? ci : new Date(year, month, 1);
+            const e = co < new Date(year, month + 1, 1) ? co : new Date(year, month + 1, 1);
             return Math.max(0, Math.round((e - s) / 86400000));
         },
 
-        // Modal
         showReservation(resId) {
             const r = this._reservations.find(x => x.id === resId);
             if (!r) return;
@@ -16495,26 +16519,25 @@
             if (!content) return;
 
             content.innerHTML = `
-                <div style="background:${color}" class="px-6 py-5 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-white/70 text-xs font-medium mb-1">${r.platform}</p>
-                            <h3 class="text-lg font-bold">${r.guestName || 'Misafir'}</h3>
-                        </div>
-                        <button onclick="CalendarView.closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition">
-                            <i data-lucide="x" class="w-4 h-4 text-white"></i>
-                        </button>
-                    </div>
+                <div style="background:${color}" class="px-6 py-5 text-white relative">
+                    <button onclick="CalendarView.closeModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition">
+                        <i data-lucide="x" class="w-4 h-4 text-white"></i>
+                    </button>
+                    <p class="text-white/70 text-xs font-medium mb-1">${r.platform}</p>
+                    <h3 class="text-xl font-bold">${r.guestName || 'Misafir'}</h3>
+                    ${r.confirmationCode ? `<p class="text-white/60 text-xs mt-1">#${r.confirmationCode}</p>` : ''}
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-6 space-y-5">
                     <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
                         <div class="flex-1 text-center">
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider">Giriş</p>
                             <p class="text-sm font-bold text-gray-800 mt-1">${fmtDate(ci)}</p>
                         </div>
-                        <div class="flex flex-col items-center">
-                            <i data-lucide="arrow-right" class="w-4 h-4 text-gray-300"></i>
-                            <span class="text-[10px] text-gray-400 mt-0.5">${r.nights} gece</span>
+                        <div class="flex flex-col items-center px-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span class="text-xs font-bold text-gray-600">${r.nights}</span>
+                            </div>
+                            <span class="text-[9px] text-gray-400 mt-0.5">gece</span>
                         </div>
                         <div class="flex-1 text-center">
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider">Çıkış</p>
@@ -16523,31 +16546,26 @@
                     </div>
 
                     ${apt ? `<div class="flex items-center gap-3 px-1">
-                        <i data-lucide="home" class="w-4 h-4 text-gray-400"></i>
+                        <i data-lucide="home" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
                         <span class="text-sm text-gray-600">${apt.code}${apt.name ? ' — ' + apt.name : ''}</span>
                     </div>` : ''}
 
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-gray-50 rounded-xl p-3 text-center">
-                            <p class="text-[10px] text-gray-400 uppercase">Toplam</p>
-                            <p class="text-lg font-bold text-gray-900 mt-0.5">€${r.totalAmount?.toLocaleString('tr-TR') || '0'}</p>
+                        <div class="bg-gray-50 rounded-2xl p-4 text-center">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Toplam</p>
+                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.totalAmount?.toLocaleString('tr-TR') || '0'}</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-3 text-center">
-                            <p class="text-[10px] text-gray-400 uppercase">Gecelik</p>
-                            <p class="text-lg font-bold text-gray-900 mt-0.5">€${r.pricePerNight?.toLocaleString('tr-TR') || '0'}</p>
+                        <div class="bg-gray-50 rounded-2xl p-4 text-center">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Gecelik</p>
+                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.pricePerNight?.toLocaleString('tr-TR') || '0'}</p>
                         </div>
                     </div>
 
-                    ${r.confirmationCode ? `<div class="flex items-center gap-3 px-1">
-                        <i data-lucide="hash" class="w-4 h-4 text-gray-400"></i>
-                        <span class="text-sm text-gray-500">${r.confirmationCode}</span>
-                    </div>` : ''}
-
-                    ${r.cleaningFee > 0 || r.platformCommission > 0 ? `
-                    <div class="border-t border-gray-100 pt-3 space-y-2 px-1">
-                        ${r.cleaningFee > 0 ? `<div class="flex justify-between text-xs"><span class="text-gray-400">Temizlik</span><span class="text-gray-600">€${r.cleaningFee}</span></div>` : ''}
-                        ${r.platformCommission > 0 ? `<div class="flex justify-between text-xs"><span class="text-gray-400">Platform komisyonu</span><span class="text-gray-600">€${r.platformCommission}</span></div>` : ''}
-                        ${r.hostPayout > 0 ? `<div class="flex justify-between text-xs font-medium"><span class="text-gray-500">Net ödeme</span><span class="text-gray-800">€${r.hostPayout}</span></div>` : ''}
+                    ${(r.cleaningFee > 0 || r.platformCommission > 0 || r.hostPayout > 0) ? `
+                    <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5">
+                        ${r.cleaningFee > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">Temizlik ücreti</span><span class="text-gray-700">€${r.cleaningFee}</span></div>` : ''}
+                        ${r.platformCommission > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">Platform komisyonu</span><span class="text-gray-700 font-medium">-€${r.platformCommission}</span></div>` : ''}
+                        ${r.hostPayout > 0 ? `<div class="flex justify-between text-sm pt-2 border-t border-gray-200"><span class="text-gray-700 font-semibold">Net ödeme</span><span class="text-gray-900 font-bold">€${r.hostPayout}</span></div>` : ''}
                     </div>` : ''}
                 </div>`;
 
