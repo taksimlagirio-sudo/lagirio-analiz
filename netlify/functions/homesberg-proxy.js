@@ -1,6 +1,6 @@
 const { verifyUser, ok, err, adminClient } = require('./_shared');
 
-const HOMESBERG_API_URL = process.env.HOMESBERG_API_URL || 'https://api.homesberg.com';
+const HOMESBERG_API_URL = process.env.HOMESBERG_API_URL || 'https://public-api.homesberg.com/v1';
 const HOMESBERG_API_KEY = process.env.HOMESBERG_API_KEY;
 
 // İzin verilen endpoint'ler
@@ -17,23 +17,23 @@ function buildUrl(action, params = {}) {
     let path;
     switch (action) {
         case 'listings':
-            path = '/v1/listings';
+            path = '/listings';
             break;
         case 'reservations':
-            path = '/v1/reservations';
+            path = '/reservations';
             break;
         case 'reservation-detail':
-            path = `/v1/reservations/${params._id}`;
+            path = `/reservations/${params._id}`;
             delete params._id;
             break;
         case 'calendar':
-            path = '/v1/calendar';
+            path = '/calendar';
             break;
         case 'channel-types':
-            path = '/v1/reservations/channel-types';
+            path = '/reservations/channel-types';
             break;
         case 'currencies':
-            path = '/v1/reservations/currencies';
+            path = '/reservations/currencies';
             break;
         default:
             throw new Error('Geçersiz action: ' + action);
