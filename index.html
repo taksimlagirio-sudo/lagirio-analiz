@@ -16116,6 +16116,10 @@
         async loadListings() {
             try {
                 this._listings = await HomesbergAPI.getListings();
+                if (this._listings.length > 0) {
+                    console.log('[Homesberg] Listing alanları:', Object.keys(this._listings[0]));
+                    console.log('[Homesberg] İlk listing örneği:', JSON.stringify(this._listings[0], null, 2));
+                }
             } catch (e) {
                 this._listings = [];
                 Analytics.showToast('Listing\'ler yüklenemedi: ' + e.message, 'error');
@@ -16140,9 +16144,12 @@
                 return;
             }
 
-            const listingOptions = this._listings.map(l =>
-                `<option value="${l.id}">${l.title || l.name || 'Listing #' + l.id}</option>`
-            ).join('');
+            const listingOptions = this._listings.map(l => {
+                const code = l.internal_name || l.internal_code || '';
+                const title = l.title || l.name || 'Listing #' + l.id;
+                const label = code ? `[${code}] ${title}` : title;
+                return `<option value="${l.id}">${label}</option>`;
+            }).join('');
 
             container.innerHTML = apartments.map(apt => {
                 const currentListingId = apt.homesbergListingId || '';
@@ -16164,7 +16171,7 @@
                             ${listingOptions}
                         </select>
                     </div>
-                    ${matchedListing ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedListing.title || matchedListing.name || ''}</span>` : ''}
+                    ${matchedListing ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedListing.internal_name || matchedListing.internal_code || matchedListing.title || matchedListing.name || ''}</span>` : ''}
                 </div>`;
             }).join('');
 
