@@ -2031,7 +2031,7 @@
                 <!-- Takvim Grid -->
                 <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6">
                     <!-- Gün başlıkları -->
-                    <div class="cal-grid border-b border-gray-200">
+                    <div class="cal-week border-b border-gray-200">
                         <div class="cal-weekday-header" data-i18n="cal.mon">P</div>
                         <div class="cal-weekday-header" data-i18n="cal.tue">S</div>
                         <div class="cal-weekday-header" data-i18n="cal.wed">Ç</div>
@@ -2041,7 +2041,7 @@
                         <div class="cal-weekday-header" data-i18n="cal.sun">P</div>
                     </div>
                     <!-- Takvim hücreleri -->
-                    <div id="calGrid" class="cal-grid">
+                    <div id="calGrid">
                         <div class="col-span-7 flex items-center justify-center py-16" style="grid-column: 1 / -1">
                             <p class="text-sm text-gray-400" data-i18n="cal.loading">Takvim yükleniyor...</p>
                         </div>
@@ -5715,7 +5715,8 @@
             'expedia': '#FBAF17', 'Expedia': '#FBAF17',
             'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222',
             'google': '#4285F4', 'Google': '#4285F4',
-            'tripadvisor': '#34E0A1', 'TripAdvisor': '#34E0A1'
+            'tripadvisor': '#34E0A1', 'TripAdvisor': '#34E0A1',
+            'online': '#F97316', 'Online': '#F97316'
         },
         DEFAULT_COLOR: '#717171',
 
@@ -5730,6 +5731,7 @@
             if (p.includes('direct') || p.includes('direkt')) return '#222222';
             if (p.includes('google')) return '#4285F4';
             if (p.includes('tripadvisor')) return '#34E0A1';
+            if (p.includes('online') || p.includes('lagirio')) return '#F97316';
             return this.DEFAULT_COLOR;
         },
 
@@ -16257,14 +16259,13 @@
             'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222',
             'google': '#4285F4', 'Google': '#4285F4',
             'tripadvisor': '#34E0A1', 'TripAdvisor': '#34E0A1', 'Tripadvisor': '#34E0A1',
+            'online': '#F97316', 'Online': '#F97316',
             '_default': '#717171'
         },
 
         _getColor(platform) {
             if (!platform) return this.COLORS._default;
-            // Exact match first
             if (this.COLORS[platform]) return this.COLORS[platform];
-            // Fuzzy match
             const p = platform.toLowerCase();
             if (p.includes('airbnb')) return '#FF385C';
             if (p.includes('booking')) return '#003580';
@@ -16273,6 +16274,7 @@
             if (p.includes('direct') || p.includes('direkt') || p.includes('kapi')) return '#222222';
             if (p.includes('google')) return '#4285F4';
             if (p.includes('tripadvisor')) return '#34E0A1';
+            if (p.includes('online') || p.includes('lagirio')) return '#F97316';
             return this.COLORS._default;
         },
 
