@@ -2069,15 +2069,16 @@
                 </div>
             </div>
 
-            <!-- Reservation Detail Modal -->
-            <div id="calResModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)CalendarView.closeModal()">
-                <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up">
-                    <div id="calResModalContent"></div>
-                </div>
-            </div>
 
         </div>
     </div>
+    <!-- Reservation Detail Modal (body seviyesinde, tüm sayfayı kaplıyor) -->
+    <div id="calResModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center p-4" style="z-index:9999" onclick="if(event.target===this)CalendarView.closeModal()">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up">
+            <div id="calResModalContent"></div>
+        </div>
+    </div>
+
     <!-- Notification Modal -->
     <div id="notificationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden animate-slide-up">
@@ -16590,13 +16591,21 @@
                 </div>`;
 
             const modal = document.getElementById('calResModal');
-            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
         closeModal() {
             const modal = document.getElementById('calResModal');
-            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+            }
         }
     };
 
