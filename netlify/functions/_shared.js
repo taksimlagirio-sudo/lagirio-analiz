@@ -25,6 +25,52 @@ async function verifyAdmin(authHeader) {
     return user;
 }
 
+async function verifyUser(authHeader) {
+    const token = authHeader?.replace('Bearer ', '');
+    if (!token) throw Object.assign(new Error('Token gerekli'), { status: 401 });
+
+    const { data: { user }, error } = await adminClient.auth.getUser(token);
+    if (error || !user) throw Object.assign(new Error('Geçersiz token: ' + (error?.message || 'user null')), { status: 401 });
+
+    const { data: profile } = await adminClient
+        .from('user_profiles')
+        .select('role, is_active')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile?.is_active) {
+        throw Object.assign(new Error('Hesap aktif değil'), { status: 403 });
+    }
+
+    let apartmentIds = [];
+    let homesbergListingIds = [];
+
+    if (profile.role === 'owner') {
+        const { data: assignments } = await adminClient
+            .from('user_apartment_assignments')
+            .select('apartment_id')
+            .eq('user_id', user.id);
+
+        apartmentIds = (assignments || []).map(a => a.apartment_id);
+
+        if (apartmentIds.length > 0) {
+            const { data: apartments } = await adminClient
+                .from('apartments')
+                .select('data')
+                .in('id', apartmentIds);
+
+            homesbergListingIds = (apartments || [])
+                .map(a => {
+                    const d = typeof a.data === 'string' ? JSON.parse(a.data) : a.data;
+                    return d?.homesbergListingId;
+                })
+                .filter(Boolean);
+        }
+    }
+
+    return { user, profile, apartmentIds, homesbergListingIds };
+}
+
 function ok(body) {
     return {
         statusCode: 200,
@@ -41,4 +87,4 @@ function err(message, status = 500) {
     };
 }
 
-module.exports = { adminClient, verifyAdmin, ok, err };
+module.exports = { adminClient, verifyAdmin, verifyUser, ok, err };
