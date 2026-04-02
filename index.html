@@ -16145,9 +16145,9 @@
             }
 
             const listingOptions = this._listings.map(l => {
-                const code = l.internal_name || l.internal_code || '';
+                const nick = l.nickname || '';
                 const title = l.title || l.name || 'Listing #' + l.id;
-                const label = code ? `[${code}] ${title}` : title;
+                const label = nick ? `${nick} — ${title}` : title;
                 return `<option value="${l.id}">${label}</option>`;
             }).join('');
 
@@ -16171,7 +16171,7 @@
                             ${listingOptions}
                         </select>
                     </div>
-                    ${matchedListing ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedListing.internal_name || matchedListing.internal_code || matchedListing.title || matchedListing.name || ''}</span>` : ''}
+                    ${matchedListing ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedListing.nickname || matchedListing.name || ''}</span>` : ''}
                 </div>`;
             }).join('');
 
