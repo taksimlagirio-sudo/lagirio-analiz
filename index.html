@@ -2673,7 +2673,10 @@
                 'cal.legend': 'Platform Colors:',
                 'cal.other': 'Other',
                 'cal.available': 'Available',
-                'cal.mon': 'Mon', 'cal.tue': 'Tue', 'cal.wed': 'Wed', 'cal.thu': 'Thu', 'cal.fri': 'Fri', 'cal.sat': 'Sat', 'cal.sun': 'Sun',
+                'cal.mon': 'MON', 'cal.tue': 'TUE', 'cal.wed': 'WED', 'cal.thu': 'THU', 'cal.fri': 'FRI', 'cal.sat': 'SAT', 'cal.sun': 'SUN',
+                'cal.modal.guest': 'Guest', 'cal.modal.checkin': 'Check-in', 'cal.modal.checkout': 'Check-out',
+                'cal.modal.nights': 'nights', 'cal.modal.total': 'Total', 'cal.modal.nightly': 'Nightly',
+                'cal.modal.cleaning': 'Cleaning fee', 'cal.modal.commission': 'Platform commission', 'cal.modal.payout': 'Net payout',
                 // Homesberg
                 'dm.homesberg.title': 'Homesberg Mapping',
                 'dm.homesberg.desc': 'Map apartments to Homesberg PMS listings. This mapping is used for calendar and projection data.',
@@ -3383,7 +3386,10 @@
                 'cal.legend': 'Цвета платформ:',
                 'cal.other': 'Другое',
                 'cal.available': 'Свободно',
-                'cal.mon': 'Пн', 'cal.tue': 'Вт', 'cal.wed': 'Ср', 'cal.thu': 'Чт', 'cal.fri': 'Пт', 'cal.sat': 'Сб', 'cal.sun': 'Вс',
+                'cal.mon': 'ПН', 'cal.tue': 'ВТ', 'cal.wed': 'СР', 'cal.thu': 'ЧТ', 'cal.fri': 'ПТ', 'cal.sat': 'СБ', 'cal.sun': 'ВС',
+                'cal.modal.guest': 'Гость', 'cal.modal.checkin': 'Заезд', 'cal.modal.checkout': 'Выезд',
+                'cal.modal.nights': 'ночей', 'cal.modal.total': 'Итого', 'cal.modal.nightly': 'За ночь',
+                'cal.modal.cleaning': 'Уборка', 'cal.modal.commission': 'Комиссия платформы', 'cal.modal.payout': 'Чистая выплата',
                 'dm.homesberg.title': 'Привязка Homesberg',
                 'dm.homesberg.desc': 'Привяжите квартиры к листингам PMS Homesberg.',
                 'proj.homesberg.pull': 'Получить будущие бронирования из Homesberg',
@@ -4093,6 +4099,9 @@
                 'cal.other': 'أخرى',
                 'cal.available': 'متاح',
                 'cal.mon': 'اثن', 'cal.tue': 'ثلا', 'cal.wed': 'أرب', 'cal.thu': 'خمي', 'cal.fri': 'جمع', 'cal.sat': 'سبت', 'cal.sun': 'أحد',
+                'cal.modal.guest': 'ضيف', 'cal.modal.checkin': 'تسجيل الوصول', 'cal.modal.checkout': 'تسجيل المغادرة',
+                'cal.modal.nights': 'ليالي', 'cal.modal.total': 'المجموع', 'cal.modal.nightly': 'لكل ليلة',
+                'cal.modal.cleaning': 'رسوم التنظيف', 'cal.modal.commission': 'عمولة المنصة', 'cal.modal.payout': 'صافي الدفع',
                 'dm.homesberg.title': 'ربط Homesberg',
                 'dm.homesberg.desc': 'اربط الشقق بقوائم Homesberg PMS.',
                 'proj.homesberg.pull': 'جلب الحجوزات المستقبلية من Homesberg',
@@ -16347,7 +16356,7 @@
         },
 
         _renderTitle() {
-            const months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+            const months = I18n.getMonthNames('full');
             const el = document.getElementById('calMonthTitle');
             if (el) el.textContent = months[this._currentMonth] + ' ' + this._currentYear;
         },
@@ -16515,7 +16524,9 @@
             const color = this._getColor(r.platform);
             const ci = new Date(r.checkIn);
             const co = new Date(r.checkOut);
-            const fmtDate = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+            const locale = I18n.currentLang === 'ar' ? 'ar-SA' : I18n.currentLang === 'ru' ? 'ru-RU' : I18n.currentLang === 'en' ? 'en-GB' : 'tr-TR';
+            const fmtDate = d => d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+            const _t = (k, fb) => I18n.t(k, fb);
 
             const content = document.getElementById('calResModalContent');
             if (!content) return;
@@ -16526,23 +16537,23 @@
                         <i data-lucide="x" class="w-4 h-4 text-white"></i>
                     </button>
                     <p class="text-white/70 text-xs font-medium mb-1">${r.platform}</p>
-                    <h3 class="text-xl font-bold">${r.guestName || 'Misafir'}</h3>
+                    <h3 class="text-xl font-bold">${r.guestName || _t('cal.modal.guest', 'Misafir')}</h3>
                     ${r.confirmationCode ? `<p class="text-white/60 text-xs mt-1">#${r.confirmationCode}</p>` : ''}
                 </div>
                 <div class="p-6 space-y-5">
                     <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
                         <div class="flex-1 text-center">
-                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Giriş</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">${_t('cal.modal.checkin', 'Giriş')}</p>
                             <p class="text-sm font-bold text-gray-800 mt-1">${fmtDate(ci)}</p>
                         </div>
                         <div class="flex flex-col items-center px-3">
                             <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                                 <span class="text-xs font-bold text-gray-600">${r.nights}</span>
                             </div>
-                            <span class="text-[9px] text-gray-400 mt-0.5">gece</span>
+                            <span class="text-[9px] text-gray-400 mt-0.5">${_t('cal.modal.nights', 'gece')}</span>
                         </div>
                         <div class="flex-1 text-center">
-                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Çıkış</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">${_t('cal.modal.checkout', 'Çıkış')}</p>
                             <p class="text-sm font-bold text-gray-800 mt-1">${fmtDate(co)}</p>
                         </div>
                     </div>
@@ -16554,20 +16565,20 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-gray-50 rounded-2xl p-4 text-center">
-                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Toplam</p>
-                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.totalAmount?.toLocaleString('tr-TR') || '0'}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">${_t('cal.modal.total', 'Toplam')}</p>
+                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.totalAmount?.toLocaleString(locale) || '0'}</p>
                         </div>
                         <div class="bg-gray-50 rounded-2xl p-4 text-center">
-                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Gecelik</p>
-                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.pricePerNight?.toLocaleString('tr-TR') || '0'}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">${_t('cal.modal.nightly', 'Gecelik')}</p>
+                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.pricePerNight?.toLocaleString(locale) || '0'}</p>
                         </div>
                     </div>
 
                     ${(r.cleaningFee > 0 || r.platformCommission > 0 || r.hostPayout > 0) ? `
                     <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5">
-                        ${r.cleaningFee > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">Temizlik ücreti</span><span class="text-gray-700">€${r.cleaningFee}</span></div>` : ''}
-                        ${r.platformCommission > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">Platform komisyonu</span><span class="text-gray-700 font-medium">-€${r.platformCommission}</span></div>` : ''}
-                        ${r.hostPayout > 0 ? `<div class="flex justify-between text-sm pt-2 border-t border-gray-200"><span class="text-gray-700 font-semibold">Net ödeme</span><span class="text-gray-900 font-bold">€${r.hostPayout}</span></div>` : ''}
+                        ${r.cleaningFee > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">${_t('cal.modal.cleaning', 'Temizlik ücreti')}</span><span class="text-gray-700">€${r.cleaningFee}</span></div>` : ''}
+                        ${r.platformCommission > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">${_t('cal.modal.commission', 'Platform komisyonu')}</span><span class="text-gray-700 font-medium">-€${r.platformCommission}</span></div>` : ''}
+                        ${r.hostPayout > 0 ? `<div class="flex justify-between text-sm pt-2 border-t border-gray-200"><span class="text-gray-700 font-semibold">${_t('cal.modal.payout', 'Net ödeme')}</span><span class="text-gray-900 font-bold">€${r.hostPayout}</span></div>` : ''}
                     </div>` : ''}
                 </div>`;
 
