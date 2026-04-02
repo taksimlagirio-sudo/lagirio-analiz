@@ -9203,6 +9203,14 @@
                 console.log('🔍 === GİDER DEBUG BİTİŞ ===');
             }
             
+            // Homesberg eşleştirmelerini Supabase'den yükle (ilk yüklemede)
+            if (!this._homesbergMappingsLoaded) {
+                this._homesbergMappingsLoaded = true;
+                HomesbergMapping._loadFromSupabase().then(() => {
+                    try { localStorage.setItem('lagirioAnalyticsData', JSON.stringify(this.data)); } catch(e) {}
+                }).catch(e => console.warn('Homesberg mapping yükleme hatası:', e));
+            }
+
             // Veriyi localStorage'a kaydet (sayfa yenilemede korunsun)
             try {
                 localStorage.setItem('lagirioAnalyticsData', JSON.stringify(this.data));
@@ -16066,6 +16074,7 @@
                 return;
             }
             this._initialized = true;
+            await this._loadFromSupabase();
             await this.testConnection();
             await this.loadListings();
             this.render();
@@ -16180,15 +16189,68 @@
                 return;
             }
 
-            // Veriyi kaydet (Supabase + localStorage)
-            if (typeof DataManager !== 'undefined' && DataManager.saveCurrentData) {
-                await DataManager.saveCurrentData();
-            } else {
-                localStorage.setItem('lagirioData', JSON.stringify(Analytics.data));
-            }
+            // Supabase'e kaydet
+            await this._saveToSupabase();
+
+            // localStorage'a da yedek kaydet
+            try { localStorage.setItem('lagirioAnalyticsData', JSON.stringify(Analytics.data)); } catch(e) {}
 
             this.render();
             Analytics.showToast(changed + ' eşleştirme kaydedildi', 'success');
+        },
+
+        // Supabase'den eşleştirmeleri yükle ve Analytics.data.apartments'a uygula
+        async _loadFromSupabase() {
+            try {
+                const { data } = await supabase
+                    .from('pms_data')
+                    .select('apt_mapping')
+                    .eq('id', 'singleton')
+                    .maybeSingle();
+
+                const mappings = data?.apt_mapping?._homesberg;
+                if (mappings && typeof mappings === 'object') {
+                    const apartments = Analytics.data?.apartments || [];
+                    for (const [aptId, listingId] of Object.entries(mappings)) {
+                        const apt = apartments.find(a => a.id === aptId);
+                        if (apt && listingId) apt.homesbergListingId = listingId;
+                    }
+                }
+            } catch (e) {
+                console.warn('Homesberg eşleştirmeleri Supabase\'den yüklenemedi:', e.message);
+            }
+        },
+
+        // Eşleştirmeleri Supabase'e kaydet (apt_mapping JSONB içinde _homesberg key)
+        async _saveToSupabase() {
+            try {
+                const apartments = Analytics.data?.apartments || [];
+                const mappings = {};
+                apartments.forEach(apt => {
+                    if (apt.homesbergListingId) {
+                        mappings[apt.id] = apt.homesbergListingId;
+                    }
+                });
+
+                // Mevcut apt_mapping'i çek, _homesberg key'ini güncelle
+                const { data: existing } = await supabase
+                    .from('pms_data')
+                    .select('apt_mapping')
+                    .eq('id', 'singleton')
+                    .maybeSingle();
+
+                const aptMapping = existing?.apt_mapping || {};
+                aptMapping._homesberg = mappings;
+
+                await supabase.from('pms_data').upsert({
+                    id: 'singleton',
+                    apt_mapping: aptMapping,
+                    updated_at: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error('Homesberg eşleştirmeleri kaydedilemedi:', e.message);
+                Analytics.showToast('Supabase kaydetme hatası: ' + e.message, 'error');
+            }
         }
     };
 
