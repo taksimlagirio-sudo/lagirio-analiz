@@ -5385,6 +5385,181 @@
     };
 
     // ============================================================
+    // HOMESBERG API CLIENT
+    // ============================================================
+    const HomesbergAPI = {
+        CACHE_TTL: 60 * 60 * 1000, // 1 saat
+        _cache: {},
+
+        // Proxy üzerinden Homesberg API çağrısı
+        async call(action, params = {}) {
+            const cacheKey = JSON.stringify({ action, params });
+            const cached = this._getCached(cacheKey);
+            if (cached) return cached;
+
+            const session = await supabase.auth.getSession();
+            const token = session?.data?.session?.access_token;
+            if (!token) throw new Error('Oturum bulunamadı');
+
+            const res = await fetch('/.netlify/functions/homesberg-proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ action, params })
+            });
+
+            if (res.status === 429) {
+                throw new Error('Rate limit aşıldı, lütfen biraz bekleyin');
+            }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || `API hatası: ${res.status}`);
+            }
+
+            const data = await res.json();
+            this._setCache(cacheKey, data);
+            return data;
+        },
+
+        // Tüm sayfalı veriyi çek (pagination)
+        async callPaginated(action, params = {}, maxPages = 20) {
+            const allResults = [];
+            let offset = 0;
+            const limit = 100;
+
+            for (let page = 0; page < maxPages; page++) {
+                const data = await this.call(action, { ...params, limit, offset });
+
+                if (data.results && Array.isArray(data.results)) {
+                    allResults.push(...data.results);
+                    if (!data.next || data.results.length < limit) break;
+                    offset += limit;
+                    // Sonraki sayfa için cache bypass
+                    const nextKey = JSON.stringify({ action, params: { ...params, limit, offset } });
+                    delete this._cache[nextKey];
+                } else if (Array.isArray(data)) {
+                    // channel-types, currencies gibi liste endpoint'leri
+                    return data;
+                } else {
+                    break;
+                }
+            }
+            return allResults;
+        },
+
+        // Listing'leri getir (admin eşleştirme için)
+        async getListings() {
+            return this.callPaginated('listings');
+        },
+
+        // Rezervasyonları getir (tarih filtreli)
+        async getReservations(listingId, fromDate, toDate) {
+            const params = { listing__id: listingId };
+            if (fromDate) params.check_in__gte = fromDate;
+            if (toDate) params.check_in__lte = toDate;
+            params.ordering = 'check_in';
+            return this.callPaginated('reservations', params);
+        },
+
+        // Tek rezervasyon detayı
+        async getReservation(id) {
+            return this.call('reservation-detail', { _id: id });
+        },
+
+        // Takvim verisi (360 gün ileri)
+        async getCalendar(listingId) {
+            return this.callPaginated('calendar', { listing__id: listingId });
+        },
+
+        // Kanal tipleri
+        async getChannelTypes() {
+            return this.call('channel-types');
+        },
+
+        // Para birimleri
+        async getCurrencies() {
+            return this.call('currencies');
+        },
+
+        // Platform renk eşleştirmesi
+        CHANNEL_COLORS: {
+            'airbnb': '#FF5A5F',
+            'Airbnb': '#FF5A5F',
+            'booking.com': '#003580',
+            'Booking.com': '#003580',
+            'bookingCom': '#003580',
+            'direct': '#10B981',
+            'Direct': '#10B981',
+            'Direkt': '#10B981'
+        },
+        DEFAULT_COLOR: '#8B5CF6',
+
+        getChannelColor(channelName) {
+            if (!channelName) return this.DEFAULT_COLOR;
+            return this.CHANNEL_COLORS[channelName] || this.DEFAULT_COLOR;
+        },
+
+        // Homesberg reservation → Projeksiyon formatına dönüştür
+        toProjectionFormat(hbRes, apartmentId) {
+            const checkIn = new Date(hbRes.check_in);
+            const checkOut = new Date(hbRes.check_out);
+            const nights = Math.max(1, Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+            const total = parseFloat(hbRes.accommodation_fare) || 0;
+            return {
+                id: 'hb-' + hbRes.id,
+                apartmentId,
+                guestName: hbRes.guests?.[0] ? `${hbRes.guests[0].first_name || ''} ${hbRes.guests[0].last_name || ''}`.trim() : '',
+                checkIn: hbRes.check_in,
+                checkOut: hbRes.check_out,
+                nights,
+                platform: hbRes.channel_name || 'Bilinmiyor',
+                totalAmount: total,
+                pricePerNight: nights > 0 ? Math.round(total / nights * 100) / 100 : 0,
+                cleaningFee: parseFloat(hbRes.cleaning_fee) || 0,
+                platformCommission: parseFloat(hbRes.channel_commission) || 0,
+                hostPayout: parseFloat(hbRes.host_payout) || 0,
+                currency: hbRes.currency_code || 'EUR',
+                confirmationCode: hbRes.confirmation_code || '',
+                status: hbRes.status, // 1=Confirmed, 2=Canceled
+                statusName: hbRes.status_name || '',
+                source: 'homesberg'
+            };
+        },
+
+        // Apartment ID ↔ Homesberg Listing ID eşleştirmesi
+        getListingIdForApartment(apartmentId) {
+            const apt = Analytics.data?.apartments?.find(a => a.id === apartmentId);
+            return apt?.homesbergListingId || null;
+        },
+
+        getApartmentIdForListing(listingId) {
+            const apt = Analytics.data?.apartments?.find(a => a.homesbergListingId === String(listingId));
+            return apt?.id || null;
+        },
+
+        // Cache yönetimi
+        _getCached(key) {
+            const entry = this._cache[key];
+            if (!entry) return null;
+            if (Date.now() - entry.ts > this.CACHE_TTL) {
+                delete this._cache[key];
+                return null;
+            }
+            return entry.data;
+        },
+
+        _setCache(key, data) {
+            this._cache[key] = { data, ts: Date.now() };
+        },
+
+        clearCache() {
+            this._cache = {};
+        }
+    };
+
+    // ============================================================
     // PROJECTION - Gelecek Rezervasyon Projeksiyonu & Lagirio Kazancı
     // ============================================================
     const Projection = {
