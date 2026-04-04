@@ -2019,9 +2019,6 @@
                         <button onclick="CalendarView.goToday()" class="text-xs px-3 py-1.5 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition font-medium ml-2" data-i18n="cal.today">Bugün</button>
                     </div>
                     <div class="flex items-center gap-3">
-                        <select id="calApartmentSelect" onchange="CalendarView.onApartmentChange()" class="px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white">
-                            <option value="" data-i18n="cal.all.apartments">Tüm Daireler</option>
-                        </select>
                         <button onclick="CalendarView.refresh()" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 rounded-full transition" title="Yenile">
                             <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i>
                         </button>
@@ -9071,6 +9068,11 @@
                         if (this.charts.costEfficiency) {
                             this.createEfficiencyCharts();
                         }
+                    }
+
+                    // Takvim sekmesi aktifse filtreyi uygula
+                    if (this.currentMainTab === 'calendar') {
+                        CalendarView.onFilterChange();
                     }
 
                     lucide.createIcons();
@@ -16263,7 +16265,6 @@
         _currentYear: new Date().getFullYear(),
         _currentMonth: new Date().getMonth(),
         _reservations: [],
-        _selectedAptId: '',
         _loading: false,
         _initialized: false,
 
@@ -16298,24 +16299,20 @@
         async init() {
             if (this._initialized) return;
             this._initialized = true;
-            this._populateApartmentSelect();
             await this.loadData();
         },
 
-        _populateApartmentSelect() {
-            const sel = document.getElementById('calApartmentSelect');
-            if (!sel) return;
-            const apartments = Analytics.data?.apartments || [];
-            const ownerApts = apartments.filter(a => a.homesbergListingId);
-            sel.innerHTML = '<option value="">' + I18n.t('cal.all.apartments', 'Tüm Daireler') + '</option>';
-            ownerApts.forEach(a => {
-                sel.innerHTML += `<option value="${a.id}">${a.code || a.id}${a.name ? ' - ' + a.name : ''}</option>`;
-            });
+        // Soldaki daire filtresi tarafından çağrılır
+        onFilterChange() {
+            this.render();
         },
 
-        onApartmentChange() {
-            this._selectedAptId = document.getElementById('calApartmentSelect')?.value || '';
-            this.render();
+        _getSelectedAptIds() {
+            const all = Analytics._ownerAllApartmentIds || [];
+            const sel = Analytics._ownerSelectedIds || [];
+            // Tümü seçiliyse boş dön (filtreleme yok)
+            if (sel.length === 0 || sel.length === all.length) return [];
+            return sel;
         },
         prevMonth() { this._currentMonth--; if (this._currentMonth < 0) { this._currentMonth = 11; this._currentYear--; } this.render(); },
         nextMonth() { this._currentMonth++; if (this._currentMonth > 11) { this._currentMonth = 0; this._currentYear++; } this.render(); },
@@ -16378,8 +16375,9 @@
             const startDow = (new Date(year, month, 1).getDay() + 6) % 7; // Monday=0
             const today = new Date(); today.setHours(0,0,0,0);
 
-            const filteredRes = this._selectedAptId
-                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId) : this._reservations;
+            const selIds = this._getSelectedAptIds();
+            const filteredRes = selIds.length > 0
+                ? this._reservations.filter(r => selIds.includes(r.apartmentId)) : this._reservations;
 
             // Build cell array
             const cells = [];
@@ -16492,8 +16490,9 @@
         _renderStats() {
             const year = this._currentYear, month = this._currentMonth;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const filteredRes = this._selectedAptId
-                ? this._reservations.filter(r => r.apartmentId === this._selectedAptId) : this._reservations;
+            const selIds = this._getSelectedAptIds();
+            const filteredRes = selIds.length > 0
+                ? this._reservations.filter(r => selIds.includes(r.apartmentId)) : this._reservations;
 
             const bookedDays = new Set();
             let totalRevenue = 0, totalNights = 0;
@@ -16508,7 +16507,7 @@
                 if (nim > 0) { totalRevenue += (r.totalAmount / rn) * nim; totalNights += nim; }
             });
 
-            const aptCount = this._selectedAptId ? 1 : Math.max(1, new Set(filteredRes.map(r => r.apartmentId)).size);
+            const aptCount = selIds.length > 0 ? selIds.length : Math.max(1, new Set(filteredRes.map(r => r.apartmentId)).size);
             const occupancy = Math.round((bookedDays.size / (daysInMonth * aptCount)) * 100);
             const avgRate = totalNights > 0 ? Math.round(totalRevenue / totalNights) : 0;
             const fmt = v => '€' + v.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
