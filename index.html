@@ -16206,12 +16206,12 @@
                 return;
             }
 
-            const roomOptions = this._rooms.map(r => {
-                const label = r.roomType ? `${r.roomNo} — ${r.roomType}` : r.roomNo;
+            const datalistOptions = this._rooms.map(r => {
+                const label = r.roomType ? `${r.roomNo} (${r.roomType})` : r.roomNo;
                 return `<option value="${r.roomNo}">${label}</option>`;
             }).join('');
 
-            container.innerHTML = apartments.map(apt => {
+            container.innerHTML = `<datalist id="elektraRoomNoDatalist">${datalistOptions}</datalist>` + apartments.map(apt => {
                 const currentRoomNo = apt.elektrawebRoomNo || '';
                 const matchedRoom = this._rooms.find(r => String(r.roomNo) === String(currentRoomNo));
                 const statusClass = currentRoomNo ? 'border-green-200 bg-green-50/50' : 'border-gray-200';
@@ -16226,34 +16226,23 @@
                         </div>
                     </div>
                     <div class="flex-1">
-                        <select data-apt-id="${apt.id}" class="hb-listing-select w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200">
-                            <option value="">-- Oda Seç --</option>
-                            ${roomOptions}
-                        </select>
+                        <input type="text" data-apt-id="${apt.id}" list="elektraRoomNoDatalist" value="${currentRoomNo}" placeholder="Room-no yazin (orn: 304)" class="hb-listing-input w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                     </div>
                     ${matchedRoom ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedRoom.roomType || ''}</span>` : ''}
                 </div>`;
             }).join('');
 
-            // Mevcut eşleştirmeleri seç
-            apartments.forEach(apt => {
-                if (apt.elektrawebRoomNo) {
-                    const sel = container.querySelector(`select[data-apt-id="${apt.id}"]`);
-                    if (sel) sel.value = apt.elektrawebRoomNo;
-                }
-            });
-
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
         async saveAll() {
-            const selects = document.querySelectorAll('.hb-listing-select');
+            const inputs = document.querySelectorAll('.hb-listing-input');
             const apartments = Analytics.data?.apartments || [];
             let changed = 0;
 
-            selects.forEach(sel => {
-                const aptId = sel.dataset.aptId;
-                const roomNo = sel.value;
+            inputs.forEach(inp => {
+                const aptId = inp.dataset.aptId;
+                const roomNo = (inp.value || '').trim();
                 const apt = apartments.find(a => a.id === aptId);
                 if (apt) {
                     const oldVal = apt.elektrawebRoomNo || '';
