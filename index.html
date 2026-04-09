@@ -16616,6 +16616,12 @@
             const fmtDate = d => d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
             const _t = (k, fb) => I18n.t(k, fb);
 
+            // Rezervasyonun kendi para birimini kullan (EUR hardcode degil)
+            const curSymbols = { EUR: '\u20ac', USD: '$', TRY: '\u20ba', GBP: '\u00a3', RUB: '\u20bd', AED: 'AED ' };
+            const curCode = String(r.currency || 'EUR').toUpperCase();
+            const curSym = curSymbols[curCode] || (curCode + ' ');
+            const fmtMoney = (amount) => curSym + (Number(amount) || 0).toLocaleString(locale);
+
             const content = document.getElementById('calResModalContent');
             if (!content) return;
 
@@ -16654,19 +16660,19 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-gray-50 rounded-2xl p-4 text-center">
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider">${_t('cal.modal.total', 'Toplam')}</p>
-                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.totalAmount?.toLocaleString(locale) || '0'}</p>
+                            <p class="text-xl font-bold text-gray-900 mt-1">${fmtMoney(r.totalAmount)}</p>
                         </div>
                         <div class="bg-gray-50 rounded-2xl p-4 text-center">
                             <p class="text-[10px] text-gray-400 uppercase tracking-wider">${_t('cal.modal.nightly', 'Gecelik')}</p>
-                            <p class="text-xl font-bold text-gray-900 mt-1">€${r.pricePerNight?.toLocaleString(locale) || '0'}</p>
+                            <p class="text-xl font-bold text-gray-900 mt-1">${fmtMoney(r.pricePerNight)}</p>
                         </div>
                     </div>
 
                     ${(r.cleaningFee > 0 || r.platformCommission > 0 || r.hostPayout > 0) ? `
                     <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5">
-                        ${r.cleaningFee > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">${_t('cal.modal.cleaning', 'Temizlik ücreti')}</span><span class="text-gray-700">€${r.cleaningFee}</span></div>` : ''}
-                        ${r.platformCommission > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">${_t('cal.modal.commission', 'Platform komisyonu')}</span><span class="text-gray-700 font-medium">-€${r.platformCommission}</span></div>` : ''}
-                        ${r.hostPayout > 0 ? `<div class="flex justify-between text-sm pt-2 border-t border-gray-200"><span class="text-gray-700 font-semibold">${_t('cal.modal.payout', 'Net ödeme')}</span><span class="text-gray-900 font-bold">€${r.hostPayout}</span></div>` : ''}
+                        ${r.cleaningFee > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">${_t('cal.modal.cleaning', 'Temizlik ücreti')}</span><span class="text-gray-700">${fmtMoney(r.cleaningFee)}</span></div>` : ''}
+                        ${r.platformCommission > 0 ? `<div class="flex justify-between text-sm"><span class="text-gray-500">${_t('cal.modal.commission', 'Platform komisyonu')}</span><span class="text-gray-700 font-medium">-${fmtMoney(r.platformCommission)}</span></div>` : ''}
+                        ${r.hostPayout > 0 ? `<div class="flex justify-between text-sm pt-2 border-t border-gray-200"><span class="text-gray-700 font-semibold">${_t('cal.modal.payout', 'Net ödeme')}</span><span class="text-gray-900 font-bold">${fmtMoney(r.hostPayout)}</span></div>` : ''}
                     </div>` : ''}
                 </div>`;
 
