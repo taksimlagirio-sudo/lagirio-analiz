@@ -181,8 +181,38 @@ function extractContactName(eRes) {
 /**
  * Reservation list'i ortak projeksiyon/takvim formatina cevirir.
  * Owner tarafi bu formati bekler: id, room-no, check-in, check-out, channel, price.
+ * ElektraWeb read response'unda currency/price alanlarinin tam adi belgelenmemis,
+ * bu yuzden birden fazla olasi isim icin fallback zinciri kullaniyoruz.
  */
+function pickFirst(obj, keys) {
+    for (const k of keys) {
+        const v = obj?.[k];
+        if (v != null && v !== '') return v;
+    }
+    return undefined;
+}
+
 function toCommonFormat(eRes) {
+    const currency = pickFirst(eRes, [
+        'reservation-currency',
+        'currency-code',
+        'currency',
+        'reservation-currency-code'
+    ]) || 'EUR';
+
+    const totalPrice = pickFirst(eRes, [
+        'reservation-total-price',
+        'total-price',
+        'reservation-total',
+        'totalPrice'
+    ]) || 0;
+
+    const paidPrice = pickFirst(eRes, [
+        'reservation-paid-price',
+        'paid-price',
+        'reservation-paid'
+    ]) || 0;
+
     return {
         id: eRes['reservation-id'] || eRes.id,
         roomNo: String(eRes['room-no'] || '').trim(),
@@ -194,12 +224,29 @@ function toCommonFormat(eRes) {
         contactName: extractContactName(eRes),
         agency: normalizeAgency(eRes.agency),
         voucherNo: eRes['voucher-no'] || '',
-        totalPrice: eRes['reservation-total-price'] || 0,
-        paidPrice: eRes['reservation-paid-price'] || 0,
-        currency: eRes['reservation-currency'] || 'EUR',
+        totalPrice: Number(totalPrice) || 0,
+        paidPrice: Number(paidPrice) || 0,
+        currency: String(currency).toUpperCase(),
         status: eRes['reservation-status'] || 'Reservation',
         rateType: eRes['rate-type'] || ''
     };
+}
+
+// Tek seferlik debug: ilk reservation-list cagrisinda ham field isimlerini
+// konsola bas, gercek API sozlesmesini netlify fonksiyon loglarindan dogrulayalim.
+// Field isimleri onaylandiktan sonra bu bloku kaldirabiliriz.
+let _debugLoggedSample = false;
+function logSampleOnce(list) {
+    if (_debugLoggedSample) return;
+    if (!Array.isArray(list) || list.length === 0) return;
+    const sample = list[0];
+    const keys = Object.keys(sample || {});
+    const currencyKeys = keys.filter(k => /currenc/i.test(k));
+    const priceKeys = keys.filter(k => /price|total|amount/i.test(k));
+    console.log('[elektra-proxy] sample reservation keys:', keys.join(','));
+    console.log('[elektra-proxy] currency-like fields:', currencyKeys.map(k => `${k}=${sample[k]}`).join(' | '));
+    console.log('[elektra-proxy] price-like fields:', priceKeys.map(k => `${k}=${sample[k]}`).join(' | '));
+    _debugLoggedSample = true;
 }
 
 exports.handler = async (event) => {
@@ -248,7 +295,9 @@ exports.handler = async (event) => {
             queryParams['reservation-status'] = params.reservationStatus || 'Reservation';
 
             const data = await elektraGet(hotelPath('/reservation-list'), queryParams);
-            let reservations = normalizeReservationList(data).map(toCommonFormat);
+            const rawList = normalizeReservationList(data);
+            logSampleOnce(rawList);
+            let reservations = rawList.map(toCommonFormat);
 
             // Owner filtering: only show reservations for mapped room-no's
             if (profile.role === 'owner') {
