@@ -9920,6 +9920,7 @@
                 USD: usdRate,
                 '$': usdRate,
                 TL: 1 / tlRate,
+                TRY: 1 / tlRate,
                 '₺': 1 / tlRate
             };
             
@@ -16585,7 +16586,15 @@
                 }
                 const rn = Math.max(1, Math.round((co - ci) / 86400000));
                 const nim = this._nightsInMonth(ci, co, year, month);
-                if (nim > 0) { totalRevenue += (r.totalAmount / rn) * nim; totalNights += nim; }
+                if (nim > 0) {
+                    // Gelir her zaman EUR'da — rezervasyonun kendi para birimini
+                    // sitedeki kur ile cevir (TRY/USD → EUR).
+                    const amountEUR = Analytics.convertToEUR
+                        ? Analytics.convertToEUR(r.totalAmount || 0, r.currency || 'EUR')
+                        : (r.totalAmount || 0);
+                    totalRevenue += (amountEUR / rn) * nim;
+                    totalNights += nim;
+                }
             });
 
             const aptCount = selIds.length > 0 ? selIds.length : Math.max(1, new Set(filteredRes.map(r => r.apartmentId)).size);
