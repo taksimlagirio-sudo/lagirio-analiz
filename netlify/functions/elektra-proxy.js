@@ -151,6 +151,34 @@ function normalizeReservationList(data) {
 }
 
 /**
+ * ElektraWeb'de bazi kanallar numerik kod olarak geliyor (ornek: 1101).
+ * Bilinen kodlari insan okunabilir isimle eslestiriyoruz.
+ */
+const AGENCY_CODE_MAP = {
+    '1101': 'Expedia'
+};
+
+function normalizeAgency(agency) {
+    if (agency == null) return '';
+    const s = String(agency).trim();
+    if (!s) return '';
+    return AGENCY_CODE_MAP[s] || s;
+}
+
+/**
+ * Guest name'i cikartir: once contact-name, bos ise guest-list[0]'dan compose et.
+ * Backend'deki extractGuestInfo ile ayni davranis.
+ */
+function extractContactName(eRes) {
+    let name = String(eRes['contact-name'] || '').trim();
+    if (!name && Array.isArray(eRes['guest-list']) && eRes['guest-list'].length > 0) {
+        const g = eRes['guest-list'][0] || {};
+        name = [g.name, g.surname].filter(Boolean).join(' ').trim();
+    }
+    return name;
+}
+
+/**
  * Reservation list'i ortak projeksiyon/takvim formatina cevirir.
  * Owner tarafi bu formati bekler: id, room-no, check-in, check-out, channel, price.
  */
@@ -163,8 +191,8 @@ function toCommonFormat(eRes) {
         checkOut: eRes['check-out-date'] || eRes['check-out'],
         adultCount: eRes['adult-count'] || 0,
         childCount: (eRes['elder-child-count'] || 0) + (eRes['younger-child-count'] || 0) + (eRes['baby-count'] || 0),
-        contactName: eRes['contact-name'] || '',
-        agency: eRes.agency || '',
+        contactName: extractContactName(eRes),
+        agency: normalizeAgency(eRes.agency),
         voucherNo: eRes['voucher-no'] || '',
         totalPrice: eRes['reservation-total-price'] || 0,
         paidPrice: eRes['reservation-paid-price'] || 0,
