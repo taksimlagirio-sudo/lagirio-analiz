@@ -886,8 +886,8 @@
                 <button onclick="DataManager.switchTab('users')" id="dmTab-users" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600">
                     <i data-lucide="users" class="w-4 h-4"></i> Kullanıcılar
                 </button>
-                <button onclick="DataManager.switchTab('homesberg')" id="dmTab-homesberg" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600">
-                    <i data-lucide="link" class="w-4 h-4"></i> Homesberg
+                <button onclick="DataManager.switchTab('elektra')" id="dmTab-elektra" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600">
+                    <i data-lucide="link" class="w-4 h-4"></i> ElektraWeb
                 </button>
             </div>
 
@@ -975,14 +975,14 @@
                 </div>
             </div>
 
-            <!-- ===== Homesberg Mapping Panel ===== -->
-            <div id="dmPanel-homesberg" class="glass rounded-2xl shadow-2xl p-8 hidden">
+            <!-- ===== ElektraWeb Mapping Panel ===== -->
+            <div id="dmPanel-elektra" class="glass rounded-2xl shadow-2xl p-8 hidden">
                 <div class="text-center mb-6">
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                         <i data-lucide="link" class="w-8 h-8 text-blue-600"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="dm.homesberg.title">Homesberg Eslestirme</h3>
-                    <p class="text-sm text-gray-500" data-i18n="dm.homesberg.desc">Daireleri Homesberg PMS listing'leriyle eslestirin. Bu eslestirme takvim ve projeksiyon verisi icin kullanilir.</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="dm.elektra.title">ElektraWeb Eslestirme</h3>
+                    <p class="text-sm text-gray-500" data-i18n="dm.elektra.desc">Daireleri ElektraWeb PMS odalariyla eslestirin. Bu eslestirme takvim ve projeksiyon verisi icin kullanilir.</p>
                 </div>
 
                 <!-- Bağlantı durumu -->
@@ -992,7 +992,7 @@
                             <div id="hbStatusDot" class="w-3 h-3 rounded-full bg-gray-300"></div>
                             <span id="hbStatusText" class="text-sm text-gray-500">Bağlantı kontrol ediliyor...</span>
                         </div>
-                        <button onclick="HomesbergMapping.testConnection()" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
+                        <button onclick="ElektraMapping.testConnection()" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
                             <i data-lucide="wifi" class="w-3 h-3"></i> Bağlantıyı Test Et
                         </button>
                     </div>
@@ -1007,11 +1007,16 @@
                 </div>
 
                 <!-- Kaydet butonu -->
-                <div class="mt-6 flex items-center justify-between">
-                    <button onclick="HomesbergMapping.refreshListings()" class="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center gap-1.5">
-                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Listing'leri Yenile
-                    </button>
-                    <button onclick="HomesbergMapping.saveAll()" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
+                <div class="mt-6 flex items-center justify-between flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <button onclick="ElektraMapping.refreshRooms()" class="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center gap-1.5">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Odalari Yenile
+                        </button>
+                        <button onclick="ElektraMapping.autoMatch()" class="px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition flex items-center gap-1.5">
+                            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Otomatik Eslestir
+                        </button>
+                    </div>
+                    <button onclick="ElektraMapping.saveAll()" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
                         <i data-lucide="save" class="w-3.5 h-3.5"></i> Eslestirmeleri Kaydet
                     </button>
                 </div>
@@ -1808,16 +1813,16 @@
                         </div>
                     </div>
 
-                    <!-- Homesberg'den Çek -->
+                    <!-- ElektraWeb'den Çek -->
                     <div class="mt-4 pt-4 border-t border-gray-100">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <i data-lucide="cloud-download" class="w-4 h-4 text-blue-500"></i>
-                                <span class="text-sm font-medium text-gray-700" data-i18n="proj.homesberg.pull">Homesberg'den Gelecek Rezervasyonları Çek</span>
+                                <span class="text-sm font-medium text-gray-700" data-i18n="proj.elektra.pull">ElektraWeb'den Gelecek Rezervasyonları Çek</span>
                             </div>
-                            <button onclick="Projection.fetchFromHomesberg()" id="projHbFetchBtn" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
+                            <button onclick="Projection.fetchFromElektra()" id="projHbFetchBtn" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                <span data-i18n="proj.homesberg.fetch">Homesberg'den Çek</span>
+                                <span data-i18n="proj.elektra.fetch">ElektraWeb'den Çek</span>
                             </button>
                         </div>
                         <div id="projHbStatus" class="mt-2 hidden text-xs text-gray-500"></div>
@@ -2675,11 +2680,11 @@
                 'cal.modal.guest': 'Guest', 'cal.modal.checkin': 'Check-in', 'cal.modal.checkout': 'Check-out',
                 'cal.modal.nights': 'nights', 'cal.modal.total': 'Total', 'cal.modal.nightly': 'Nightly',
                 'cal.modal.cleaning': 'Cleaning fee', 'cal.modal.commission': 'Platform commission', 'cal.modal.payout': 'Net payout',
-                // Homesberg
-                'dm.homesberg.title': 'Homesberg Mapping',
-                'dm.homesberg.desc': 'Map apartments to Homesberg PMS listings. This mapping is used for calendar and projection data.',
-                'proj.homesberg.pull': 'Pull Future Reservations from Homesberg',
-                'proj.homesberg.fetch': 'Pull from Homesberg',
+                // ElektraWeb
+                'dm.elektra.title': 'ElektraWeb Mapping',
+                'dm.elektra.desc': 'Map apartments to ElektraWeb PMS rooms. This mapping is used for calendar and projection data.',
+                'proj.elektra.pull': 'Pull Future Reservations from ElektraWeb',
+                'proj.elektra.fetch': 'Pull from ElektraWeb',
                 // Analysis subtabs
                 'tab.analysis.system': 'System Analysis',
                 'tab.analysis.apartment': 'Apartment Analysis',
@@ -3388,10 +3393,10 @@
                 'cal.modal.guest': 'Гость', 'cal.modal.checkin': 'Заезд', 'cal.modal.checkout': 'Выезд',
                 'cal.modal.nights': 'ночей', 'cal.modal.total': 'Итого', 'cal.modal.nightly': 'За ночь',
                 'cal.modal.cleaning': 'Уборка', 'cal.modal.commission': 'Комиссия платформы', 'cal.modal.payout': 'Чистая выплата',
-                'dm.homesberg.title': 'Привязка Homesberg',
-                'dm.homesberg.desc': 'Привяжите квартиры к листингам PMS Homesberg.',
-                'proj.homesberg.pull': 'Получить будущие бронирования из Homesberg',
-                'proj.homesberg.fetch': 'Получить из Homesberg',
+                'dm.elektra.title': 'Привязка ElektraWeb',
+                'dm.elektra.desc': 'Привяжите квартиры к номерам PMS ElektraWeb.',
+                'proj.elektra.pull': 'Получить будущие бронирования из ElektraWeb',
+                'proj.elektra.fetch': 'Получить из ElektraWeb',
                 // Analysis subtabs
                 'tab.analysis.system': 'Системный анализ',
                 'tab.analysis.apartment': 'Анализ квартир',
@@ -4100,10 +4105,10 @@
                 'cal.modal.guest': 'ضيف', 'cal.modal.checkin': 'تسجيل الوصول', 'cal.modal.checkout': 'تسجيل المغادرة',
                 'cal.modal.nights': 'ليالي', 'cal.modal.total': 'المجموع', 'cal.modal.nightly': 'لكل ليلة',
                 'cal.modal.cleaning': 'رسوم التنظيف', 'cal.modal.commission': 'عمولة المنصة', 'cal.modal.payout': 'صافي الدفع',
-                'dm.homesberg.title': 'ربط Homesberg',
-                'dm.homesberg.desc': 'اربط الشقق بقوائم Homesberg PMS.',
-                'proj.homesberg.pull': 'جلب الحجوزات المستقبلية من Homesberg',
-                'proj.homesberg.fetch': 'جلب من Homesberg',
+                'dm.elektra.title': 'ربط ElektraWeb',
+                'dm.elektra.desc': 'اربط الشقق بغرف ElektraWeb PMS.',
+                'proj.elektra.pull': 'جلب الحجوزات المستقبلية من ElektraWeb',
+                'proj.elektra.fetch': 'جلب من ElektraWeb',
                 // Analysis subtabs
                 'tab.analysis.system': 'تحليل النظام',
                 'tab.analysis.apartment': 'تحليل الشقق',
@@ -4870,7 +4875,7 @@
                 btn.className = 'dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200';
             });
 
-            const colors = { upload: 'emerald', drive: 'blue', users: 'purple', homesberg: 'blue' };
+            const colors = { upload: 'emerald', drive: 'blue', users: 'purple', elektra: 'blue' };
             const color = colors[tabName] || 'emerald';
             const activeTab = document.getElementById('dmTab-' + tabName);
             if (activeTab) {
@@ -4878,7 +4883,7 @@
             }
 
             // Panelleri göster/gizle
-            ['upload', 'drive', 'users', 'homesberg'].forEach(panel => {
+            ['upload', 'drive', 'users', 'elektra'].forEach(panel => {
                 const el = document.getElementById('dmPanel-' + panel);
                 if (el) el.classList.toggle('hidden', panel !== tabName);
             });
@@ -4888,8 +4893,8 @@
                 UserManager._populateApartmentSelect();
             }
 
-            if (tabName === 'homesberg') {
-                HomesbergMapping.init();
+            if (tabName === 'elektra') {
+                ElektraMapping.init();
             }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -5616,13 +5621,13 @@
     };
 
     // ============================================================
-    // HOMESBERG API CLIENT
+    // ELEKTRAWEB API CLIENT
     // ============================================================
-    const HomesbergAPI = {
+    const ElektraAPI = {
         CACHE_TTL: 60 * 60 * 1000, // 1 saat
         _cache: {},
 
-        // Proxy üzerinden Homesberg API çağrısı
+        // Proxy uzerinden ElektraWeb API cagrisi
         async call(action, params = {}) {
             const cacheKey = JSON.stringify({ action, params });
             const cached = this._getCached(cacheKey);
@@ -5632,7 +5637,7 @@
             const token = session?.data?.session?.access_token;
             if (!token) throw new Error('Oturum bulunamadı');
 
-            const res = await fetch('/.netlify/functions/homesberg-proxy', {
+            const res = await fetch('/.netlify/functions/elektra-proxy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -5654,76 +5659,44 @@
             return data;
         },
 
-        // Tüm sayfalı veriyi çek (pagination)
-        async callPaginated(action, params = {}, maxPages = 20) {
-            const allResults = [];
-            let offset = 0;
-            const limit = 100;
-
-            for (let page = 0; page < maxPages; page++) {
-                const data = await this.call(action, { ...params, limit, offset });
-
-                if (data.results && Array.isArray(data.results)) {
-                    allResults.push(...data.results);
-                    if (!data.next || data.results.length < limit) break;
-                    offset += limit;
-                    // Sonraki sayfa için cache bypass
-                    const nextKey = JSON.stringify({ action, params: { ...params, limit, offset } });
-                    delete this._cache[nextKey];
-                } else if (Array.isArray(data)) {
-                    // channel-types, currencies gibi liste endpoint'leri
-                    return data;
-                } else {
-                    break;
-                }
-            }
-            return allResults;
+        // Baglanti testi
+        async testConnection() {
+            return this.call('test-connection');
         },
 
-        // Listing'leri getir (admin eşleştirme için)
-        async getListings() {
-            return this.callPaginated('listings');
+        // Oda listesi (admin eslestirme icin) - rezervasyonlardan turetiliyor
+        async getRooms() {
+            const data = await this.call('room-list');
+            return data.rooms || [];
         },
 
-        // Rezervasyonları getir (tarih filtreli)
-        async getReservations(listingId, fromDate, toDate) {
-            const params = { listing__id: listingId };
-            if (fromDate) params.check_in__gte = fromDate;
-            if (toDate) params.check_in__lte = toDate;
-            params.ordering = 'check_in';
-            return this.callPaginated('reservations', params);
+        // Rezervasyonlari getir (tarih filtreli)
+        async getReservations(fromDate, toDate, reservationStatus = 'Reservation') {
+            const params = {};
+            if (fromDate) params.fromCheckIn = fromDate;
+            if (toDate) params.toCheckIn = toDate;
+            params.reservationStatus = reservationStatus;
+            const data = await this.call('reservations', params);
+            return data.reservations || [];
         },
 
-        // Tek rezervasyon detayı
-        async getReservation(id) {
-            return this.call('reservation-detail', { _id: id });
+        // In-house (su an otelde olan) rezervasyonlar
+        async getInHouseReservations() {
+            const data = await this.call('reservations-in-house');
+            return data.reservations || [];
         },
 
-        // Takvim verisi (360 gün ileri)
-        async getCalendar(listingId) {
-            return this.callPaginated('calendar', { listing__id: listingId });
-        },
-
-        // Kanal tipleri
-        async getChannelTypes() {
-            return this.call('channel-types');
-        },
-
-        // Para birimleri
-        async getCurrencies() {
-            return this.call('currencies');
-        },
-
-        // Platform renk eşleştirmesi
+        // Platform renk eslestirmesi
         CHANNEL_COLORS: {
             'airbnb': '#FF385C', 'Airbnb': '#FF385C',
-            'booking.com': '#003580', 'Booking.com': '#003580', 'bookingCom': '#003580',
+            'booking.com': '#003580', 'Booking.com': '#003580', 'Booking': '#003580',
             'vrbo': '#3C6EE5', 'VRBO': '#3C6EE5', 'Vrbo': '#3C6EE5',
             'expedia': '#FBAF17', 'Expedia': '#FBAF17',
-            'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222',
+            'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222', 'Walk-in': '#222222',
             'google': '#4285F4', 'Google': '#4285F4',
             'tripadvisor': '#34E0A1', 'TripAdvisor': '#34E0A1',
-            'online': '#F97316', 'Online': '#F97316'
+            'lagirio': '#F97316', 'Lagirio': '#F97316',
+            'elektraweb': '#717171', 'ElektraWeb': '#717171'
         },
         DEFAULT_COLOR: '#717171',
 
@@ -5735,48 +5708,49 @@
             if (p.includes('booking')) return '#003580';
             if (p.includes('vrbo')) return '#3C6EE5';
             if (p.includes('expedia')) return '#FBAF17';
-            if (p.includes('direct') || p.includes('direkt')) return '#222222';
+            if (p.includes('direct') || p.includes('direkt') || p.includes('walk')) return '#222222';
             if (p.includes('google')) return '#4285F4';
             if (p.includes('tripadvisor')) return '#34E0A1';
-            if (p.includes('online') || p.includes('lagirio')) return '#F97316';
+            if (p.includes('lagirio')) return '#F97316';
             return this.DEFAULT_COLOR;
         },
 
-        // Homesberg reservation → Projeksiyon formatına dönüştür
-        toProjectionFormat(hbRes, apartmentId) {
-            const checkIn = new Date(hbRes.check_in);
-            const checkOut = new Date(hbRes.check_out);
+        // ElektraWeb rezervasyonu → Projeksiyon formatina donustur
+        // Proxy zaten camelCase alanlara cevirmis halde gonderiyor.
+        toProjectionFormat(eRes, apartmentId) {
+            const checkIn = new Date(eRes.checkIn);
+            const checkOut = new Date(eRes.checkOut);
             const nights = Math.max(1, Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
-            const total = parseFloat(hbRes.accommodation_fare) || 0;
+            const total = parseFloat(eRes.totalPrice) || 0;
             return {
-                id: 'hb-' + hbRes.id,
+                id: 'ew-' + eRes.id,
                 apartmentId,
-                guestName: hbRes.guests?.[0] ? `${hbRes.guests[0].first_name || ''} ${hbRes.guests[0].last_name || ''}`.trim() : '',
-                checkIn: hbRes.check_in,
-                checkOut: hbRes.check_out,
+                guestName: eRes.contactName || '',
+                checkIn: eRes.checkIn,
+                checkOut: eRes.checkOut,
                 nights,
-                platform: hbRes.channel_name || 'Bilinmiyor',
+                platform: eRes.agency || 'Direct',
                 totalAmount: total,
                 pricePerNight: nights > 0 ? Math.round(total / nights * 100) / 100 : 0,
-                cleaningFee: parseFloat(hbRes.cleaning_fee) || 0,
-                platformCommission: parseFloat(hbRes.channel_commission) || 0,
-                hostPayout: parseFloat(hbRes.host_payout) || 0,
-                currency: hbRes.currency_code || 'EUR',
-                confirmationCode: hbRes.confirmation_code || '',
-                status: hbRes.status, // 1=Confirmed, 2=Canceled
-                statusName: hbRes.status_name || '',
-                source: 'homesberg'
+                cleaningFee: 0,
+                platformCommission: 0,
+                hostPayout: total,
+                currency: eRes.currency || 'EUR',
+                confirmationCode: eRes.voucherNo || '',
+                status: eRes.status === 'Cancelled' ? 2 : 1, // 1=Confirmed, 2=Canceled
+                statusName: eRes.status || '',
+                source: 'elektraweb'
             };
         },
 
-        // Apartment ID ↔ Homesberg Listing ID eşleştirmesi
-        getListingIdForApartment(apartmentId) {
+        // Apartment ↔ ElektraWeb room-no eslestirmesi
+        getRoomNoForApartment(apartmentId) {
             const apt = Analytics.data?.apartments?.find(a => a.id === apartmentId);
-            return apt?.homesbergListingId || null;
+            return apt?.elektrawebRoomNo || null;
         },
 
-        getApartmentIdForListing(listingId) {
-            const apt = Analytics.data?.apartments?.find(a => a.homesbergListingId === String(listingId));
+        getApartmentIdForRoomNo(roomNo) {
+            const apt = Analytics.data?.apartments?.find(a => String(a.elektrawebRoomNo) === String(roomNo));
             return apt?.id || null;
         },
 
@@ -5978,36 +5952,42 @@
             this.calculate();
         },
 
-        async fetchFromHomesberg() {
+        async fetchFromElektra() {
             const btn = document.getElementById('projHbFetchBtn');
             const status = document.getElementById('projHbStatus');
             if (btn) btn.disabled = true;
-            if (status) { status.classList.remove('hidden'); status.textContent = 'Homesberg\'den veri çekiliyor...'; }
+            if (status) { status.classList.remove('hidden'); status.textContent = 'ElektraWeb\'den veri çekiliyor...'; }
 
             try {
                 const apartments = Analytics.data?.apartments || [];
-                const mappedApts = apartments.filter(a => a.homesbergListingId);
+                const mappedApts = apartments.filter(a => a.elektrawebRoomNo);
 
                 if (mappedApts.length === 0) {
-                    Analytics.showToast('Homesberg eşleştirmesi yapılmış daire bulunamadı. Veri Yönetimi > Homesberg sekmesinden eşleştirme yapın.', 'warning');
+                    Analytics.showToast('ElektraWeb eşleştirmesi yapılmış daire bulunamadı. Veri Yönetimi > ElektraWeb sekmesinden eşleştirme yapın.', 'warning');
                     return;
                 }
 
                 const today = new Date();
                 const fromDate = today.toISOString().split('T')[0];
+                const toDate = new Date(today.getFullYear(), today.getMonth() + 12, 28).toISOString().split('T')[0];
+
+                // ElektraWeb'den tum rezervasyonlari tek seferde cek
+                const allReservations = await ElektraAPI.getReservations(fromDate, toDate, 'Reservation');
+
+                // room-no → apartmentId lookup
+                const roomToApt = new Map();
+                mappedApts.forEach(a => roomToApt.set(String(a.elektrawebRoomNo), a.id));
 
                 const allRes = [];
-                for (const apt of mappedApts) {
-                    const reservations = await HomesbergAPI.getReservations(apt.homesbergListingId, fromDate);
-                    reservations.forEach(r => {
-                        if (r.status !== 2) { // Canceled hariç
-                            allRes.push(HomesbergAPI.toProjectionFormat(r, apt.id));
-                        }
-                    });
+                for (const r of allReservations) {
+                    const aptId = roomToApt.get(String(r.roomNo));
+                    if (aptId) {
+                        allRes.push(ElektraAPI.toProjectionFormat(r, aptId));
+                    }
                 }
 
-                // Mevcut PMS rezervasyonlarından Homesberg olanları çıkar, yenileri ekle
-                this.reservations = this.reservations.filter(r => r.source !== 'homesberg');
+                // Mevcut PMS rezervasyonlarindan ElektraWeb olanlari cikar, yenileri ekle
+                this.reservations = this.reservations.filter(r => r.source !== 'elektraweb' && r.source !== 'homesberg');
                 this.reservations.push(...allRes);
 
                 this.save();
@@ -6015,16 +5995,16 @@
                 this.calculate();
 
                 if (status) {
-                    status.textContent = `${allRes.length} gelecek rezervasyon Homesberg'den çekildi (${mappedApts.length} daire).`;
+                    status.textContent = `${allRes.length} gelecek rezervasyon ElektraWeb'den çekildi (${mappedApts.length} daire).`;
                     status.className = 'mt-2 text-xs text-green-600';
                 }
-                Analytics.showToast(`Homesberg: ${allRes.length} gelecek rezervasyon yüklendi`, 'success');
+                Analytics.showToast(`ElektraWeb: ${allRes.length} gelecek rezervasyon yüklendi`, 'success');
             } catch (e) {
                 if (status) {
                     status.textContent = 'Hata: ' + e.message;
                     status.className = 'mt-2 text-xs text-red-600';
                 }
-                Analytics.showToast('Homesberg hatası: ' + e.message, 'error');
+                Analytics.showToast('ElektraWeb hatası: ' + e.message, 'error');
             } finally {
                 if (btn) btn.disabled = false;
             }
@@ -16079,10 +16059,10 @@
     };
 
     // ============================================================
-    // HOMESBERG MAPPING - Admin Daire ↔ Listing Eşleştirme
+    // ELEKTRAWEB MAPPING - Admin Daire ↔ Room-No Eşleştirme
     // ============================================================
-    const HomesbergMapping = {
-        _listings: [],
+    const ElektraMapping = {
+        _rooms: [], // { roomNo, roomType }
         _initialized: false,
 
         async init() {
@@ -16092,7 +16072,7 @@
             }
             this._initialized = true;
             await this.testConnection();
-            await this.loadListings();
+            await this.loadRooms();
             this.render();
         },
 
@@ -16105,9 +16085,9 @@
             text.textContent = 'Test ediliyor...';
 
             try {
-                await HomesbergAPI.call('channel-types');
+                await ElektraAPI.testConnection();
                 dot.className = 'w-3 h-3 rounded-full bg-green-500';
-                text.textContent = 'Homesberg bağlantısı aktif';
+                text.textContent = 'ElektraWeb bağlantısı aktif';
                 text.className = 'text-sm text-green-600';
             } catch (e) {
                 dot.className = 'w-3 h-3 rounded-full bg-red-500';
@@ -16116,25 +16096,104 @@
             }
         },
 
-        async loadListings() {
+        async loadRooms() {
             try {
-                this._listings = await HomesbergAPI.getListings();
-                if (this._listings.length > 0) {
-                    console.log('[Homesberg] Listing alanları:', Object.keys(this._listings[0]));
-                    console.log('[Homesberg] İlk listing örneği:', JSON.stringify(this._listings[0], null, 2));
+                this._rooms = await ElektraAPI.getRooms();
+                if (this._rooms.length > 0) {
+                    console.log('[ElektraWeb] Bulunan odalar:', this._rooms.length);
                 }
             } catch (e) {
-                this._listings = [];
-                Analytics.showToast('Listing\'ler yüklenemedi: ' + e.message, 'error');
+                this._rooms = [];
+                Analytics.showToast('Odalar yüklenemedi: ' + e.message, 'error');
             }
         },
 
-        async refreshListings() {
-            HomesbergAPI.clearCache();
-            this._listings = [];
-            await this.loadListings();
+        async refreshRooms() {
+            ElektraAPI.clearCache();
+            this._rooms = [];
+            await this.loadRooms();
             this.render();
-            Analytics.showToast('Listing\'ler yenilendi', 'success');
+            Analytics.showToast('Oda listesi yenilendi', 'success');
+        },
+
+        // Daire kodu ile oda-no arasinda basit bir yakinlik sezgisi ile
+        // otomatik eslestirme yapar. Mevcut eslesmeleri bozmaz, sadece
+        // bos kalanlari doldurur. Kullanici sonra "Kaydet" ile onaylar.
+        autoMatch() {
+            const apartments = Analytics.data?.apartments || [];
+            if (apartments.length === 0) {
+                Analytics.showToast('Daire verisi yok', 'warning');
+                return;
+            }
+            if (this._rooms.length === 0) {
+                Analytics.showToast('Once oda listesini yukleyin', 'warning');
+                return;
+            }
+
+            // Kullanimda olan oda-no'lar (baska daireye atanmis)
+            const usedRoomNos = new Set(
+                apartments.filter(a => a.elektrawebRoomNo).map(a => String(a.elektrawebRoomNo))
+            );
+
+            const normalize = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const digits = (s) => String(s || '').replace(/\D/g, '');
+
+            // Eslestirilebilir oda havuzu (henuz kullanilmamislar)
+            const availableRooms = this._rooms.filter(r => !usedRoomNos.has(String(r.roomNo)));
+
+            let matched = 0;
+            const candidates = [];
+
+            for (const apt of apartments) {
+                if (apt.elektrawebRoomNo) continue; // zaten eslesmis, atlama
+
+                const aptCode = normalize(apt.code || apt.id);
+                const aptName = normalize(apt.name);
+                const aptDigits = digits(apt.code || '') || digits(apt.name || '') || digits(apt.id || '');
+
+                let bestMatch = null;
+                let bestScore = 0;
+
+                for (const room of availableRooms) {
+                    if (usedRoomNos.has(String(room.roomNo))) continue;
+                    const rn = normalize(room.roomNo);
+                    const rnDigits = digits(room.roomNo);
+                    if (!rn) continue;
+
+                    let score = 0;
+                    // 1. Tam eslesme (en guclu)
+                    if (rn === aptCode || rn === aptName) score = 100;
+                    // 2. Apt kodu room-no ile bitiyor/basliyor (L304 <-> 304)
+                    else if (aptCode && (aptCode.endsWith(rn) || aptCode.startsWith(rn))) score = 80;
+                    else if (aptName && (aptName.endsWith(rn) || aptName.startsWith(rn))) score = 75;
+                    // 3. Sadece rakamlar eslesiyor (L-304 <-> A304)
+                    else if (rnDigits && aptDigits && rnDigits === aptDigits) score = 70;
+                    // 4. Rakamlar contains (304 <-> 3041, zayif)
+                    else if (rnDigits && aptDigits && rnDigits.length >= 3 &&
+                             (aptDigits.includes(rnDigits) || rnDigits.includes(aptDigits))) score = 40;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMatch = room;
+                    }
+                }
+
+                if (bestMatch && bestScore >= 70) {
+                    candidates.push({ aptId: apt.id, aptCode: apt.code || apt.id, roomNo: bestMatch.roomNo, score: bestScore });
+                    apt.elektrawebRoomNo = bestMatch.roomNo;
+                    usedRoomNos.add(String(bestMatch.roomNo));
+                    matched++;
+                }
+            }
+
+            if (matched === 0) {
+                Analytics.showToast('Otomatik eslestirilecek daire bulunamadi', 'info');
+                return;
+            }
+
+            console.log('[ElektraWeb] Otomatik eslestirmeler:', candidates);
+            this.render();
+            Analytics.showToast(`${matched} daire otomatik eslestirildi. Kontrol edip kaydedin.`, 'success');
         },
 
         render() {
@@ -16147,17 +16206,15 @@
                 return;
             }
 
-            const listingOptions = this._listings.map(l => {
-                const nick = l.nickname || '';
-                const title = l.title || l.name || 'Listing #' + l.id;
-                const label = nick ? `${nick} — ${title}` : title;
-                return `<option value="${l.id}">${label}</option>`;
+            const roomOptions = this._rooms.map(r => {
+                const label = r.roomType ? `${r.roomNo} — ${r.roomType}` : r.roomNo;
+                return `<option value="${r.roomNo}">${label}</option>`;
             }).join('');
 
             container.innerHTML = apartments.map(apt => {
-                const currentListingId = apt.homesbergListingId || '';
-                const matchedListing = this._listings.find(l => String(l.id) === String(currentListingId));
-                const statusClass = currentListingId ? 'border-green-200 bg-green-50/50' : 'border-gray-200';
+                const currentRoomNo = apt.elektrawebRoomNo || '';
+                const matchedRoom = this._rooms.find(r => String(r.roomNo) === String(currentRoomNo));
+                const statusClass = currentRoomNo ? 'border-green-200 bg-green-50/50' : 'border-gray-200';
 
                 return `
                 <div class="flex items-center gap-4 p-4 rounded-xl border ${statusClass} transition-all">
@@ -16165,24 +16222,24 @@
                         <div class="flex items-center gap-2">
                             <span class="font-semibold text-gray-800">${apt.code || apt.id}</span>
                             ${apt.name ? `<span class="text-xs text-gray-400">${apt.name}</span>` : ''}
-                            ${currentListingId ? '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
+                            ${currentRoomNo ? '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
                         </div>
                     </div>
                     <div class="flex-1">
                         <select data-apt-id="${apt.id}" class="hb-listing-select w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200">
-                            <option value="">-- Listing Seç --</option>
-                            ${listingOptions}
+                            <option value="">-- Oda Seç --</option>
+                            ${roomOptions}
                         </select>
                     </div>
-                    ${matchedListing ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedListing.nickname || matchedListing.name || ''}</span>` : ''}
+                    ${matchedRoom ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedRoom.roomType || ''}</span>` : ''}
                 </div>`;
             }).join('');
 
             // Mevcut eşleştirmeleri seç
             apartments.forEach(apt => {
-                if (apt.homesbergListingId) {
+                if (apt.elektrawebRoomNo) {
                     const sel = container.querySelector(`select[data-apt-id="${apt.id}"]`);
-                    if (sel) sel.value = apt.homesbergListingId;
+                    if (sel) sel.value = apt.elektrawebRoomNo;
                 }
             });
 
@@ -16196,12 +16253,12 @@
 
             selects.forEach(sel => {
                 const aptId = sel.dataset.aptId;
-                const listingId = sel.value;
+                const roomNo = sel.value;
                 const apt = apartments.find(a => a.id === aptId);
                 if (apt) {
-                    const oldVal = apt.homesbergListingId || '';
-                    if (oldVal !== listingId) {
-                        apt.homesbergListingId = listingId || undefined;
+                    const oldVal = apt.elektrawebRoomNo || '';
+                    if (oldVal !== roomNo) {
+                        apt.elektrawebRoomNo = roomNo || undefined;
                         changed++;
                     }
                 }
@@ -16234,15 +16291,15 @@
                     if (!row) continue;
 
                     const currentData = typeof row.data === 'string' ? JSON.parse(row.data) : (row.data || {});
-                    const oldVal = currentData.homesbergListingId || '';
-                    const newVal = apt.homesbergListingId || '';
+                    const oldVal = currentData.elektrawebRoomNo || '';
+                    const newVal = apt.elektrawebRoomNo || '';
 
                     // Sadece değişenleri güncelle
                     if (oldVal !== newVal) {
                         if (newVal) {
-                            currentData.homesbergListingId = newVal;
+                            currentData.elektrawebRoomNo = newVal;
                         } else {
-                            delete currentData.homesbergListingId;
+                            delete currentData.elektrawebRoomNo;
                         }
 
                         await supabase
@@ -16252,14 +16309,14 @@
                     }
                 }
             } catch (e) {
-                console.error('Homesberg eşleştirmeleri kaydedilemedi:', e.message);
+                console.error('ElektraWeb eşleştirmeleri kaydedilemedi:', e.message);
                 Analytics.showToast('Supabase kaydetme hatası: ' + e.message, 'error');
             }
         }
     };
 
     // ============================================================
-    // CALENDAR VIEW - Owner Takvim Görünümü (Homesberg verisiyle)
+    // CALENDAR VIEW - Owner Takvim Görünümü (ElektraWeb verisiyle)
     // ============================================================
     const CalendarView = {
         _currentYear: new Date().getFullYear(),
@@ -16319,7 +16376,7 @@
         goToday() { this._currentYear = new Date().getFullYear(); this._currentMonth = new Date().getMonth(); this.render(); },
 
         async refresh() {
-            HomesbergAPI.clearCache();
+            ElektraAPI.clearCache();
             this._reservations = [];
             this._initialized = false;
             await this.init();
@@ -16329,14 +16386,26 @@
             if (this._loading) return;
             this._loading = true;
             const apartments = Analytics.data?.apartments || [];
-            const mappedApts = apartments.filter(a => a.homesbergListingId);
+            const mappedApts = apartments.filter(a => a.elektrawebRoomNo);
             if (mappedApts.length === 0) { this._loading = false; this._showNoMapping(); return; }
             try {
+                // Gecmis 6 ay + gelecek 12 ay araliginda tum rezervasyonlari tek sorguda cek
+                const today = new Date();
+                const fromDate = new Date(today.getFullYear(), today.getMonth() - 6, 1).toISOString().split('T')[0];
+                const toDate = new Date(today.getFullYear(), today.getMonth() + 12, 28).toISOString().split('T')[0];
+
+                const reservations = await ElektraAPI.getReservations(fromDate, toDate, 'Reservation');
+
+                // room-no → apartmentId lookup
+                const roomToApt = new Map();
+                mappedApts.forEach(a => roomToApt.set(String(a.elektrawebRoomNo), a.id));
+
                 const allRes = [];
-                for (const apt of mappedApts) {
-                    const reservations = await HomesbergAPI.getReservations(apt.homesbergListingId);
-                    reservations.forEach(r => allRes.push(HomesbergAPI.toProjectionFormat(r, apt.id)));
+                for (const r of reservations) {
+                    const aptId = roomToApt.get(String(r.roomNo));
+                    if (aptId) allRes.push(ElektraAPI.toProjectionFormat(r, aptId));
                 }
+
                 this._reservations = allRes.filter(r => r.status !== 2);
                 this.render();
             } catch (e) { Analytics.showToast('Takvim verisi yüklenemedi: ' + e.message, 'error'); }
@@ -16348,7 +16417,7 @@
             if (grid) {
                 grid.innerHTML = `<div class="flex flex-col items-center justify-center py-16">
                     <i data-lucide="link-2-off" class="w-12 h-12 text-gray-200 mb-4"></i>
-                    <p class="text-sm text-gray-500 font-medium">Henüz Homesberg eşleştirmesi yapılmamış</p>
+                    <p class="text-sm text-gray-500 font-medium">Henüz ElektraWeb eşleştirmesi yapılmamış</p>
                     <p class="text-xs text-gray-400 mt-1">Yöneticinizden dairenizi bağlamasını isteyin</p></div>`;
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
