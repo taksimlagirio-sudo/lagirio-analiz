@@ -5680,6 +5680,27 @@
             return data.reservations || [];
         },
 
+        // Gecmis + gelecek tum rezervasyonlari tek seferde getirir.
+        // ElektraWeb status enum'u: Reservation (bekleyen), InHouse (otelde),
+        // CheckOut (cikmis). Uc status'u de paralel cekip birlestirir.
+        async getAllReservations(fromDate, toDate) {
+            const statuses = ['Reservation', 'InHouse', 'CheckOut'];
+            const results = await Promise.all(
+                statuses.map(s => this.getReservations(fromDate, toDate, s).catch(e => {
+                    console.warn('[ElektraWeb]', s, 'yuklenemedi:', e.message);
+                    return [];
+                }))
+            );
+            // reservation-id uzerinden dedupe (bir rez birden fazla status'te gozukebilir)
+            const byId = new Map();
+            for (const list of results) {
+                for (const r of list) {
+                    if (r && r.id != null && !byId.has(r.id)) byId.set(r.id, r);
+                }
+            }
+            return Array.from(byId.values());
+        },
+
         // In-house (su an otelde olan) rezervasyonlar
         async getInHouseReservations() {
             const data = await this.call('reservations-in-house');
@@ -16378,12 +16399,14 @@
             const mappedApts = apartments.filter(a => a.elektrawebRoomNo);
             if (mappedApts.length === 0) { this._loading = false; this._showNoMapping(); return; }
             try {
-                // Gecmis 6 ay + gelecek 12 ay araliginda tum rezervasyonlari tek sorguda cek
+                // Gecmis 12 ay + gelecek 12 ay araligi. Tum status'ler (Reservation
+                // + InHouse + CheckOut) paralel cekilir — boylece gecmis konaklamalar
+                // da takvimde gozukur.
                 const today = new Date();
-                const fromDate = new Date(today.getFullYear(), today.getMonth() - 6, 1).toISOString().split('T')[0];
+                const fromDate = new Date(today.getFullYear(), today.getMonth() - 12, 1).toISOString().split('T')[0];
                 const toDate = new Date(today.getFullYear(), today.getMonth() + 12, 28).toISOString().split('T')[0];
 
-                const reservations = await ElektraAPI.getReservations(fromDate, toDate, 'Reservation');
+                const reservations = await ElektraAPI.getAllReservations(fromDate, toDate);
 
                 // room-no → apartmentId lookup
                 const roomToApt = new Map();
