@@ -43,7 +43,7 @@ async function verifyUser(authHeader) {
     }
 
     let apartmentIds = [];
-    let homesbergListingIds = [];
+    let elektrawebRoomNos = [];
 
     if (profile.role === 'owner') {
         const { data: assignments } = await adminClient
@@ -59,16 +59,16 @@ async function verifyUser(authHeader) {
                 .select('data')
                 .in('id', apartmentIds);
 
-            homesbergListingIds = (apartments || [])
+            elektrawebRoomNos = (apartments || [])
                 .map(a => {
                     const d = typeof a.data === 'string' ? JSON.parse(a.data) : a.data;
-                    return d?.homesbergListingId;
+                    return d?.elektrawebRoomNo;
                 })
                 .filter(Boolean);
         }
     }
 
-    return { user, profile, apartmentIds, homesbergListingIds };
+    return { user, profile, apartmentIds, elektrawebRoomNos };
 }
 
 function ok(body) {
