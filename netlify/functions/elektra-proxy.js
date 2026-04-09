@@ -193,23 +193,26 @@ function pickFirst(obj, keys) {
 }
 
 function toCommonFormat(eRes) {
+    // ElektraWeb POST /reservation belgelenen field isimleri: currency-code, total-price.
+    // Read response ayni isimleri kullaniyor; eski reservation-currency/reservation-total-price
+    // varyantlarini geriye donuk olarak koruyoruz.
     const currency = pickFirst(eRes, [
-        'reservation-currency',
         'currency-code',
+        'reservation-currency',
         'currency',
         'reservation-currency-code'
     ]) || 'EUR';
 
     const totalPrice = pickFirst(eRes, [
-        'reservation-total-price',
         'total-price',
+        'reservation-total-price',
         'reservation-total',
         'totalPrice'
     ]) || 0;
 
     const paidPrice = pickFirst(eRes, [
-        'reservation-paid-price',
         'paid-price',
+        'reservation-paid-price',
         'reservation-paid'
     ]) || 0;
 
