@@ -16504,24 +16504,38 @@
                 html += '</div>';
 
                 // --- Reservation bar rows ---
-                // Collect unique reservations in this week
+                // Collect unique reservations in this week, tracking isStart/isEnd flags
                 const weekRes = new Map();
                 week.forEach((c, col) => {
                     c.reservations.forEach(r => {
-                        if (!weekRes.has(r.id)) weekRes.set(r.id, { res: r, startCol: col, endCol: col });
-                        else weekRes.get(r.id).endCol = col;
+                        const ci = new Date(r.checkIn); ci.setHours(0,0,0,0);
+                        const co = new Date(r.checkOut); co.setHours(0,0,0,0);
+                        if (!weekRes.has(r.id)) {
+                            weekRes.set(r.id, {
+                                res: r, startCol: col, endCol: col,
+                                isStart: c.date.getTime() === ci.getTime(),
+                                isEnd: c.date.getTime() === co.getTime()
+                            });
+                        } else {
+                            const entry = weekRes.get(r.id);
+                            entry.endCol = col;
+                            entry.isEnd = c.date.getTime() === co.getTime();
+                        }
                     });
                 });
 
                 // Sort by startCol, then by length (longer first)
                 const barList = [...weekRes.values()].sort((a, b) => a.startCol - b.startCol || (b.endCol - b.startCol) - (a.endCol - a.startCol));
 
-                // Simple lane allocation to avoid overlaps
+                // Lane allocation aware of half-day semantics:
+                // - A checkout bar (isEnd) only occupies the LEFT half of its endCol → next bar can use same col
+                // - A check-in bar (isStart) can slot into a lane where the previous bar's checkout was on the same col
+                // - A mid-period bar needs a fully free column (lanes[lane] < startCol)
                 const lanes = [];
                 barList.forEach(bar => {
-                    let lane = lanes.findIndex(l => l <= bar.startCol);
+                    let lane = lanes.findIndex(l => l < bar.startCol || (l === bar.startCol && bar.isStart));
                     if (lane === -1) { lane = lanes.length; lanes.push(0); }
-                    lanes[lane] = bar.endCol + 1;
+                    lanes[lane] = bar.isEnd ? bar.endCol : bar.endCol + 1;
                     bar.lane = lane;
                 });
 
@@ -16538,13 +16552,7 @@
                             html += `<div style="grid-column:${col + 1}/span ${bar.startCol - col}"></div>`;
                         }
 
-                        const { res, startCol, endCol } = bar;
-                        const ci = new Date(res.checkIn); ci.setHours(0,0,0,0);
-                        const co = new Date(res.checkOut); co.setHours(0,0,0,0);
-                        // isStart: check-in falls in this week's startCol cell
-                        // isEnd: check-out falls in this week's endCol cell
-                        const isStart = week[startCol].date.getTime() === ci.getTime();
-                        const isEnd = week[endCol].date.getTime() === co.getTime();
+                        const { res, startCol, endCol, isStart, isEnd } = bar;
 
                         let cls = 'cal-mid';
                         if (isStart && isEnd) cls = 'cal-solo';
