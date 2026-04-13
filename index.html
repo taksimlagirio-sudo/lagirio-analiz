@@ -261,13 +261,14 @@
         .cal-day.cal-outside .cal-day-num { color: #ccc; }
         .cal-day.cal-booked .cal-day-num { color: #999; }
         .cal-bar-row { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 3px; }
-        .cal-bar { height: 30px; display: flex; align-items: center; padding: 0 12px; cursor: pointer; transition: filter 0.15s; overflow: hidden; white-space: nowrap; }
-        .cal-bar:hover { filter: brightness(0.88); }
-        .cal-bar-label { font-size: 12px; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; }
-        .cal-bar.cal-start { border-top-left-radius: 20px; border-bottom-left-radius: 20px; margin-left: 4px; }
-        .cal-bar.cal-end { border-top-right-radius: 20px; border-bottom-right-radius: 20px; margin-right: 4px; }
-        .cal-bar.cal-solo { border-radius: 20px; margin: 0 4px; }
-        .cal-bar.cal-mid { border-radius: 0; }
+        .cal-bar { height: 30px; display: flex; align-items: center; cursor: pointer; overflow: hidden; white-space: nowrap; }
+        .cal-bar-inner { display: flex; align-items: center; height: 26px; padding: 0 10px; flex: 1; transition: filter 0.15s; overflow: hidden; white-space: nowrap; }
+        .cal-bar:hover .cal-bar-inner { filter: brightness(0.88); }
+        .cal-bar-label { font-size: 12px; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .cal-bar.cal-start .cal-bar-inner { border-top-left-radius: 20px; border-bottom-left-radius: 20px; }
+        .cal-bar.cal-end .cal-bar-inner { border-top-right-radius: 20px; border-bottom-right-radius: 20px; }
+        .cal-bar.cal-solo .cal-bar-inner { border-radius: 20px; }
+        .cal-bar.cal-mid .cal-bar-inner { border-radius: 0; }
         .cal-sep { border-bottom: 1px solid #f0f0f0; grid-column: 1 / -1; }
         .cal-weekday-header { font-size: 12px; font-weight: 600; color: #717171; text-align: center; padding: 14px 0; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -16476,12 +16477,13 @@
                 cells.push({ date: new Date(d), day: d.getDate(), outside: true });
             }
 
-            // For each cell, find reservations
+            // For each cell, find reservations.
+            // Include the checkout day so the bar can show its morning half-day.
             cells.forEach(c => {
                 c.reservations = filteredRes.filter(r => {
                     const ci = new Date(r.checkIn); ci.setHours(0,0,0,0);
                     const co = new Date(r.checkOut); co.setHours(0,0,0,0);
-                    return c.date >= ci && c.date < co;
+                    return c.date >= ci && c.date <= co;
                 });
             });
 
@@ -16539,9 +16541,10 @@
                         const { res, startCol, endCol } = bar;
                         const ci = new Date(res.checkIn); ci.setHours(0,0,0,0);
                         const co = new Date(res.checkOut); co.setHours(0,0,0,0);
-                        const lastNight = new Date(co.getTime() - 86400000);
+                        // isStart: check-in falls in this week's startCol cell
+                        // isEnd: check-out falls in this week's endCol cell
                         const isStart = week[startCol].date.getTime() === ci.getTime();
-                        const isEnd = week[endCol].date.getTime() === lastNight.getTime();
+                        const isEnd = week[endCol].date.getTime() === co.getTime();
 
                         let cls = 'cal-mid';
                         if (isStart && isEnd) cls = 'cal-solo';
@@ -16552,8 +16555,12 @@
                         const color = this._getColor(res.platform);
                         const label = res.guestName || res.platform;
 
-                        html += `<div class="cal-bar ${cls}" style="grid-column:${startCol + 1}/span ${span};background:${color}" onclick="CalendarView.showReservation('${res.id}')">
-                            <span class="cal-bar-label">${isStart ? label : ''}</span></div>`;
+                        // Half-day offset: check-in bar starts at 2nd half of its cell (afternoon arrival),
+                        // check-out bar ends at 1st half of its cell (morning departure).
+                        const startMarginPct = isStart ? (50 / span).toFixed(2) : 0;
+                        const endMarginPct = isEnd ? (50 / span).toFixed(2) : 0;
+
+                        html += `<div class="cal-bar ${cls}" style="grid-column:${startCol + 1}/span ${span}" onclick="CalendarView.showReservation('${res.id}')"><div class="cal-bar-inner" style="background:${color};margin-left:${startMarginPct}%;margin-right:${endMarginPct}%"><span class="cal-bar-label">${isStart ? label : ''}</span></div></div>`;
 
                         col = endCol + 1;
                     });
