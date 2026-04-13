@@ -16524,22 +16524,27 @@
                     });
                 });
 
-                // Sort by startCol, then by length (longer first)
-                const barList = [...weekRes.values()].sort((a, b) => a.startCol - b.startCol || (b.endCol - b.startCol) - (a.endCol - a.startCol));
-
-                // Lane allocation aware of half-day semantics:
-                // - A checkout bar (isEnd) only occupies the LEFT half of its endCol → next bar can use same col
-                // - A check-in bar (isStart) can slot into a lane where the previous bar's checkout was on the same col
-                // - A mid-period bar needs a fully free column (lanes[lane] < startCol)
-                const lanes = [];
+                // Compute visual range in half-column units:
+                //   isStart → bar begins at right half of startCol  (+1 offset)
+                //   isEnd   → bar ends at left half of endCol       (vEnd = col*2+1 instead of col*2+2)
+                // e.g. checkout col4/checkin col4: vEnd=9, vStart=9 → adjacent, no overlap
+                const barList = [...weekRes.values()];
                 barList.forEach(bar => {
-                    let lane = lanes.findIndex(l => l < bar.startCol || (l === bar.startCol && bar.isStart));
-                    if (lane === -1) { lane = lanes.length; lanes.push(0); }
-                    lanes[lane] = bar.isEnd ? bar.endCol : bar.endCol + 1;
+                    bar.vStart = bar.startCol * 2 + (bar.isStart ? 1 : 0);
+                    bar.vEnd   = bar.endCol   * 2 + (bar.isEnd   ? 1 : 2);
+                });
+                barList.sort((a, b) => a.vStart - b.vStart || (b.vEnd - b.vStart) - (a.vEnd - a.vStart));
+
+                // Greedy lane allocation: a lane is free if its last bar's visual end ≤ this bar's visual start
+                const laneVEnd = [];
+                barList.forEach(bar => {
+                    let lane = laneVEnd.findIndex(ve => ve <= bar.vStart);
+                    if (lane === -1) { lane = laneVEnd.length; }
+                    laneVEnd[lane] = bar.vEnd;
                     bar.lane = lane;
                 });
 
-                const maxLanes = Math.max(lanes.length, 0);
+                const maxLanes = laneVEnd.length;
                 for (let lane = 0; lane < maxLanes; lane++) {
                     html += '<div class="cal-bar-row">';
                     const laneBars = barList.filter(b => b.lane === lane);
