@@ -16573,7 +16573,7 @@
                         const startMarginPct = isStart ? (50 / span).toFixed(2) : 0;
                         const endMarginPct = isEnd ? (50 / span).toFixed(2) : 0;
 
-                        html += `<div class="cal-bar ${cls}" style="grid-column:${startCol + 1}/span ${span}" onclick="CalendarView.showReservation('${res.id}')"><div class="cal-bar-inner" style="background:${color};margin-left:${startMarginPct}%;margin-right:${endMarginPct}%"><span class="cal-bar-label">${isStart ? label : ''}▸${bar.lane}</span></div></div>`;
+                        html += `<div class="cal-bar ${cls}" style="grid-column:${startCol + 1}/span ${span}" onclick="CalendarView.showReservation('${res.id}')"><div class="cal-bar-inner" style="background:${color};margin-left:${startMarginPct}%;margin-right:${endMarginPct}%"><span class="cal-bar-label">${isStart ? label : ''}</span></div></div>`;
 
                         col = endCol + 1;
                     });
