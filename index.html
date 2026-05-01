@@ -3006,6 +3006,8 @@
                 'system.platform.sep': 'Platform Separated',
                 'system.mixed': 'Mixed Platform',
                 'system.profit.based': 'Profit-Based',
+                'system.withholding.kdv': 'Withholding (VAT-Adjusted)',
+                'system.erhan': 'Company (Erhan)',
                 // Common
                 'common.apartment': 'apartment',
                 'common.apartments': 'apartments',
@@ -3718,6 +3720,8 @@
                 'system.platform.sep': 'Раздельная платформа',
                 'system.mixed': 'Смешанная платформа',
                 'system.profit.based': 'На основе прибыли',
+                'system.withholding.kdv': 'С удержанием (НДС-скоррект.)',
+                'system.erhan': 'Компания (Эрхан)',
                 // Common
                 'common.apartment': 'квартира',
                 'common.apartments': 'квартир',
@@ -4430,6 +4434,8 @@
                 'system.platform.sep': 'منصة منفصلة',
                 'system.mixed': 'منصة مختلطة',
                 'system.profit.based': 'على أساس الربح',
+                'system.withholding.kdv': 'خصم ضريبي (معدّل لضريبة القيمة)',
+                'system.erhan': 'شركة (إرهان)',
                 // Common
                 'common.apartment': 'شقة',
                 'common.apartments': 'شقق',
@@ -8455,7 +8461,7 @@
             const analyticsApts = this.getAnalyticsApartments();
             const mapping = this.loadMapping();
 
-            const sysNames = { '1': 'S1', '2': 'S2', '3': 'S3', '4': 'S4', '5': 'S5', '6': 'S6', '7': 'S7', '8': 'S8', '9': 'S9' };
+            const sysNames = { '1': 'S1', '2': 'S2', '3': 'S3', '4': 'S4', '5': 'S5', '6': 'S6', '7': 'S7', '8': 'S8', '9': 'S9', '10': 'S10' };
 
             const content = document.getElementById('aptMatchingContent');
             if (!content) return;
@@ -8530,7 +8536,7 @@
             const pmsId = selectEl.dataset.pmsId;
             const row = selectEl.closest('.flex.items-center');
             const analyticsApts = this.getAnalyticsApartments();
-            const sysNames = { '1': 'S1', '2': 'S2', '3': 'S3', '4': 'S4', '5': 'S5', '6': 'S6', '7': 'S7', '8': 'S8', '9': 'S9' };
+            const sysNames = { '1': 'S1', '2': 'S2', '3': 'S3', '4': 'S4', '5': 'S5', '6': 'S6', '7': 'S7', '8': 'S8', '9': 'S9', '10': 'S10' };
 
             if (selectEl.value) {
                 const apt = analyticsApts.find(a => a.id === selectEl.value);
@@ -10038,6 +10044,12 @@
                     lagirioProfit = bankLagirioComm9 + cashLagirioComm9;
                     break;
 
+                case '10': // Sistem 10 - Şirket (Erhan Daireler)
+                    // Banka/nakit ayrımı yok, KDV Lagirio komisyonu üzerine eklenir; Lagirio kârı KDV hariç
+                    const balance10 = totalIncome - totalPlatformCommission - totalExpenses;
+                    lagirioProfit = balance10 > 0 ? balance10 * (apartment.lagirioCommission / 100) : 0;
+                    break;
+
                 default:
                     lagirioProfit = 0;
             }
@@ -10216,6 +10228,16 @@
                     ownerShare = bankOwner9 + cashOwner9;
                     break;
 
+                case '10': // Sistem 10 - Şirket (Erhan Daireler)
+                    // Banka/nakit ayrımı yok; KDV Lagirio komisyonu üzerine eklenir
+                    const totalIncome10 = bankIncome + cashIncome;
+                    const totalPlatformComm10 = bankCommission + cashCommission;
+                    const balance10 = totalIncome10 - totalPlatformComm10 - totalExpenses;
+                    const lagirioCommExcl10 = balance10 > 0 ? balance10 * (apartment.lagirioCommission / 100) : 0;
+                    const lagirioCommIncl10 = lagirioCommExcl10 * (1 + (apartment.taxRate || 0) / 100);
+                    ownerShare = balance10 - lagirioCommIncl10;
+                    break;
+
                 default:
                     ownerShare = 0;
             }
@@ -10264,6 +10286,13 @@
                         sum + this.convertToEUR(res.totalAmount, res.currency || 'EUR'), 0);
                     totalKDV = bookingBankInc * (apartment.taxRate / 100) / (1 + apartment.taxRate / 100);
                     break;
+                case '10': {
+                    // Sistem 10: KDV gelir üzerinden değil, Lagirio komisyonu üzerine eklenir
+                    const balance10d = totalIncome - totalPlatformCommission - totalExpenses;
+                    const lagirioCommExcl10d = balance10d > 0 ? balance10d * (apartment.lagirioCommission / 100) : 0;
+                    totalKDV = lagirioCommExcl10d * ((apartment.taxRate || 0) / 100);
+                    break;
+                }
             }
 
             // Gelir vergisi
@@ -11199,11 +11228,13 @@
                 '5': 'Sistem 5 - Stopajlı',
                 '6': 'Sistem 6 - Platform',
                 '7': 'Sistem 7 - Karma',
-                '8': 'Sistem 8 - Kâr Bazlı'
+                '8': 'Sistem 8 - Kâr Bazlı',
+                '9': 'Sistem 9 - Stop-KDV',
+                '10': 'Sistem 10 - Erhan'
             };
-            
+
             // Sistem verilerini başlat
-            for (let i = 1; i <= 8; i++) {
+            for (let i = 1; i <= 10; i++) {
                 systemData[i] = {
                     name: systemNames[i],
                     revenue: 0,
@@ -11423,14 +11454,17 @@
                 'from-red-500 to-red-600',
                 'from-indigo-500 to-indigo-600',
                 'from-pink-500 to-pink-600',
-                'from-gray-500 to-gray-600'
+                'from-gray-500 to-gray-600',
+                'from-amber-500 to-amber-600',
+                'from-teal-500 to-teal-600'
             ];
-            
+
             const systemIcons = [
                 'home', 'building', 'percent', 'star',
-                'shield', 'globe', 'layers', 'trending-up'
+                'shield', 'globe', 'layers', 'trending-up',
+                'banknote', 'briefcase'
             ];
-            
+
             const systemNames = {
                 '1': t('system.rental', 'Kira'),
                 '2': t('system.sole', 'Kişi Şirketi'),
@@ -11439,12 +11473,14 @@
                 '5': t('system.withholding', 'Stopajlı'),
                 '6': t('system.platform.sep', 'Platform Ayrımlı'),
                 '7': t('system.mixed', 'Karma Platform'),
-                '8': t('system.profit.based', 'Kâr Bazlı')
+                '8': t('system.profit.based', 'Kâr Bazlı'),
+                '9': t('system.withholding.kdv', 'Stopaj-KDV'),
+                '10': t('system.erhan', 'Şirket (Erhan)')
             };
-            
+
             const systems = [];
-            
-            for (let i = 1; i <= 8; i++) {
+
+            for (let i = 1; i <= 10; i++) {
                 const apartments = this.data.apartments?.filter(a => a.systemType === String(i)) || [];
                 
                 if (apartments.length > 0) {
@@ -14946,7 +14982,7 @@
             const sel = document.getElementById('earningsMonthSelector');
             const selectedMonth = sel ? sel.value : 'all';
             const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
-            const sysNames = { '1': 'S1 Net', '2': 'S2 Brüt', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV' };
+            const sysNames = { '1': 'S1 Net', '2': 'S2 Brüt', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV', '10': 'S10 Erhan' };
 
             const apartments = this.data?.apartments || [];
             const allReservations = this.data?.reservations || [];
