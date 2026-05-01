@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    // ERKEN HATA YAKALAYICI - Debug panel kurulmadan önce çalışır
+    window.__dbgLogs = [];
+    function __dbgAdd(type, msg) {
+        window.__dbgLogs.push({type, msg, ts: new Date().toLocaleTimeString('tr-TR')});
+        var p = document.getElementById('dbg-log');
+        var c = document.getElementById('dbg-count');
+        if (p) {
+            var n = p.children.length + 1;
+            if (c) c.textContent = n;
+            var d = document.createElement('div');
+            d.style.cssText = 'padding:2px 0;border-bottom:1px solid #1e293b;word-break:break-all;color:' + ({log:'#94a3b8',warn:'#fbbf24',error:'#f87171',info:'#60a5fa'}[type]||'#94a3b8');
+            d.textContent = '[' + window.__dbgLogs[window.__dbgLogs.length-1].ts + '] [' + type.toUpperCase() + '] ' + msg;
+            p.appendChild(d);
+            p.scrollTop = p.scrollHeight;
+        }
+    }
+    window.onerror = function(msg, src, line, col, err) {
+        __dbgAdd('error', msg + ' (' + (src||'').split('/').pop() + ':' + line + ')');
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+        __dbgAdd('error', 'Promise: ' + (e.reason && e.reason.message || e.reason || 'unknown'));
+    });
+    </script>
+    <title>Lagirio Analytics Pro - Gelişmiş Veri Analizi</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d3028'/><text x='50' y='68' font-size='60' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>L</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+    <script>
+        // Tailwind config
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'lagirio': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            950: '#052e16',
+                            beige: '#f5e6d3',
+                            green: '#004d40',
+                            orange: '#ff9800',
+                            'orange-dark': '#f57c00',
+                        }
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-soft': 'pulseSoft 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #16a34a, #22c55e);
+            border-radius: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #15803d, #16a34a);
+        }
+        
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 253, 251, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(250, 246, 240, 0.5);
+        }
+        
+        .glass-dark {
+            background: rgba(0, 77, 64, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Chart container heights */
+        .chart-container {
+            height: 320px;
+        }
+
+        .chart-container-lg {
+            height: 420px;
+        }
+
+        .chart-container-sm {
+            height: 250px;
+        }
+
+        @media (max-width: 767px) {
+            .chart-container { height: 240px; }
+            .chart-container-lg { height: 280px; }
+            .chart-container-sm { height: 200px; }
+        }
+        
+        /* Tab transitions */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* Gradient backgrounds */
+        .gradient-mesh {
+            background-image: radial-gradient(at 47% 33%, hsl(35, 45%, 92%) 0, transparent 59%),
+                            radial-gradient(at 82% 65%, hsl(44, 40%, 88%) 0, transparent 55%);
+            filter: blur(40px);
+            opacity: 0.3;
+        }
+        
+        /* Loading animation */
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #16a34a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Tooltip styles */
+        .custom-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .custom-tooltip.show {
+            opacity: 1;
+        }
+
+        /* ========= LOGIN SCREEN ========= */
+        .login-screen {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #003d33 0%, #004d40 40%, #00695c 80%, #00796b 100%);
+            position: relative; overflow: hidden;
+        }
+        .login-screen::before {
+            content: ''; position: absolute; top: -30%; right: -20%; width: 70%; height: 140%;
+            background: radial-gradient(ellipse, rgba(255,152,0,0.07) 0%, transparent 65%);
+            pointer-events: none; animation: loginFloat 14s ease-in-out infinite;
+        }
+        .login-screen::after {
+            content: ''; position: absolute; bottom: -20%; left: -15%; width: 60%; height: 100%;
+            background: radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 60%);
+            pointer-events: none; animation: loginFloat 18s ease-in-out infinite reverse;
+        }
+        .login-screen.hidden { display: none; }
+        .login-error { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; text-align: center; }
+        @keyframes loginFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+
+        /* ========= APP WRAPPER ========= */
+        .app-wrapper { display: none; }
+        .app-wrapper.active { display: block; animation: fadeIn 0.4s ease-out; }
+
+        /* ========= UPLOAD PANELS ========= */
+        .upload-panel.hidden { display: none; }
+        .upload-tab.active { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: white !important; border-color: transparent !important; box-shadow: 0 4px 12px rgba(22,163,74,0.3) !important; }
+
+        /* ========= OWNER MODE ========= */
+        body.owner-mode [data-tab="efficiency"],
+        body.owner-mode [data-tab="reports"],
+        body.owner-mode #efficiency-content,
+        body.owner-mode #reports-content,
+        body.owner-mode .admin-only,
+        body.owner-mode [data-analysis="system"],
+        body.owner-mode [data-analysis="owner"],
+        body.owner-mode #system-analysis,
+        body.owner-mode #owner-analysis,
+        body.owner-mode #topPerformersSection {
+            display: none !important;
+        }
+        /* Calendar tab: sadece owner'da görünür */
+        .owner-only-tab { display: none !important; }
+        body.owner-mode .owner-only-tab { display: flex !important; }
+        body.owner-mode [data-tab="calendar"].owner-only-tab { display: flex !important; }
+        body.owner-mode #calendar-content.owner-only-tab { display: none !important; }
+        body.owner-mode #calendar-content.owner-only-tab.active { display: block !important; }
+
+        /* Airbnb-style Calendar */
+        .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .cal-day { min-height: 44px; padding: 4px 0; text-align: center; position: relative; }
+        .cal-day-num { font-size: 14px; font-weight: 500; color: #484848; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; }
+        .cal-day.cal-today .cal-day-num { background: #222; color: #fff; font-weight: 700; }
+        .cal-day.cal-outside .cal-day-num { color: #ccc; }
+        .cal-day.cal-booked .cal-day-num { color: #999; }
+        .cal-bar-row { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 3px; }
+        .cal-bar { height: 30px; display: flex; align-items: center; cursor: pointer; overflow: hidden; white-space: nowrap; }
+        .cal-bar-inner { display: flex; align-items: center; height: 26px; padding: 0 10px; flex: 1; transition: filter 0.15s; overflow: hidden; white-space: nowrap; }
+        .cal-bar:hover .cal-bar-inner { filter: brightness(0.88); }
+        .cal-bar-label { font-size: 12px; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .cal-bar.cal-start .cal-bar-inner { border-top-left-radius: 20px; border-bottom-left-radius: 20px; }
+        .cal-bar.cal-end .cal-bar-inner { border-top-right-radius: 20px; border-bottom-right-radius: 20px; }
+        .cal-bar.cal-solo .cal-bar-inner { border-radius: 20px; }
+        .cal-bar.cal-mid .cal-bar-inner { border-radius: 0; }
+        .cal-sep { border-bottom: 1px solid #f0f0f0; grid-column: 1 / -1; }
+        .cal-weekday-header { font-size: 12px; font-weight: 600; color: #717171; text-align: center; padding: 14px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        body.owner-mode #revenueTrendSection {
+            grid-column: 1 / -1;
+        }
+        body.owner-mode .owner-readonly {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        /* Owner filter chip styles */
+        .owner-filter-chip {
+            user-select: none;
+        }
+        .owner-filter-chip:not(.active) {
+            background: white;
+            border-color: #e5e7eb;
+            color: #6b7280;
+        }
+        .owner-filter-chip:not(.active):hover {
+            border-color: #9ca3af;
+            background: #f9fafb;
+        }
+
+        /* ========= MOBILE RESPONSIVE ========= */
+
+        /* --- Hide mobile-only elements by default (shown via media query) --- */
+        .mobile-header-menu,
+        .mobile-more-sheet-overlay,
+        .mobile-more-sheet {
+            display: none;
+        }
+
+        /* --- Mobile Bottom Tab Bar --- */
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 767px) {
+            /* Bottom navigation */
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+                background: rgba(0, 77, 64, 0.95);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(255,255,255,0.1);
+                padding: 4px 0 calc(4px + env(safe-area-inset-bottom));
+                justify-content: space-around;
+                align-items: stretch;
+            }
+
+            .mobile-bottom-nav button {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                padding: 6px 2px;
+                color: rgba(255,255,255,0.55);
+                font-size: 10px;
+                font-weight: 500;
+                border: none;
+                background: none;
+                transition: color 0.2s;
+                position: relative;
+            }
+
+            .mobile-bottom-nav button.active {
+                color: #fff;
+            }
+
+            .mobile-bottom-nav button.active::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 25%;
+                right: 25%;
+                height: 2px;
+                background: #fb923c;
+                border-radius: 0 0 2px 2px;
+            }
+
+            .mobile-bottom-nav button svg,
+            .mobile-bottom-nav button i {
+                width: 20px;
+                height: 20px;
+            }
+
+            /* Hide desktop tab nav on mobile */
+            .desktop-tab-nav {
+                display: none !important;
+            }
+
+            /* Body bottom padding for bottom nav */
+            body {
+                padding-bottom: 68px;
+            }
+
+            /* Mobile "More" sheet overlay */
+            .mobile-more-sheet-overlay {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 49;
+                opacity: 0;
+                transition: opacity 0.25s;
+                pointer-events: none;
+            }
+            .mobile-more-sheet-overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .mobile-more-sheet {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 51;
+                background: white;
+                border-radius: 16px 16px 0 0;
+                padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+            }
+            .mobile-more-sheet.active {
+                transform: translateY(0);
+            }
+            .mobile-more-sheet .sheet-handle {
+                width: 36px;
+                height: 4px;
+                border-radius: 2px;
+                background: #d1d5db;
+                margin: 0 auto 12px;
+            }
+            .mobile-more-sheet button {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                padding: 14px 12px;
+                border: none;
+                background: none;
+                font-size: 15px;
+                color: #374151;
+                border-radius: 10px;
+                transition: background 0.15s;
+            }
+            .mobile-more-sheet button:active {
+                background: #f3f4f6;
+            }
+            .mobile-more-sheet button svg,
+            .mobile-more-sheet button i {
+                width: 20px;
+                height: 20px;
+                color: #6b7280;
+            }
+
+            /* --- Header compact on mobile --- */
+            .header-actions-desktop {
+                display: none !important;
+            }
+            .header-mobile-trigger {
+                display: flex !important;
+            }
+            .header-brand-subtitle {
+                display: none;
+            }
+            .header-brand-title {
+                font-size: 16px;
+            }
+
+            /* Mobile header dropdown */
+            .mobile-header-menu {
+                display: block;
+                position: absolute;
+                top: 100%;
+                right: 8px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                padding: 6px;
+                min-width: 200px;
+                z-index: 60;
+                opacity: 0;
+                transform: translateY(-8px) scale(0.97);
+                pointer-events: none;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .mobile-header-menu.active {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                pointer-events: auto;
+            }
+            .mobile-header-menu button,
+            .mobile-header-menu a {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                padding: 10px 12px;
+                border: none;
+                background: none;
+                font-size: 14px;
+                color: #374151;
+                border-radius: 8px;
+                transition: background 0.15s;
+                cursor: pointer;
+                text-decoration: none;
+            }
+            .mobile-header-menu button:active,
+            .mobile-header-menu a:active {
+                background: #f3f4f6;
+            }
+            .mobile-header-menu button svg,
+            .mobile-header-menu button i,
+            .mobile-header-menu a svg,
+            .mobile-header-menu a i {
+                width: 18px;
+                height: 18px;
+                color: #6b7280;
+            }
+            .mobile-header-menu .menu-separator {
+                height: 1px;
+                background: #e5e7eb;
+                margin: 4px 8px;
+            }
+
+            /* --- Analysis sub-tabs horizontal scroll --- */
+            .analysis-subtabs-nav {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .analysis-subtabs-nav::-webkit-scrollbar {
+                display: none;
+            }
+            .analysis-subtabs-nav button {
+                flex: 0 0 auto !important;
+                white-space: nowrap;
+            }
+
+            /* --- Responsive tables compact --- */
+            .responsive-table th,
+            .responsive-table td {
+                padding: 8px 10px !important;
+                font-size: 12px !important;
+            }
+            .responsive-table th {
+                font-size: 10px !important;
+            }
+
+            /* --- Projection table column hiding --- */
+            .proj-hide-mobile {
+                display: none !important;
+            }
+
+            /* --- Efficiency card view on mobile --- */
+            .eff-mobile-cards .eff-card {
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            .eff-mobile-cards .eff-card-header {
+                font-weight: 600;
+                font-size: 14px;
+                color: #1f2937;
+                margin-bottom: 8px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid #f3f4f6;
+            }
+            .eff-mobile-cards .eff-card-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .eff-mobile-cards .eff-metric {
+                text-align: center;
+            }
+            .eff-mobile-cards .eff-metric-label {
+                font-size: 10px;
+                color: #9ca3af;
+                text-transform: uppercase;
+                font-weight: 500;
+            }
+            .eff-mobile-cards .eff-metric-value {
+                font-size: 14px;
+                font-weight: 700;
+                color: #374151;
+            }
+
+            /* --- Modals fullscreen on mobile --- */
+            .modal-mobile-full {
+                max-width: 100% !important;
+                max-height: 100vh !important;
+                height: 100vh;
+                border-radius: 0 !important;
+                animation: none !important;
+            }
+            .modal-mobile-full .max-h-\[70vh\],
+            .modal-mobile-full .max-h-\[80vh\],
+            .modal-mobile-full .max-h-\[85vh\],
+            .modal-mobile-full .max-h-\[90vh\] {
+                max-height: calc(100vh - 120px) !important;
+            }
+
+            /* --- Font size minimums --- */
+            .text-\[10px\] { font-size: 11px !important; }
+            .text-\[11px\] { font-size: 12px !important; }
+
+            /* --- Report modal grid stacking --- */
+            .report-grid-responsive {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* --- FAB & Toast above bottom nav --- */
+            .fab-container {
+                bottom: 80px !important;
+            }
+            #toastContainer {
+                bottom: 80px !important;
+            }
+        }
+
+        /* Desktop: hide mobile-only elements */
+        @media (min-width: 768px) {
+            .header-mobile-trigger {
+                display: none !important;
+            }
+        }
+
+        /* Owner mode: hide tabs in mobile bottom nav too */
+        body.owner-mode .mobile-bottom-nav [data-tab="efficiency"],
+        body.owner-mode .mobile-bottom-nav [data-tab="reports"],
+        body.owner-mode .mobile-more-sheet [data-tab="efficiency"],
+        body.owner-mode .mobile-more-sheet [data-tab="reports"] {
+            display: none !important;
+        }
+
+        /* Touch feedback for touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            button:active, a:active, [role="button"]:active {
+                opacity: 0.85;
+                transform: scale(0.98);
+                transition: transform 0.1s, opacity 0.1s;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#faf6f0] via-[#fdfcfa] to-[#faf6f0] font-inter min-h-screen">
+    
+    <!-- ========= LOGIN SCREEN ========= -->
+    <div class="login-screen" id="loginScreen">
+        <div class="relative z-10 overflow-hidden rounded-3xl shadow-[0_32px_72px_rgba(0,0,0,0.4)]" style="width:400px;max-width:92vw;">
+
+            <!-- Hero header (lagirio.com hero section inspired) -->
+            <div class="relative text-center overflow-hidden" style="background:linear-gradient(150deg,#002e27 0%,#004d40 55%,#005c4b 100%);padding:2.5rem 2.5rem 2.25rem;">
+                <!-- Orange ambient glow behind text -->
+                <div class="absolute pointer-events-none" style="top:-40%;left:50%;transform:translateX(-50%);width:280px;height:200px;background:radial-gradient(ellipse,rgba(255,152,0,0.18) 0%,transparent 65%);"></div>
+                <!-- Subtle corner shimmer -->
+                <div class="absolute pointer-events-none" style="bottom:-30%;right:-20%;width:180px;height:180px;background:radial-gradient(ellipse,rgba(255,255,255,0.04) 0%,transparent 60%);"></div>
+
+                <h1 class="relative font-bold leading-none mb-2" style="font-size:3rem;color:#ff9800;text-shadow:0 2px 24px rgba(255,152,0,0.35);">lagirio.</h1>
+                <p class="relative text-xs tracking-widest uppercase font-medium" style="color:#f5e6d3;opacity:0.55;" data-i18n="login.subtitle">Analitik Paneli</p>
+            </div>
+
+            <!-- Form card -->
+            <div class="bg-white" style="padding:2rem 2.5rem 1.75rem;">
+
+                <!-- Username -->
+                <div class="mb-4 text-left">
+                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-widest" data-i18n="login.username">Kullanıcı Adı</label>
+                    <div class="relative">
+                        <input type="text" id="loginUser" autocomplete="username"
+                               data-i18n-placeholder="login.username.ph"
+                               placeholder="kullanıcı adı"
+                               class="w-full px-4 py-3 pl-10 border border-gray-200 rounded-xl text-sm bg-gray-50 transition-all focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-6 text-left">
+                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-widest" data-i18n="login.password">Şifre</label>
+                    <div class="relative">
+                        <input type="password" id="loginPass" autocomplete="current-password"
+                               data-i18n-placeholder="login.password.ph"
+                               placeholder="••••••••"
+                               class="w-full px-4 py-3 pl-10 border border-gray-200 rounded-xl text-sm bg-gray-50 transition-all focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
+                               onkeydown="if(event.key==='Enter')Auth.login()">
+                        <i data-lucide="lock" class="w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <button id="loginBtn" onclick="Auth.login()"
+                        class="w-full py-3 text-white rounded-xl text-sm font-bold cursor-pointer transition-all flex items-center justify-center gap-2 hover:-translate-y-px active:translate-y-0"
+                        style="background:linear-gradient(135deg,#004d40,#00695c);box-shadow:0 4px 16px rgba(0,77,64,0.35);">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span data-i18n="login.btn">Giriş Yap</span>
+                </button>
+
+                <p id="loginError" class="login-error"></p>
+
+                <!-- Footer -->
+                <div class="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-[11px] text-gray-400">
+                        <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> <span data-i18n="login.footer.secure">Güvenli</span></span>
+                        <span class="text-gray-200">·</span>
+                        <span class="flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> <span data-i18n="login.footer.fast">Hızlı</span></span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-gray-400">
+                        <i data-lucide="globe" class="w-3 h-3"></i>
+                        <select id="langSelector" onchange="I18n.setLang(this.value)"
+                                class="text-[11px] text-gray-400 bg-transparent border-none focus:outline-none cursor-pointer">
+                            <option value="tr">Türkçe</option>
+                            <option value="en">English</option>
+                            <option value="ru">Русский</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========= MAIN APP WRAPPER (hidden until login) ========= -->
+    <div class="app-wrapper" id="appWrapper">
+
+    <!-- Gradient Mesh Background -->
+    <div class="fixed inset-0 gradient-mesh pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="glass-dark shadow-xl sticky top-0 z-50 relative">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div>
+                        <h1 class="text-2xl font-bold leading-none" style="color:#ff9800;">lagirio.</h1>
+                        <p class="text-emerald-300/70 text-xs mt-0.5 header-brand-subtitle" data-i18n="header.subtitle">Gelişmiş Veri Analizi Platformu</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <!-- Quick Stats -->
+                    <div class="hidden lg:flex items-center space-x-6 mr-6">
+                        <div class="text-center">
+                            <p class="text-emerald-200 text-xs" id="headerPortfolioLabel" data-i18n="header.portfolio">Portföy Değeri</p>
+                            <p class="text-white font-bold text-lg" id="headerPortfolioValue">€0</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-emerald-200 text-xs" id="headerMonthlyLabel" data-i18n="header.monthly">Bu Ay</p>
+                            <p class="text-white font-bold text-lg" id="headerMonthlyValue">€0</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons (Desktop) -->
+                    <div class="header-actions-desktop flex items-center space-x-3">
+                        <button onclick="Analytics.showNotifications()" class="relative bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="notificationCount">0</span>
+                        </button>
+
+                        <button onclick="Analytics.exportPDF()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">PDF</span>
+                        </button>
+
+                        <button onclick="Analytics.exportExcel()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
+                            <i data-lucide="table" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Excel</span>
+                        </button>
+
+
+                        <button onclick="DataManager.open()" class="admin-only bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition" title="Veri Yönetimi">
+                            <i data-lucide="database" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Veri</span>
+                        </button>
+
+                        <button onclick="Analytics.showSettings()" class="admin-only bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                        </button>
+
+                        <div class="w-px h-8 bg-white/10"></div>
+
+                        <!-- Header Language Selector -->
+                        <select id="headerLangSelector" onchange="I18n.setLang(this.value)"
+                                class="bg-white/10 hover:bg-white/20 text-white text-sm px-2 py-2 rounded-lg border-none cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
+                            <option value="tr" class="text-gray-800">TR</option>
+                            <option value="en" class="text-gray-800">EN</option>
+                            <option value="ru" class="text-gray-800">RU</option>
+                            <option value="ar" class="text-gray-800">AR</option>
+                        </select>
+
+                        <button onclick="Auth.logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 px-3 py-2 rounded-lg flex items-center space-x-2 transition text-sm">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline" data-i18n="header.logout">Çıkış</span>
+                        </button>
+                    </div>
+
+                    <!-- Action Buttons (Mobile) -->
+                    <div class="header-mobile-trigger flex items-center space-x-2" style="display:none;">
+                        <button onclick="Analytics.showNotifications()" class="relative bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="notificationCountMobile">0</span>
+                        </button>
+                        <button onclick="MobileUI.toggleHeaderMenu()" class="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition">
+                            <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Header Dropdown -->
+                    <div class="mobile-header-menu" id="mobileHeaderMenu">
+                        <button onclick="Analytics.exportPDF(); MobileUI.closeHeaderMenu();">
+                            <i data-lucide="file-text"></i>
+                            <span>PDF Export</span>
+                        </button>
+                        <button onclick="Analytics.exportExcel(); MobileUI.closeHeaderMenu();">
+                            <i data-lucide="table"></i>
+                            <span>Excel Export</span>
+                        </button>
+                        <button onclick="DataManager.open(); MobileUI.closeHeaderMenu();" class="admin-only">
+                            <i data-lucide="database"></i>
+                            <span data-i18n="header.mobile.data">Veri Yönetimi</span>
+                        </button>
+                        <button onclick="Analytics.showSettings(); MobileUI.closeHeaderMenu();" class="admin-only">
+                            <i data-lucide="settings"></i>
+                            <span data-i18n="header.mobile.settings">Ayarlar</span>
+                        </button>
+                        <div class="menu-separator"></div>
+                        <div class="flex items-center gap-2 px-3 py-2">
+                            <i data-lucide="globe" class="w-4 h-4 text-gray-400"></i>
+                            <select id="headerLangSelectorMobile" onchange="I18n.setLang(this.value)"
+                                    class="flex-1 text-sm px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 bg-white text-gray-700">
+                                <option value="tr">Türkçe</option>
+                                <option value="en">English</option>
+                                <option value="ru">Русский</option>
+                                <option value="ar">العربية</option>
+                            </select>
+                        </div>
+                        <div class="menu-separator"></div>
+                        <button onclick="Auth.logout(); MobileUI.closeHeaderMenu();" class="text-red-500">
+                            <i data-lucide="log-out" class="text-red-400"></i>
+                            <span data-i18n="header.logout">Çıkış</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+
+    <!-- ========= VERİ YÖNETİMİ SAYFASI ========= -->
+    <div id="dataManagerSection" class="container mx-auto px-4 py-8 hidden">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6 animate-fade-in">
+                <div class="flex items-center gap-3">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl shadow-lg">
+                        <i data-lucide="database" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800" data-i18n="dm.title">Veri Yönetimi</h2>
+                        <p class="text-sm text-gray-500" data-i18n="dm.subtitle">Veri yükleme, Drive bağlantısı ve kullanıcı yönetimi</p>
+                    </div>
+                </div>
+                <button onclick="DataManager.goBack()" id="dmBackBtn" class="hidden bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Dashboard'a Dön
+                </button>
+            </div>
+
+            <!-- Current Data Info Banner -->
+            <div id="dmCurrentData" class="mb-6 hidden animate-fade-in">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-semibold text-emerald-800 text-sm flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i> Yüklü Veri
+                        </h4>
+                        <button onclick="DataManager.clearData()" class="text-xs text-red-400 hover:text-red-600 underline">Veriyi Temizle</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div class="bg-white rounded-lg p-2">
+                            <p class="text-lg font-bold text-emerald-700" id="dmApartmentCount">0</p>
+                            <p class="text-[10px] text-gray-400">Daire</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-2">
+                            <p class="text-lg font-bold text-blue-700" id="dmReservationCount">0</p>
+                            <p class="text-[10px] text-gray-400">Rezervasyon</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-2">
+                            <p class="text-lg font-bold text-orange-700" id="dmExpenseCount">0</p>
+                            <p class="text-[10px] text-gray-400">Gider</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-6">
+                <button onclick="DataManager.switchTab('upload')" id="dmTab-upload" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-emerald-600 text-white shadow-lg">
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i> Veri Yükle
+                </button>
+                <button onclick="DataManager.switchTab('users')" id="dmTab-users" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600">
+                    <i data-lucide="users" class="w-4 h-4"></i> Kullanıcılar
+                </button>
+                <button onclick="DataManager.switchTab('elektra')" id="dmTab-elektra" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600">
+                    <i data-lucide="link" class="w-4 h-4"></i> ElektraWeb
+                </button>
+            </div>
+
+            <!-- ===== Upload Panel ===== -->
+            <div id="dmPanel-upload" class="glass rounded-2xl shadow-2xl p-8 animate-fade-in">
+                <div id="dmUploadArea" class="border-2 border-dashed border-emerald-300 rounded-xl py-12 px-6 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all cursor-pointer group">
+                    <div class="text-center">
+                        <i data-lucide="folder-open" class="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2" data-i18n="upload.json.title">JSON Dosya Seçin veya Sürükleyin</h3>
+                        <p class="text-sm text-gray-500 mb-4" data-i18n="upload.json.desc">Daire, rezervasyon ve gider verilerini içeren JSON dosyası</p>
+                        <input type="file" id="dmFileInput" accept=".json" class="hidden">
+                        <div class="flex items-center justify-center space-x-4 mt-6">
+                            <button onclick="document.getElementById('dmFileInput').click()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                <span data-i18n="btn.choose.file">Dosya Seç</span>
+                            </button>
+                            <button onclick="Analytics.loadSampleData()" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-orange-700 transition shadow-lg flex items-center space-x-2">
+                                <i data-lucide="database" class="w-4 h-4"></i>
+                                <span data-i18n="btn.sample.data">Örnek Veri</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Users Panel ===== -->
+            <div id="dmPanel-users" class="glass rounded-2xl shadow-2xl p-8 hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                        <i data-lucide="users" class="w-8 h-8 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Kullanıcı Yönetimi</h3>
+                    <p class="text-sm text-gray-500">Daire sahipleri için hesap oluşturun. Davet emaili otomatik gönderilir.</p>
+                </div>
+
+                <!-- Kullanıcı listesi -->
+                <div id="dmOwnerAccountsList" class="space-y-3 mb-6">
+                    <div class="text-center py-8">
+                        <i data-lucide="loader" class="w-6 h-6 text-gray-300 animate-spin mx-auto mb-2"></i>
+                        <p class="text-sm text-gray-400">Kullanıcılar yükleniyor...</p>
+                    </div>
+                </div>
+
+                <!-- Yeni kullanıcı oluşturma formu -->
+                <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                    <h4 class="text-sm font-semibold text-gray-600 mb-4 flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-4 h-4 text-purple-500"></i>
+                        Yeni Kullanıcı Ekle
+                    </h4>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">Ad Soyad *</label>
+                            <input type="text" id="dmNewOwnerName" placeholder="Ali Yılmaz"
+                                   class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">Kullanıcı Adı *</label>
+                            <input type="text" id="dmNewOwnerUsername" placeholder="aliYilmaz"
+                                   class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-[11px] text-gray-400 mb-1">Şifre *</label>
+                        <input type="text" id="dmNewOwnerPass" placeholder="En az 6 karakter"
+                               class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[11px] text-gray-400 mb-1">Erişim verilecek daireler (Ctrl+Click ile çoklu seçim) *</label>
+                        <select id="dmNewOwnerApt" multiple size="4"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                        </select>
+                    </div>
+                    <button id="dmInviteBtn" onclick="UserManager.createUser(event)"
+                            class="w-full px-3 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                        <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                        Kullanıcı Oluştur
+                    </button>
+                </div>
+
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <p class="text-xs text-blue-600 flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                        Kullanıcıya email ve şifreyi doğrudan bildirin. Şifreyi sonradan 🔑 butonuyla değiştirebilirsiniz.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ===== ElektraWeb Mapping Panel ===== -->
+            <div id="dmPanel-elektra" class="glass rounded-2xl shadow-2xl p-8 hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                        <i data-lucide="link" class="w-8 h-8 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="dm.elektra.title">ElektraWeb Eslestirme</h3>
+                    <p class="text-sm text-gray-500" data-i18n="dm.elektra.desc">Daireleri ElektraWeb PMS odalariyla eslestirin. Bu eslestirme takvim ve projeksiyon verisi icin kullanilir.</p>
+                </div>
+
+                <!-- Bağlantı durumu -->
+                <div id="hbConnectionStatus" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div id="hbStatusDot" class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <span id="hbStatusText" class="text-sm text-gray-500">Bağlantı kontrol ediliyor...</span>
+                        </div>
+                        <button onclick="ElektraMapping.testConnection()" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
+                            <i data-lucide="wifi" class="w-3 h-3"></i> Bağlantıyı Test Et
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Eşleştirme tablosu -->
+                <div id="hbMappingTable" class="space-y-3">
+                    <div class="text-center py-8">
+                        <i data-lucide="loader" class="w-6 h-6 text-gray-300 animate-spin mx-auto mb-2"></i>
+                        <p class="text-sm text-gray-400">Yükleniyor...</p>
+                    </div>
+                </div>
+
+                <!-- Kaydet butonu -->
+                <div class="mt-6 flex items-center justify-between flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <button onclick="ElektraMapping.refreshRooms()" class="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center gap-1.5">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Odalari Yenile
+                        </button>
+                        <button onclick="ElektraMapping.autoMatch()" class="px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition flex items-center gap-1.5">
+                            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Otomatik Eslestir
+                        </button>
+                    </div>
+                    <button onclick="ElektraMapping.saveAll()" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i> Eslestirmeleri Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard (Hidden initially) -->
+    <div id="mainDashboard" class="container mx-auto px-4 py-6 hidden">
+        
+        <!-- Top Controls Bar -->
+        <div class="glass rounded-xl shadow-lg p-4 mb-6 animate-slide-up">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <!-- Date Range Selector -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="calendar-days" class="w-5 h-5 text-emerald-600"></i>
+                        <select id="datePreset" class="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                            <option value="this-month" data-i18n="date.this.month">Bu Ay</option>
+                            <option value="last-month" data-i18n="date.last.month">Geçen Ay</option>
+                            <option value="last-3-months" data-i18n="date.last.3m">Son 3 Ay</option>
+                            <option value="last-6-months" data-i18n="date.last.6m">Son 6 Ay</option>
+                            <option value="this-year" data-i18n="date.this.year">Bu Yıl</option>
+                            <option value="last-year" data-i18n="date.last.year">Geçen Yıl</option>
+                            <option value="all" selected data-i18n="date.all.time">Tüm Zamanlar</option>
+                            <option value="custom" data-i18n="date.custom">Özel Seçim</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customDateRange" class="hidden flex items-center space-x-2 animate-fade-in">
+                        <input type="date" id="startDate" class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
+                        <span class="text-gray-400">→</span>
+                        <input type="date" id="endDate" class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
+                        <button onclick="Analytics.applyDateFilter()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition flex items-center space-x-1">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span data-i18n="btn.apply">Uygula</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Currency Settings -->
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 bg-white/50 px-3 py-2 rounded-lg">
+                        <span class="text-sm text-gray-600">€/₺</span>
+                        <input type="number" id="exchangeRateTL" value="48.5" step="0.1" class="owner-readonly w-16 px-2 py-1 bg-white border border-gray-200 rounded text-sm">
+                    </div>
+                    <div class="flex items-center space-x-2 bg-white/50 px-3 py-2 rounded-lg">
+                        <span class="text-sm text-gray-600">€/$</span>
+                        <input type="number" id="exchangeRateUSD" value="0.86" step="0.01" class="owner-readonly w-16 px-2 py-1 bg-white border border-gray-200 rounded text-sm">
+                    </div>
+                    <button onclick="Analytics.refreshData()" class="admin-only bg-emerald-100 text-emerald-700 p-2 rounded-lg hover:bg-emerald-200 transition" title="Verileri Yenile">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+            <!-- Portfolio Value Card -->
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.1s">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 group-hover:from-emerald-500/20 group-hover:to-emerald-600/20 transition"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="p-2 bg-emerald-100 rounded-lg">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
+                        </div>
+                        <span class="text-xs text-emerald-600 font-semibold" id="portfolioTrend">+0%</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-1" id="portfolioLabel" data-i18n="kpi.portfolio">Toplam Portföy</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="totalPortfolioValue">€0</p>
+                    <div class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-500" id="portfolioProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Revenue Card -->
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.2s">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/10 group-hover:from-blue-500/20 group-hover:to-blue-600/20 transition"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i data-lucide="euro" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <span class="text-xs text-blue-600 font-semibold" id="monthlyTrend">→</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-1" id="revenueLabel" data-i18n="kpi.monthly.revenue">Bu Ay Kazanç</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="monthlyRevenue">€0</p>
+                    <p class="text-xs text-gray-400 mt-2" id="monthlyChange" data-i18n="kpi.vs.last">vs geçen dönem</p>
+                </div>
+            </div>
+
+            <!-- Active Properties Card -->
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.3s">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-600/10 group-hover:from-purple-500/20 group-hover:to-purple-600/20 transition"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <i data-lucide="home" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full" id="activePercentage">0%</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-1" data-i18n="kpi.active.apartments">Aktif Daireler</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="activeProperties">0/0</p>
+                    <p class="text-xs text-gray-400 mt-2" data-i18n="kpi.with.reservation">Rezervasyonlu</p>
+                </div>
+            </div>
+
+            <!-- Average Occupancy Card -->
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.4s">
+                <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-orange-600/10 group-hover:from-orange-500/20 group-hover:to-orange-600/20 transition"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="p-2 bg-orange-100 rounded-lg">
+                            <i data-lucide="calendar-check" class="w-5 h-5 text-orange-600"></i>
+                        </div>
+                        <span class="text-xs text-orange-600" id="occupancyIndicator">→</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-1" data-i18n="kpi.avg.occupancy">Ortalama Doluluk</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="avgOccupancy">0%</p>
+                    <div class="mt-2 flex space-x-1">
+                        <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
+                        <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
+                        <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
+                        <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
+                        <div class="flex-1 h-1 bg-gray-200 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best System Card -->
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up col-span-2 lg:col-span-1" style="animation-delay: 0.5s">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-teal-600/10 group-hover:from-emerald-500/20 group-hover:to-teal-600/20 transition"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="p-2 bg-emerald-100 rounded-lg">
+                            <i data-lucide="award" class="w-5 h-5 text-emerald-600"></i>
+                        </div>
+                        <i data-lucide="crown" class="w-4 h-4 text-yellow-500"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-1" id="bestSystemLabel" data-i18n="kpi.best.system">En Karlı Sistem</p>
+                    <p class="text-xl font-bold text-gray-800" id="bestSystem">-</p>
+                    <p class="text-xs text-emerald-600 font-semibold mt-2" id="systemProfit">€0</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Navigation Tabs -->
+        <div class="glass rounded-xl shadow-lg overflow-hidden mb-6">
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-1">
+                <nav class="flex flex-wrap desktop-tab-nav">
+                    <button onclick="Analytics.switchMainTab('overview')" class="main-tab active flex-1 px-4 py-3 text-sm font-semibold text-white bg-white/20 rounded-t-lg transition hover:bg-white/30 flex items-center justify-center space-x-2" data-tab="overview">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span data-i18n="tab.overview">Genel Bakış</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('analysis')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2 hidden" data-tab="analysis">
+                        <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                        <span data-i18n="tab.analysis">Detaylı Analiz</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('comparison')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="comparison">
+                        <i data-lucide="git-compare" class="w-4 h-4"></i>
+                        <span data-i18n="tab.comparison">Genel Karşılaştırma</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('trends')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="trends">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                        <span data-i18n="tab.trends">Trendler</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('efficiency')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="efficiency">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span data-i18n="tab.efficiency">Daire Kazançları</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('reports')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="reports">
+                        <i data-lucide="file-bar-chart" class="w-4 h-4"></i>
+                        <span data-i18n="tab.reports">Raporlar</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('projection')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2" data-tab="projection">
+                        <i data-lucide="telescope" class="w-4 h-4"></i>
+                        <span data-i18n="tab.projection">Projeksiyon</span>
+                    </button>
+                    <button onclick="Analytics.switchMainTab('calendar')" class="main-tab flex-1 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white transition hover:bg-white/10 rounded-t-lg flex items-center justify-center space-x-2 owner-only-tab" data-tab="calendar">
+                        <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                        <span data-i18n="tab.calendar">Takvim</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Owner Apartment Filter Bar - sadece çok daireli owner'da görünür -->
+            <div id="ownerApartmentFilter" class="hidden bg-white/90 backdrop-blur border-b border-gray-200 px-4 py-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1" data-i18n="header.filter.apartment">Daire:</span>
+                    <button onclick="Analytics.ownerFilterSelectAll()" id="ownerFilterAll"
+                            class="owner-filter-chip active px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition cursor-pointer bg-emerald-50 border-emerald-500 text-emerald-700">
+                        <span data-i18n="header.filter.all">Tümü</span>
+                    </button>
+                    <div id="ownerFilterChips" class="flex items-center gap-2 flex-wrap">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overview Tab Content -->
+            <div id="overview-content" class="tab-content active bg-white/95 p-3 sm:p-6">
+                <!-- Owner Financial Summary - sadece owner modunda görünür -->
+                <div id="ownerFinancialSummary" class="hidden mb-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="receipt" class="w-5 h-5 text-emerald-600"></i>
+                            <span data-i18n="overview.financial.title">Finansal Özet</span>
+                        </h3>
+                        <div id="ownerFinancialDetail"></div>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Revenue Trend Chart -->
+                    <div id="revenueTrendSection" class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                <i data-lucide="line-chart" class="w-5 h-5 text-emerald-600"></i>
+                                <span id="dashboardTrendTitle" data-i18n="overview.revenue.trend">Gelir Trendi</span>
+                            </h3>
+                            <select id="trendPeriod" class="text-sm px-3 py-1 border border-gray-200 rounded-lg admin-only" onchange="Analytics.createRevenueTrendChart()">
+                                <option value="daily">Günlük</option>
+                                <option value="weekly">Haftalık</option>
+                                <option value="monthly" selected>Aylık</option>
+                                <option value="yearly">Yıllık</option>
+                            </select>
+                        </div>
+                        <div class="chart-container" id="revenueTrendChart"></div>
+                    </div>
+                    
+                    <!-- Top Performers -->
+                    <div id="topPerformersSection" class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="trophy" class="w-5 h-5 text-yellow-500"></i>
+                            <span data-i18n="overview.top.performers">En İyi Performans</span>
+                        </h3>
+                        <div class="space-y-3" id="topPerformers">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Platform Distribution -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="globe" class="w-5 h-5 text-blue-600"></i>
+                            <span data-i18n="overview.platform.dist">Platform Dağılımı</span>
+                        </h3>
+                        <div class="chart-container-sm" id="platformDistChart"></div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="credit-card" class="w-5 h-5 text-green-600"></i>
+                            <span data-i18n="overview.payment.dist">Ödeme Yöntemi Dağılımı</span>
+                        </h3>
+                        <div class="chart-container-sm" id="paymentMethodChart"></div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- Analysis Tab Content -->
+            <div id="analysis-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
+                <!-- Analysis Sub-tabs -->
+                <div class="bg-gray-50 rounded-lg p-1 mb-6">
+                    <nav class="flex flex-wrap analysis-subtabs-nav">
+                        <button onclick="Analytics.switchAnalysisTab('system')" class="analysis-tab active flex-1 px-4 py-2 text-sm font-medium bg-white rounded-lg shadow-sm" data-analysis="system">
+                            <span data-i18n="tab.analysis.system">Sistem Analizi</span>
+                        </button>
+                        <button onclick="Analytics.switchAnalysisTab('apartment')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="apartment">
+                            <span data-i18n="tab.analysis.apartment">Daire Analizi</span>
+                        </button>
+                        <button onclick="Analytics.switchAnalysisTab('platform')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="platform">
+                            <span data-i18n="tab.analysis.platform">Platform Analizi</span>
+                        </button>
+                        <button onclick="Analytics.switchAnalysisTab('expense')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="expense">
+                            <span data-i18n="tab.analysis.expense">Gider Analizi</span>
+                        </button>
+                        <button onclick="Analytics.switchAnalysisTab('owner')" class="analysis-tab flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900" data-analysis="owner">
+                            <span data-i18n="tab.analysis.owner">Sahip Analizi</span>
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Analysis Content Areas -->
+                <div id="system-analysis" class="analysis-content active">
+                    <!-- System analysis content -->
+                </div>
+                <div id="apartment-analysis" class="analysis-content hidden">
+                    <!-- Apartment analysis content -->
+                </div>
+                <div id="platform-analysis" class="analysis-content hidden">
+                    <!-- Platform analysis content -->
+                </div>
+                <div id="expense-analysis" class="analysis-content hidden">
+                    <!-- Expense analysis content -->
+                </div>
+                <div id="owner-analysis" class="analysis-content hidden">
+                    <!-- Owner analysis content -->
+                </div>
+            </div>
+            
+            <!-- Comparison Tab Content -->
+            <div id="comparison-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
+                <!-- Advanced Comparison Controls -->
+                <!-- Advanced Comparison Controls -->
+                <div class="bg-gray-50 rounded-xl p-3 sm:p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4" data-i18n="comparison.params">Genel Karşılaştırma Parametreleri</h3>
+
+                    <!-- Comparison Mode Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3" data-i18n="comparison.mode">Karşılaştırma Modu</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <button onclick="Analytics.setComparisonMode('apartment-apartment')"
+                                    class="comparison-mode-btn active px-4 py-3 bg-white border-2 border-emerald-500 rounded-lg hover:bg-emerald-50 transition text-left">
+                                <div class="font-semibold text-emerald-700" data-i18n="comparison.apt.vs.apt">Daire vs Daire</div>
+                                <div class="text-xs text-gray-500 mt-1">Aynı dönemde</div>
+                            </button>
+
+                            <button onclick="Analytics.setComparisonMode('apartment-period')"
+                                    class="comparison-mode-btn px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-500 transition text-left">
+                                <div class="font-semibold text-gray-700" data-i18n="comparison.apt.vs.period">Daire vs Dönem</div>
+                                <div class="text-xs text-gray-500 mt-1">Bir daire, farklı aylar</div>
+                            </button>
+
+                            <button onclick="Analytics.setComparisonMode('group-group')"
+                                    class="comparison-mode-btn px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-purple-50 hover:border-purple-500 transition text-left">
+                                <div class="font-semibold text-gray-700">Grup vs Grup</div>
+                                <div class="text-xs text-gray-500 mt-1">Çoklu daire karşılaştır</div>
+                            </button>
+
+                            <button onclick="Analytics.setComparisonMode('system-system')"
+                                    class="comparison-mode-btn admin-only px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-500 transition text-left">
+                                <div class="font-semibold text-gray-700" data-i18n="comparison.sys.vs.sys">Sistem vs Sistem</div>
+                                <div class="text-xs text-gray-500 mt-1">Sistem karşılaştır</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Comparison Panels -->
+                    <div id="comparisonPanels">
+                        <!-- Will be filled dynamically -->
+                    </div>
+
+                    <button id="comparisonRunBtn" onclick="Analytics.runAdvancedComparison()"
+                            class="mt-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg flex items-center space-x-2 mx-auto">
+                        <i data-lucide="git-compare" class="w-5 h-5"></i>
+                        <span data-i18n="comparison.btn">Karşılaştır</span>
+                    </button>
+                </div>
+
+                
+                <!-- Comparison Results -->
+                <div id="comparisonResults" class="hidden">
+                    <!-- Dynamic comparison results -->
+                </div>
+            </div>
+            
+            <!-- Trends Tab Content -->
+            <div id="trends-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Revenue Trends -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
+                            <span id="revenueTrendTitle" data-i18n="trends.revenue">Gelir Trend Analizi</span>
+                        </h3>
+                        <div class="chart-container" id="revenueTrendAnalysisChart"></div>
+                    </div>
+                    
+                    <!-- Occupancy Trends -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="calendar-range" class="w-5 h-5 text-blue-600"></i>
+                            <span data-i18n="trends.occupancy">Doluluk Trend Analizi</span>
+                        </h3>
+                        <div class="chart-container" id="occupancyTrendChart"></div>
+                    </div>
+                    
+                    <!-- Seasonal Analysis -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="sun" class="w-5 h-5 text-orange-600"></i>
+                            <span data-i18n="trends.seasonal">Mevsimsel Analiz</span>
+                        </h3>
+                        <div class="chart-container" id="seasonalAnalysisChart"></div>
+                    </div>
+                    
+                    <!-- Growth Analysis -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-purple-600"></i>
+                            <span data-i18n="trends.growth">Büyüme Analizi</span>
+                        </h3>
+                        <div class="chart-container" id="growthAnalysisChart"></div>
+                    </div>
+                </div>
+                
+                <!-- Admin: Kâr Trend Grafikleri - geçmiş veriden -->
+                <div id="trendProfitChartsPanel" class="admin-only hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="bar-chart-big" class="w-5 h-5 text-indigo-600"></i>
+                            <span data-i18n="trends.profit">Kâr Trendleri</span>
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.monthly.profit">Aylık Kâr Akışı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.monthly.profit.desc">Brüt Kazanç → Gerçek Kâr dönüşümü</p>
+                                <div id="trendProfitFlowChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.apt.profit.trend">Daire Kârlılık Trendi (Top 5)</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.apt.profit.desc">En kârlı 5 dairenin aylık Lagirio kazancı</p>
+                                <div id="trendAptProfitChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.margin.trend">Kâr Marjı Trendi</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.margin.desc">Gerçek Kâr / Brüt Kazanç oranının aylık değişimi</p>
+                                <div id="trendProfitMarginChart" style="height:280px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.occ.profit">Doluluk-Kârlılık İlişkisi</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.occ.profit.desc">Ort. doluluk oranı ile daire başına gerçek kâr arasındaki korelasyon</p>
+                                <div id="trendOccupancyProfitChart" style="height:280px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Owner: Kazanç Analizi Grafikleri -->
+                <div id="ownerTrendChartsPanel" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="wallet" class="w-5 h-5 text-emerald-600"></i>
+                            <span data-i18n="trends.revenue.analysis">Kazanç Analizi</span>
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.monthly.breakdown">Aylık Kazanç Kırılımı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.monthly.profit.desc">Brüt gelirden net kazanca: kesintilerin aylık dağılımı</p>
+                                <div id="ownerIncomeBreakdownChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.apt.perf.compare">Daire Performans Karşılaştırma</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.apt.perf.desc">Her dairenin aylık net kazancı</p>
+                                <div id="ownerAptPerformanceChart" style="height:320px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.price.vs.occ">Gecelik Fiyat vs Doluluk</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.price.occ.desc">Fiyat-doluluk dengesi: optimum noktayı bulun</p>
+                                <div id="ownerPriceOccupancyChart" style="height:280px"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2" data-i18n="trends.platform.revenue">Platform Gelir Dağılımı</h4>
+                                <p class="text-[10px] text-gray-400 mb-2" data-i18n="trends.platform.desc">Hangi platform daha fazla gelir getiriyor?</p>
+                                <div id="ownerPlatformTrendChart" style="height:280px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forecast Section -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                        <i data-lucide="crystal-ball" class="w-5 h-5 text-indigo-600"></i>
+                        <span data-i18n="trends.forecasts">Tahminler ve Projeksiyonlar</span>
+                    </h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-indigo-50 rounded-lg p-4">
+                            <h4 class="font-medium text-indigo-900 mb-2" data-i18n="trends.next.month">Sonraki Ay Tahmini</h4>
+                            <p class="text-2xl font-bold text-indigo-600" id="nextMonthForecast">€0</p>
+                            <p class="text-sm text-indigo-700 mt-1" data-i18n="forecast.past.data">Geçmiş verilere dayalı</p>
+                        </div>
+                        <div class="bg-emerald-50 rounded-lg p-4">
+                            <h4 class="font-medium text-emerald-900 mb-2" data-i18n="trends.3month">3 Aylık Projeksiyon</h4>
+                            <p class="text-2xl font-bold text-emerald-600" id="quarterForecast">€0</p>
+                            <p class="text-sm text-emerald-700 mt-1" data-i18n="trends.based.on">Trend analizi bazlı</p>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <h4 class="font-medium text-purple-900 mb-2" data-i18n="trends.annual">Yıllık Hedef</h4>
+                            <p class="text-2xl font-bold text-purple-600" id="yearlyTarget">€0</p>
+                            <p class="text-sm text-purple-700 mt-1" data-i18n="forecast.current.perf">Mevcut performansa göre</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Efficiency Tab Content -->
+            <div id="efficiency-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
+                <!-- Alt-sekme Navigasyonu -->
+                <div class="bg-gray-50 rounded-lg p-1 mb-6">
+                    <nav class="flex flex-wrap">
+                        <button onclick="Analytics.switchEarningsSubTab('earnings-list')" class="earnings-subtab active bg-white text-gray-900 shadow-sm flex-1 px-4 py-2.5 text-sm font-semibold rounded-md transition flex items-center justify-center space-x-2" data-subtab="earnings-list">
+                            <i data-lucide="list" class="w-4 h-4"></i>
+                            <span>Kazanç Listesi</span>
+                        </button>
+                        <button onclick="Analytics.switchEarningsSubTab('performance')" class="earnings-subtab flex-1 px-4 py-2.5 text-sm font-semibold text-gray-500 rounded-md transition hover:bg-gray-100 flex items-center justify-center space-x-2" data-subtab="performance">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                            <span>Performans Grafikleri</span>
+                        </button>
+                        <button onclick="Analytics.switchEarningsSubTab('temporal')" class="earnings-subtab flex-1 px-4 py-2.5 text-sm font-semibold text-gray-500 rounded-md transition hover:bg-gray-100 flex items-center justify-center space-x-2" data-subtab="temporal">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                            <span>Zamansal Karşılaştırma</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Kazanç Listesi Alt-Sekmesi -->
+                <div id="earnings-list-content" class="earnings-content">
+                    <!-- Ay Seçici -->
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <label class="text-sm font-medium text-gray-700">Dönem:</label>
+                        <select id="earningsMonthSelector" onchange="Analytics.onEarningsMonthChange()" class="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="all">Tüm Zamanlar</option>
+                        </select>
+                    </div>
+
+                    <!-- KPI Kartları -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6" id="earningsKpiCards">
+                        <!-- Dinamik içerik -->
+                    </div>
+
+                    <!-- Daire Kazanç Tablosu -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                <i data-lucide="building-2" class="w-5 h-5 text-emerald-600"></i>
+                                <span>Daire Bazlı Lagirio Kazançları</span>
+                            </h3>
+                        </div>
+                        <!-- Desktop tablo -->
+                        <div class="overflow-x-auto" id="earningsTableDesktop">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Daire</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sistem</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Brüt Gelir</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Lagirio Kazanç</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Oran</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Rez.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="earningsTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Dinamik içerik -->
+                                </tbody>
+                                <tfoot id="earningsTableFoot" class="bg-emerald-50 font-semibold">
+                                    <!-- Dinamik toplam satırı -->
+                                </tfoot>
+                            </table>
+                        </div>
+                        <!-- Mobil kart görünümü -->
+                        <div class="eff-mobile-cards hidden" id="earningsCardsMobile"></div>
+                    </div>
+                </div>
+
+                <!-- Performans Grafikleri Alt-Sekmesi -->
+                <div id="performance-content" class="earnings-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                                <i data-lucide="coins" class="w-5 h-5 text-yellow-600"></i>
+                                <span data-i18n="eff.cost">Maliyet Verimliliği</span>
+                            </h3>
+                            <div class="chart-container" id="costEfficiencyChart"></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                                <i data-lucide="gauge" class="w-5 h-5 text-red-600"></i>
+                                <span data-i18n="eff.system">Sistem Verimliliği</span>
+                            </h3>
+                            <div class="chart-container" id="systemEfficiencyChart"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                <i data-lucide="table" class="w-5 h-5 text-gray-600"></i>
+                                <span data-i18n="eff.detailed">Detaylı Verimlilik Metrikleri</span>
+                            </h3>
+                        </div>
+                        <div class="overflow-x-auto" id="efficiencyTableDesktop">
+                            <table class="w-full responsive-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.apartment">Daire</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.expense.ratio">Gider/Gelir</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.margin">Net Kar Marjı</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.per.night">€/Gece</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.idle.cost">Boş Gün Maliyeti</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="eff.col.score">Verimlilik Skoru</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="efficiencyMetricsTable" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                        <div class="eff-mobile-cards hidden" id="efficiencyCardsMobile"></div>
+                    </div>
+                </div>
+
+                <!-- Zamansal Karşılaştırma Alt-Sekmesi -->
+                <div id="temporal-content" class="earnings-content hidden">
+                    <div class="bg-gray-50 rounded-xl p-4 sm:p-6 mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                            <i data-lucide="clock" class="w-5 h-5 text-indigo-600"></i>
+                            <span>Zamansal Karşılaştırma</span>
+                        </h3>
+                        <div class="flex gap-4 flex-wrap items-end">
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem A (çoklu seçim)</label>
+                                <select id="earningsTemporalA" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <span class="text-lg text-gray-300 self-center">vs</span>
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 block mb-1">Dönem B (çoklu seçim)</label>
+                                <select id="earningsTemporalB" class="text-xs border border-gray-200 rounded-lg px-3 py-2 min-w-[200px]" multiple size="4"></select>
+                            </div>
+                            <button onclick="Analytics.runEarningsTemporalComparison()" class="bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-600 transition self-end">Karşılaştır</button>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2">Ctrl/Cmd ile çoklu ay seçebilirsiniz. Farklı yıllardan aylar karşılaştırılabilir.</p>
+                    </div>
+                    <div id="earningsTemporalResults">
+                        <!-- Dinamik sonuçlar -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reports Tab Content -->
+            <div id="reports-content" class="tab-content hidden bg-white/95 p-3 sm:p-6">
+                <!-- Report Type Selection -->
+                <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4" data-i18n="reports.create">Rapor Oluştur</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <button onclick="Analytics.generateReport('summary')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
+                            <i data-lucide="file-text" class="w-8 h-8 text-emerald-600 mb-3 group-hover:scale-110 transition"></i>
+                            <h4 class="font-semibold text-gray-800 mb-1" data-i18n="reports.summary">Özet Rapor</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.summary.desc">Tek sayfalık yönetici özeti</p>
+                        </button>
+
+                        <button onclick="Analytics.generateReport('detailed')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
+                            <i data-lucide="file-bar-chart" class="w-8 h-8 text-blue-600 mb-3 group-hover:scale-110 transition"></i>
+                            <h4 class="font-semibold text-gray-800 mb-1" data-i18n="reports.detailed">Detaylı Rapor</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.detailed.desc">Kapsamlı analiz raporu</p>
+                        </button>
+
+                        <button onclick="Analytics.generateReport('comparison')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
+                            <i data-lucide="git-compare" class="w-8 h-8 text-purple-600 mb-3 group-hover:scale-110 transition"></i>
+                            <h4 class="font-semibold text-gray-800 mb-1" data-i18n="reports.comparison">Karşılaştırma Raporu</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.comparison.desc">Dönem/daire karşılaştırması</p>
+                        </button>
+
+                        <button onclick="Analytics.generateReport('financial')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
+                            <i data-lucide="wallet" class="w-8 h-8 text-green-600 mb-3 group-hover:scale-110 transition"></i>
+                            <h4 class="font-semibold text-gray-800 mb-1">Finansal Rapor</h4>
+                            <p class="text-sm text-gray-600" data-i18n="reports.revenue.expense">Gelir-gider detayları</p>
+                        </button>
+
+                        <button onclick="Analytics.generateReport('performance')" class="p-6 bg-white rounded-lg shadow hover:shadow-lg transition group">
+                            <i data-lucide="trending-up" class="w-8 h-8 text-orange-600 mb-3 group-hover:scale-110 transition"></i>
+                            <h4 class="font-semibold text-gray-8
