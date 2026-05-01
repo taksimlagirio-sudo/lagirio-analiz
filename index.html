@@ -253,6 +253,13 @@
         body.owner-mode #calendar-content.owner-only-tab { display: none !important; }
         body.owner-mode #calendar-content.owner-only-tab.active { display: block !important; }
 
+        /* Quick stats grid: admin'de 6 kart, owner'da 5 kart */
+        .quick-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        @media (min-width: 1024px) {
+            .quick-stats-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+            body.owner-mode .quick-stats-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        }
+
         /* Airbnb-style Calendar */
         .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); }
         .cal-day { min-height: 44px; padding: 4px 0; text-align: center; position: relative; }
@@ -1076,7 +1083,7 @@
         </div>
         
         <!-- Quick Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+        <div class="quick-stats-grid grid gap-3 sm:gap-4 mb-6">
             <!-- Portfolio Value Card -->
             <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up" style="animation-delay: 0.1s">
                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 group-hover:from-emerald-500/20 group-hover:to-emerald-600/20 transition"></div>
@@ -1162,6 +1169,22 @@
                     <p class="text-xs text-gray-500 mb-1" id="bestSystemLabel" data-i18n="kpi.best.system">En Karlı Sistem</p>
                     <p class="text-xl font-bold text-gray-800" id="bestSystem">-</p>
                     <p class="text-xs text-emerald-600 font-semibold mt-2" id="systemProfit">€0</p>
+                </div>
+            </div>
+
+            <!-- Extra Revenues Card (admin-only) -->
+            <div class="glass rounded-xl p-3 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-shadow animate-slide-up admin-only" style="animation-delay: 0.6s">
+                <div class="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-cyan-600/10 group-hover:from-teal-500/20 group-hover:to-cyan-600/20 transition"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="p-2 bg-teal-100 rounded-lg">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-teal-600"></i>
+                        </div>
+                        <span class="text-xs text-teal-600 font-semibold" id="extraRevenuesTotal">€0</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-1" data-i18n="kpi.extra.revenues">Ek Kârlar</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-800" id="monthlyExtraRevenues">€0</p>
+                    <p class="text-xs text-gray-400 mt-2" data-i18n="kpi.extra.revenues.desc">Tur, temizlik, transfer</p>
                 </div>
             </div>
         </div>
@@ -2706,6 +2729,9 @@
                 'kpi.with.reservation': 'With Reservations',
                 'kpi.avg.occupancy': 'Average Occupancy',
                 'kpi.best.system': 'Best System',
+                'kpi.extra.revenues': 'Extra Revenues',
+                'kpi.extra.revenues.desc': 'Tours, cleaning, transfer',
+                'kpi.extra.total.label': 'Total',
                 'kpi.total.expense': 'Total Expenses',
                 'kpi.net.income': 'Net Income',
                 'kpi.net.income.yours': 'Your Net Income',
@@ -3261,6 +3287,7 @@
                 'chart.real.profit': 'Real Profit',
                 'chart.net.profit': 'Net Profit',
                 'chart.company.exp': 'Company Expenses',
+                'chart.extra.revenues': 'Extra Revenues',
                 // Phase 7 — Projection KPI & Waterfall
                 'proj.waterfall.title': 'Income Flow',
                 'proj.waterfall.desc': '(From gross income to net income)',
@@ -3420,6 +3447,9 @@
                 'kpi.with.reservation': 'С бронированием',
                 'kpi.avg.occupancy': 'Средняя заполняемость',
                 'kpi.best.system': 'Лучшая система',
+                'kpi.extra.revenues': 'Доп. доходы',
+                'kpi.extra.revenues.desc': 'Туры, уборка, трансфер',
+                'kpi.extra.total.label': 'Всего',
                 'kpi.total.expense': 'Общие расходы',
                 'kpi.net.income': 'Чистый доход',
                 'kpi.net.income.yours': 'Ваш чистый доход',
@@ -3972,6 +4002,7 @@
                 'comparison.subtitle': 'Сравнение выполнено!',
                 // Chart legends
                 'chart.gross.profit': 'Валовая прибыль',
+                'chart.extra.revenues': 'Доп. доходы',
                 'chart.real.profit': 'Реальная прибыль',
                 'chart.net.profit': 'Чистая прибыль',
                 'chart.company.exp': 'Расходы компании',
@@ -4134,6 +4165,9 @@
                 'kpi.with.reservation': 'بها حجوزات',
                 'kpi.avg.occupancy': 'متوسط الإشغال',
                 'kpi.best.system': 'أفضل نظام',
+                'kpi.extra.revenues': 'إيرادات إضافية',
+                'kpi.extra.revenues.desc': 'جولات، تنظيف، نقل',
+                'kpi.extra.total.label': 'إجمالي',
                 'kpi.total.expense': 'إجمالي المصاريف',
                 'kpi.net.income': 'صافي الدخل',
                 'kpi.net.income.yours': 'صافي دخلك',
@@ -4686,6 +4720,7 @@
                 'comparison.subtitle': 'تمت المقارنة!',
                 // Chart legends
                 'chart.gross.profit': 'الربح الإجمالي',
+                'chart.extra.revenues': 'إيرادات إضافية',
                 'chart.real.profit': 'الربح الحقيقي',
                 'chart.net.profit': 'صافي الربح',
                 'chart.company.exp': 'مصاريف الشركة',
@@ -5136,22 +5171,24 @@
 
             Analytics.showLoading();
             try {
-                const [apts, rsvs, exps, caps, lags, cats] = await Promise.all([
+                const [apts, rsvs, exps, caps, lags, extras, cats] = await Promise.all([
                     fetchAll('apartments', 'data'),
                     fetchAll('reservations', 'data'),
                     fetchAll('expenses', 'data'),
                     fetchAll('capital_expenses', 'data'),
                     fetchAll('lagirio_expenses', 'data'),
+                    fetchAll('lagirio_extra_revenues', 'data'),
                     fetchAll('expense_categories', 'name'),
                 ]);
 
                 Analytics.data = {
-                    apartments:      apts.map(r => r.data),
-                    reservations:    rsvs.map(r => r.data),
-                    expenses:        exps.map(r => r.data),
-                    capitalExpenses: caps.map(r => r.data),
-                    lagirioExpenses: lags.map(r => r.data),
-                    categories:      cats.map(r => r.name),
+                    apartments:           apts.map(r => r.data),
+                    reservations:         rsvs.map(r => r.data),
+                    expenses:             exps.map(r => r.data),
+                    capitalExpenses:      caps.map(r => r.data),
+                    lagirioExpenses:      lags.map(r => r.data),
+                    lagirioExtraRevenues: extras.map(r => r.data),
+                    categories:           cats.map(r => r.name),
                 };
 
                 if (isOwner && this.currentUser.apartmentIds?.length) {
@@ -8899,7 +8936,8 @@
                 reservations: ((this._fullData || this.data).reservations || []).filter(r => apartmentIds.includes(r.apartmentId)),
                 expenses: ((this._fullData || this.data).expenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
                 capitalExpenses: ((this._fullData || this.data).capitalExpenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
-                lagirioExpenses: ((this._fullData || this.data).lagirioExpenses || []).filter(e => apartmentIds.includes(e.apartmentId))
+                lagirioExpenses: ((this._fullData || this.data).lagirioExpenses || []).filter(e => apartmentIds.includes(e.apartmentId)),
+                lagirioExtraRevenues: [] // Lagirio'nun şirket bazlı geliri — owner ile ilgisi yok
             };
         },
 
@@ -9318,6 +9356,7 @@
             if (!isOwner) {
                 const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
                 const lagirioExps = this.data?.lagirioExpenses || [];
+                const extraRevs = this.data?.lagirioExtraRevenues || [];
 
                 // Aylık şirket giderlerini hesapla
                 const compExpByMonth = {};
@@ -9331,6 +9370,15 @@
                 const avgCompExp = compExpEnteredMonths.length > 0
                     ? Object.values(compExpByMonth).reduce((s,v) => s+v, 0) / compExpEnteredMonths.length : 0;
 
+                // Aylık ek kârları hesapla (Lagirio'nun daire dışı gelirleri)
+                const extraRevByMonth = {};
+                extraRevs.forEach(rev => {
+                    const dd = new Date(rev.date);
+                    const mk = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0');
+                    if (!extraRevByMonth[mk]) extraRevByMonth[mk] = 0;
+                    extraRevByMonth[mk] += convertEUR(rev.amount, rev.currency);
+                });
+
                 // Rez olan ayları bul — filtreye göre (sadece görüntülenen dönem)
                 const resMonths = new Set();
                 (this.filteredData?.reservations || []).forEach(r => {
@@ -9338,20 +9386,25 @@
                     resMonths.add(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
                 });
 
-                // Toplam şirket gideri: rez olan aylarda gerçek gider veya ortalama
+                // Toplam şirket gideri ve ek kâr: rez olan aylarda gerçek değer (ek kârda ortalama yapmıyoruz - sadece girilen aylar)
                 let totalCompanyExp = 0;
+                let totalExtraRev = 0;
                 resMonths.forEach(mk => {
                     totalCompanyExp += compExpByMonth[mk] != null ? compExpByMonth[mk] : avgCompExp;
+                    totalExtraRev += extraRevByMonth[mk] || 0;
                 });
 
                 stats.totalCompanyExpense = totalCompanyExp;
-                stats.realProfit = stats.totalPortfolio - totalCompanyExp;
+                stats.totalExtraRevenue = totalExtraRev;
+                stats.realProfit = stats.totalPortfolio + totalExtraRev - totalCompanyExp;
                 portfolioDisplay = stats.realProfit;
 
-                // Hedef ay gerçek kâr: aylık lagirio - o ayın şirket gideri
+                // Hedef ay gerçek kâr: aylık lagirio + ek kâr - şirket gideri
                 const targetMk = stats._monthlyTargetYear + '-' + String(stats._monthlyTargetMonth + 1).padStart(2, '0');
                 const targetCompExp = compExpByMonth[targetMk] != null ? compExpByMonth[targetMk] : avgCompExp;
-                monthlyRealProfit = stats.monthlyRevenue - targetCompExp;
+                const targetExtraRev = extraRevByMonth[targetMk] || 0;
+                stats.monthlyExtraRevenue = targetExtraRev;
+                monthlyRealProfit = stats.monthlyRevenue + targetExtraRev - targetCompExp;
 
                 // Önceki ay gerçek kâr: bir önceki rez olan ayı bul
                 const prevDate = new Date(stats._monthlyTargetYear, stats._monthlyTargetMonth - 1, 1);
@@ -9387,7 +9440,8 @@
                     });
                     const prevMk = prevYear + '-' + String(prevMonth + 1).padStart(2, '0');
                     const prevCompExp = compExpByMonth[prevMk] != null ? compExpByMonth[prevMk] : avgCompExp;
-                    prevMonthRealProfit = prevLagirio - prevCompExp;
+                    const prevExtraRev = extraRevByMonth[prevMk] || 0;
+                    prevMonthRealProfit = prevLagirio + prevExtraRev - prevCompExp;
                 }
 
                 stats._monthlyRealProfit = monthlyRealProfit;
@@ -9425,6 +9479,18 @@
             document.getElementById('monthlyRevenue').textContent = `€${monthlyDisplay.toLocaleString()}`;
             document.getElementById('activeProperties').textContent = `${stats.activeProperties}/${stats.totalProperties}`;
             document.getElementById('avgOccupancy').textContent = `${stats.avgOccupancy.toFixed(1)}%`;
+
+            // Ek Kârlar kartı (admin-only)
+            if (!isOwner) {
+                const extraMonthlyEl = document.getElementById('monthlyExtraRevenues');
+                const extraTotalEl = document.getElementById('extraRevenuesTotal');
+                const monthlyExtra = stats.monthlyExtraRevenue || 0;
+                const totalExtra = stats.totalExtraRevenue || 0;
+                if (extraMonthlyEl) extraMonthlyEl.textContent = `€${Math.round(monthlyExtra).toLocaleString()}`;
+                if (extraTotalEl) extraTotalEl.textContent = totalExtra > 0
+                    ? t('kpi.extra.total.label', 'Toplam') + `: €${Math.round(totalExtra).toLocaleString()}`
+                    : '—';
+            }
 
             // Aylık kazanç kartındaki trend badge + alt metin
             const monthlyTrendEl = document.getElementById('monthlyTrend');
@@ -14219,10 +14285,11 @@
         _getHistoricalProfitData() {
             const now = new Date();
             const monthNames = I18n.getMonthNames('short');
-            const result = { keys: [], labels: [], lagirio: [], grossIncome: [], compExp: [], realProfit: [], margins: [], resCounts: [], activeAptCounts: [], avgOccupancies: [], aptData: {} };
+            const result = { keys: [], labels: [], lagirio: [], grossIncome: [], compExp: [], extraRev: [], realProfit: [], margins: [], resCounts: [], activeAptCounts: [], avgOccupancies: [], aptData: {} };
 
             // Şirket gideri tahmini
             const lagirioExps = this.data?.lagirioExpenses || [];
+            const extraRevs = this.data?.lagirioExtraRevenues || [];
             const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
             const expByMonth = {};
             lagirioExps.forEach(e => {
@@ -14233,6 +14300,15 @@
             });
             const expMonths = Object.keys(expByMonth);
             const baseCompExp = expMonths.length > 0 ? Object.values(expByMonth).reduce((s,v) => s+v, 0) / expMonths.length : 0;
+
+            // Aylık ek kâr (Lagirio'nun daire dışı gelirleri)
+            const extraByMonth = {};
+            extraRevs.forEach(rev => {
+                const d = new Date(rev.date);
+                const mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+                if (!extraByMonth[mk]) extraByMonth[mk] = 0;
+                extraByMonth[mk] += convertEUR(rev.amount, rev.currency);
+            });
 
             for (let i = 11; i >= 0; i--) {
                 const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -14277,8 +14353,11 @@
                 if (monthResCount > 0) {
                     monthCompExp = expByMonth[mk] != null ? expByMonth[mk] : baseCompExp;
                 }
-                const realP = monthLagirio - monthCompExp;
-                const margin = monthLagirio > 0 ? ((realP / monthLagirio) * 100) : 0;
+                const monthExtraRev = extraByMonth[mk] || 0;
+                // Gerçek Kâr = Brüt Kazanç + Ek Kârlar - Şirket Giderleri
+                const realP = monthLagirio + monthExtraRev - monthCompExp;
+                const totalRevForMargin = monthLagirio + monthExtraRev;
+                const margin = totalRevForMargin > 0 ? ((realP / totalRevForMargin) * 100) : 0;
 
                 const avgOcc = activeAptCount > 0 ? totalOccupancy / activeAptCount : 0;
 
@@ -14287,6 +14366,7 @@
                 result.lagirio.push(parseFloat(monthLagirio.toFixed(2)));
                 result.grossIncome.push(parseFloat(monthGrossIncome.toFixed(2)));
                 result.compExp.push(parseFloat(monthCompExp.toFixed(2)));
+                result.extraRev.push(parseFloat(monthExtraRev.toFixed(2)));
                 result.realProfit.push(parseFloat(realP.toFixed(2)));
                 result.margins.push(parseFloat(margin.toFixed(1)));
                 result.resCounts.push(monthResCount);
@@ -14307,18 +14387,34 @@
             const chart = echarts.init(container);
             this.charts._trendProfitFlow = chart;
 
+            const hasExtra = (d.extraRev || []).some(v => v > 0);
+
+            const series = [
+                { name: t('chart.gross.profit', 'Brüt Kazanç'), type: 'bar', stack: 'revenue', data: d.lagirio, itemStyle: { color: '#93c5fd' }, barWidth: '35%' }
+            ];
+            if (hasExtra) {
+                series.push({
+                    name: t('chart.extra.revenues', 'Ek Kârlar'), type: 'bar', stack: 'revenue', data: d.extraRev,
+                    itemStyle: { color: '#5eead4' }, barWidth: '35%'
+                });
+            }
+            series.push(
+                { name: t('chart.company.exp', 'Şirket Gideri'), type: 'line', data: d.compExp, itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' },
+                { name: t('chart.real.profit', 'Gerçek Kâr'), type: 'line', data: d.realProfit, itemStyle: { color: '#6366f1' }, lineStyle: { width: 3, type: 'dashed' }, symbol: 'diamond', symbolSize: 8,
+                  markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } }
+            );
+
+            const legendData = [t('chart.gross.profit', 'Brüt Kazanç')];
+            if (hasExtra) legendData.push(t('chart.extra.revenues', 'Ek Kârlar'));
+            legendData.push(t('chart.company.exp', 'Şirket Gideri'), t('chart.real.profit', 'Gerçek Kâr'));
+
             chart.setOption({
                 tooltip: { trigger: 'axis', textStyle: { fontSize: 11 } },
-                legend: { data: [t('chart.gross.profit', 'Brüt Kazanç'), t('chart.real.profit', 'Gerçek Kâr'), t('chart.company.exp', 'Şirket Gideri')], bottom: 0, textStyle: { fontSize: 10 } },
+                legend: { data: legendData, bottom: 0, textStyle: { fontSize: 10 } },
                 grid: { top: 30, right: 20, bottom: 55, left: 55 },
                 xAxis: { type: 'category', data: d.labels, axisLabel: { fontSize: 10 } },
                 yAxis: { type: 'value', axisLabel: { formatter: '€{value}', fontSize: 10 } },
-                series: [
-                    { name: t('chart.gross.profit', 'Brüt Kazanç'), type: 'bar', data: d.lagirio, itemStyle: { color: '#93c5fd' }, barWidth: '35%' },
-                    { name: t('chart.real.profit', 'Gerçek Kâr'), type: 'line', data: d.realProfit, itemStyle: { color: '#6366f1' }, lineStyle: { width: 3, type: 'dashed' }, symbol: 'diamond', symbolSize: 8,
-                      markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } },
-                    { name: t('chart.company.exp', 'Şirket Gideri'), type: 'line', data: d.compExp, itemStyle: { color: '#f59e0b' }, lineStyle: { width: 1, type: 'dotted' }, symbol: 'none' }
-                ]
+                series: series
             });
         },
 
@@ -14490,8 +14586,36 @@
                     ]
                 });
             } else {
-                // Admin: Brüt Gelir, Brüt Kazanç (Lagirio), Şirket Gideri, Gerçek Kâr
+                // Admin: Brüt Gelir, Brüt Kazanç (Lagirio), Ek Kârlar, Şirket Gideri, Gerçek Kâr
                 const d = this._getHistoricalProfitData();
+                const hasExtra = (d.extraRev || []).some(v => v > 0);
+
+                const legendData = [t('proj.gross.income', 'Brüt Gelir'), t('chart.gross.profit', 'Brüt Kazanç')];
+                if (hasExtra) legendData.push(t('chart.extra.revenues', 'Ek Kârlar'));
+                legendData.push(t('chart.company.exp', 'Şirket Gideri'), t('chart.real.profit', 'Gerçek Kâr'));
+
+                const series = [
+                    { name: t('proj.gross.income', 'Brüt Gelir'), type: 'line', data: d.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
+                      lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6,
+                      areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.15)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } },
+                    { name: t('chart.gross.profit', 'Brüt Kazanç'), type: 'bar', stack: 'lagirio_rev', data: d.lagirio, itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: hasExtra ? [0,0,0,0] : [4,4,0,0] } }
+                ];
+                if (hasExtra) {
+                    series.push({
+                        name: t('chart.extra.revenues', 'Ek Kârlar'), type: 'bar', stack: 'lagirio_rev', data: d.extraRev,
+                        itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#14b8a6'},{offset:1,color:'#0d9488'}]), borderRadius: [4,4,0,0] }
+                    });
+                }
+                series.push(
+                    { name: t('chart.company.exp', 'Şirket Gideri'), type: 'line', data: d.compExp, smooth: true, itemStyle: { color: '#f59e0b' },
+                      lineStyle: { width: 2, type: 'dashed' }, symbol: 'circle', symbolSize: 5 },
+                    { name: t('chart.real.profit', 'Gerçek Kâr'), type: 'line', data: d.realProfit, smooth: true, itemStyle: { color: '#6366f1' },
+                      lineStyle: { width: 3 }, symbol: 'diamond', symbolSize: 8,
+                      areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(99,102,241,0.2)'},{offset:1,color:'rgba(99,102,241,0.02)'}]) },
+                      markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } }
+                );
+
                 chart.setOption({
                     tooltip: { trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.9)', borderColor: 'transparent',
                         formatter: function(params) {
@@ -14500,23 +14624,11 @@
                             return html;
                         }
                     },
-                    legend: { data: [t('proj.gross.income', 'Brüt Gelir'), t('chart.gross.profit', 'Brüt Kazanç'), t('chart.company.exp', 'Şirket Gideri'), t('chart.real.profit', 'Gerçek Kâr')], bottom: 0 },
+                    legend: { data: legendData, bottom: 0 },
                     grid: { left: '3%', right: '4%', bottom: '15%', top: '3%', containLabel: true },
                     xAxis: { type: 'category', data: d.labels, axisLabel: { rotate: 45, fontSize: 10 } },
                     yAxis: { type: 'value', axisLabel: { formatter: value => `€${(value / 1000).toFixed(0)}k` } },
-                    series: [
-                        { name: t('proj.gross.income', 'Brüt Gelir'), type: 'line', data: d.grossIncome, smooth: true, itemStyle: { color: '#3b82f6' },
-                          lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6,
-                          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.15)'},{offset:1,color:'rgba(59,130,246,0.02)'}]) } },
-                        { name: t('chart.gross.profit', 'Brüt Kazanç'), type: 'bar', data: d.lagirio, itemStyle: {
-                            color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#10b981'},{offset:1,color:'#059669'}]), borderRadius: [4,4,0,0] } },
-                        { name: t('chart.company.exp', 'Şirket Gideri'), type: 'line', data: d.compExp, smooth: true, itemStyle: { color: '#f59e0b' },
-                          lineStyle: { width: 2, type: 'dashed' }, symbol: 'circle', symbolSize: 5 },
-                        { name: t('chart.real.profit', 'Gerçek Kâr'), type: 'line', data: d.realProfit, smooth: true, itemStyle: { color: '#6366f1' },
-                          lineStyle: { width: 3 }, symbol: 'diamond', symbolSize: 8,
-                          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(99,102,241,0.2)'},{offset:1,color:'rgba(99,102,241,0.02)'}]) },
-                          markLine: { data: [{ yAxis: 0, lineStyle: { color: '#ef4444', type: 'solid', width: 1 } }], silent: true } }
-                    ]
+                    series: series
                 });
             }
         },
