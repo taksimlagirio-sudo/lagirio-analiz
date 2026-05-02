@@ -6344,6 +6344,11 @@
                         const lagirioComm2 = bankAmount * ((apartment.lagirioCommission || 0) / 100);
                         const toBeReturned2 = estExpenses + bankPlatComm2 + lagirioComm2;
                         estKDV = toBeReturned2 * 0.20;
+                    } else if (sysType === '10') {
+                        // Sistem 10: KDV gelir üzerinden değil, Lagirio komisyonu üzerine eklenir
+                        const balance10 = estMonthlyGross - estPlatformComm - estExpenses;
+                        const lagirioCommExcl10 = balance10 > 0 ? balance10 * ((apartment.lagirioCommission || 0) / 100) : 0;
+                        estKDV = lagirioCommExcl10 * (taxRate / 100);
                     } else if (taxRate > 0) {
                         if (kdvSystems.has(sysType)) {
                             estKDV = bankAmount * (taxRate / 100) / (1 + taxRate / 100);
