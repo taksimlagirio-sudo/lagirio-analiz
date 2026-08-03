@@ -6339,9 +6339,9 @@
                     let estKDV = 0;
                     const bankAmount = estMonthlyGross * bankCashRatio;
                     if (sysType === '2') {
-                        // Sistem 2: iade edilen tutarın %20 KDV'si
+                        // Sistem 2: iade edilen tutarın %20 KDV'si (Lagirio komisyonu platform sonrası tutardan)
                         const bankPlatComm2 = bankAmount * platCommRatio;
-                        const lagirioComm2 = bankAmount * ((apartment.lagirioCommission || 0) / 100);
+                        const lagirioComm2 = (bankAmount - bankPlatComm2) * ((apartment.lagirioCommission || 0) / 100);
                         const toBeReturned2 = estExpenses + bankPlatComm2 + lagirioComm2;
                         estKDV = toBeReturned2 * 0.20;
                     } else if (taxRate > 0) {
@@ -10027,8 +10027,9 @@
                     lagirioProfit = totalIncome - bankCommission - cashCommission - totalExpenses - totalKDV;
                     break;
 
-                case '2': // Sistem 2 - Komisyonlar Lagirio'nun
-                    const bankLagirioComm2 = bankIncome * (apartment.lagirioCommission / 100);
+                case '2': // Sistem 2 - Komisyonlar Lagirio'nun (platform komisyonu sonrası tutardan)
+                    const bankAfterPlatform2 = bankIncome - bankCommission;
+                    const bankLagirioComm2 = bankAfterPlatform2 * (apartment.lagirioCommission / 100);
                     const cashAfterPlatform2 = cashIncome - cashCommission;
                     const cashLagirioComm2 = cashAfterPlatform2 * (apartment.lagirioCommission / 100);
                     lagirioProfit = bankLagirioComm2 + cashLagirioComm2;
@@ -10151,8 +10152,9 @@
                     ownerShare = 0;
                     break;
 
-                case '2': // Sistem 2
-                    const lagirioComm2 = bankIncome * (apartment.lagirioCommission / 100);
+                case '2': // Sistem 2 - Lagirio komisyonu platform komisyonu sonrası tutardan
+                    const bankAfterPlat2 = bankIncome - bankCommission;
+                    const lagirioComm2 = bankAfterPlat2 * (apartment.lagirioCommission / 100);
                     const toBeReturned2 = totalExpenses + bankCommission + lagirioComm2;
                     const kdvOnReturn2 = toBeReturned2 * 0.20;
                     const bankOwner2 = bankIncome - toBeReturned2 - kdvOnReturn2;
@@ -10339,8 +10341,8 @@
                     }, 0);
                     break;
                 case '2': {
-                    // Sistem 2: iade edilen tutarın %20 KDV'si
-                    const lagirioComm2d = bankIncome * (apartment.lagirioCommission / 100);
+                    // Sistem 2: iade edilen tutarın %20 KDV'si (Lagirio komisyonu platform sonrası tutardan)
+                    const lagirioComm2d = (bankIncome - bankCommission) * (apartment.lagirioCommission / 100);
                     const toBeReturned2d = totalExpenses + bankCommission + lagirioComm2d;
                     totalKDV = toBeReturned2d * 0.20;
                     break;
@@ -15094,7 +15096,7 @@
             const sel = document.getElementById('earningsMonthSelector');
             const selectedMonth = sel ? sel.value : 'all';
             const convertEUR = this.convertToEUR ? this.convertToEUR.bind(this) : (a) => a;
-            const sysNames = { '1': 'S1 Net', '2': 'S2 Brüt', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV', '10': 'S10 Erhan' };
+            const sysNames = { '1': 'S1 Net', '2': 'S2 Kişi', '3': 'S3 Kar', '4': 'S4 Plat', '5': 'S5 Stop', '6': 'S6 Net', '7': 'S7 Karma', '8': 'S8 Kar', '9': 'S9 Stop-KDV', '10': 'S10 Erhan' };
 
             const apartments = this.data?.apartments || [];
             const allReservations = this.data?.reservations || [];
