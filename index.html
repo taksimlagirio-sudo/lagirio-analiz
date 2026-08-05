@@ -5670,20 +5670,13 @@
     // ============================================================
     // ELEKTRAWEB API CLIENT
     // ============================================================
-    // Eski ElektraWeb oda kodundan YENI kodu uret (hizli eslestirme onerisi).
-    // Taksim 360 binalari 3xx: bastaki '3' atilir, slash kaldirilir, oda 2 haneye tamamlanir.
-    //   385/18 -> 8518 · 363/4 -> 6304 · 387F/33 -> 87F33 · 111 (duz) -> 11. Yalniz ONERI'dir.
-    function elektraOldToNew(code) {
-        const s = String(code == null ? '' : code).trim();
-        if (!s) return '';
-        const i = s.indexOf('/');
-        let b = i >= 0 ? s.slice(0, i) : s;
-        const r = i >= 0 ? s.slice(i + 1) : '';
-        if (/^3/.test(b)) b = b.slice(1);
-        if (r === '') return b;
-        const rr = /^\d+$/.test(r) ? r.padStart(2, '0') : r;
-        return b + rr;
-    }
+    // Kod normalizasyonu + yeni-kod türetmesi — pms-lagirio (0145/0146 SQL + RezScreens) ile BİREBİR aynı kural.
+    // ewNorm: eşleştirmede kullanılır → 385-18 ≡ 385/18 ≡ "385 18" (küçük harf, TR harf sadeleştir, alfanümerik dışı sil).
+    // ewDerive: eski koddan yeni kodu üretir — ilk karakteri at (bina 2+ karakterse), ayraç [/ veya -] kaldır,
+    //   oda tek haneyse 2'ye tamamla: 385/18→8518, 363/4→6304, 387F/33→87F33, 385-18→8518.
+    //   Ayraç yoksa null → düz koda (111 gibi) öneri verilmez. Yalnız ÖNERİ'dir; yönetici kaydetmeden görür.
+    function ewNorm(s) { return String(s == null ? '' : s).toLowerCase().replace(/ı/g, 'i').replace(/İ/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z0-9]+/g, ''); }
+    function ewDerive(code) { if (code == null) return null; const m = String(code).trim().match(/^(.+?)[/-](.+)$/); if (!m) return null; let a = m[1], b = m[2]; if (a.length < 2) return null; a = a.slice(1); if (b.length === 1) b = '0' + b; return a + b; }
     // Bir dairenin tum ElektraWeb oda kodlari (eski + yeni). Bos olanlar elenir.
     // Eski rezervasyonlar eski kodda, yeniler yeni kodda geldigi icin eslestirmede ikisi de kullanilir.
     function aptElektraRoomNos(a) {
@@ -5830,7 +5823,7 @@
         },
 
         getApartmentIdForRoomNo(roomNo) {
-            const apt = Analytics.data?.apartments?.find(a => aptElektraRoomNos(a).some(c => c === String(roomNo)));
+            const apt = Analytics.data?.apartments?.find(a => aptElektraRoomNos(a).some(c => ewNorm(c) === ewNorm(roomNo)));
             return apt?.id || null;
         },
 
@@ -6038,11 +6031,11 @@
 
                 // room-no → apartmentId lookup
                 const roomToApt = new Map();
-                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(String(c), a.id)));
+                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(ewNorm(c), a.id)));
 
                 const allRes = [];
                 for (const r of allReservations) {
-                    const aptId = roomToApt.get(String(r.roomNo));
+                    const aptId = roomToApt.get(ewNorm(r.roomNo));
                     if (aptId) {
                         allRes.push(ElektraAPI.toProjectionFormat(r, aptId));
                     }
@@ -16430,7 +16423,7 @@
                 if (!oldInp || !newInp) return;
                 const base = (oldInp.value || '').trim();
                 if (!base || (newInp.value || '').trim()) return;
-                const guess = elektraOldToNew(base);
+                const guess = ewDerive(base);
                 if (guess && guess !== base) { newInp.value = guess; n++; }
             });
             Analytics.showToast(n > 0 ? (n + ' daireye yeni kod önerildi. Kontrol edip Kaydet.') : 'Önerilecek yeni kod bulunamadı', n > 0 ? 'success' : 'info');
@@ -16587,11 +16580,11 @@
 
                 // room-no → apartmentId lookup
                 const roomToApt = new Map();
-                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(String(c), a.id)));
+                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(ewNorm(c), a.id)));
 
                 const allRes = [];
                 for (const r of reservations) {
-                    const aptId = roomToApt.get(String(r.roomNo));
+                    const aptId = roomToApt.get(ewNorm(r.roomNo));
                     if (aptId) allRes.push(ElektraAPI.toProjectionFormat(r, aptId));
                 }
 
