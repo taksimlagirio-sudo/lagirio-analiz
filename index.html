@@ -1023,6 +1023,9 @@
                         <button onclick="ElektraMapping.autoMatch()" class="px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition flex items-center gap-1.5">
                             <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Otomatik Eslestir
                         </button>
+                        <button onclick="ElektraMapping.suggestNewCodes()" class="px-4 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-sm font-medium hover:bg-indigo-100 transition flex items-center gap-1.5">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i> Yeni Kodlari Oner
+                        </button>
                     </div>
                     <button onclick="ElektraMapping.saveAll()" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
                         <i data-lucide="save" class="w-3.5 h-3.5"></i> Eslestirmeleri Kaydet
@@ -5667,6 +5670,27 @@
     // ============================================================
     // ELEKTRAWEB API CLIENT
     // ============================================================
+    // Eski ElektraWeb oda kodundan YENI kodu uret (hizli eslestirme onerisi).
+    // Taksim 360 binalari 3xx: bastaki '3' atilir, slash kaldirilir, oda 2 haneye tamamlanir.
+    //   385/18 -> 8518 · 363/4 -> 6304 · 387F/33 -> 87F33 · 111 (duz) -> 11. Yalniz ONERI'dir.
+    function elektraOldToNew(code) {
+        const s = String(code == null ? '' : code).trim();
+        if (!s) return '';
+        const i = s.indexOf('/');
+        let b = i >= 0 ? s.slice(0, i) : s;
+        const r = i >= 0 ? s.slice(i + 1) : '';
+        if (/^3/.test(b)) b = b.slice(1);
+        if (r === '') return b;
+        const rr = /^\d+$/.test(r) ? r.padStart(2, '0') : r;
+        return b + rr;
+    }
+    // Bir dairenin tum ElektraWeb oda kodlari (eski + yeni). Bos olanlar elenir.
+    // Eski rezervasyonlar eski kodda, yeniler yeni kodda geldigi icin eslestirmede ikisi de kullanilir.
+    function aptElektraRoomNos(a) {
+        return [a && a.elektrawebRoomNo, a && a.elektrawebRoomNo2]
+            .map(x => (x == null ? '' : String(x).trim())).filter(Boolean);
+    }
+
     const ElektraAPI = {
         // Proxy uzerinden ElektraWeb API cagrisi
         async call(action, params = {}) {
@@ -5806,7 +5830,7 @@
         },
 
         getApartmentIdForRoomNo(roomNo) {
-            const apt = Analytics.data?.apartments?.find(a => String(a.elektrawebRoomNo) === String(roomNo));
+            const apt = Analytics.data?.apartments?.find(a => aptElektraRoomNos(a).some(c => c === String(roomNo)));
             return apt?.id || null;
         },
 
@@ -5998,7 +6022,7 @@
 
             try {
                 const apartments = Analytics.data?.apartments || [];
-                const mappedApts = apartments.filter(a => a.elektrawebRoomNo);
+                const mappedApts = apartments.filter(a => aptElektraRoomNos(a).length > 0);
 
                 if (mappedApts.length === 0) {
                     Analytics.showToast('ElektraWeb eşleştirmesi yapılmış daire bulunamadı. Veri Yönetimi > ElektraWeb sekmesinden eşleştirme yapın.', 'warning');
@@ -6014,7 +6038,7 @@
 
                 // room-no → apartmentId lookup
                 const roomToApt = new Map();
-                mappedApts.forEach(a => roomToApt.set(String(a.elektrawebRoomNo), a.id));
+                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(String(c), a.id)));
 
                 const allRes = [];
                 for (const r of allReservations) {
@@ -16277,7 +16301,7 @@
 
             // Kullanimda olan oda-no'lar (baska daireye atanmis)
             const usedRoomNos = new Set(
-                apartments.filter(a => a.elektrawebRoomNo).map(a => String(a.elektrawebRoomNo))
+                apartments.flatMap(a => aptElektraRoomNos(a).map(String))
             );
 
             const normalize = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -16357,9 +16381,10 @@
             }).join('');
 
             container.innerHTML = `<datalist id="elektraRoomNoDatalist">${datalistOptions}</datalist>` + apartments.map(apt => {
-                const currentRoomNo = apt.elektrawebRoomNo || '';
-                const matchedRoom = this._rooms.find(r => String(r.roomNo) === String(currentRoomNo));
-                const statusClass = currentRoomNo ? 'border-green-200 bg-green-50/50' : 'border-gray-200';
+                const oldNo = apt.elektrawebRoomNo || '';
+                const newNo = apt.elektrawebRoomNo2 || '';
+                const mapped = oldNo || newNo;
+                const statusClass = mapped ? 'border-green-200 bg-green-50/50' : 'border-gray-200';
 
                 return `
                 <div class="flex items-center gap-4 p-4 rounded-xl border ${statusClass} transition-all">
@@ -16367,35 +16392,62 @@
                         <div class="flex items-center gap-2">
                             <span class="font-semibold text-gray-800">${apt.code || apt.id}</span>
                             ${apt.name ? `<span class="text-xs text-gray-400">${apt.name}</span>` : ''}
-                            ${currentRoomNo ? '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
+                            ${mapped ? '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
                         </div>
                     </div>
-                    <div class="flex-1">
-                        <input type="text" data-apt-id="${apt.id}" list="elektraRoomNoDatalist" value="${currentRoomNo}" placeholder="Room-no yazin (orn: 304)" class="hb-listing-input w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                    <div class="flex items-center gap-2" style="flex:1.4">
+                        <input type="text" data-apt-id="${apt.id}" data-slot="1" list="elektraRoomNoDatalist" value="${oldNo}" placeholder="Eski kod (385/18)" class="hb-listing-input flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                        <span class="text-gray-300 shrink-0">→</span>
+                        <input type="text" data-apt-id="${apt.id}" data-slot="2" list="elektraRoomNoDatalist" value="${newNo}" placeholder="Yeni kod (8518)" class="hb-listing-input flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                     </div>
-                    ${matchedRoom ? `<span class="text-xs text-green-600 whitespace-nowrap">${matchedRoom.roomType || ''}</span>` : ''}
                 </div>`;
             }).join('');
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
+        // Ekrandaki iki slotu (eski=1, yeni=2) daire başına topla.
+        _collectInputs() {
+            const bySlot = {};
+            document.querySelectorAll('.hb-listing-input').forEach(inp => {
+                const aptId = inp.dataset.aptId;
+                const slot = inp.dataset.slot || '1';
+                (bySlot[aptId] = bySlot[aptId] || {})[slot] = (inp.value || '').trim();
+            });
+            return bySlot;
+        },
+
+        // Hizli eslestirme: her daire icin eski koddan (slot 1) yeni kodu (slot 2) uret — YALNIZ bos olan slot 2'yi
+        // doldurur; ekrandaki degerlere yazar (kaydetmez). Kullanici kontrol edip "Kaydet"e basar.
+        suggestNewCodes() {
+            const rows = {};
+            document.querySelectorAll('.hb-listing-input').forEach(inp => {
+                (rows[inp.dataset.aptId] = rows[inp.dataset.aptId] || {})[inp.dataset.slot || '1'] = inp;
+            });
+            let n = 0;
+            Object.values(rows).forEach(r => {
+                const oldInp = r['1'], newInp = r['2'];
+                if (!oldInp || !newInp) return;
+                const base = (oldInp.value || '').trim();
+                if (!base || (newInp.value || '').trim()) return;
+                const guess = elektraOldToNew(base);
+                if (guess && guess !== base) { newInp.value = guess; n++; }
+            });
+            Analytics.showToast(n > 0 ? (n + ' daireye yeni kod önerildi. Kontrol edip Kaydet.') : 'Önerilecek yeni kod bulunamadı', n > 0 ? 'success' : 'info');
+        },
+
         async saveAll() {
-            const inputs = document.querySelectorAll('.hb-listing-input');
             const apartments = Analytics.data?.apartments || [];
+            const bySlot = this._collectInputs();
             let changed = 0;
 
-            inputs.forEach(inp => {
-                const aptId = inp.dataset.aptId;
-                const roomNo = (inp.value || '').trim();
-                const apt = apartments.find(a => a.id === aptId);
-                if (apt) {
-                    const oldVal = apt.elektrawebRoomNo || '';
-                    if (oldVal !== roomNo) {
-                        apt.elektrawebRoomNo = roomNo || undefined;
-                        changed++;
-                    }
-                }
+            apartments.forEach(apt => {
+                const s = bySlot[apt.id];
+                if (!s) return;
+                const nOld = s['1'] || '';
+                const nNew = s['2'] || '';
+                if ((apt.elektrawebRoomNo || '') !== nOld) { apt.elektrawebRoomNo = nOld || undefined; changed++; }
+                if ((apt.elektrawebRoomNo2 || '') !== nNew) { apt.elektrawebRoomNo2 = nNew || undefined; changed++; }
             });
 
             if (changed === 0) {
@@ -16425,17 +16477,19 @@
                     if (!row) continue;
 
                     const currentData = typeof row.data === 'string' ? JSON.parse(row.data) : (row.data || {});
-                    const oldVal = currentData.elektrawebRoomNo || '';
-                    const newVal = apt.elektrawebRoomNo || '';
+                    let dirty = false;
 
-                    // Sadece değişenleri güncelle
-                    if (oldVal !== newVal) {
-                        if (newVal) {
-                            currentData.elektrawebRoomNo = newVal;
-                        } else {
-                            delete currentData.elektrawebRoomNo;
+                    // Her iki kodu da (eski + yeni) senkronla; sadece değişenleri güncelle.
+                    for (const key of ['elektrawebRoomNo', 'elektrawebRoomNo2']) {
+                        const oldVal = currentData[key] || '';
+                        const newVal = apt[key] || '';
+                        if (oldVal !== newVal) {
+                            if (newVal) currentData[key] = newVal; else delete currentData[key];
+                            dirty = true;
                         }
+                    }
 
+                    if (dirty) {
                         await supabase
                             .from('apartments')
                             .update({ data: currentData })
@@ -16519,7 +16573,7 @@
             if (this._loading) return;
             this._loading = true;
             const apartments = Analytics.data?.apartments || [];
-            const mappedApts = apartments.filter(a => a.elektrawebRoomNo);
+            const mappedApts = apartments.filter(a => aptElektraRoomNos(a).length > 0);
             if (mappedApts.length === 0) { this._loading = false; this._showNoMapping(); return; }
             try {
                 // Gecmis 12 ay + gelecek 12 ay araligi. Tum status'ler (Reservation
@@ -16533,7 +16587,7 @@
 
                 // room-no → apartmentId lookup
                 const roomToApt = new Map();
-                mappedApts.forEach(a => roomToApt.set(String(a.elektrawebRoomNo), a.id));
+                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(String(c), a.id)));
 
                 const allRes = [];
                 for (const r of reservations) {
