@@ -59,10 +59,13 @@ async function verifyUser(authHeader) {
                 .select('data')
                 .in('id', apartmentIds);
 
+            // Owner'ın izinli oda listesi HER İKİ kodu da içerir (eski elektrawebRoomNo + yeni elektrawebRoomNo2).
+            // Aksi halde ElektraWeb'de kodu değişen (ör. 385/18 → 8518) dairelerin yeni kodlu rezervasyonları
+            // proxy owner filtresinde elenir ve owner takvimine hiç ulaşmaz.
             elektrawebRoomNos = (apartments || [])
-                .map(a => {
+                .flatMap(a => {
                     const d = typeof a.data === 'string' ? JSON.parse(a.data) : a.data;
-                    return d?.elektrawebRoomNo;
+                    return [d?.elektrawebRoomNo, d?.elektrawebRoomNo2];
                 })
                 .filter(Boolean);
         }

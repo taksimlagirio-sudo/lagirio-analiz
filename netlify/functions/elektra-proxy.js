@@ -141,6 +141,15 @@ function hotelPath(suffix = '') {
     return `/hotel/${ELEKTRAWEB_HOTEL_ID}${suffix}`;
 }
 
+// ElektraWeb oda-no normalize (client index.html'deki ewNorm ile aynı kural): 385-18 ≡ 385/18 ≡ "385 18".
+// Owner filtresinde ayraç/biçim farklarını tolere etmek için kullanılır.
+function ewNorm(s) {
+    return String(s == null ? '' : s).toLowerCase()
+        .replace(/ı/g, 'i').replace(/İ/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
+        .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c')
+        .replace(/[^a-z0-9]+/g, '');
+}
+
 function normalizeReservationList(data) {
     if (Array.isArray(data)) return data;
     if (data && Array.isArray(data.reservations)) return data.reservations;
@@ -304,8 +313,8 @@ exports.handler = async (event) => {
 
             // Owner filtering: only show reservations for mapped room-no's
             if (profile.role === 'owner') {
-                const allowed = new Set((elektrawebRoomNos || []).map(String));
-                reservations = reservations.filter(r => allowed.has(String(r.roomNo)));
+                const allowed = new Set((elektrawebRoomNos || []).map(ewNorm));
+                reservations = reservations.filter(r => allowed.has(ewNorm(r.roomNo)));
             }
 
             return ok({ success: true, count: reservations.length, reservations });
@@ -316,8 +325,8 @@ exports.handler = async (event) => {
             let reservations = normalizeReservationList(data).map(toCommonFormat);
 
             if (profile.role === 'owner') {
-                const allowed = new Set((elektrawebRoomNos || []).map(String));
-                reservations = reservations.filter(r => allowed.has(String(r.roomNo)));
+                const allowed = new Set((elektrawebRoomNos || []).map(ewNorm));
+                reservations = reservations.filter(r => allowed.has(ewNorm(r.roomNo)));
             }
 
             return ok({ success: true, count: reservations.length, reservations });
