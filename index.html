@@ -894,8 +894,8 @@
                 <button onclick="DataManager.switchTab('users')" id="dmTab-users" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600">
                     <i data-lucide="users" class="w-4 h-4"></i> Kullanıcılar
                 </button>
-                <button onclick="DataManager.switchTab('elektra')" id="dmTab-elektra" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600">
-                    <i data-lucide="link" class="w-4 h-4"></i> ElektraWeb
+                <button onclick="DataManager.switchTab('pms')" id="dmTab-pms" class="dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600">
+                    <i data-lucide="link" class="w-4 h-4"></i> PMS Lagirio
                 </button>
             </div>
 
@@ -983,31 +983,31 @@
                 </div>
             </div>
 
-            <!-- ===== ElektraWeb Mapping Panel ===== -->
-            <div id="dmPanel-elektra" class="glass rounded-2xl shadow-2xl p-8 hidden">
+            <!-- ===== PMS Lagirio Eşleştirme Paneli ===== -->
+            <div id="dmPanel-pms" class="glass rounded-2xl shadow-2xl p-8 hidden">
                 <div class="text-center mb-6">
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                         <i data-lucide="link" class="w-8 h-8 text-blue-600"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="dm.elektra.title">ElektraWeb Eslestirme</h3>
-                    <p class="text-sm text-gray-500" data-i18n="dm.elektra.desc">Daireleri ElektraWeb PMS odalariyla eslestirin. Bu eslestirme takvim ve projeksiyon verisi icin kullanilir.</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="dm.pms.title">PMS Lagirio Eşleştirme</h3>
+                    <p class="text-sm text-gray-500" data-i18n="dm.pms.desc">Daireleri PMS Lagirio birimleriyle (1001 kodlu işletme) eşleştirin. Takvim ve projeksiyon verisi bu bağ üzerinden gelir.</p>
                 </div>
 
                 <!-- Bağlantı durumu -->
-                <div id="hbConnectionStatus" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div id="pmsConnectionStatus" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <div id="hbStatusDot" class="w-3 h-3 rounded-full bg-gray-300"></div>
-                            <span id="hbStatusText" class="text-sm text-gray-500">Bağlantı kontrol ediliyor...</span>
+                            <div id="pmsStatusDot" class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <span id="pmsStatusText" class="text-sm text-gray-500">Bağlantı kontrol ediliyor...</span>
                         </div>
-                        <button onclick="ElektraMapping.testConnection()" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
+                        <button onclick="PmsMapping.testConnection()" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
                             <i data-lucide="wifi" class="w-3 h-3"></i> Bağlantıyı Test Et
                         </button>
                     </div>
                 </div>
 
                 <!-- Eşleştirme tablosu -->
-                <div id="hbMappingTable" class="space-y-3">
+                <div id="pmsMappingTable" class="space-y-3">
                     <div class="text-center py-8">
                         <i data-lucide="loader" class="w-6 h-6 text-gray-300 animate-spin mx-auto mb-2"></i>
                         <p class="text-sm text-gray-400">Yükleniyor...</p>
@@ -1017,18 +1017,15 @@
                 <!-- Kaydet butonu -->
                 <div class="mt-6 flex items-center justify-between flex-wrap gap-2">
                     <div class="flex items-center gap-2">
-                        <button onclick="ElektraMapping.refreshRooms()" class="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center gap-1.5">
-                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Odalari Yenile
+                        <button onclick="PmsMapping.refreshUnits()" class="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition flex items-center gap-1.5">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Birimleri Yenile
                         </button>
-                        <button onclick="ElektraMapping.autoMatch()" class="px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition flex items-center gap-1.5">
-                            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Otomatik Eslestir
-                        </button>
-                        <button onclick="ElektraMapping.suggestNewCodes()" class="px-4 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-sm font-medium hover:bg-indigo-100 transition flex items-center gap-1.5">
-                            <i data-lucide="zap" class="w-3.5 h-3.5"></i> Yeni Kodlari Oner
+                        <button onclick="PmsMapping.autoMatch()" class="px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition flex items-center gap-1.5">
+                            <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Otomatik Eşleştir
                         </button>
                     </div>
-                    <button onclick="ElektraMapping.saveAll()" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
-                        <i data-lucide="save" class="w-3.5 h-3.5"></i> Eslestirmeleri Kaydet
+                    <button onclick="PmsMapping.saveAll()" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i> Eşleştirmeleri Kaydet
                     </button>
                 </div>
             </div>
@@ -1840,19 +1837,19 @@
                         </div>
                     </div>
 
-                    <!-- ElektraWeb'den Çek -->
+                    <!-- PMS Lagirio'dan Çek -->
                     <div class="mt-4 pt-4 border-t border-gray-100">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <i data-lucide="cloud-download" class="w-4 h-4 text-blue-500"></i>
-                                <span class="text-sm font-medium text-gray-700" data-i18n="proj.elektra.pull">ElektraWeb'den Gelecek Rezervasyonları Çek</span>
+                                <span class="text-sm font-medium text-gray-700" data-i18n="proj.pms.pull">PMS Lagirio'dan Gelecek Rezervasyonları Çek</span>
                             </div>
-                            <button onclick="Projection.fetchFromElektra()" id="projHbFetchBtn" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
+                            <button onclick="Projection.fetchFromPms()" id="projPmsFetchBtn" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-sm flex items-center gap-1.5">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                <span data-i18n="proj.elektra.fetch">ElektraWeb'den Çek</span>
+                                <span data-i18n="proj.pms.fetch">PMS'ten Çek</span>
                             </button>
                         </div>
-                        <div id="projHbStatus" class="mt-2 hidden text-xs text-gray-500"></div>
+                        <div id="projPmsStatus" class="mt-2 hidden text-xs text-gray-500"></div>
                     </div>
                 </div>
 
@@ -2707,11 +2704,11 @@
                 'cal.modal.guest': 'Guest', 'cal.modal.checkin': 'Check-in', 'cal.modal.checkout': 'Check-out',
                 'cal.modal.nights': 'nights', 'cal.modal.total': 'Total', 'cal.modal.nightly': 'Nightly',
                 'cal.modal.cleaning': 'Cleaning fee', 'cal.modal.commission': 'Platform commission', 'cal.modal.payout': 'Net payout',
-                // ElektraWeb
-                'dm.elektra.title': 'ElektraWeb Mapping',
-                'dm.elektra.desc': 'Map apartments to ElektraWeb PMS rooms. This mapping is used for calendar and projection data.',
-                'proj.elektra.pull': 'Pull Future Reservations from ElektraWeb',
-                'proj.elektra.fetch': 'Pull from ElektraWeb',
+                // PMS Lagirio
+                'dm.pms.title': 'PMS Lagirio Mapping',
+                'dm.pms.desc': 'Link apartments to PMS Lagirio units (property 1001). Calendar and projection data flows through this link.',
+                'proj.pms.pull': 'Pull Future Reservations from PMS Lagirio',
+                'proj.pms.fetch': 'Pull from PMS',
                 // Analysis subtabs
                 'tab.analysis.system': 'System Analysis',
                 'tab.analysis.apartment': 'Apartment Analysis',
@@ -3426,10 +3423,10 @@
                 'cal.modal.guest': 'Гость', 'cal.modal.checkin': 'Заезд', 'cal.modal.checkout': 'Выезд',
                 'cal.modal.nights': 'ночей', 'cal.modal.total': 'Итого', 'cal.modal.nightly': 'За ночь',
                 'cal.modal.cleaning': 'Уборка', 'cal.modal.commission': 'Комиссия платформы', 'cal.modal.payout': 'Чистая выплата',
-                'dm.elektra.title': 'Привязка ElektraWeb',
-                'dm.elektra.desc': 'Привяжите квартиры к номерам PMS ElektraWeb.',
-                'proj.elektra.pull': 'Получить будущие бронирования из ElektraWeb',
-                'proj.elektra.fetch': 'Получить из ElektraWeb',
+                'dm.pms.title': 'Привязка PMS Lagirio',
+                'dm.pms.desc': 'Привяжите квартиры к юнитам PMS Lagirio (объект 1001).',
+                'proj.pms.pull': 'Получить будущие бронирования из PMS Lagirio',
+                'proj.pms.fetch': 'Получить из PMS',
                 // Analysis subtabs
                 'tab.analysis.system': 'Системный анализ',
                 'tab.analysis.apartment': 'Анализ квартир',
@@ -4144,10 +4141,10 @@
                 'cal.modal.guest': 'ضيف', 'cal.modal.checkin': 'تسجيل الوصول', 'cal.modal.checkout': 'تسجيل المغادرة',
                 'cal.modal.nights': 'ليالي', 'cal.modal.total': 'المجموع', 'cal.modal.nightly': 'لكل ليلة',
                 'cal.modal.cleaning': 'رسوم التنظيف', 'cal.modal.commission': 'عمولة المنصة', 'cal.modal.payout': 'صافي الدفع',
-                'dm.elektra.title': 'ربط ElektraWeb',
-                'dm.elektra.desc': 'اربط الشقق بغرف ElektraWeb PMS.',
-                'proj.elektra.pull': 'جلب الحجوزات المستقبلية من ElektraWeb',
-                'proj.elektra.fetch': 'جلب من ElektraWeb',
+                'dm.pms.title': 'ربط PMS Lagirio',
+                'dm.pms.desc': 'اربط الشقق بوحدات PMS Lagirio (المنشأة 1001).',
+                'proj.pms.pull': 'جلب الحجوزات المستقبلية من PMS Lagirio',
+                'proj.pms.fetch': 'جلب من PMS',
                 // Analysis subtabs
                 'tab.analysis.system': 'تحليل النظام',
                 'tab.analysis.apartment': 'تحليل الشقق',
@@ -4920,7 +4917,7 @@
                 btn.className = 'dm-tab px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white text-gray-600 border border-gray-200';
             });
 
-            const colors = { upload: 'emerald', drive: 'blue', users: 'purple', elektra: 'blue' };
+            const colors = { upload: 'emerald', drive: 'blue', users: 'purple', pms: 'blue' };
             const color = colors[tabName] || 'emerald';
             const activeTab = document.getElementById('dmTab-' + tabName);
             if (activeTab) {
@@ -4928,7 +4925,7 @@
             }
 
             // Panelleri göster/gizle
-            ['upload', 'drive', 'users', 'elektra'].forEach(panel => {
+            ['upload', 'drive', 'users', 'pms'].forEach(panel => {
                 const el = document.getElementById('dmPanel-' + panel);
                 if (el) el.classList.toggle('hidden', panel !== tabName);
             });
@@ -4938,8 +4935,8 @@
                 UserManager._populateApartmentSelect();
             }
 
-            if (tabName === 'elektra') {
-                ElektraMapping.init();
+            if (tabName === 'pms') {
+                PmsMapping.init();
             }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -5668,30 +5665,33 @@
     };
 
     // ============================================================
-    // ELEKTRAWEB API CLIENT
+    // PMS LAGIRIO API CLIENT
     // ============================================================
-    // Kod normalizasyonu + yeni-kod türetmesi — pms-lagirio (0145/0146 SQL + RezScreens) ile BİREBİR aynı kural.
-    // ewNorm: eşleştirmede kullanılır → 385-18 ≡ 385/18 ≡ "385 18" (küçük harf, TR harf sadeleştir, alfanümerik dışı sil).
-    // ewDerive: eski koddan yeni kodu üretir — ilk karakteri at (bina 2+ karakterse), ayraç [/ veya -] kaldır,
-    //   oda tek haneyse 2'ye tamamla: 385/18→8518, 363/4→6304, 387F/33→87F33, 385-18→8518.
-    //   Ayraç yoksa null → düz koda (111 gibi) öneri verilmez. Yalnız ÖNERİ'dir; yönetici kaydetmeden görür.
-    function ewNorm(s) { return String(s == null ? '' : s).toLowerCase().replace(/ı/g, 'i').replace(/İ/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z0-9]+/g, ''); }
-    function ewDerive(code) { if (code == null) return null; const m = String(code).trim().match(/^(.+?)[/-](.+)$/); if (!m) return null; let a = m[1], b = m[2]; if (a.length < 2) return null; a = a.slice(1); if (b.length === 1) b = '0' + b; return a + b; }
-    // Bir dairenin tum ElektraWeb oda kodlari (eski + yeni). Bos olanlar elenir.
-    // Eski rezervasyonlar eski kodda, yeniler yeni kodda geldigi icin eslestirmede ikisi de kullanilir.
-    function aptElektraRoomNos(a) {
-        return [a && a.elektrawebRoomNo, a && a.elektrawebRoomNo2]
-            .map(x => (x == null ? '' : String(x).trim())).filter(Boolean);
-    }
+    // Takvim ve projeksiyon verisinin kaynağı pms-lagirio'dur (1001 kodlu işletme = kendi
+    // mülkümüz). Daha önce ElektraWeb'den çekiliyordu; aynı konaklama iki sistemde ayrı ayrı
+    // durunca biri bayatlıyor ve "daire doluydu ama analizde boş" gibi sessiz ayrışmalar
+    // çıkıyordu. Zincir: tarayıcı → netlify `pms-proxy` → PMS `analiz-feed` edge fonksiyonu.
+    //
+    // Daire ↔ PMS birimi bağı KİMLİKLE (uuid) tutulur: `apartment.pmsUnitId`. Kodla değil —
+    // PMS'te birim kodu değişebiliyor (385/18 → 8518 geçmişi bunun canlı örneği) ve kod
+    // değiştiği gün kodla kurulan bağ sessizce kopardı. `pmsUnitCode` yalnız ekranda
+    // göstermek/denetlemek için tutulan bir kopyadır, eşleştirme ONA bakmaz.
+    //
+    // kodNorm: eşleştirme ÖNERİSİ için kod karşılaştırması — 385-18 ≡ 385/18 ≡ "385 18"
+    //   (küçük harf, TR harf sadeleştir, alfanümerik dışını sil). Yalnız öneri üretir;
+    //   kaydeden yöneticidir.
+    function kodNorm(s) { return String(s == null ? '' : s).toLowerCase().replace(/ı/g, 'i').replace(/İ/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z0-9]+/g, ''); }
+    // Bir dairenin bağlı olduğu PMS birim kimliği (yoksa boş dize).
+    function aptPmsUnitId(a) { const v = a && a.pmsUnitId; return v == null ? '' : String(v).trim(); }
 
-    const ElektraAPI = {
-        // Proxy uzerinden ElektraWeb API cagrisi
+    const PmsAPI = {
+        // Proxy üzerinden PMS beslemesi çağrısı
         async call(action, params = {}) {
             const session = await supabase.auth.getSession();
             const token = session?.data?.session?.access_token;
             if (!token) throw new Error('Oturum bulunamadı');
 
-            const res = await fetch('/.netlify/functions/elektra-proxy', {
+            const res = await fetch('/.netlify/functions/pms-proxy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -5711,65 +5711,33 @@
             return await res.json();
         },
 
-        // Baglanti testi
-        async testConnection() {
-            return this.call('test-connection');
+        // Bağlantı testi — hangi işletmeye bağlandığımızı da döndürür (1001 mi, doğrula).
+        async ping() {
+            return this.call('ping');
         },
 
-        // Oda listesi (admin eslestirme icin) - rezervasyonlardan turetiliyor
-        async getRooms() {
-            const data = await this.call('room-list');
-            return data.rooms || [];
+        // PMS birim listesi (admin eşleştirme ekranı için)
+        async getUnits() {
+            const data = await this.call('units');
+            return data.units || [];
         },
 
-        // Rezervasyonlari getir (tarih filtreli)
-        async getReservations(fromDate, toDate, reservationStatus = 'Reservation') {
-            const params = {};
-            if (fromDate) params.fromCheckIn = fromDate;
-            if (toDate) params.toCheckIn = toDate;
-            params.reservationStatus = reservationStatus;
-            const data = await this.call('reservations', params);
-            return data.reservations || [];
+        // Rezervasyonlar — pencereyle KESİŞEN her konaklama (giriş tarihi pencereden önce olan
+        // uzun konaklamalar dahil). İptaller varsayılan olarak GELMEZ.
+        async getReservations(fromDate, toDate, includeCancelled = false) {
+            return this.call('reservations', { from: fromDate, to: toDate, includeCancelled });
         },
 
-        // Gecmis + gelecek tum rezervasyonlari tek seferde getirir.
-        // ElektraWeb status enum'u: Reservation (bekleyen), InHouse (otelde),
-        // CheckOut (cikmis). Uc status'u de paralel cekip birlestirir.
-        async getAllReservations(fromDate, toDate) {
-            const statuses = ['Reservation', 'InHouse', 'CheckOut'];
-            const results = await Promise.all(
-                statuses.map(s => this.getReservations(fromDate, toDate, s).catch(e => {
-                    console.warn('[ElektraWeb]', s, 'yuklenemedi:', e.message);
-                    return [];
-                }))
-            );
-            // reservation-id uzerinden dedupe (bir rez birden fazla status'te gozukebilir)
-            const byId = new Map();
-            for (const list of results) {
-                for (const r of list) {
-                    if (r && r.id != null && !byId.has(r.id)) byId.set(r.id, r);
-                }
-            }
-            return Array.from(byId.values());
-        },
-
-        // In-house (su an otelde olan) rezervasyonlar
-        async getInHouseReservations() {
-            const data = await this.call('reservations-in-house');
-            return data.reservations || [];
-        },
-
-        // Platform renk eslestirmesi
+        // Platform renk eşleştirmesi
         CHANNEL_COLORS: {
-            'airbnb': '#FF385C', 'Airbnb': '#FF385C',
-            'booking.com': '#003580', 'Booking.com': '#003580', 'Booking': '#003580',
+            'airbnb': '#FF385C', 'Airbnb': '#FF385C', 'AIRBNB': '#FF385C', 'AirBNB': '#FF385C',
+            'booking.com': '#003580', 'Booking.com': '#003580', 'Booking': '#003580', 'BookingCom': '#003580',
             'vrbo': '#3C6EE5', 'VRBO': '#3C6EE5', 'Vrbo': '#3C6EE5',
             'expedia': '#FBAF17', 'Expedia': '#FBAF17',
-            'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222', 'Walk-in': '#222222',
+            'direct': '#222222', 'Direct': '#222222', 'Direkt': '#222222', 'Walk-in': '#222222', 'WALKIN': '#222222',
             'google': '#4285F4', 'Google': '#4285F4',
             'tripadvisor': '#34E0A1', 'TripAdvisor': '#34E0A1',
-            'lagirio': '#F97316', 'Lagirio': '#F97316',
-            'elektraweb': '#717171', 'ElektraWeb': '#717171'
+            'lagirio': '#F97316', 'Lagirio': '#F97316', 'lagirio.com': '#F97316'
         },
         DEFAULT_COLOR: '#717171',
 
@@ -5788,42 +5756,49 @@
             return this.DEFAULT_COLOR;
         },
 
-        // ElektraWeb rezervasyonu → Projeksiyon formatina donustur
-        // Proxy zaten camelCase alanlara cevirmis halde gonderiyor.
-        toProjectionFormat(eRes, apartmentId) {
-            const checkIn = new Date(eRes.checkIn);
-            const checkOut = new Date(eRes.checkOut);
-            const nights = Math.max(1, Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
-            const total = parseFloat(eRes.totalPrice) || 0;
+        // PMS rezervasyonu → Projeksiyon/takvim formatına dönüştür.
+        // Proxy zaten camelCase alanlara çevirmiş halde gönderiyor.
+        toProjectionFormat(r, apartmentId) {
+            const checkIn = new Date(r.checkIn);
+            const checkOut = new Date(r.checkOut);
+            const nights = r.nights > 0 ? r.nights : Math.max(1, Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+            const total = parseFloat(r.totalPrice) || 0;
             return {
-                id: 'ew-' + eRes.id,
+                id: 'pms-' + r.id,
                 apartmentId,
-                guestName: eRes.contactName || '',
-                checkIn: eRes.checkIn,
-                checkOut: eRes.checkOut,
+                guestName: r.guestName || '',
+                checkIn: r.checkIn,
+                checkOut: r.checkOut,
                 nights,
-                platform: eRes.agency || 'Direct',
+                platform: r.channel || 'Direct',
                 totalAmount: total,
                 pricePerNight: nights > 0 ? Math.round(total / nights * 100) / 100 : 0,
                 cleaningFee: 0,
+                // OTA komisyonu PMS'te YALNIZ bazı kayıtlarda dolu (kanal gönderiyorsa). Bilinmeyeni
+                // sıfır saymamak için ham değeri ayrı alanda taşıyoruz; ekranın kullandığı
+                // platformCommission eskisi gibi 0 kalıyor — analize aktarım (mergeToAnalytics)
+                // zaten kendi %15 tahminini uyguluyor, oraya gerçek veriyle karışık girmesin.
                 platformCommission: 0,
+                otaCommission: r.otaCommission == null ? null : Number(r.otaCommission),
                 hostPayout: total,
-                currency: eRes.currency || 'EUR',
-                confirmationCode: eRes.voucherNo || '',
-                status: eRes.status === 'Cancelled' ? 2 : 1, // 1=Confirmed, 2=Canceled
-                statusName: eRes.status || '',
-                source: 'elektraweb'
+                currency: r.currency || 'EUR',
+                confirmationCode: r.voucherNo || '',
+                status: r.cancelled ? 2 : 1, // 1=Confirmed, 2=Canceled
+                statusName: r.status || '',
+                unitId: r.unitId,
+                unitCode: r.unitCode || '',
+                source: 'pms'
             };
         },
 
-        // Apartment ↔ ElektraWeb room-no eslestirmesi
-        getRoomNoForApartment(apartmentId) {
+        // Daire ↔ PMS birimi çözümü
+        getUnitIdForApartment(apartmentId) {
             const apt = Analytics.data?.apartments?.find(a => a.id === apartmentId);
-            return apt?.elektrawebRoomNo || null;
+            return aptPmsUnitId(apt) || null;
         },
 
-        getApartmentIdForRoomNo(roomNo) {
-            const apt = Analytics.data?.apartments?.find(a => aptElektraRoomNos(a).some(c => ewNorm(c) === ewNorm(roomNo)));
+        getApartmentIdForUnitId(unitId) {
+            const apt = Analytics.data?.apartments?.find(a => aptPmsUnitId(a) === String(unitId));
             return apt?.id || null;
         },
 
@@ -6007,18 +5982,18 @@
             this.calculate();
         },
 
-        async fetchFromElektra() {
-            const btn = document.getElementById('projHbFetchBtn');
-            const status = document.getElementById('projHbStatus');
+        async fetchFromPms() {
+            const btn = document.getElementById('projPmsFetchBtn');
+            const status = document.getElementById('projPmsStatus');
             if (btn) btn.disabled = true;
-            if (status) { status.classList.remove('hidden'); status.textContent = 'ElektraWeb\'den veri çekiliyor...'; }
+            if (status) { status.classList.remove('hidden'); status.textContent = 'PMS Lagirio\'dan veri çekiliyor...'; }
 
             try {
                 const apartments = Analytics.data?.apartments || [];
-                const mappedApts = apartments.filter(a => aptElektraRoomNos(a).length > 0);
+                const mappedApts = apartments.filter(a => aptPmsUnitId(a));
 
                 if (mappedApts.length === 0) {
-                    Analytics.showToast('ElektraWeb eşleştirmesi yapılmış daire bulunamadı. Veri Yönetimi > ElektraWeb sekmesinden eşleştirme yapın.', 'warning');
+                    Analytics.showToast('PMS eşleştirmesi yapılmış daire bulunamadı. Veri Yönetimi > PMS Lagirio sekmesinden eşleştirme yapın.', 'warning');
                     return;
                 }
 
@@ -6026,23 +6001,22 @@
                 const fromDate = today.toISOString().split('T')[0];
                 const toDate = new Date(today.getFullYear(), today.getMonth() + 12, 28).toISOString().split('T')[0];
 
-                // ElektraWeb'den tum rezervasyonlari tek seferde cek
-                const allReservations = await ElektraAPI.getReservations(fromDate, toDate, 'Reservation');
+                const cevap = await PmsAPI.getReservations(fromDate, toDate);
+                const allReservations = cevap.reservations || [];
 
-                // room-no → apartmentId lookup
-                const roomToApt = new Map();
-                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(ewNorm(c), a.id)));
+                // birim kimliği → apartmentId sözlüğü
+                const unitToApt = new Map();
+                mappedApts.forEach(a => unitToApt.set(aptPmsUnitId(a), a.id));
 
                 const allRes = [];
                 for (const r of allReservations) {
-                    const aptId = roomToApt.get(ewNorm(r.roomNo));
-                    if (aptId) {
-                        allRes.push(ElektraAPI.toProjectionFormat(r, aptId));
-                    }
+                    const aptId = unitToApt.get(String(r.unitId));
+                    if (aptId) allRes.push(PmsAPI.toProjectionFormat(r, aptId));
                 }
 
-                // Mevcut PMS rezervasyonlarindan ElektraWeb olanlari cikar, yenileri ekle
-                this.reservations = this.reservations.filter(r => r.source !== 'elektraweb' && r.source !== 'homesberg');
+                // Eski kaynakların (ElektraWeb/Homesberg) kalıntıları da temizlenir; aksi halde
+                // aynı konaklama iki kez sayılırdı.
+                this.reservations = this.reservations.filter(r => r.source !== 'pms' && r.source !== 'elektraweb' && r.source !== 'homesberg');
                 this.reservations.push(...allRes);
 
                 this.save();
@@ -6050,16 +6024,22 @@
                 this.calculate();
 
                 if (status) {
-                    status.textContent = `${allRes.length} gelecek rezervasyon ElektraWeb'den çekildi (${mappedApts.length} daire).`;
+                    // Sessiz incelik yok: kaç dairenin bağlanmadığı ve PMS'te birim ATANMAMIŞ
+                    // (dolayısıyla hiçbir takvime düşemeyen) kaç rezervasyon olduğu yazılır.
+                    const eksik = apartments.length - mappedApts.length;
+                    const atanmamis = cevap.unassignedCount || 0;
+                    status.textContent = `${allRes.length} gelecek rezervasyon PMS'ten çekildi (${mappedApts.length} bağlı daire`
+                        + (eksik > 0 ? `, ${eksik} daire bağlanmamış` : '')
+                        + (atanmamis > 0 ? `, PMS'te ${atanmamis} rezervasyon henüz birime atanmamış` : '') + ').';
                     status.className = 'mt-2 text-xs text-green-600';
                 }
-                Analytics.showToast(`ElektraWeb: ${allRes.length} gelecek rezervasyon yüklendi`, 'success');
+                Analytics.showToast(`PMS: ${allRes.length} gelecek rezervasyon yüklendi`, 'success');
             } catch (e) {
                 if (status) {
                     status.textContent = 'Hata: ' + e.message;
                     status.className = 'mt-2 text-xs text-red-600';
                 }
-                Analytics.showToast('ElektraWeb hatası: ' + e.message, 'error');
+                Analytics.showToast('PMS hatası: ' + e.message, 'error');
             } finally {
                 if (btn) btn.disabled = false;
             }
@@ -16222,10 +16202,14 @@
     };
 
     // ============================================================
-    // ELEKTRAWEB MAPPING - Admin Daire ↔ Room-No Eşleştirme
+    // PMS EŞLEŞTİRME - Admin: Daire ↔ PMS Birimi
     // ============================================================
-    const ElektraMapping = {
-        _rooms: [], // { roomNo, roomType }
+    // 1001 kodlu işletmenin (Lagirio / Taksim 360) birimleri buradan analizdeki dairelere
+    // bağlanır. Bağ KİMLİKLE (uuid) kurulur, kodla değil — PMS'te kod değişebiliyor.
+    // Bağlanmamış daire = takvimi ve projeksiyonu BOŞ daire; ekran bunu sayıyla söyler.
+    const PmsMapping = {
+        _units: [],          // { id, code, active, guests, property, category }
+        _tenant: null,       // { isletme_no, name }
         _initialized: false,
 
         async init() {
@@ -16235,131 +16219,106 @@
             }
             this._initialized = true;
             await this.testConnection();
-            await this.loadRooms();
+            await this.loadUnits();
             this.render();
         },
 
         async testConnection() {
-            const dot = document.getElementById('hbStatusDot');
-            const text = document.getElementById('hbStatusText');
+            const dot = document.getElementById('pmsStatusDot');
+            const text = document.getElementById('pmsStatusText');
             if (!dot || !text) return;
 
             dot.className = 'w-3 h-3 rounded-full bg-yellow-400 animate-pulse';
             text.textContent = 'Test ediliyor...';
 
             try {
-                await ElektraAPI.testConnection();
+                const r = await PmsAPI.ping();
+                this._tenant = r.tenant || null;
                 dot.className = 'w-3 h-3 rounded-full bg-green-500';
-                text.textContent = 'ElektraWeb bağlantısı aktif';
+                // Hangi işletmeye bağlandığı EKRANDA yazar: yanlış tenant'a bağlanmak sessiz
+                // kalmasın (veri gelir, ama başka birinin verisi gelir).
+                text.textContent = `PMS bağlantısı aktif — ${r.tenant?.name || '?'} (işletme ${r.tenant?.isletme_no ?? '?'}), ${r.unitCount ?? 0} birim`;
                 text.className = 'text-sm text-green-600';
             } catch (e) {
+                this._tenant = null;
                 dot.className = 'w-3 h-3 rounded-full bg-red-500';
                 text.textContent = 'Bağlantı hatası: ' + e.message;
                 text.className = 'text-sm text-red-600';
             }
         },
 
-        async loadRooms() {
+        async loadUnits() {
             try {
-                this._rooms = await ElektraAPI.getRooms();
-                if (this._rooms.length > 0) {
-                    console.log('[ElektraWeb] Bulunan odalar:', this._rooms.length);
-                }
+                this._units = await PmsAPI.getUnits();
             } catch (e) {
-                this._rooms = [];
-                Analytics.showToast('Odalar yüklenemedi: ' + e.message, 'error');
+                this._units = [];
+                Analytics.showToast('PMS birimleri yüklenemedi: ' + e.message, 'error');
             }
         },
 
-        async refreshRooms() {
-            this._rooms = [];
-            await this.loadRooms();
+        async refreshUnits() {
+            this._units = [];
+            await this.loadUnits();
             this.render();
-            Analytics.showToast('Oda listesi yenilendi', 'success');
+            Analytics.showToast('Birim listesi yenilendi', 'success');
         },
 
-        // Daire kodu ile oda-no arasinda basit bir yakinlik sezgisi ile
-        // otomatik eslestirme yapar. Mevcut eslesmeleri bozmaz, sadece
-        // bos kalanlari doldurur. Kullanici sonra "Kaydet" ile onaylar.
+        _unitById(id) {
+            return this._units.find(u => String(u.id) === String(id)) || null;
+        },
+
+        // Otomatik eşleştirme ÖNERİSİ: yalnız boş kalanları doldurur, mevcut bağı bozmaz,
+        // bir birimi iki daireye vermez. Kaydeden yöneticidir ("Eşleştirmeleri Kaydet").
+        // Sıra: eski ElektraWeb oda kodu → daire kodu → yalnız rakamlar.
         autoMatch() {
             const apartments = Analytics.data?.apartments || [];
-            if (apartments.length === 0) {
-                Analytics.showToast('Daire verisi yok', 'warning');
-                return;
-            }
-            if (this._rooms.length === 0) {
-                Analytics.showToast('Once oda listesini yukleyin', 'warning');
-                return;
-            }
+            if (apartments.length === 0) { Analytics.showToast('Daire verisi yok', 'warning'); return; }
+            if (this._units.length === 0) { Analytics.showToast('Önce birim listesini yükleyin', 'warning'); return; }
 
-            // Kullanimda olan oda-no'lar (baska daireye atanmis)
-            const usedRoomNos = new Set(
-                apartments.flatMap(a => aptElektraRoomNos(a).map(String))
-            );
-
-            const normalize = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const digits = (s) => String(s || '').replace(/\D/g, '');
-
-            // Eslestirilebilir oda havuzu (henuz kullanilmamislar)
-            const availableRooms = this._rooms.filter(r => !usedRoomNos.has(String(r.roomNo)));
-
-            let matched = 0;
-            const candidates = [];
+            const kullanilan = new Set(apartments.map(a => aptPmsUnitId(a)).filter(Boolean));
+            const rakam = (x) => String(x || '').replace(/\D/g, '');
+            let eslesen = 0;
+            const oneriler = [];
 
             for (const apt of apartments) {
-                if (apt.elektrawebRoomNo) continue; // zaten eslesmis, atlama
+                if (aptPmsUnitId(apt)) continue; // zaten bağlı
 
-                const aptCode = normalize(apt.code || apt.id);
-                const aptName = normalize(apt.name);
-                const aptDigits = digits(apt.code || '') || digits(apt.name || '') || digits(apt.id || '');
+                // Adaylar: dairenin bildiği tüm kodlar. elektrawebRoomNo geçmişten kalan ama
+                // PMS birim koduyla BİREBİR örtüşen en güçlü ipucu (385/49 ≡ 385/49).
+                const adaylar = [apt.elektrawebRoomNo, apt.elektrawebRoomNo2, apt.code, apt.name]
+                    .map(x => (x == null ? '' : String(x).trim())).filter(Boolean);
+                if (adaylar.length === 0) continue;
 
-                let bestMatch = null;
-                let bestScore = 0;
-
-                for (const room of availableRooms) {
-                    if (usedRoomNos.has(String(room.roomNo))) continue;
-                    const rn = normalize(room.roomNo);
-                    const rnDigits = digits(room.roomNo);
-                    if (!rn) continue;
-
-                    let score = 0;
-                    // 1. Tam eslesme (en guclu)
-                    if (rn === aptCode || rn === aptName) score = 100;
-                    // 2. Apt kodu room-no ile bitiyor/basliyor (L304 <-> 304)
-                    else if (aptCode && (aptCode.endsWith(rn) || aptCode.startsWith(rn))) score = 80;
-                    else if (aptName && (aptName.endsWith(rn) || aptName.startsWith(rn))) score = 75;
-                    // 3. Sadece rakamlar eslesiyor (L-304 <-> A304)
-                    else if (rnDigits && aptDigits && rnDigits === aptDigits) score = 70;
-                    // 4. Rakamlar contains (304 <-> 3041, zayif)
-                    else if (rnDigits && aptDigits && rnDigits.length >= 3 &&
-                             (aptDigits.includes(rnDigits) || rnDigits.includes(aptDigits))) score = 40;
-
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestMatch = room;
+                let bulunan = null, skor = 0;
+                for (const u of this._units) {
+                    if (!u.code || kullanilan.has(String(u.id))) continue;
+                    const un = kodNorm(u.code), ud = rakam(u.code);
+                    for (const aday of adaylar) {
+                        const an = kodNorm(aday), ad = rakam(aday);
+                        let s = 0;
+                        if (an && an === un) s = 100;                                  // tam kod eşleşmesi
+                        else if (ad && ud && ad === ud && ad.length >= 3) s = 70;       // yalnız rakamlar
+                        if (s > skor) { skor = s; bulunan = u; }
                     }
                 }
 
-                if (bestMatch && bestScore >= 70) {
-                    candidates.push({ aptId: apt.id, aptCode: apt.code || apt.id, roomNo: bestMatch.roomNo, score: bestScore });
-                    apt.elektrawebRoomNo = bestMatch.roomNo;
-                    usedRoomNos.add(String(bestMatch.roomNo));
-                    matched++;
+                if (bulunan && skor >= 70) {
+                    apt.pmsUnitId = bulunan.id;
+                    apt.pmsUnitCode = bulunan.code;
+                    kullanilan.add(String(bulunan.id));
+                    oneriler.push({ daire: apt.code || apt.id, birim: bulunan.code, skor });
+                    eslesen++;
                 }
             }
 
-            if (matched === 0) {
-                Analytics.showToast('Otomatik eslestirilecek daire bulunamadi', 'info');
-                return;
-            }
-
-            console.log('[ElektraWeb] Otomatik eslestirmeler:', candidates);
+            if (eslesen === 0) { Analytics.showToast('Otomatik eşleştirilecek daire bulunamadı', 'info'); return; }
+            console.log('[PMS] Otomatik eşleştirmeler:', oneriler);
             this.render();
-            Analytics.showToast(`${matched} daire otomatik eslestirildi. Kontrol edip kaydedin.`, 'success');
+            Analytics.showToast(`${eslesen} daire otomatik eşleştirildi. Kontrol edip kaydedin.`, 'success');
         },
 
         render() {
-            const container = document.getElementById('hbMappingTable');
+            const container = document.getElementById('pmsMappingTable');
             if (!container) return;
 
             const apartments = Analytics.data?.apartments || [];
@@ -16368,30 +16327,61 @@
                 return;
             }
 
-            const datalistOptions = this._rooms.map(r => {
-                const label = r.roomType ? `${r.roomNo} (${r.roomType})` : r.roomNo;
-                return `<option value="${r.roomNo}">${label}</option>`;
-            }).join('');
+            // Bir birim iki daireye bağlanmışsa bu bir VERİ HATASIDIR (aynı rezervasyon iki
+            // dairede görünür) — satırda kırmızı uyarı olarak çıkar, sessiz kalmaz.
+            const sayac = {};
+            apartments.forEach(a => { const id = aptPmsUnitId(a); if (id) sayac[id] = (sayac[id] || 0) + 1; });
 
-            container.innerHTML = `<datalist id="elektraRoomNoDatalist">${datalistOptions}</datalist>` + apartments.map(apt => {
-                const oldNo = apt.elektrawebRoomNo || '';
-                const newNo = apt.elektrawebRoomNo2 || '';
-                const mapped = oldNo || newNo;
-                const statusClass = mapped ? 'border-green-200 bg-green-50/50' : 'border-gray-200';
+            const bagli = apartments.filter(a => aptPmsUnitId(a)).length;
+            const bagsiz = apartments.length - bagli;
+            const kullanilan = new Set(apartments.map(a => aptPmsUnitId(a)).filter(Boolean));
+            const bostaBirim = this._units.filter(u => !kullanilan.has(String(u.id)));
+
+            const ozet = `
+                <div class="flex flex-wrap items-center gap-3 mb-4 text-xs">
+                    <span class="px-3 py-1.5 rounded-lg bg-green-50 text-green-700 border border-green-100">${bagli} daire bağlı</span>
+                    <span class="px-3 py-1.5 rounded-lg ${bagsiz > 0 ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}">${bagsiz} daire bağlanmamış${bagsiz > 0 ? ' — takvimi ve projeksiyonu boş kalır' : ''}</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-100">${bostaBirim.length} PMS birimi boşta${bostaBirim.length > 0 ? ': ' + bostaBirim.map(u => u.code).join(', ') : ''}</span>
+                </div>`;
+
+            const secenekler = (seciliId) => {
+                const bos = `<option value="">— bağlı değil —</option>`;
+                return bos + this._units.map(u => {
+                    const etiket = [u.code, u.category ? '· ' + u.category : '', u.active ? '' : '(pasif)']
+                        .filter(Boolean).join(' ');
+                    const baskaDaire = kullanilan.has(String(u.id)) && String(u.id) !== String(seciliId);
+                    return `<option value="${u.id}" ${String(u.id) === String(seciliId) ? 'selected' : ''}>${etiket}${baskaDaire ? ' — başka daireye bağlı' : ''}</option>`;
+                }).join('');
+            };
+
+            container.innerHTML = ozet + apartments.map(apt => {
+                const unitId = aptPmsUnitId(apt);
+                const unit = unitId ? this._unitById(unitId) : null;
+                const cift = unitId && sayac[unitId] > 1;
+                // Bağlı ama PMS'te BULUNAMAYAN birim: silinmiş/başka tenant'a taşınmış olabilir.
+                const kayipBirim = unitId && !unit && this._units.length > 0;
+                const durumClass = cift || kayipBirim ? 'border-red-200 bg-red-50/50'
+                    : (unitId ? 'border-green-200 bg-green-50/50' : 'border-gray-200');
+
+                const uyari = cift
+                    ? '<span class="text-[11px] text-red-600">Bu birim birden fazla daireye bağlı</span>'
+                    : (kayipBirim ? '<span class="text-[11px] text-red-600">Bağlı birim PMS listesinde yok</span>' : '');
 
                 return `
-                <div class="flex items-center gap-4 p-4 rounded-xl border ${statusClass} transition-all">
+                <div class="flex items-center gap-4 p-4 rounded-xl border ${durumClass} transition-all">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="font-semibold text-gray-800">${apt.code || apt.id}</span>
-                            ${apt.name ? `<span class="text-xs text-gray-400">${apt.name}</span>` : ''}
-                            ${mapped ? '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
+                            ${apt.ownerName ? `<span class="text-xs text-gray-400">${apt.ownerName}</span>` : ''}
+                            ${unitId && !kayipBirim ? '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>' : '<i data-lucide="circle" class="w-4 h-4 text-gray-300"></i>'}
                         </div>
+                        ${apt.elektrawebRoomNo ? `<div class="text-[11px] text-gray-400 mt-0.5">eski oda kodu: ${apt.elektrawebRoomNo}</div>` : ''}
+                        ${uyari}
                     </div>
                     <div class="flex items-center gap-2" style="flex:1.4">
-                        <input type="text" data-apt-id="${apt.id}" data-slot="1" list="elektraRoomNoDatalist" value="${oldNo}" placeholder="Eski kod (385/18)" class="hb-listing-input flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
-                        <span class="text-gray-300 shrink-0">→</span>
-                        <input type="text" data-apt-id="${apt.id}" data-slot="2" list="elektraRoomNoDatalist" value="${newNo}" placeholder="Yeni kod (8518)" class="hb-listing-input flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                        <select data-apt-id="${apt.id}" class="pms-unit-select flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                            ${secenekler(unitId)}
+                        </select>
                     </div>
                 </div>`;
             }).join('');
@@ -16399,48 +16389,24 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         },
 
-        // Ekrandaki iki slotu (eski=1, yeni=2) daire başına topla.
-        _collectInputs() {
-            const bySlot = {};
-            document.querySelectorAll('.hb-listing-input').forEach(inp => {
-                const aptId = inp.dataset.aptId;
-                const slot = inp.dataset.slot || '1';
-                (bySlot[aptId] = bySlot[aptId] || {})[slot] = (inp.value || '').trim();
-            });
-            return bySlot;
-        },
-
-        // Hizli eslestirme: her daire icin eski koddan (slot 1) yeni kodu (slot 2) uret — YALNIZ bos olan slot 2'yi
-        // doldurur; ekrandaki degerlere yazar (kaydetmez). Kullanici kontrol edip "Kaydet"e basar.
-        suggestNewCodes() {
-            const rows = {};
-            document.querySelectorAll('.hb-listing-input').forEach(inp => {
-                (rows[inp.dataset.aptId] = rows[inp.dataset.aptId] || {})[inp.dataset.slot || '1'] = inp;
-            });
-            let n = 0;
-            Object.values(rows).forEach(r => {
-                const oldInp = r['1'], newInp = r['2'];
-                if (!oldInp || !newInp) return;
-                const base = (oldInp.value || '').trim();
-                if (!base || (newInp.value || '').trim()) return;
-                const guess = ewDerive(base);
-                if (guess && guess !== base) { newInp.value = guess; n++; }
-            });
-            Analytics.showToast(n > 0 ? (n + ' daireye yeni kod önerildi. Kontrol edip Kaydet.') : 'Önerilecek yeni kod bulunamadı', n > 0 ? 'success' : 'info');
-        },
-
         async saveAll() {
             const apartments = Analytics.data?.apartments || [];
-            const bySlot = this._collectInputs();
-            let changed = 0;
+            const secimler = {};
+            document.querySelectorAll('.pms-unit-select').forEach(sel => { secimler[sel.dataset.aptId] = sel.value || ''; });
 
+            let changed = 0;
             apartments.forEach(apt => {
-                const s = bySlot[apt.id];
-                if (!s) return;
-                const nOld = s['1'] || '';
-                const nNew = s['2'] || '';
-                if ((apt.elektrawebRoomNo || '') !== nOld) { apt.elektrawebRoomNo = nOld || undefined; changed++; }
-                if ((apt.elektrawebRoomNo2 || '') !== nNew) { apt.elektrawebRoomNo2 = nNew || undefined; changed++; }
+                if (!(apt.id in secimler)) return;
+                const yeni = secimler[apt.id];
+                if (aptPmsUnitId(apt) === yeni) return;
+                if (yeni) {
+                    apt.pmsUnitId = yeni;
+                    apt.pmsUnitCode = this._unitById(yeni)?.code || undefined;
+                } else {
+                    apt.pmsUnitId = undefined;
+                    apt.pmsUnitCode = undefined;
+                }
+                changed++;
             });
 
             if (changed === 0) {
@@ -16448,7 +16414,6 @@
                 return;
             }
 
-            // Supabase apartments tablosuna kaydet
             await this._saveToSupabase();
 
             this.render();
@@ -16460,7 +16425,6 @@
             try {
                 const apartments = Analytics.data?.apartments || [];
                 for (const apt of apartments) {
-                    // Supabase'deki mevcut data'yı çek
                     const { data: row } = await supabase
                         .from('apartments')
                         .select('id, data')
@@ -16472,8 +16436,9 @@
                     const currentData = typeof row.data === 'string' ? JSON.parse(row.data) : (row.data || {});
                     let dirty = false;
 
-                    // Her iki kodu da (eski + yeni) senkronla; sadece değişenleri güncelle.
-                    for (const key of ['elektrawebRoomNo', 'elektrawebRoomNo2']) {
+                    // Yalnız değişenler yazılır. elektrawebRoomNo alanlarına DOKUNULMAZ: artık
+                    // veri kaynağı değiller ama otomatik eşleştirmenin ipucu ve geçmişin kaydı.
+                    for (const key of ['pmsUnitId', 'pmsUnitCode']) {
                         const oldVal = currentData[key] || '';
                         const newVal = apt[key] || '';
                         if (oldVal !== newVal) {
@@ -16490,14 +16455,14 @@
                     }
                 }
             } catch (e) {
-                console.error('ElektraWeb eşleştirmeleri kaydedilemedi:', e.message);
+                console.error('PMS eşleştirmeleri kaydedilemedi:', e.message);
                 Analytics.showToast('Supabase kaydetme hatası: ' + e.message, 'error');
             }
         }
     };
 
     // ============================================================
-    // CALENDAR VIEW - Owner Takvim Görünümü (ElektraWeb verisiyle)
+    // CALENDAR VIEW - Owner Takvim Görünümü (PMS Lagirio verisiyle)
     // ============================================================
     const CalendarView = {
         _currentYear: new Date().getFullYear(),
@@ -16566,26 +16531,26 @@
             if (this._loading) return;
             this._loading = true;
             const apartments = Analytics.data?.apartments || [];
-            const mappedApts = apartments.filter(a => aptElektraRoomNos(a).length > 0);
+            const mappedApts = apartments.filter(a => aptPmsUnitId(a));
             if (mappedApts.length === 0) { this._loading = false; this._showNoMapping(); return; }
             try {
-                // Gecmis 12 ay + gelecek 12 ay araligi. Tum status'ler (Reservation
-                // + InHouse + CheckOut) paralel cekilir — boylece gecmis konaklamalar
-                // da takvimde gozukur.
+                // Geçmiş 12 ay + gelecek 12 ay aralığı. PMS beslemesi pencereyle KESİŞEN tüm
+                // konaklamaları döndürür (geçmiş konaklamalar dahil); iptaller gelmez.
                 const today = new Date();
                 const fromDate = new Date(today.getFullYear(), today.getMonth() - 12, 1).toISOString().split('T')[0];
                 const toDate = new Date(today.getFullYear(), today.getMonth() + 12, 28).toISOString().split('T')[0];
 
-                const reservations = await ElektraAPI.getAllReservations(fromDate, toDate);
+                const cevap = await PmsAPI.getReservations(fromDate, toDate);
+                const reservations = cevap.reservations || [];
 
-                // room-no → apartmentId lookup
-                const roomToApt = new Map();
-                mappedApts.forEach(a => aptElektraRoomNos(a).forEach(c => roomToApt.set(ewNorm(c), a.id)));
+                // birim kimliği → apartmentId sözlüğü
+                const unitToApt = new Map();
+                mappedApts.forEach(a => unitToApt.set(aptPmsUnitId(a), a.id));
 
                 const allRes = [];
                 for (const r of reservations) {
-                    const aptId = roomToApt.get(ewNorm(r.roomNo));
-                    if (aptId) allRes.push(ElektraAPI.toProjectionFormat(r, aptId));
+                    const aptId = unitToApt.get(String(r.unitId));
+                    if (aptId) allRes.push(PmsAPI.toProjectionFormat(r, aptId));
                 }
 
                 this._reservations = allRes.filter(r => r.status !== 2);
@@ -16599,7 +16564,7 @@
             if (grid) {
                 grid.innerHTML = `<div class="flex flex-col items-center justify-center py-16">
                     <i data-lucide="link-2-off" class="w-12 h-12 text-gray-200 mb-4"></i>
-                    <p class="text-sm text-gray-500 font-medium">Henüz ElektraWeb eşleştirmesi yapılmamış</p>
+                    <p class="text-sm text-gray-500 font-medium">Daireniz henüz PMS birimine bağlanmamış</p>
                     <p class="text-xs text-gray-400 mt-1">Yöneticinizden dairenizi bağlamasını isteyin</p></div>`;
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
