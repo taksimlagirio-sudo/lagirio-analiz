@@ -216,3 +216,52 @@ Not: Bu değerler `index.html` içine hardcode edildi (public anon key olduğu i
 - Admin hesabı artık sadece Supabase'de — eski `admin/lagirio2025` kullanılamaz
 - Drive sync (analiz verisi) hâlâ çalışır, sadece kullanıcı sync'i kaldırıldı
 - Netlify Functions yalnızca admin tokenı kabul eder (güvenlik garantili)
+
+---
+
+## PMS Lagirio takvim/projeksiyon beslemesi ✅ (16 Eyl 2026)
+
+**Hedef:** Takvim ve projeksiyon verisi ElektraWeb yerine **pms-lagirio**'dan gelsin.
+Kaynak: PMS'teki **1001** kodlu işletme (Lagirio / Taksim 360 — kendi mülkümüz).
+
+**Niçin:** Aynı konaklama iki sistemde ayrı ayrı duruyordu; ayrıştıklarında kimse görmüyordu
+(sahip takviminde boş görünen gün PMS'te doluydu). Besleme kaynağa çekildi.
+
+### Zincir
+
+```
+tarayıcı ─(analiz oturum JWT'si)→ netlify/functions/pms-proxy
+        ─(paylaşılan token)→ PMS edge analiz-feed → pms_reservations / pms_units
+```
+
+Kullanıcı kimliği ve daire erişimi **burada** çözülür (`_shared.js · verifyUser`); owner süzgeci
+`pms-proxy` içinde uygulanır — sahibin dairesine bağlı olmayan birimin rezervasyonu tarayıcıya
+hiç inmez. PMS tarafı yalnız "çağıran analiz mi" sorusuna bakar.
+
+### Yapılanlar
+
+- `netlify/functions/pms-proxy.js` eklendi (ping · units · reservations)
+- `netlify/functions/elektra-proxy.js` **kaldırıldı** (kullanılmayan, kimlikli bir uç bırakmamak için)
+- `_shared.js · verifyUser` artık `pmsUnitIds` türetiyor (eski `elektrawebRoomNos` yerine)
+- `index.html`: `ElektraAPI → PmsAPI`, `ElektraMapping → PmsMapping`, `Projection.fetchFromPms()`,
+  `CalendarView` PMS'ten okuyor; Veri Yönetimi sekmesi **PMS Lagirio** oldu
+
+### Daire ↔ birim bağı
+
+`apartments.data.pmsUnitId` (**uuid**) + yalnız gösterim için `pmsUnitCode`.
+**Kodla değil kimlikle** — PMS'te birim kodu değişebiliyor (385/18 → 8518 bunun canlı örneği) ve
+kodla kurulan bağ kod değiştiği gün sessizce kopardı. Eski `elektrawebRoomNo` alanlarına
+dokunulmuyor: artık veri kaynağı değiller ama otomatik eşleştirmenin en güçlü ipucu.
+
+Eşleştirme: **Veri Yönetimi → PMS Lagirio**. "Otomatik Eşleştir" yalnız öneri üretir (boşları
+doldurur, mevcut bağı bozmaz, bir birimi iki daireye vermez); yönetici "Eşleştirmeleri Kaydet"
+der. Ekran üç sayıyı hep gösterir: bağlı daire · bağlanmamış daire · boşta PMS birimi.
+
+### Netlify env vars (analiz sitesi)
+
+- `PMS_FEED_URL` = `https://<pms-proje-ref>.supabase.co/functions/v1/analiz-feed`
+- `PMS_FEED_TOKEN` = PMS'teki `ANALIZ_FEED_TOKEN` ile **aynı** dize
+
+İkisinden biri eksikse `pms-proxy` **503** ile açıkça söyler; sessizce boş liste dönmez —
+"kurulum eksik" ile "rezervasyon yok" aynı görünmesin. PMS tarafındaki kurulum ve sözleşme:
+pms-lagirio deposunda `docs/analiz-takvim-besleme.md`.

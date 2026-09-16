@@ -43,7 +43,7 @@ async function verifyUser(authHeader) {
     }
 
     let apartmentIds = [];
-    let elektrawebRoomNos = [];
+    let pmsUnitIds = [];
 
     if (profile.role === 'owner') {
         const { data: assignments } = await adminClient
@@ -59,19 +59,20 @@ async function verifyUser(authHeader) {
                 .select('data')
                 .in('id', apartmentIds);
 
-            // Owner'ın izinli oda listesi HER İKİ kodu da içerir (eski elektrawebRoomNo + yeni elektrawebRoomNo2).
-            // Aksi halde ElektraWeb'de kodu değişen (ör. 385/18 → 8518) dairelerin yeni kodlu rezervasyonları
-            // proxy owner filtresinde elenir ve owner takvimine hiç ulaşmaz.
-            elektrawebRoomNos = (apartments || [])
-                .flatMap(a => {
+            // Owner'ın izinli birim listesi = dairelerine bağlanmış PMS birim kimlikleri (uuid).
+            // KOD DEĞİL kimlik tutuluyor: PMS'te birim kodu değişebiliyor (385/18 → 8518 geçmişi
+            // bunun canlı örneği) ve kodla filtrelersek kod değiştiği gün owner'ın takvimi
+            // sessizce boşalırdı. Kimlik sabittir.
+            pmsUnitIds = (apartments || [])
+                .map(a => {
                     const d = typeof a.data === 'string' ? JSON.parse(a.data) : a.data;
-                    return [d?.elektrawebRoomNo, d?.elektrawebRoomNo2];
+                    return d?.pmsUnitId;
                 })
                 .filter(Boolean);
         }
     }
 
-    return { user, profile, apartmentIds, elektrawebRoomNos };
+    return { user, profile, apartmentIds, pmsUnitIds };
 }
 
 function ok(body) {
