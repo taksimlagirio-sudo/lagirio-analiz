@@ -16210,10 +16210,17 @@
     const PmsMapping = {
         _units: [],          // { id, code, active, guests, property, category }
         _tenant: null,       // { isletme_no, name }
+        // Birim listesi YÜKLENDİ mi — "liste boş" ile "liste yüklenemedi" aynı şey değil.
+        // Ayrılmazsa ekran yüklenememeyi "0 birim" diye çizer ve bağlı birimlerin adını
+        // gösteremez; daha kötüsü Kaydet tüm bağları silebilirdi (aşağıda kapatıldı).
+        _unitsLoaded: false,
+        _unitsError: null,
         _initialized: false,
 
         async init() {
-            if (this._initialized) {
+            // Liste bir kez yüklenememişse (ör. ortam değişkenleri henüz kurulmamışken panel
+            // açıldıysa) sekmeye her dönüşte YENİDEN dene — yoksa boş liste kalıcı görünür.
+            if (this._initialized && this._unitsLoaded) {
                 this.render();
                 return;
             }
@@ -16250,17 +16257,22 @@
         async loadUnits() {
             try {
                 this._units = await PmsAPI.getUnits();
+                this._unitsLoaded = true;
+                this._unitsError = null;
             } catch (e) {
                 this._units = [];
+                this._unitsLoaded = false;
+                this._unitsError = e.message;
                 Analytics.showToast('PMS birimleri yüklenemedi: ' + e.message, 'error');
             }
         },
 
         async refreshUnits() {
             this._units = [];
+            this._unitsLoaded = false;
             await this.loadUnits();
             this.render();
-            Analytics.showToast('Birim listesi yenilendi', 'success');
+            if (this._unitsLoaded) Analytics.showToast(`Birim listesi yenilendi (${this._units.length} birim)`, 'success');
         },
 
         _unitById(id) {
@@ -16337,11 +16349,22 @@
             const kullanilan = new Set(apartments.map(a => aptPmsUnitId(a)).filter(Boolean));
             const bostaBirim = this._units.filter(u => !kullanilan.has(String(u.id)));
 
+            // Liste yüklenemediyse boşta birim sayısı ANLAMSIZDIR ("0 boşta" yazmak yalan olur:
+            // 46 birim duruyor, biz göremiyoruz). Sebebini yaz, düzeltme yolunu göster.
+            const uyariBandi = this._unitsLoaded ? '' : `
+                <div class="mb-4 p-4 rounded-xl border border-red-200 bg-red-50">
+                    <p class="text-sm font-semibold text-red-700">PMS birim listesi yüklenemedi — eşleştirme yapılamaz</p>
+                    <p class="text-xs text-red-600 mt-1">${this._unitsError ? this._unitsError : 'Bilinmeyen hata'}</p>
+                    <p class="text-xs text-red-600 mt-1">Aşağıdaki seçim kutuları bu yüzden boş; mevcut bağlar veritabanında DURUYOR ve silinmedi. "Birimleri Yenile" ile tekrar deneyin.</p>
+                </div>`;
+
             const ozet = `
                 <div class="flex flex-wrap items-center gap-3 mb-4 text-xs">
                     <span class="px-3 py-1.5 rounded-lg bg-green-50 text-green-700 border border-green-100">${bagli} daire bağlı</span>
                     <span class="px-3 py-1.5 rounded-lg ${bagsiz > 0 ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}">${bagsiz} daire bağlanmamış${bagsiz > 0 ? ' — takvimi ve projeksiyonu boş kalır' : ''}</span>
-                    <span class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-100">${bostaBirim.length} PMS birimi boşta${bostaBirim.length > 0 ? ': ' + bostaBirim.map(u => u.code).join(', ') : ''}</span>
+                    ${this._unitsLoaded
+                        ? `<span class="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-gray-100">${bostaBirim.length} PMS birimi boşta${bostaBirim.length > 0 ? ': ' + bostaBirim.map(u => u.code).join(', ') : ''}</span>`
+                        : `<span class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-100">PMS birim listesi yok — boşta birim sayılamıyor</span>`}
                 </div>`;
 
             const secenekler = (seciliId) => {
@@ -16354,12 +16377,12 @@
                 }).join('');
             };
 
-            container.innerHTML = ozet + apartments.map(apt => {
+            container.innerHTML = uyariBandi + ozet + apartments.map(apt => {
                 const unitId = aptPmsUnitId(apt);
                 const unit = unitId ? this._unitById(unitId) : null;
                 const cift = unitId && sayac[unitId] > 1;
                 // Bağlı ama PMS'te BULUNAMAYAN birim: silinmiş/başka tenant'a taşınmış olabilir.
-                const kayipBirim = unitId && !unit && this._units.length > 0;
+                const kayipBirim = unitId && !unit && this._unitsLoaded;
                 const durumClass = cift || kayipBirim ? 'border-red-200 bg-red-50/50'
                     : (unitId ? 'border-green-200 bg-green-50/50' : 'border-gray-200');
 
@@ -16379,9 +16402,13 @@
                         ${uyari}
                     </div>
                     <div class="flex items-center gap-2" style="flex:1.4">
+                        ${this._unitsLoaded ? `
                         <select data-apt-id="${apt.id}" class="pms-unit-select flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200">
                             ${secenekler(unitId)}
-                        </select>
+                        </select>` : `
+                        <div class="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500">
+                            ${unitId ? `bağlı: ${apt.pmsUnitCode || unitId} <span class="text-gray-400">(liste yüklenemedi, değiştirilemez)</span>` : 'bağlı değil'}
+                        </div>`}
                     </div>
                 </div>`;
             }).join('');
@@ -16390,9 +16417,23 @@
         },
 
         async saveAll() {
+            // VERİ KAYBI KAPISI: birim listesi yüklenemediyse ekrandaki her kutu boş görünür ve
+            // kaydetmek MEVCUT BÜTÜN BAĞLARI SİLERDİ (45 dairenin takvimi bir tıkla boşalırdı).
+            // Liste yoksa kaydetme yok — önce "Birimleri Yenile".
+            if (!this._unitsLoaded) {
+                Analytics.showToast('PMS birim listesi yüklenmeden kaydedilemez — mevcut bağlar korundu. Önce "Birimleri Yenile".', 'error');
+                return;
+            }
+
             const apartments = Analytics.data?.apartments || [];
             const secimler = {};
             document.querySelectorAll('.pms-unit-select').forEach(sel => { secimler[sel.dataset.aptId] = sel.value || ''; });
+
+            // İkinci kapı: ekranda hiç seçim kutusu yoksa (render eksik/kesilmiş) hiçbir şey yazma.
+            if (Object.keys(secimler).length === 0) {
+                Analytics.showToast('Ekranda seçim kutusu yok — kaydedilecek bir şey bulunamadı.', 'warning');
+                return;
+            }
 
             let changed = 0;
             apartments.forEach(apt => {
